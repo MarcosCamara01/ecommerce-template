@@ -1,0 +1,33 @@
+.login-register {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-register form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px
+}
+
+.login-register form h1 {
+    margin-bottom: 20px;
+}
+
+.login-register form h1,
+.login-register form label {
+    width: 100%;
+}
+
+.login-register form input {
+    width: 100%;
+    height: 30px;
+}
+
+.login-register form a {
+    font-size: 14px;
+}

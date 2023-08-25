@@ -3,6 +3,8 @@ import { FormEvent, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import '../../styles/form.css';
+import Link from "next/link";
 
 function Signup() {
   const [error, setError] = useState();
@@ -24,7 +26,7 @@ function Signup() {
         redirect: false,
       });
 
-      if (res?.ok) return router.push("/dashboard/profile");
+      if (res?.ok) return router.push("/");
     } catch (error) {
       console.log(error);
       if (error instanceof AxiosError) {
@@ -35,16 +37,16 @@ function Signup() {
   };
 
   return (
-    <div className="justify-center h-[calc(100vh-4rem)] flex items-center">
-      <form onSubmit={handleSubmit} className="bg-neutral-950 px-8 py-10 w-3/12">
-        {error && <div className="bg-red-500 text-white p-2 mb-2">{error}</div>}
-        <h1 className="text-4xl font-bold mb-7">Signup</h1>
+    <div className="login-register">
+      <form onSubmit={handleSubmit} className="">
+        {error && <div className="">{error}</div>}
+        <h1 className="">Signup</h1>
 
-        <label className="text-slate-300">Fullname:</label>
+        <label className="">Fullname:</label>
         <input
           type="text"
           placeholder="Fullname"
-          className="bg-zinc-800 px-4 py-2 block mb-2 w-full"
+          className=""
           name="fullname"
         />
 
@@ -52,21 +54,22 @@ function Signup() {
         <input
           type="email"
           placeholder="Email"
-          className="bg-zinc-800 px-4 py-2 block mb-2 w-full"
+          className=""
           name="email"
         />
 
-        <label className="text-slate-300">Password:</label>
+        <label className="">Password:</label>
         <input
           type="password"
           placeholder="Password"
-          className="bg-zinc-800 px-4 py-2 block mb-2 w-full"
+          className=""
           name="password"
         />
 
-        <button className="bg-blue-500 text-white px-4 py-2 block w-full mt-4">
+        <button className="">
           Signup
         </button>
+        <Link href="/">Already have an account?</Link>
       </form>
     </div>
   );
