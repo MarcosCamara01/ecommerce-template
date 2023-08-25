@@ -1,0 +1,23 @@
+header {
+    position: fixed;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px;
+}
+
+header ul {
+    display: flex;
+    gap: 15px;
+    list-style: none;
+    font-size: 14px;
+}
+
+header ul div {
+    display: flex;
+}
+
+header ul svg {
+    font-size: 17px;
+}

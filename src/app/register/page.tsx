@@ -69,7 +69,7 @@ function Signup() {
         <button className="">
           Signup
         </button>
-        <Link href="/">Already have an account?</Link>
+        <Link href="/login">Already have an account?</Link>
       </form>
     </div>
   );
