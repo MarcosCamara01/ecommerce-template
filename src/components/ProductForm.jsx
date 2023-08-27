@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const ProductForm = () => {
-
     const [productData, setProductData] = useState({
         name: '',
         description: '',
