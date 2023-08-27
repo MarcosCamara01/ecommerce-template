@@ -38,7 +38,7 @@ const ProductSchema: Schema = new Schema({
         required: true,
     },
     images: {
-        type: [Buffer],
+        type: [String],
         required: true,
     },
 });

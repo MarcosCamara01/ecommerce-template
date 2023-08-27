@@ -13,6 +13,26 @@ const ProductForm = () => {
         sizes: [],
         images: [],
     });
+    const [imageUrls, setImageUrls] = useState([]);
+
+    const handleImageChange = async (e) => {
+        try {
+            const files = e.target.files;
+            const newImageUrls = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+                formData.append("image", file);
+                const response = await axios.post("/api/upload", formData);
+                newImageUrls.push(response.data.url);
+            }
+
+            setImageUrls(newImageUrls);
+        } catch (error) {
+            console.error('Failed to save the images.', error);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -22,38 +42,24 @@ const ProductForm = () => {
         }));
     };
 
-    const handleImageChange = (e) => {
-        const files = e.target.files;
-        const imagesArray = [];
-    
-        for (const file of files) {
-            imagesArray.push(file);
-        }
-    
-        setProductData((prevData) => ({
-            ...prevData,
-            images: imagesArray,
-        }));
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             const colorsArray = productData.colors.split(',');
             const sizesArray = productData.sizes.split(',');
-            const imagesBufferArray = productData.images.map((imageData) => Buffer.from(imageData));
 
             const dataToSubmit = {
                 ...productData,
                 colors: colorsArray,
                 sizes: sizesArray,
-                images: imagesBufferArray,
+                images: imageUrls
             };
 
             const url = '/api/products';
 
             const response = await axios.post(url, dataToSubmit);
+
 
             if (response.data && response.data._id) {
                 console.log('Product created successfully!');
@@ -62,7 +68,6 @@ const ProductForm = () => {
             console.error('Failed to create product.', error);
         }
     };
-
 
     return (
         <form onSubmit={handleSubmit}>
