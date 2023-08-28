@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -13,9 +14,11 @@ const ProductForm = () => {
         images: [],
     });
     const [imageUrls, setImageUrls] = useState([]);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleImageChange = async (e) => {
         try {
+            setIsUploading(true);
             const files = e.target.files;
             const newImageUrls = [];
 
@@ -27,9 +30,13 @@ const ProductForm = () => {
                 newImageUrls.push(response.data.url);
             }
 
-            setImageUrls(newImageUrls);
+            setImageUrls([...imageUrls, ...newImageUrls]);
+            setIsUploading(false);
+            console.log(imageUrls)
+
         } catch (error) {
             console.error('Failed to save the images.', error);
+            setIsUploading(false);
         }
     };
 
@@ -48,6 +55,8 @@ const ProductForm = () => {
             const colorsArray = productData.colors.split(',');
             const sizesArray = productData.sizes.split(',');
 
+            console.log(imageUrls)
+
             const dataToSubmit = {
                 ...productData,
                 colors: colorsArray,
@@ -59,7 +68,6 @@ const ProductForm = () => {
 
             const response = await axios.post(url, dataToSubmit);
 
-
             if (response.data && response.data._id) {
                 console.log('Product created successfully!');
             }
@@ -70,28 +78,53 @@ const ProductForm = () => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <label>Name:</label>
-            <input type="text" name="name" value={productData.name} onChange={handleInputChange} />
+            <div className='input-bx'>
+                <label>Name:</label>
+                <input type="text" name="name" value={productData.name} onChange={handleInputChange} />
+            </div>
 
-            <label>Description:</label>
-            <textarea name="description" value={productData.description} onChange={handleInputChange} />
+            <div className='input-bx'>
+                <label>Description:</label>
+                <textarea name="description" value={productData.description} onChange={handleInputChange} />
+            </div>
 
-            <label>Price:</label>
-            <input type="number" name="price" value={productData.price} onChange={handleInputChange} />
+            <div className='input-bx'>
+                <label>Price:</label>
+                <input type="number" name="price" value={productData.price} onChange={handleInputChange} />
+            </div>
 
-            <label>Category:</label>
-            <input type="text" name="category" value={productData.category} onChange={handleInputChange} />
+            <div className='input-bx'>
+                <label>Category:</label>
+                <input type="text" name="category" value={productData.category} onChange={handleInputChange} />
+            </div>
 
-            <label>Colors:</label>
-            <input type="text" name="colors" value={productData.colors} onChange={handleInputChange} />
+            <div className='input-bx'>
+                <label>Colors:</label>
+                <input type="text" name="colors" value={productData.colors} onChange={handleInputChange} />
+            </div>
 
-            <label>Sizes:</label>
-            <input type="text" name="sizes" value={productData.sizes} onChange={handleInputChange} />
+            <div className='input-bx'>
+                <label>Sizes:</label>
+                <input type="text" name="sizes" value={productData.sizes} onChange={handleInputChange} />
+            </div>
 
-            <label>Images:</label>
-            <input type="file" name="images" multiple onChange={handleImageChange} />
+            <div className='input-bx'>
+                <label>Images:</label>
+                <input type="file" name="images" multiple onChange={handleImageChange} disabled={isUploading}/>
+            </div>
 
-            <button type="submit">Create Product</button>
+            <div className="image-preview-container">
+                {imageUrls.map((url, index) => (
+                    <img
+                        key={index}
+                        src={url}
+                        alt={`Image ${index}`}
+                        className="image-preview"
+                    />
+                ))}
+            </div>
+            {isUploading && <p>Uploading images...</p>}
+            <button type="submit" disabled={isUploading}>Create Product</button>
         </form>
     );
 };
