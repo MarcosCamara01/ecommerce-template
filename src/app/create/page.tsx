@@ -4,10 +4,10 @@ import '../../styles/createproduct.css';
 
 const CreateProduct = () => {
     return (
-        <div className='create-product'>
+        <section className='create-product'>
             <h1>Create a New Product</h1>
             <ProductForm />
-        </div>
+        </section>
     );
 };
 

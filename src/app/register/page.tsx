@@ -1,7 +1,7 @@
 "use client";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import '../../styles/form.css';
 import Link from "next/link";
@@ -9,6 +9,13 @@ import Link from "next/link";
 function Signup() {
   const [error, setError] = useState();
   const router = useRouter();
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session) {
+      router.push("/");
+    }
+  }, [session, router]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,7 +44,7 @@ function Signup() {
   };
 
   return (
-    <div className="login-register">
+    <section className="login-register">
       <form onSubmit={handleSubmit} className="">
         {error && <div className="">{error}</div>}
         <h1 className="">Signup</h1>
@@ -71,7 +78,7 @@ function Signup() {
         </button>
         <Link href="/login">Already have an account?</Link>
       </form>
-    </div>
+    </section>
   );
 }
 

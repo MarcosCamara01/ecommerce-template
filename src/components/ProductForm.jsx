@@ -32,7 +32,6 @@ const ProductForm = () => {
 
             setImageUrls([...imageUrls, ...newImageUrls]);
             setIsUploading(false);
-            console.log(imageUrls)
 
         } catch (error) {
             console.error('Failed to save the images.', error);
@@ -54,8 +53,6 @@ const ProductForm = () => {
         try {
             const colorsArray = productData.colors.split(',');
             const sizesArray = productData.sizes.split(',');
-
-            console.log(imageUrls)
 
             const dataToSubmit = {
                 ...productData,

@@ -7,7 +7,7 @@ function ProfilePage() {
   console.log(session, status);
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col gap-y-10 items-center justify-center">
+    <section className="h-[calc(100vh-4rem)] flex flex-col gap-y-10 items-center justify-center">
       <h1 className="font-bold text-3xl">Profile</h1>
 
       <pre className="bg-zinc-800 p-4">
@@ -29,7 +29,7 @@ function ProfilePage() {
       >
         Signout
       </button>
-    </div>
+    </section>
   );
 }
 
