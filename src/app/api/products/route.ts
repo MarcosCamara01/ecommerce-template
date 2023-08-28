@@ -7,7 +7,7 @@ connectDB();
 export async function GET() {
     try {
         const products = await Product.find();
-        return NextResponse.json(products);
+        return NextResponse.json(products.reverse());
     } catch (error) {
         console.error('Failed to fetch products.', error);
         return NextResponse.json({ error: 'Failed to fetch products.' }, { status: 500 });
