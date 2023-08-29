@@ -1,5 +1,4 @@
 import { Schema, model, models } from "mongoose";
-import Cart from "./Cart";
 
 const UserSchema = new Schema(
   {
@@ -23,15 +22,20 @@ const UserSchema = new Schema(
       minLength: [3, "fullname must be at least 3 characters"],
       maxLength: [25, "fullname must be at most 25 characters"],
     },
-    cart: {
-      type: Schema.Types.ObjectId,
-      ref: "Cart",
-    },
+    cart: [
+      {
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: 'Product',
+        },
+        quantity: Number,
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-const User = models.User || model("User", UserSchema);
+const User = models.User || model('User', UserSchema);
 export default User;

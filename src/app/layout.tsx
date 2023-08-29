@@ -5,6 +5,7 @@ import Providers from "./Providers";
 import styles from '../styles/page.module.css';
 import { Navbar } from "../components/Navbar";
 import { ProductProvider } from '../helpers/ProductContext';
+import { CartProvider } from '../helpers/CartContext';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,8 +25,10 @@ export default function RootLayout({
         <body className={inter.className}>
           <main className={styles.main}>
             <ProductProvider>
-              <Navbar />
-              {children}
+              <CartProvider>
+                <Navbar />
+                {children}
+              </CartProvider>
             </ProductProvider>
           </main>
         </body>
