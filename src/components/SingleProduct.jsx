@@ -1,7 +1,14 @@
 import React from 'react';
 import '../styles/singleproduct.css';
+import { useCart } from '@/helpers/CartContext';
 
 export const SingleProduct = ({ product }) => {
+    const { addToCart } = useCart();
+
+    const handleAddToCart = () => {
+        addToCart(product);
+      };
+
     return (
         <div className="product-bx">
             <div className="information-bx">
@@ -31,7 +38,7 @@ export const SingleProduct = ({ product }) => {
                     </div>
 
                     <div className='section-bot'>
-                        <button type="submit">Add to Cart</button>
+                        <button type="submit" onClick={handleAddToCart}>Add to Cart</button>
                     </div>
                 </div>
             </div>
