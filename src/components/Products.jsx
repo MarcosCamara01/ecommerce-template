@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import '../styles/products.css';
+import Link from 'next/link';
 
 export const Products = ({ products }) => {
   const [loadedProducts, setLoadedProducts] = useState([]);
@@ -40,9 +41,11 @@ export const Products = ({ products }) => {
         {loadedProducts.map((product) => {
           return (
             <div className='product-card' key={product._id}>
-              <img src={product.images[0]} alt={product.name} className='product-img' />
-              <h2 className='product-name'>{product.name}</h2>
-              <div className='product-price'>{product.price}€</div>
+              <Link href={`/${product.category}/${product._id}`}>
+                <img src={product.images[0]} alt={product.name} className='product-img' />
+                <h2 className='product-name'>{product.name}</h2>
+                <div className='product-price'>{product.price}€</div>
+              </Link>
             </div>
           );
         })}

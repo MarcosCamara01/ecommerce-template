@@ -9,9 +9,9 @@ export const Navbar = () => {
   return (
     <header>
       <ul>
-        <li><Link href="/dashboard/camisetas">Camisetas</Link></li>
-        <li><Link href="/dashboard/pantalones">Pantalones</Link></li>
-        <li><Link href="/dashboard/sudaderas">Sudaderas</Link></li>
+        <li><Link href="/camisetas">Camisetas</Link></li>
+        <li><Link href="/pantalones">Pantalones</Link></li>
+        <li><Link href="/sudaderas">Sudaderas</Link></li>
       </ul>
       <ul>
         <div className='search'><HiOutlineSearch /></div>
