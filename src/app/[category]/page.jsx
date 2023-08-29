@@ -4,13 +4,12 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Products } from "@/components/Products";
 import { useProductContext } from '@/helpers/ProductContext';
-import axios from "axios";
+import { fetchProducts } from '@/helpers/fetchProducts';
 
 const CategoryPage = () => {
     const { products, setProducts } = useProductContext();
     const [productsInCategory, setProductsInCategory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-
     const params = useParams();
 
     useEffect(() => {
@@ -20,7 +19,7 @@ const CategoryPage = () => {
                 const productData = await products;
 
                 if (productData.length === 0) {
-                    fetchProducts();
+                    await fetchProducts(setProducts);
                 }
 
                 if (params.category) {
@@ -41,16 +40,6 @@ const CategoryPage = () => {
 
         fetchProductsInCategory();
     }, [params.category, products]);
-
-    async function fetchProducts() {
-        try {
-            const response = await axios.get('/api/products');
-            const data = response.data;
-            setProducts(data);
-        } catch (error) {
-            console.error('Failed to fetch products.', error);
-        }
-    }
 
     return (
         <section>
