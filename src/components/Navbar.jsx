@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link';
 import React from 'react';
 import { HiOutlineSearch } from 'react-icons/hi';
@@ -7,9 +9,9 @@ export const Navbar = () => {
   return (
     <header>
       <ul>
-        <li><Link href="#">Camisetas</Link></li>
-        <li><Link href="#">Pantalones</Link></li>
-        <li><Link href="#">Sudaderas</Link></li>
+        <li><Link href="/dashboard/camisetas">Camisetas</Link></li>
+        <li><Link href="/dashboard/pantalones">Pantalones</Link></li>
+        <li><Link href="/dashboard/sudaderas">Sudaderas</Link></li>
       </ul>
       <ul>
         <div className='search'><HiOutlineSearch /></div>

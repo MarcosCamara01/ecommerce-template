@@ -1,15 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Products } from "../components/Products"
+import { useEffect } from "react";
+import { Products } from "../components/Products";
 import axios from "axios";
+import { useProductContext } from "@/helpers/ProductContext";
 
 export default function Home() {
-  const [products, setProducts] = useState([])
+  const { products, setProducts } = useProductContext();
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (products.length === 0) {
+      fetchProducts();
+    }
+  }, [products]);
 
   async function fetchProducts() {
     try {
@@ -23,7 +26,7 @@ export default function Home() {
 
   return (
     <section className="section-products">
-      <Products 
+      <Products
         products={products}
       />
     </section>

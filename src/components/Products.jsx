@@ -5,7 +5,7 @@ import '../styles/products.css';
 export const Products = ({ products }) => {
   const [loadedProducts, setLoadedProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
-
+  console.log(products)
   useEffect(() => {
     if (products.length > 0) {
       const initialBatch = products.slice(0, 18);
