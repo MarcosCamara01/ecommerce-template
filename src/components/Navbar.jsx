@@ -4,8 +4,11 @@ import Link from 'next/link';
 import React from 'react';
 import { HiOutlineSearch } from 'react-icons/hi';
 import '../styles/header.css';
+import { useSession } from "next-auth/react";
 
 export const Navbar = () => {
+  const { data: session } = useSession();
+
   return (
     <header>
       <ul>
@@ -15,7 +18,12 @@ export const Navbar = () => {
       </ul>
       <ul>
         <div className='search'><HiOutlineSearch /></div>
-        <li><Link href="/register">Login</Link></li>
+        {
+          session ?
+          <li><Link href="/user/profile">{session.user.fullname}</Link></li>
+          :
+          <li><Link href="/login">Login</Link></li>
+        }
       </ul>
     </header>
   )

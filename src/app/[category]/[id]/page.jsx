@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useProductContext } from "@/helpers/ProductContext";
 import { useParams } from "next/navigation";
 import { fetchProducts } from '@/helpers/fetchProducts';
+import { SingleProduct } from "../../../components/SingleProduct";
 
 const ProductPage = () => {
     const { products, setProducts } = useProductContext();
@@ -23,9 +24,8 @@ const ProductPage = () => {
 
             if (foundProduct) {
                 setProduct(foundProduct);
+                setIsLoading(false);
             }
-            
-            setIsLoading(false);
         };
 
         fetchProduct();
@@ -36,7 +36,9 @@ const ProductPage = () => {
             {isLoading ? (
                 <p>Loading...</p>
             ) : (
-                <h1>{product.name}</h1>
+                <SingleProduct
+                    product={product}
+                />
             )}
         </section>
     )
