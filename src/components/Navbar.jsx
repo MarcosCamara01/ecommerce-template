@@ -7,7 +7,6 @@ import '../styles/header.css';
 import { useSession } from "next-auth/react";
 import { useCart } from '@/helpers/CartContext';
 
-
 export const Navbar = () => {
   const { data: session } = useSession();
   const { cartItems } = useCart();

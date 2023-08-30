@@ -5,11 +5,15 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import '../../styles/form.css';
 import Link from "next/link";
+import { useCart } from "@/helpers/CartContext";
 
 function Signup() {
+  const { cartItems } = useCart();
   const [error, setError] = useState();
   const router = useRouter();
   const { data: session } = useSession();
+
+  console.log(cartItems)
 
   useEffect(() => {
     if (session) {
@@ -25,6 +29,7 @@ function Signup() {
         email: formData.get("email"),
         password: formData.get("password"),
         fullname: formData.get("fullname"),
+        cart: cartItems,
       });
       console.log(signupResponse);
       const res = await signIn("credentials", {
