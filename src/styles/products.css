@@ -1,7 +1,8 @@
 .products-section {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
+    column-gap: 15px;
+    row-gap: 30px;
 }
 
 .product-card {

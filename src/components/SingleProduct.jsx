@@ -7,7 +7,7 @@ export const SingleProduct = ({ product }) => {
 
     const handleAddToCart = () => {
         addToCart(product);
-      };
+    };
 
     return (
         <div className="product-bx">
