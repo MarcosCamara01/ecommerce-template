@@ -21,12 +21,12 @@ export const Navbar = () => {
       <ul>
         <li><div className='search'><HiOutlineSearch /></div></li>
         {
-          session ?
-          <li><Link href="/user/profile">{session.user.fullname}</Link></li>
+          session  ?
+          <li><Link href="/user/profile">{session.user?.fullname}</Link></li>
           :
           <li><Link href="/login">Login</Link></li>
         }
-        <li><Link href="/user/cart">Cesta ({cartItems.length})</Link></li>
+        <li><Link href="/user/cart">Cesta ({cartItems?.length})</Link></li>
       </ul>
     </header>
   )

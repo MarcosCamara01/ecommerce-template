@@ -3,8 +3,8 @@
 import { useProductContext } from "@/helpers/ProductContext";
 import { useCart } from "../../../helpers/CartContext";
 import { useEffect, useState } from "react";
-import { fetchProducts } from "@/helpers/fetchProducts";
 import { Products } from "@/components/Products";
+import { fetchProducts } from '@/helpers/fetchProducts';
 
 const Cart = () => {
   const { cartItems } = useCart();
@@ -13,27 +13,26 @@ const Cart = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      const productData = await products;
-
-      if (productData.length === 0) {
+    const fetchAllProducts = async () => {
+      if (products.length === 0) {
         await fetchProducts(setProducts);
       }
-      
-      console.log(cartItems, productData)
+    }
 
-      const cartItemsWithProducts = await cartItems.map(cartItem => {
-        return productData.find(product => product._id === cartItem.product);
-      });
+    fetchAllProducts();
 
-      setCartWithProducts(cartItemsWithProducts);
-      setIsLoading(false);
-    };
+    const cartItemsWithProducts = cartItems.map(cartItemId => {
+      const product = products.find(product => product._id === cartItemId);
+      if (product) {
+        return product;
+      }
+      return null;
+    });
 
-    fetchProduct();
-  }, [cartItems, products, setProducts]);
-
-  console.log(cartWithProducts)
+    const validCartItemsWithProducts = cartItemsWithProducts.filter(item => item !== null);
+    setCartWithProducts(validCartItemsWithProducts);
+    setIsLoading(false);
+  }, [cartItems, products]);
 
   return (
     <section>
@@ -42,7 +41,7 @@ const Cart = () => {
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <h2>Hola</h2>
+        <Products products={cartWithProducts} />
       )}
     </section>
   );

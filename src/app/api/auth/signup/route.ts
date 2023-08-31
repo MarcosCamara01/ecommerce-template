@@ -37,9 +37,7 @@ export async function POST(request: Request) {
     const savedUser = await user.save();
 
     if (cart && cart.length > 0) {
-      savedUser.cart = cart.map((cartItem: any) => ({
-        product: cartItem,
-      }));
+      savedUser.cart = cart;
       await savedUser.save();
     }
 
@@ -103,9 +101,7 @@ export async function PUT(request: Request) {
     }
 
     if (cart) {
-      userToUpdate.cart = cart.map((cartItem: any) => ({
-        product: cartItem,
-      }));
+      userToUpdate.cart = cart;
     }
 
     await userToUpdate.save();

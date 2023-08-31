@@ -22,15 +22,10 @@ const UserSchema = new Schema(
       minLength: [3, "fullname must be at least 3 characters"],
       maxLength: [25, "fullname must be at most 25 characters"],
     },
-    cart: [
-      {
-        product: {
-          type: Schema.Types.ObjectId,
-          ref: 'Product',
-        },
-        quantity: Number,
-      },
-    ],
+    cart: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Product',
+    },
   },
   {
     timestamps: true,
