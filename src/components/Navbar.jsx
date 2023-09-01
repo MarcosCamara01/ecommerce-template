@@ -26,7 +26,7 @@ export const Navbar = () => {
             :
             <li><Link href="/login">Login</Link></li>
         }
-        <li><Link href="/user/cart">Cesta ({cartItems.length})</Link></li>
+        <li><Link href="/user/cart">Cesta ({cartItems ? cartItems.length : 0})</Link></li>
       </ul>
     </header>
   )
