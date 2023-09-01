@@ -9,6 +9,7 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const { data: session, status } = useSession()
   const [cartItems, setCartItems] = useState([]);
+  const [userCart, setUserCart] = useState(null);
 
   const fetchUserCart = async () => {
     if (status === "authenticated") {
@@ -29,8 +30,10 @@ export function CartProvider({ children }) {
       const userCart = await fetchUserCart();
       if (userCart) {
         setCartItems(userCart.cart);
+        setUserCart(userCart);
       } else {
         setCartItems([]);
+        setUserCart(null);
       }
     };
 
@@ -43,29 +46,33 @@ export function CartProvider({ children }) {
     if (status === "authenticated") {
       try {
         const userId = session.user._id;
-        let userCart = await fetchUserCart();
 
         if (!userId) {
           console.error('No se pudo obtener el _id del usuario.');
           return;
         }
 
-        if (!userCart) {
-          userCart = await axios.post(`/api/cart`, {
+        let userCartToUpdate = userCart;
+        if (!userCartToUpdate) {
+          userCartToUpdate = await axios.post(`/api/cart`, {
             cart: updatedCart,
             userId: userId
           });
           console.log('Cart created on the server');
         } else {
-          await axios.put(`/api/cart?id=${userCart._id}`, {
+          await axios.put(`/api/cart?id=${userCartToUpdate._id}`, {
             cart: updatedCart,
           });
           console.log('Cart updated on the server');
         }
 
+        setUserCart(userCartToUpdate);
+
       } catch (error) {
         console.error('Error updating/creating cart on the server:', error);
       }
+    } else {
+      // Si no hay un usuario autenticado, puedes manejar el carrito localmente o usar cookies.
     }
 
     setCartItems(updatedCart);
