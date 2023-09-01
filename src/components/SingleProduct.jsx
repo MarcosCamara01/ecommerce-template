@@ -6,7 +6,7 @@ export const SingleProduct = ({ product }) => {
     const { addToCart } = useCart();
 
     const handleAddToCart = () => {
-        addToCart(product);
+        addToCart(product._id);
     };
 
     return (

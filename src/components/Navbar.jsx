@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import { useCart } from '@/helpers/CartContext';
 
 export const Navbar = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { cartItems } = useCart();
 
   return (
@@ -21,12 +21,12 @@ export const Navbar = () => {
       <ul>
         <li><div className='search'><HiOutlineSearch /></div></li>
         {
-          session  ?
-          <li><Link href="/user/profile">{session.user?.fullname}</Link></li>
-          :
-          <li><Link href="/login">Login</Link></li>
+          status === "authenticated" ?
+            <li><Link href="/user/profile">{session.user.fullname.split(' ')[0]}</Link></li>
+            :
+            <li><Link href="/login">Login</Link></li>
         }
-        <li><Link href="/user/cart">Cesta ({cartItems?.length})</Link></li>
+        <li><Link href="/user/cart">Cesta ({cartItems.length})</Link></li>
       </ul>
     </header>
   )
