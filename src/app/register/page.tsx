@@ -29,7 +29,6 @@ function Signup() {
         email: formData.get("email"),
         password: formData.get("password"),
         fullname: formData.get("fullname"),
-        cart: cartItems,
       });
       console.log(signupResponse);
       const res = await signIn("credentials", {

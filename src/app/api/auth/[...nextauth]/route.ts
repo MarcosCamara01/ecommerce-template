@@ -1,10 +1,11 @@
+import type { NextApiRequest, NextApiResponse, } from "next"
 import { connectDB } from "@/libs/mongodb";
 import User from "@/models/User";
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
-const handler = NextAuth({
+const createOptions = (req: NextApiRequest): AuthOptions => ({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -51,5 +52,9 @@ const handler = NextAuth({
     },
   },
 });
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  return NextAuth(req, res, createOptions(req))
+}
 
 export { handler as GET, handler as POST };
