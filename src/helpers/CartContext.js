@@ -40,8 +40,14 @@ export function CartProvider({ children }) {
     fetchCartAndUpdateState();
   }, [status, session]);
 
-  const addToCart = async (product) => {
-    const updatedCart = [...cartItems, product];
+  const addToCart = async (product, color, size) => {
+    const newItem = {
+      product,
+      color,
+      size,
+    };
+
+    const updatedCart = [...cartItems, newItem];
 
     if (status === "authenticated") {
       try {

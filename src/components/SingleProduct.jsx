@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../styles/singleproduct.css';
 import { useCart } from '@/helpers/CartContext';
 
 export const SingleProduct = ({ product }) => {
     const { addToCart } = useCart();
+    const [selectedColor, setSelectedColor] = useState('default');
+    const [selectedSize, setSelectedSize] = useState('');
 
     const handleAddToCart = () => {
-        addToCart(product._id);
+        if (selectedColor && selectedSize) {
+            addToCart(product._id, selectedColor, selectedSize);
+        } else {
+            console.error('Selecciona un color y una talla antes de agregar al carrito.');
+        }
     };
 
     return (
@@ -30,7 +36,11 @@ export const SingleProduct = ({ product }) => {
                     <div className='section section-mid'>
                         <div className='sizes'>
                             {product.sizes.map((size, index) => (
-                                <button key={index} className='size-item'>
+                                <button
+                                    key={index}
+                                    className={`size-item ${selectedSize === size ? 'selected' : ''}`}
+                                    onClick={() => setSelectedSize(size)}
+                                >
                                     <span>{size}</span>
                                 </button>
                             ))}

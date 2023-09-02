@@ -4,6 +4,19 @@ import { connectDB } from '../../../libs/mongodb';
 
 connectDB();
 
+interface CartUpdateData {
+    cart: any[];
+    color?: string;
+    size?: string;
+}
+
+interface CartSaveData {
+    userId: string;
+    cart: any[];
+    color: string;
+    size: string;
+}
+
 export async function GET() {
     try {
         const cart = await Cart.find();
@@ -14,14 +27,26 @@ export async function GET() {
     }
 }
 
+
 export async function PUT(req: NextRequest) {
     const query = new URL(req.url).searchParams;
     const id = query.get('id');
 
     try {
-        const dataToUpdate = await req.json();
-        const updatedCart = await Cart.findByIdAndUpdate(id, dataToUpdate, { new: true });
+        const { cart, color, size } = await req.json();
+        const dataToUpdate: CartUpdateData = {
+            cart: cart,
+        };
 
+        if (color) {
+            dataToUpdate.color = color;
+        }
+
+        if (size) {
+            dataToUpdate.size = size;
+        }
+
+        const updatedCart = await Cart.findByIdAndUpdate(id, dataToUpdate, { new: true });
         return NextResponse.json(updatedCart);
     } catch (error) {
         console.error('Failed to update product.', error);
@@ -29,12 +54,15 @@ export async function PUT(req: NextRequest) {
     }
 }
 
+
 export async function POST(req: NextRequest) {
     try {
-        const { userId, cart } = await req.json();
-        const dataToSave = {
+        const { userId, cart, color, size } = await req.json();
+        const dataToSave: CartSaveData = {
             userId: userId,
             cart: cart,
+            color: color,
+            size: size,
         };
         const savedCart = await Cart.create(dataToSave);
         return NextResponse.json({ _id: savedCart._id });
