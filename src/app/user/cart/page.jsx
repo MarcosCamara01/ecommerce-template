@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useProductContext } from "@/helpers/ProductContext";
 import { useCart } from "../../../helpers/CartContext";
@@ -21,17 +21,20 @@ const Cart = () => {
 
     fetchAllProducts();
 
-    const cartItemsWithProducts = cartItems.map(cartItemId => {
-      const product = products.find(product => product._id === cartItemId);
-      if (product) {
-        return product;
-      }
-      return null;
-    });
+    if (cartItems && cartItems[0]) {
+      const cartItemsWithProducts = cartItems.map(cartItem => {
+        const product = products.find(product => product._id === cartItem.product);
+        if (product) {
+          return { ...product, quantity: cartItem.quantity, color: cartItem.color, size: cartItem.size };
+        }
+        return null;
+      });
 
-    const validCartItemsWithProducts = cartItemsWithProducts.filter(item => item !== null);
-    setCartWithProducts(validCartItemsWithProducts);
-    setIsLoading(false);
+      const validCartItemsWithProducts = cartItemsWithProducts.filter(item => item !== null);
+      setCartWithProducts(validCartItemsWithProducts);
+      setIsLoading(false);
+    }
+
   }, [cartItems, products]);
 
   return (
