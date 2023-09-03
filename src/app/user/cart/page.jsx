@@ -3,7 +3,7 @@
 import { useProductContext } from "@/helpers/ProductContext";
 import { useCart } from "../../../helpers/CartContext";
 import { useEffect, useState } from "react";
-import { Products } from "@/components/Products";
+import { CartProducts } from "@/components/CartProducts";
 import { fetchProducts } from '@/helpers/fetchProducts';
 
 const Cart = () => {
@@ -11,6 +11,8 @@ const Cart = () => {
   const { products, setProducts } = useProductContext();
   const [cartWithProducts, setCartWithProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  console.log(cartItems)
 
   useEffect(() => {
     const fetchAllProducts = async () => {
@@ -21,20 +23,29 @@ const Cart = () => {
 
     fetchAllProducts();
 
-    if (cartItems && cartItems[0]) {
-      const cartItemsWithProducts = cartItems.map(cartItem => {
-        const product = products.find(product => product._id === cartItem.product);
-        if (product) {
-          return { ...product, quantity: cartItem.quantity, color: cartItem.color, size: cartItem.size };
+    if (cartItems && cartItems.length > 0) {
+      const productMap = new Map();
+      
+      cartItems.forEach(cartItem => {
+        const productKey = cartItem.product;
+        if (productMap.has(productKey)) {
+          productMap.set(productKey, productMap.get(productKey) + 1);
+        } else {
+          productMap.set(productKey, 1);
         }
-        return null;
       });
 
-      const validCartItemsWithProducts = cartItemsWithProducts.filter(item => item !== null);
-      setCartWithProducts(validCartItemsWithProducts);
+      const uniqueCartProducts = Array.from(productMap.keys()).map(productId => {
+        const product = products.find(product => product._id === productId);
+        return {
+          ...product,
+          quantity: productMap.get(productId),
+        };
+      });
+
+      setCartWithProducts(uniqueCartProducts);
       setIsLoading(false);
     }
-
   }, [cartItems, products]);
 
   return (
@@ -44,7 +55,7 @@ const Cart = () => {
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <Products products={cartWithProducts} />
+        <CartProducts products={cartWithProducts} />
       )}
     </section>
   );

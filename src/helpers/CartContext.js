@@ -78,7 +78,7 @@ export function CartProvider({ children }) {
         console.error('Error updating/creating cart on the server:', error);
       }
     } else {
-      // Si no hay un usuario autenticado, puedes manejar el carrito localmente o usar cookies.
+      // Si no hay un usuario autenticado, usar cookies.
     }
 
     setCartItems(updatedCart);
