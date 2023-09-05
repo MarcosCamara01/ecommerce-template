@@ -13,6 +13,10 @@ const CartItemSchema = new Schema({
     type: String,
     required: true,
   },
+  quantity: {
+    type: Number,
+    required: false,
+  },
 });
 
 const CartSchema = new Schema({

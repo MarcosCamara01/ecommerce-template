@@ -9,7 +9,9 @@ export const SingleProduct = ({ product }) => {
 
     const handleAddToCart = () => {
         if (selectedColor && selectedSize) {
-            addToCart(product._id, selectedColor, selectedSize);
+            console.log(selectedColor, selectedSize)
+            const quantity = 1;
+            addToCart(product._id, selectedColor, selectedSize, quantity);
         } else {
             console.error('Selecciona un color y una talla antes de agregar al carrito.');
         }
@@ -44,6 +46,17 @@ export const SingleProduct = ({ product }) => {
                                     <span>{size}</span>
                                 </button>
                             ))}
+                        </div>
+                        <div className="colors">
+                            {product.colors.map((color, index) => (
+                                <button
+                                    key={index}
+                                    className={`color-item ${selectedColor === color ? 'selected' : ''}`}
+                                    style={{ backgroundColor: color }}
+                                    onClick={() => setSelectedColor(color)}
+                                ></button>
+                            ))}
+
                         </div>
                     </div>
 

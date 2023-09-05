@@ -12,40 +12,38 @@ const Cart = () => {
   const [cartWithProducts, setCartWithProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log(cartItems)
-
   useEffect(() => {
     const fetchAllProducts = async () => {
       if (products.length === 0) {
         await fetchProducts(setProducts);
       }
-    }
+    };
+
+    const updateCartWithProducts = () => {
+      const updatedCart = cartItems.map((cartItem) => {
+        const matchingProduct = products.find(
+          (product) => product._id === cartItem.product
+        );
+
+        if (matchingProduct) {
+          return {
+            ...cartItem,
+            category: matchingProduct.category,
+            image: matchingProduct.images,
+            name: matchingProduct.name,
+            price: matchingProduct.price,
+          };
+        }
+
+        return cartItem;
+      });
+
+      setCartWithProducts(updatedCart);
+      setIsLoading(false);
+    };
 
     fetchAllProducts();
-
-    if (cartItems && cartItems.length > 0) {
-      const productMap = new Map();
-      
-      cartItems.forEach(cartItem => {
-        const productKey = cartItem.product;
-        if (productMap.has(productKey)) {
-          productMap.set(productKey, productMap.get(productKey) + 1);
-        } else {
-          productMap.set(productKey, 1);
-        }
-      });
-
-      const uniqueCartProducts = Array.from(productMap.keys()).map(productId => {
-        const product = products.find(product => product._id === productId);
-        return {
-          ...product,
-          quantity: productMap.get(productId),
-        };
-      });
-
-      setCartWithProducts(uniqueCartProducts);
-      setIsLoading(false);
-    }
+    updateCartWithProducts();
   }, [cartItems, products]);
 
   return (
