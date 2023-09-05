@@ -48,8 +48,8 @@
 
 .section-mid .sizes {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);  
-      gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
     justify-content: center;
 }
 
@@ -73,4 +73,22 @@
     border: 0;
     background-color: transparent;
     cursor: pointer;
+}
+
+.section-mid .colors {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 10px;
+}
+
+.section-mid .colors .color-item {
+    border-radius: 9999px;
+    border: 1px solid #fff;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.color-item.selected {
+    border: 5px solid #fff;
 }

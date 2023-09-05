@@ -40,14 +40,30 @@ export function CartProvider({ children }) {
     fetchCartAndUpdateState();
   }, [status, session]);
 
-  const addToCart = async (product, color, size) => {
+  const addToCart = async (productId, color, size, quantity) => {
     const newItem = {
-      product,
+      product: productId,
       color,
       size,
+      quantity,
     };
 
-    const updatedCart = [...cartItems, newItem];
+    let updatedCart = [...cartItems];
+
+    const existingItemIndex = updatedCart.findIndex(
+      (item) =>
+        item.product === productId &&
+        item.color === color &&
+        item.size === size
+    );
+
+    if (existingItemIndex !== -1) {
+      updatedCart[existingItemIndex].quantity += quantity;
+    } else {
+      updatedCart = [...updatedCart, newItem];
+    }
+
+    setCartItems(updatedCart);
 
     if (status === "authenticated") {
       try {
@@ -80,8 +96,6 @@ export function CartProvider({ children }) {
     } else {
       // Si no hay un usuario autenticado, usar cookies.
     }
-
-    setCartItems(updatedCart);
   };
 
   return (

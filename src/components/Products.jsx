@@ -42,7 +42,7 @@ export const Products = ({ products }) => {
           return (
             <div className='product-card' key={product?._id}>
               <Link href={`/${product?.category}/${product?._id}`}>
-                <img src={product?.images[0]} alt={product?.name} className='product-img' />
+                <img src={product?.images[0]} alt={product?.name} className='product-img' loading='lazy' />
                 <h2 className='product-name'>{product?.name}</h2>
                 <div className='product-price'>{product?.price}€</div>
               </Link>
