@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import '../styles/products.css';
 import Link from 'next/link';
+import { useCart } from '@/helpers/CartContext';
+import { MdAdd } from 'react-icons/md';
+import { MdRemove } from 'react-icons/md';
 
 export const Products = ({ products }) => {
   const [loadedProducts, setLoadedProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
+  const { addToCart } = useCart();
   console.log(products)
   useEffect(() => {
     if (products.length > 0) {
@@ -38,14 +42,37 @@ export const Products = ({ products }) => {
       loader={<h4>Loading...</h4>}
     >
       <div className='products-section'>
-        {loadedProducts.map((product) => {
+        {loadedProducts.map((product, index) => {
           return (
-            <div className='product-card' key={product?._id}>
-              <Link href={`/${product?.category}/${product?._id}`}>
+            <div className='product-card' key={index}>
+              <Link href={`/${product?.category}/${product.quantity ? product.productId : product._id}`}>
                 <img src={product?.images[0]} alt={product?.name} className='product-img' loading='lazy' />
-                <h2 className='product-name'>{product?.name}</h2>
-                <div className='product-price'>{product?.price}€</div>
               </Link>
+              <div className='product-information'>
+                <Link href={`/${product?.category}/${product.quantity ? product.productId : product._id}`}>
+                  <h2 className='product-name'>{product?.name}</h2>
+                </Link>
+                <div className='product-price'>{product?.price}€</div>
+                {
+                  product.quantity && (
+                    <div className='content-cart'>
+                      <div className="buttons">
+                        <button className='add-remove' onClick={() => addToCart(product.productId, product.color, product.size, -1)}><MdRemove /></button>
+                        <span className='content'>{product.quantity}</span>
+                        <button className='add-remove' onClick={() => addToCart(product.productId, product.color, product.size, 1)}><MdAdd /></button>
+                      </div>
+                      <div className="color-size">
+                        <div className='size'>
+                          {product.size}
+                        </div>
+                        <div className='color'>
+                          {product.color}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
             </div>
           );
         })}

@@ -42,7 +42,7 @@ export function CartProvider({ children }) {
 
   const addToCart = async (productId, color, size, quantity) => {
     const newItem = {
-      product: productId,
+      productId: productId,
       color,
       size,
       quantity,
@@ -52,7 +52,7 @@ export function CartProvider({ children }) {
 
     const existingItemIndex = updatedCart.findIndex(
       (item) =>
-        item.product === productId &&
+        item.productId === productId &&
         item.color === color &&
         item.size === size
     );

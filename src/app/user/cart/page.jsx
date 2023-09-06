@@ -3,8 +3,8 @@
 import { useProductContext } from "@/helpers/ProductContext";
 import { useCart } from "../../../helpers/CartContext";
 import { useEffect, useState } from "react";
-import { CartProducts } from "@/components/CartProducts";
 import { fetchProducts } from '@/helpers/fetchProducts';
+import { Products } from "@/components/Products";
 
 const Cart = () => {
   const { cartItems } = useCart();
@@ -22,14 +22,14 @@ const Cart = () => {
     const updateCartWithProducts = () => {
       const updatedCart = cartItems.map((cartItem) => {
         const matchingProduct = products.find(
-          (product) => product._id === cartItem.product
+          (product) => product._id === cartItem.productId
         );
 
         if (matchingProduct) {
           return {
             ...cartItem,
             category: matchingProduct.category,
-            image: matchingProduct.images,
+            images: matchingProduct.images,
             name: matchingProduct.name,
             price: matchingProduct.price,
           };
@@ -53,7 +53,9 @@ const Cart = () => {
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <CartProducts products={cartWithProducts} />
+        <Products
+          products={cartWithProducts}
+        />
       )}
     </section>
   );
