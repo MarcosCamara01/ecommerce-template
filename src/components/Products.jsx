@@ -10,7 +10,6 @@ export const Products = ({ products }) => {
   const [loadedProducts, setLoadedProducts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const { addToCart } = useCart();
-  console.log(products)
   useEffect(() => {
     if (products.length > 0) {
       const initialBatch = products.slice(0, 18);
@@ -52,14 +51,27 @@ export const Products = ({ products }) => {
                 <Link href={`/${product?.category}/${product.quantity ? product.productId : product._id}`}>
                   <h2 className='product-name'>{product?.name}</h2>
                 </Link>
-                <div className='product-price'>{product?.price}€</div>
+                <div className='product-price'>
+                  {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
+                </div>
+
                 {
-                  product.quantity && (
+                  product.quantity !== undefined && (
                     <div className='content-cart'>
                       <div className="buttons">
-                        <button className='add-remove' onClick={() => addToCart(product.productId, product.color, product.size, -1)}><MdRemove /></button>
+                        <button
+                          disabled={product.quantity == 1}
+                          className='add-remove'
+                          onClick={() => addToCart(product.productId, product.color, product.size, -1)}
+                        >
+                          <MdRemove />
+                        </button>
                         <span className='content'>{product.quantity}</span>
-                        <button className='add-remove' onClick={() => addToCart(product.productId, product.color, product.size, 1)}><MdAdd /></button>
+                        <button
+                          className='add-remove'
+                          onClick={() => addToCart(product.productId, product.color, product.size, 1)}
+                        ><MdAdd />
+                        </button>
                       </div>
                       <div className="color-size">
                         <div className='size'>

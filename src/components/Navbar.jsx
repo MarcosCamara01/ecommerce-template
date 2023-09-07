@@ -11,6 +11,10 @@ export const Navbar = () => {
   const { data: session, status } = useSession();
   const { cartItems } = useCart();
 
+  const totalQuantity = cartItems.reduce((total, cartItem) => {
+    return total + cartItem.quantity;
+  }, 0);
+
   return (
     <header>
       <ul>
@@ -26,7 +30,7 @@ export const Navbar = () => {
             :
             <li><Link href="/login">Login</Link></li>
         }
-        <li><Link href="/user/cart">Cesta ({cartItems ? cartItems.length : 0})</Link></li>
+        <li><Link href="/user/cart">Cesta ({totalQuantity})</Link></li>
       </ul>
     </header>
   )
