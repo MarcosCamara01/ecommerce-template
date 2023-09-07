@@ -1,0 +1,45 @@
+.cart-footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 77px;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: 45px;
+    font-size: 13px;
+    border-top: 1px #fff solid;
+}
+
+.cart-price {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cart-price .price {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.cart-price .taxes {
+    font-size: 11px;
+}
+
+.cart-footer .cart-button {
+    height: 77px;
+    width: 100%;
+    max-width: 180px;
+}
+
+.cart-footer .cart-button button {
+    height: 77px;
+    width: 100%;
+    background-color: #fff;
+    border: transparent;
+    color: #000;
+    cursor: pointer;
+}
