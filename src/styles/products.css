@@ -21,6 +21,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
 }
 
 .content-cart {
@@ -74,4 +75,30 @@
 
 .color-size .color {
     padding-left: 10px;
+}
+
+.name-button {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+.name-button a {
+    overflow: hidden;
+}
+
+.name-button button {
+    background-color: transparent;
+    border: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.name-button button svg {
+    font-size: 20px;
 }
