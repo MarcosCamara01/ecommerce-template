@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react";
 import { useProductContext } from "@/helpers/ProductContext";
 import { useParams } from "next/navigation";
-import { fetchProducts } from '@/helpers/fetchProducts';
 import { SingleProduct } from "../../../components/SingleProduct";
 
 const ProductPage = () => {
-    const { products, setProducts } = useProductContext();
+    const { products } = useProductContext();
     const [product, setProduct] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const params = useParams();
@@ -15,10 +14,6 @@ const ProductPage = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             const productData = await products;
-
-            if (productData.length === 0) {
-                await fetchProducts(setProducts);
-            }
 
             const foundProduct = productData.find(chat => chat._id === params.id);
 
