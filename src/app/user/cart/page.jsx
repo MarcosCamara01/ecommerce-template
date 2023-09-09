@@ -3,23 +3,16 @@
 import { useProductContext } from "@/helpers/ProductContext";
 import { useCart } from "../../../helpers/CartContext";
 import { useEffect, useState } from "react";
-import { fetchProducts } from '@/helpers/fetchProducts';
 import { Products } from "@/components/Products";
 import '../../../styles/cart.css';
 
 const Cart = () => {
   const { cartItems } = useCart();
-  const { products, setProducts } = useProductContext();
+  const { products } = useProductContext();
   const [cartWithProducts, setCartWithProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAllProducts = async () => {
-      if (products.length === 0) {
-        await fetchProducts(setProducts);
-      }
-    };
-
     const updateCartWithProducts = () => {
       const updatedCart = cartItems.map((cartItem) => {
         const matchingProduct = products.find(
@@ -43,7 +36,6 @@ const Cart = () => {
       setIsLoading(false);
     };
 
-    fetchAllProducts();
     updateCartWithProducts();
   }, [cartItems, products]);
 

@@ -4,10 +4,9 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Products } from "@/components/Products";
 import { useProductContext } from '@/helpers/ProductContext';
-import { fetchProducts } from '@/helpers/fetchProducts';
 
 const CategoryPage = () => {
-    const { products, setProducts } = useProductContext();
+    const { products } = useProductContext();
     const [productsInCategory, setProductsInCategory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const params = useParams();
@@ -15,12 +14,7 @@ const CategoryPage = () => {
     useEffect(() => {
         const fetchProductsInCategory = async () => {
             try {
-
                 const productData = await products;
-
-                if (productData.length === 0) {
-                    await fetchProducts(setProducts);
-                }
 
                 if (params.category) {
                     const productsOfCategory = productData.filter(prod =>
