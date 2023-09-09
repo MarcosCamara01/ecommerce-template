@@ -49,12 +49,29 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
     const query = new URL(req.url).searchParams;
-    const id = query.get('id');
-    try {
-        const deletedCart = await Cart.findByIdAndDelete(id);
-        return NextResponse.json(deletedCart);
-    } catch (error) {
-        console.error('Failed to remove product.', error);
-        return NextResponse.json({ error: 'Failed to remove product.' }, { status: 500 });
+    const cartItemId = query.get('cartItemId');
+    const userId = query.get('userId');
+
+    if (!cartItemId || !userId) {
+        return NextResponse.json({ error: 'Missing cartItemId or userId in the request.' }, { status: 400 });
     }
-}
+
+    try {
+        // Encuentra el carrito del usuario específico
+        const cart = await Cart.findOne({ userId });
+
+        if (!cart) {
+            return NextResponse.json({ error: 'Cart not found.' }, { status: 404 });
+        }
+
+        // Filtra los elementos del carrito, excluyendo el producto con el cartItemId
+        cart.cart = cart.cart.filter((item: any) => item._id.toString() !== cartItemId);
+
+        await cart.save(); // Guarda el carrito actualizado
+
+        return NextResponse.json(cart);
+    } catch (error) {
+        console.error('Failed to remove product from cart.', error);
+        return NextResponse.json({ error: 'Failed to remove product from cart.' }, { status: 500 });
+    }
+}  
