@@ -63,8 +63,6 @@ export function CartProvider({ children }) {
       updatedCart = [...updatedCart, newItem];
     }
 
-    setCartItems(updatedCart);
-
     if (status === "authenticated") {
       try {
         const userId = session.user._id;
@@ -89,6 +87,7 @@ export function CartProvider({ children }) {
         }
 
         setUserCart(userCartToUpdate);
+        setCartItems(updatedCart);
 
       } catch (error) {
         console.error('Error updating/creating cart on the server:', error);
