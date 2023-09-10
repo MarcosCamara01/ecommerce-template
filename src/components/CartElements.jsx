@@ -6,15 +6,15 @@ import { FaRegHeart, FaHeart } from 'react-icons/fa';
 import { useSession } from 'next-auth/react';
 
 export const DeleteButton = ({ product }) => {
-    const { userToUpdate, setuserToUpdate, setCartItems } = useCart();
+    const { userCart, setUserCart, setCartItems } = useCart();
 
     const handleRemoveFromCart = async (cartItemId) => {
         try {
-            const response = await axios.delete(`/api/cart?userId=${userToUpdate.userId}&cartItemId=${cartItemId}`);
+            const response = await axios.delete(`/api/cart?userId=${userCart.userId}&cartItemId=${cartItemId}`);
 
             if (response.status === 200) {
                 setCartItems(response.data.cart);
-                setuserToUpdate(response.data);
+                setUserCart(response.data);
             } else {
                 console.error('Failed to remove product from cart.');
             }
@@ -91,22 +91,32 @@ export const FavoriteButton = ({ product }) => {
                     updatedFavorites = [...userCart.favorites, productId];
                 }
 
-                let userToUpdate = await userCart;
-                if (!userToUpdate) {
-                    userToUpdate = await axios.post(`/api/cart`, {
+                if (!userCart) {
+                    const postResponse = await axios.post(`/api/cart`, {
                         favorites: updatedFavorites,
                         userId: userId
                     });
-                    console.log('Favorites created on the server');
+
+                    if (postResponse.status === 201) {
+                        setUserCart(postResponse.data);
+                        console.log('Favorites created on the server');
+                    } else {
+                        console.error('Failed to create favorites on the server.');
+                    }
                 } else {
-                    await axios.put(`/api/cart?id=${userToUpdate._id}`, {
+                    const putResponse = await axios.put(`/api/cart?id=${userCart._id}`, {
                         favorites: updatedFavorites,
                     });
-                    console.log('Favorites updated on the server');
+
+                    if (putResponse.status === 200) {
+                        setUserCart(putResponse.data);
+                        setIsFavorite(!isFavorite);
+                        console.log('Favorites updated on the server');
+                    } else {
+                        console.error('Failed to update favorites on the server.');
+                    }
                 }
 
-                setUserCart(userToUpdate);
-                setIsFavorite(!isFavorite);
             } catch (error) {
                 console.error('Error updating/creating favorites on the server:', error);
             }
