@@ -30,7 +30,7 @@ const CartSchema = new Schema({
   },
   favorites: {
     type: [Schema.Types.ObjectId],
-    ref: 'Product',
+    default: [],
   },
 });
 

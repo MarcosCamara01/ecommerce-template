@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import '../styles/products.css';
 import Link from 'next/link';
-import { ProductInformation, DeleteButton } from "./CartElements"
+import { ProductCartInfo, DeleteButton, FavoriteButton } from "./CartElements"
 
 export const Products = ({ products }) => {
   const [loadedProducts, setLoadedProducts] = useState([]);
@@ -50,8 +50,13 @@ export const Products = ({ products }) => {
                     <h2 className='product-name'>{product?.name}</h2>
                   </Link>
                   {
-                    product.quantity !== undefined && (
+                    product.quantity !== undefined ? (
                       <DeleteButton
+                        product={product}
+                      />
+                    ) :
+                    (
+                      <FavoriteButton
                         product={product}
                       />
                     )
@@ -62,7 +67,7 @@ export const Products = ({ products }) => {
                 </div>
                 {
                   product.quantity !== undefined && (
-                    <ProductInformation
+                    <ProductCartInfo
                       product={product}
                     />
                   )

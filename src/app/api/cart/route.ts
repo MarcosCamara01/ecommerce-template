@@ -19,9 +19,11 @@ export async function PUT(req: NextRequest) {
     const id = query.get('id');
 
     try {
-        const { cart } = await req.json();
+        const { cart, favorites } = await req.json();
+
         const dataToUpdate = {
             cart: cart,
+            favorites: favorites
         };
 
         const updatedCart = await Cart.findByIdAndUpdate(id, dataToUpdate, { new: true });
@@ -34,10 +36,11 @@ export async function PUT(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const { userId, cart } = await req.json();
+        const { userId, cart, favorites } = await req.json();
         const dataToSave = {
             userId: userId,
             cart: cart,
+            favorites: favorites
         };
         const savedCart = await Cart.create(dataToSave);
         return NextResponse.json({ _id: savedCart._id });
@@ -57,17 +60,15 @@ export async function DELETE(req: NextRequest) {
     }
 
     try {
-        // Encuentra el carrito del usuario específico
         const cart = await Cart.findOne({ userId });
 
         if (!cart) {
             return NextResponse.json({ error: 'Cart not found.' }, { status: 404 });
         }
 
-        // Filtra los elementos del carrito, excluyendo el producto con el cartItemId
         cart.cart = cart.cart.filter((item: any) => item._id.toString() !== cartItemId);
 
-        await cart.save(); // Guarda el carrito actualizado
+        await cart.save();
 
         return NextResponse.json(cart);
     } catch (error) {

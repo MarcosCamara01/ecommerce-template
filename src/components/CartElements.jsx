@@ -1,18 +1,20 @@
 import axios from 'axios';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '@/helpers/CartContext';
 import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
+import { FaRegHeart, FaHeart } from 'react-icons/fa';
+import { useSession } from 'next-auth/react';
 
 export const DeleteButton = ({ product }) => {
-    const { userCart, setUserCart, setCartItems } = useCart();
+    const { userToUpdate, setuserToUpdate, setCartItems } = useCart();
 
     const handleRemoveFromCart = async (cartItemId) => {
         try {
-            const response = await axios.delete(`/api/cart?userId=${userCart.userId}&cartItemId=${cartItemId}`);
+            const response = await axios.delete(`/api/cart?userId=${userToUpdate.userId}&cartItemId=${cartItemId}`);
 
             if (response.status === 200) {
                 setCartItems(response.data.cart);
-                setUserCart(response.data);
+                setuserToUpdate(response.data);
             } else {
                 console.error('Failed to remove product from cart.');
             }
@@ -26,7 +28,7 @@ export const DeleteButton = ({ product }) => {
     )
 }
 
-export const ProductInformation = ({ product }) => {
+export const ProductCartInfo = ({ product }) => {
     const { addToCart } = useCart();
 
     return (
@@ -58,3 +60,64 @@ export const ProductInformation = ({ product }) => {
         </div>
     )
 }
+
+export const FavoriteButton = ({ product }) => {
+    const { userCart, setUserCart } = useCart();
+    const { data: session, status } = useSession();
+    const [isFavorite, setIsFavorite] = useState(false);
+
+    useEffect(() => {
+        if (userCart && userCart.favorites.includes(product._id)) {
+            setIsFavorite(true);
+        } else {
+            setIsFavorite(false);
+        }
+    }, [userCart, product._id]);
+
+    const addToFavorites = async (productId) => {
+        if (status === "authenticated") {
+            try {
+                const userId = session.user._id;
+
+                if (!userId) {
+                    console.error('No se pudo obtener el _id del usuario.');
+                    return;
+                }
+
+                let updatedFavorites;
+                if (isFavorite) {
+                    updatedFavorites = userCart.favorites.filter((favId) => favId !== productId);
+                } else {
+                    updatedFavorites = [...userCart.favorites, productId];
+                }
+
+                let userToUpdate = await userCart;
+                if (!userToUpdate) {
+                    userToUpdate = await axios.post(`/api/cart`, {
+                        favorites: updatedFavorites,
+                        userId: userId
+                    });
+                    console.log('Favorites created on the server');
+                } else {
+                    await axios.put(`/api/cart?id=${userToUpdate._id}`, {
+                        favorites: updatedFavorites,
+                    });
+                    console.log('Favorites updated on the server');
+                }
+
+                setUserCart(userToUpdate);
+                setIsFavorite(!isFavorite);
+            } catch (error) {
+                console.error('Error updating/creating favorites on the server:', error);
+            }
+        } else {
+            // Si no hay un usuario autenticado, usar cookies.
+        }
+    };
+
+    return (
+        <button onClick={() => addToFavorites(product._id)}>
+            {isFavorite ? <FaHeart /> : <FaRegHeart />}
+        </button>
+    );
+};
