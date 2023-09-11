@@ -39,12 +39,23 @@ const Cart = () => {
     updateCartWithProducts();
   }, [cartItems, products]);
 
-  const calculateTotalPrice = (cartItems) => {
+  const calculateTotalPrice = (cartItems, products) => {
     const totalPrice = cartItems.reduce((total, cartItem) => {
-      return total + cartItem.price * cartItem.quantity;
+      const matchingProduct = products.find(
+        (product) => product._id === cartItem.productId
+      );
+  
+      if (matchingProduct) {
+        return total + matchingProduct.price * cartItem.quantity;
+      }
+  
+      return total;
     }, 0);
+  
     return totalPrice.toFixed(2);
   };
+
+  const totalPrice = calculateTotalPrice(cartWithProducts, products);
 
   return (
     <section>
@@ -62,7 +73,7 @@ const Cart = () => {
             <div className="cart-price">
               <div className="price">
                 <span>Total:</span>
-                <span>{calculateTotalPrice(cartWithProducts)}€</span>
+                <span>{totalPrice}€</span>
               </div>
               <span className="taxes">+ IMPUESTOS INCLUIDOS</span>
             </div>
