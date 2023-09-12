@@ -5,6 +5,7 @@ import { useCart } from "../../../helpers/CartContext";
 import { useEffect, useState } from "react";
 import { Products } from "@/components/Products";
 import '../../../styles/cart.css';
+import { ButtonCheckout } from "@/components/ButtonCheckout"
 
 const Cart = () => {
   const { cartItems } = useCart();
@@ -78,7 +79,9 @@ const Cart = () => {
               <span className="taxes">+ IMPUESTOS INCLUIDOS</span>
             </div>
             <div className="cart-button">
-              <button>CONTINUAR</button>
+              <ButtonCheckout
+                cartWithProducts={cartWithProducts}
+              />
             </div>
           </div>
         </>
