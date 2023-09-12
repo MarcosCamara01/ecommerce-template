@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@stripe/react-stripe-js':
+    specifier: ^2.2.0
+    version: 2.2.0(@stripe/stripe-js@2.1.2)(react-dom@18.2.0)(react@18.2.0)
   '@stripe/stripe-js':
     specifier: ^2.1.2
     version: 2.1.2
@@ -260,6 +263,19 @@ packages:
 
   /@rushstack/eslint-patch@1.3.3:
     resolution: {integrity: sha512-0xd7qez0AQ+MbHatZTlI1gu5vkG8r7MYRUJAHPAHJBmGLs16zpkrpAVLvjQKQOqaXPDUBwOiJzNc00znHSCVBw==}
+    dev: false
+
+  /@stripe/react-stripe-js@2.2.0(@stripe/stripe-js@2.1.2)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Nvqexxh6uu/qfLrmLJNdWERUXWWL3LhCJMc7vKofBKbF1IOh4/dSLYqYrycJYpVF5ApCUJvAYJRGw68y+JPx2Q==}
+    peerDependencies:
+      '@stripe/stripe-js': ^1.44.1 || ^2.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@stripe/stripe-js': 2.1.2
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /@stripe/stripe-js@2.1.2:

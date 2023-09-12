@@ -9,6 +9,7 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@stripe/react-stripe-js": "^2.2.0",
         "@stripe/stripe-js": "^2.1.2",
         "@types/bcryptjs": "^2.4.3",
         "@types/node": "20.5.6",

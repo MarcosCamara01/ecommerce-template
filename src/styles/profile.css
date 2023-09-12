@@ -15,7 +15,7 @@
 }
 
 .user-information {
-    width: 50%;
+    max-width: 750px;
     padding: 25px;
     display: flex;
     justify-content: space-between;
