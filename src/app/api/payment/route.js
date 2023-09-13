@@ -13,6 +13,7 @@ export async function POST(request) {
     try {
         const data = await request.json();
         let lineItems = data.lineItems;
+        const userId = data.userId;
 
         const products = await loadPrices();
 
@@ -32,7 +33,8 @@ export async function POST(request) {
         const session = await stripe.checkout.sessions.create({
             line_items: lineItemsList,
             mode: "payment",
-            success_url: "http://localhost:3000",
+            billing_address_collection: "required",
+            success_url: `http://localhost:3000/user/result?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: "http://localhost:3000/user/cart",
         });
 
