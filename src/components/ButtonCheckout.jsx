@@ -12,12 +12,12 @@ export const ButtonCheckout = ({ cartWithProducts }) => {
         quantity: cartItem.quantity,
       }));
 
-      const { data: session } = await axios.post('/api/payment', {
+      const { data } = await axios.post('/api/stripe/payment', {
         lineItems,
         userId: userCart.userId
       });
 
-      window.location.href = session.url;
+      window.location.href = data.session.url;
 
     } catch (error) {
       console.error(error);
