@@ -1,23 +1,24 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2023-08-16"
+});
+
 export async function loadPrices() {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const prices = await stripe.prices.list();
     return prices.data;
 }
 
-export async function POST(request) {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+export async function POST(request: NextRequest) {
 
     try {
         const data = await request.json();
         let lineItems = data.lineItems;
-        const userId = data.userId;
 
         const products = await loadPrices();
 
-        const lineItemsList = await lineItems.map((item) => {
+        const lineItemsList = await lineItems.map((item: any) => {
             const matchingProduct = products.find((product) => product.nickname === item.productId);
 
             if (!matchingProduct) {
@@ -36,12 +37,14 @@ export async function POST(request) {
             billing_address_collection: "required",
             success_url: `http://localhost:3000/user/result?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: "http://localhost:3000/user/cart",
+            automatic_tax: {
+                enabled: true,
+            },
         });
+        return NextResponse.json({ session: session }, { status: 200 });
 
-        return NextResponse.json({ url: session.url });
-
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
-        return NextResponse.error("Error al procesar la solicitud", 500);
+        return NextResponse.json({ statusCode: 500, message: error.message });
     }
 }

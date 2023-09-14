@@ -1,29 +1,33 @@
 "use client"
 
 import { useSearchParams } from 'next/navigation';
-import PrintObject from '@/components/PrintObject';
-import useSWR from 'swr';
-import { fetchGetJSON } from '@/utils/api-helpers';
+import { useEffect } from 'react';
 
 function CheckoutSuccess() {
   const searchParams = useSearchParams()
- 
-  const session_id = searchParams.get('session_id')
 
-  const { data, error } = useSWR(
-    () => `/api/payment/${session_id}`,
-    fetchGetJSON
-  );
+  const session_id = searchParams.get('session_id');
 
-  if (error) return <div>failed to load</div>;
+  const fetchGetJSON = async (url) => {
+    try {
+      const data = await fetch(url).then((res) => res.json());
+      console.log(data)
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  useEffect(() => {
+    if (session_id) {
+      fetchGetJSON(`/api/stripe/checkout_sessions?session_id=${session_id}`);
+    }
+  }, [session_id])
 
   return (
     <section>
       <div className="page-container">
         <h1>Checkout Payment Result</h1>
-        <h2>Status: {data?.payment_intent?.status ?? 'loading...'}</h2>
-        <h3>CheckoutSession response:</h3>
-        <PrintObject content={data ?? 'loading...'} />
+        <h2>{session_id ? "Pago realizado con éxito" : "Ha habido algún problema al completar el pago"}</h2>
       </div>
     </section>
   );
