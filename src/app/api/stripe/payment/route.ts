@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     try {
         const data = await request.json();
         let lineItems = data.lineItems;
+        const userId = data.userId
 
         const products = await loadPrices();
 
@@ -39,6 +40,10 @@ export async function POST(request: NextRequest) {
             cancel_url: "http://localhost:3000/user/cart",
             automatic_tax: {
                 enabled: true,
+            },
+            metadata: {
+                userId: userId,
+                products: JSON.stringify(lineItems)
             },
         });
         return NextResponse.json({ session: session }, { status: 200 });

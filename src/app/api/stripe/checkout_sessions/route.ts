@@ -5,12 +5,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-08-16",
 });
 
-export default async function handler(
+async function handler(
   req: NextRequest,
   res: NextResponse
 ) {
   const query = new URL(req.url).searchParams;
-    const session_id: string = query.get('session_id') as string;
+  const session_id: string = query.get('session_id') as string;
+  
   try {
     if (!session_id.startsWith('cs_')) {
       throw Error('Incorrect CheckoutSession ID.');

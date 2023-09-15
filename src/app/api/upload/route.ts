@@ -7,10 +7,10 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export async function POST(req) {
+export async function POST(req: NextRequest) {
     try {
         const data = await req.formData()
-        const image = data.get("image");
+        const image: any = data.get("image");
 
         if (!image) {
             return NextResponse.json("No se ha subido ninguna imagen", { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(req) {
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const response = await new Promise((resolve, reject) => {
+        const response: any = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream({}, (err, result) => {
                 if (err) {
                     reject(err)
