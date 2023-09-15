@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { Cart } from "@/models/Cart";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-08-16",
@@ -42,8 +43,7 @@ const webhookHandler = async (req: NextRequest) => {
 
         switch (event.type) {
             case "payment_intent.succeeded":
-                // actualizar usuario en el backend
-                console.log("compra realizada con éxito", paymentId)
+                console.log("compra realizada con éxito", paymentId);
                 break;
 
             case "charge.succeeded":
@@ -51,11 +51,7 @@ const webhookHandler = async (req: NextRequest) => {
                 console.log(`💵 Charge id: ${charge.id}`);
                 break;
 
-            case "checkout.session.completed":
-                break;
-
             case "payment_intent.canceled":
-                // actualizar usuario en el backend
                 console.log("La compra no se ha completado")
                 break;
 

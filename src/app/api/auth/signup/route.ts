@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { fullname, email, password, cart } = await request.json();
+    const { fullname, email, password } = await request.json();
 
     if (password.length < 6) {
       return NextResponse.json(
@@ -35,11 +35,6 @@ export async function POST(request: Request) {
     });
 
     const savedUser = await user.save();
-
-    if (cart && cart.length > 0) {
-      savedUser.cart = cart;
-      await savedUser.save();
-    }
 
     console.log(savedUser);
 
@@ -69,7 +64,7 @@ export async function PUT(request: Request) {
   try {
     await connectDB();
 
-    const { userId, fullname, email, password, cart } = await request.json();
+    const { userId, fullname, email, password } = await request.json();
 
     if (password && password.length < 6) {
       return NextResponse.json(
@@ -98,10 +93,6 @@ export async function PUT(request: Request) {
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 12);
       userToUpdate.password = hashedPassword;
-    }
-
-    if (cart) {
-      userToUpdate.cart = cart;
     }
 
     await userToUpdate.save();
