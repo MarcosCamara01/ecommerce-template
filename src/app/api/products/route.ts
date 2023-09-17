@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Product, IProduct } from '../../../models/Products';
+import { Product } from '../../../models/Products';
 import { connectDB } from '../../../libs/mongodb';
 
 connectDB();

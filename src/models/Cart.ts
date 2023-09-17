@@ -7,7 +7,7 @@ const CartItemSchema = new Schema({
   },
   color: {
     type: String,
-    required: true,
+    required: false,
   },
   size: {
     type: String,
@@ -15,6 +15,10 @@ const CartItemSchema = new Schema({
   },
   quantity: {
     type: Number,
+    required: false,
+  },
+  variantId: {
+    type: String,
     required: false,
   },
 });

@@ -10,8 +10,9 @@ export const ButtonCheckout = ({ cartWithProducts }) => {
       const lineItems = await cartWithProducts.map((cartItem) => ({
         productId: cartItem.productId,
         quantity: cartItem.quantity,
-        color: cartItem.color,
-        size: cartItem.size
+        variantId: cartItem.variantId,
+        size: cartItem.size,
+        color: cartItem.color
       }));
 
       const { data } = await axios.post('/api/stripe/payment', {

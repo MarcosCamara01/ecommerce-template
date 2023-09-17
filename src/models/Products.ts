@@ -1,16 +1,19 @@
-import mongoose, { Document, model, Model, Schema } from 'mongoose';
+import mongoose, { model, Model, Schema } from 'mongoose';
 
-export interface IProduct {
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-    colors: string[];
-    sizes: string[];
-    images: string[];
-}
-
-export interface IProductDocument extends Document, IProduct { }
+const VariantsSchema = new Schema({
+    priceId: {
+        type: String,
+        required: true,
+    },
+    color: {
+        type: String,
+        required: true,
+    },
+    image: {
+        type: [String],
+        required: true,
+    },
+});
 
 const ProductSchema: Schema = new Schema({
     name: {
@@ -29,10 +32,6 @@ const ProductSchema: Schema = new Schema({
         type: String,
         required: true,
     },
-    colors: {
-        type: [String],
-        required: true,
-    },
     sizes: {
         type: [String],
         required: true,
@@ -41,6 +40,9 @@ const ProductSchema: Schema = new Schema({
         type: [String],
         required: true,
     },
+    variants: {
+        type: [VariantsSchema],
+        required: true,
+    },
 });
-
-export const Product = (mongoose.models.Product || model<IProductDocument>('Product', ProductSchema)) as Model<IProductDocument>;
+export const Product = (mongoose.models.Product || model('Product', ProductSchema)) as Model<any>;

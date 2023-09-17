@@ -40,12 +40,13 @@ export function CartProvider({ children }) {
     fetchCartAndUpdateState();
   }, [status, session]);
 
-  const addToCart = async (productId, color, size, quantity) => {
+  const addToCart = async (productId, color, size, quantity, variantId) => {
     const newItem = {
       productId: productId,
       color,
       size,
       quantity,
+      variantId: variantId
     };
 
     let updatedCart = [...cartItems];

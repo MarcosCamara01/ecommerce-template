@@ -26,12 +26,11 @@ function CheckoutSuccess() {
     if (session_id && userCart != null && userCart.cart.length > 0) {
       emptyCart();
     }
-  }, [userCart]);
+  }, [userCart, session_id]);
 
   useEffect(() => {
     if (products.length > 0 && data && data.metadata.products) {
       const productsMetadata = JSON.parse(data.metadata.products);
-      console.log(productsMetadata)
 
       const purchasedProductsList = productsMetadata.map((metadata) => {
         const matchingProduct = products.find(
@@ -41,7 +40,7 @@ function CheckoutSuccess() {
           return {
             productId: matchingProduct._id,
             category: matchingProduct.category,
-            color: metadata.color || matchingProduct.colors[0],
+            color: metadata.color || matchingProduct.variants[0].color,
             images: matchingProduct.images,
             name: matchingProduct.name,
             price: matchingProduct.price,
@@ -51,8 +50,6 @@ function CheckoutSuccess() {
         }
         return null;
       }).filter((product) => product !== null);
-
-      console.log(purchasedProductsList)
 
       setPurchasedProducts(purchasedProductsList);
     }
@@ -98,7 +95,6 @@ function CheckoutSuccess() {
           <p>Cargando...</p>
         )}
       </div>
-
 
       {/* Mostrar los productos comprados */}
       <Products
