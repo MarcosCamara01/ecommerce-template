@@ -4,14 +4,20 @@ import { useCart } from '@/helpers/CartContext';
 
 export const SingleProduct = ({ product }) => {
     const { addToCart } = useCart();
-    const [selectedColor, setSelectedColor] = useState('default');
+    const [selectedVariant, setSelectedVariant] = useState(null);
     const [selectedSize, setSelectedSize] = useState('');
 
     const handleAddToCart = () => {
-        if (selectedColor && selectedSize) {
-            console.log(selectedColor, selectedSize)
+        if (selectedVariant && selectedSize) {
             const quantity = 1;
-            addToCart(product._id, selectedColor, selectedSize, quantity);
+            addToCart(
+                product._id,
+                selectedVariant.color,
+                selectedSize,
+                quantity,
+                selectedVariant.priceId,
+                selectedVariant.variantId
+            );
         } else {
             console.error('Selecciona un color y una talla antes de agregar al carrito.');
         }
@@ -24,7 +30,7 @@ export const SingleProduct = ({ product }) => {
             </div>
 
             <div className="img-bx">
-                <img src={product.images} alt={product.name} className='product-img' />
+                <img src={product.images[0]} alt={product.name} className='product-img' />
             </div>
 
             <div className="information-bx">
@@ -48,12 +54,12 @@ export const SingleProduct = ({ product }) => {
                             ))}
                         </div>
                         <div className="colors">
-                            {product.colors.map((color, index) => (
+                            {product.variants.map((variant, index) => (
                                 <button
                                     key={index}
-                                    className={`color-item ${selectedColor === color ? 'selected' : ''}`}
-                                    style={{ backgroundColor: color }}
-                                    onClick={() => setSelectedColor(color)}
+                                    className={`color-item ${selectedVariant === variant ? 'selected' : ''}`}
+                                    style={{ backgroundColor: variant.color }}
+                                    onClick={() => setSelectedVariant(variant)}
                                 ></button>
                             ))}
 

@@ -14,16 +14,16 @@ export async function POST(request: NextRequest) {
 
     try {
         const data = await request.json();
-        let lineItems = data.lineItems;
-        const userId = data.userId
+        const lineItems = data.lineItems;
+        const userId = data.userId;
 
         const products = await loadPrices();
 
         const lineItemsList = await lineItems.map((item: any) => {
-            const matchingProduct = products.find((product) => product.nickname === item.productId);
+            const matchingProduct = products.find((product) => product.id === item.variantId);
 
             if (!matchingProduct) {
-                throw new Error(`Producto no encontrado para el productId: ${item.productId}`);
+                throw new Error(`Producto no encontrado para el variantId: ${item.variantId}`);
             }
 
             return {
@@ -43,9 +43,10 @@ export async function POST(request: NextRequest) {
             },
             metadata: {
                 userId: userId,
-                products: JSON.stringify(lineItems)
+                products: JSON.stringify(lineItems),
             },
         });
+
         return NextResponse.json({ session: session }, { status: 200 });
 
     } catch (error: any) {
