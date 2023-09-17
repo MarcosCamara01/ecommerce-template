@@ -5,7 +5,7 @@ import { useCart } from "../../../helpers/CartContext";
 import { useEffect, useState } from "react";
 import { Products } from "@/components/Products";
 import '../../../styles/cart.css';
-import { ButtonCheckout } from "@/components/ButtonCheckout"
+import { ButtonCheckout } from "@/components/CartElements"
 
 const Cart = () => {
   const { cartItems } = useCart();
