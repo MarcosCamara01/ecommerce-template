@@ -32,7 +32,8 @@
 
 .content-cart .buttons {
     display: flex;
-    border: 1px #fff solid;
+    border-top: 1px #fff solid;
+    border-bottom: 1px #fff solid;
     width: min-content;
 }
 
@@ -51,12 +52,12 @@
     border: transparent;
     font-size: 16px;
     cursor: pointer;
+    border-left: 1px #fff solid;
+    border-right: 1px #fff solid;
 }
 
 .buttons .content {
     font-size: 14px;
-    border-left: 1px #fff solid;
-    border-right: 1px #fff solid;
 }
 
 .color-size {

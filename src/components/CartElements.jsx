@@ -33,22 +33,30 @@ export const ProductCartInfo = ({ product }) => {
 
     return (
         <div className='content-cart'>
-            <div className="buttons">
-                <button
-                    disabled={product.quantity == 1}
-                    className='add-remove'
-                    onClick={() => addToCart(product.productId, product.color, product.size, -1)}
-                >
-                    <MdRemove />
-                </button>
-                <span className='content'>{product.quantity}</span>
-                <button
-                    className='add-remove'
-                    onClick={() => addToCart(product.productId, product.color, product.size, 1)}
-                >
-                    <MdAdd />
-                </button>
-            </div>
+
+            {
+                product.purchased ?
+                    <div className='product-price'>
+                        {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
+                    </div>
+                    :
+                    <div className="buttons">
+                        <button
+                            disabled={product.quantity == 1}
+                            className='add-remove'
+                            onClick={() => addToCart(product.productId, product.color, product.size, -1)}
+                        >
+                            <MdRemove />
+                        </button>
+                        <span className='content'>{product.quantity}</span>
+                        <button
+                            className='add-remove'
+                            onClick={() => addToCart(product.productId, product.color, product.size, 1)}
+                        >
+                            <MdAdd />
+                        </button>
+                    </div>
+            }
             <div className="color-size">
                 <div className='size'>
                     {product.size}

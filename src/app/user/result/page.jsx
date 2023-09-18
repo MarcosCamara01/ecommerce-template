@@ -46,6 +46,7 @@ function CheckoutSuccess() {
             price: matchingProduct.price,
             quantity: metadata.quantity || 1,
             size: metadata.size || matchingProduct.sizes[0],
+            purchased: true
           };
         }
         return null;
