@@ -4,8 +4,8 @@ import { Inter } from 'next/font/google';
 import Providers from "./Providers";
 import styles from '../styles/page.module.css';
 import { Navbar } from "../components/Navbar";
-import { ProductProvider } from '../helpers/ProductContext';
-import { CartProvider } from '../helpers/CartContext';
+import { ProductProvider } from '../hooks/ProductContext';
+import { CartProvider } from '../hooks/CartContext';
 
 const inter = Inter({ subsets: ['latin'] })
 

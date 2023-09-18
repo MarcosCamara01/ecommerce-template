@@ -3,8 +3,8 @@
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useCart } from '../../../helpers/CartContext';
-import { useProductContext } from '@/helpers/ProductContext';
+import { useCart } from '../../../hooks/CartContext';
+import { useProductContext } from '@/hooks/ProductContext';
 import { Products } from '@/components/Products';
 
 function CheckoutSuccess() {
@@ -68,7 +68,6 @@ function CheckoutSuccess() {
       console.error("Error al obtener datos:", err.message);
     }
   };
-
 
   const emptyCart = async () => {
     try {

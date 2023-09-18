@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/singleproduct.css';
-import { useCart } from '@/helpers/CartContext';
+import { useCart } from '@/hooks/CartContext';
 
 export const SingleProduct = ({ product }) => {
     const { addToCart } = useCart();
