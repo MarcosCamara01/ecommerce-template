@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { useProductContext } from "@/helpers/ProductContext";
+import { useProductContext } from "@/hooks/ProductContext";
 import { useParams } from "next/navigation";
 import { SingleProduct } from "../../../components/SingleProduct";
 

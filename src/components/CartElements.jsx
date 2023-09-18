@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useCart } from '@/helpers/CartContext';
+import { useCart } from '@/hooks/CartContext';
 import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
 import { FaRegHeart, FaHeart } from 'react-icons/fa';
 import { useSession } from 'next-auth/react';

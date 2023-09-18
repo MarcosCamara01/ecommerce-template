@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Products } from "@/components/Products";
-import { useProductContext } from '@/helpers/ProductContext';
+import { useProductContext } from '@/hooks/ProductContext';
 
 const CategoryPage = () => {
     const { products } = useProductContext();

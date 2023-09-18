@@ -5,7 +5,7 @@ import React from 'react';
 import { HiOutlineSearch } from 'react-icons/hi';
 import '../styles/header.css';
 import { useSession } from "next-auth/react";
-import { useCart } from '@/helpers/CartContext';
+import { useCart } from '@/hooks/CartContext';
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
