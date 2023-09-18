@@ -35,6 +35,9 @@ export async function POST(request: NextRequest) {
         const session = await stripe.checkout.sessions.create({
             line_items: lineItemsList,
             mode: "payment",
+            invoice_creation: {
+                enabled: true,
+            },
             billing_address_collection: "required",
             success_url: `http://localhost:3000/user/result?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: "http://localhost:3000/user/cart",

@@ -51,20 +51,26 @@ export const Products = ({ products }) => {
                   </Link>
                   {
                     product.quantity !== undefined ? (
-                      <DeleteButton
-                        product={product}
-                      />
+                      product.purchased ?
+                        product.quantity > 1 && <span>{product.quantity}</span>
+                        :
+                        <DeleteButton
+                          product={product}
+                        />
                     ) :
-                    (
-                      <FavoriteButton
-                        product={product}
-                      />
-                    )
+                      (
+                        <FavoriteButton
+                          product={product}
+                        />
+                      )
                   }
                 </div>
-                <div className='product-price'>
-                  {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
-                </div>
+                {
+                  !product.purchased &&
+                  <div className='product-price'>
+                    {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
+                  </div>
+                }
                 {
                   product.quantity !== undefined && (
                     <ProductCartInfo
