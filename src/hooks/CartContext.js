@@ -105,6 +105,6 @@ export function CartProvider({ children }) {
   );
 }
 
-export function useCart() {
+export const useCart = () => {
   return useContext(CartContext);
 }

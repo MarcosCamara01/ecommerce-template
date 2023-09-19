@@ -1,7 +1,7 @@
 "use client"
 
 import { Products } from "../components/Products";
-import { useProductContext } from "@/helpers/ProductContext";
+import { useProductContext } from "@/hooks/ProductContext";
 
 export default function Home() {
   const { products } = useProductContext();
