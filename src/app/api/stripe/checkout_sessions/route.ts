@@ -11,7 +11,7 @@ async function handler(
 ) {
   const query = new URL(req.url).searchParams;
   const session_id: string = query.get('session_id') as string;
-  
+
   try {
     if (!session_id.startsWith('cs_')) {
       throw Error('Incorrect CheckoutSession ID.');
@@ -20,7 +20,7 @@ async function handler(
       session_id,
       { expand: ['payment_intent'] }
     );
-
+    
     return NextResponse.json(checkout_session);
   } catch (err: any) {
     return NextResponse.json({ statusCode: 500, message: err.message });

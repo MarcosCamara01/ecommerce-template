@@ -1,7 +1,7 @@
 "use client";
 
-import { useProductContext } from "@/helpers/ProductContext";
-import { useCart } from "../../../helpers/CartContext";
+import { useProductContext } from "@/hooks/ProductContext";
+import { useCart } from "@/hooks/CartContext";
 import { useEffect, useState } from "react";
 import { Products } from "@/components/Products";
 import '../../../styles/cart.css';

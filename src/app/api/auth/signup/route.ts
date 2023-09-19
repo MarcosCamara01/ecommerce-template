@@ -139,16 +139,7 @@ export async function DELETE(request: Request) {
         { status: 404 }
       );
     }
-
-    if (itemId) {
-      user.cart = user.cart.filter((cartItem: any) => cartItem._id !== itemId);
-      await user.save();
-      return NextResponse.json(
-        { message: "Cart item deleted successfully" },
-        { status: 200 }
-      );
-    }
-
+    
     await user.remove();
 
     return NextResponse.json(

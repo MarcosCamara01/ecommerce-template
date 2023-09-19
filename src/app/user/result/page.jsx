@@ -3,16 +3,13 @@
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useCart } from '../../../hooks/CartContext';
-import { useProductContext } from '@/hooks/ProductContext';
-import { Products } from '@/components/Products';
+import { useCart } from '@/hooks/CartContext';
 
 function CheckoutSuccess() {
   const searchParams = useSearchParams();
   const { userCart, setCartItems } = useCart();
   const [data, setData] = useState();
-  const { products } = useProductContext();
-  const [purchasedProducts, setPurchasedProducts] = useState([]);
+  const [hasSavedOrder, setHasSavedOrder] = useState(false);
 
   const session_id = searchParams.get('session_id');
 
@@ -29,32 +26,59 @@ function CheckoutSuccess() {
   }, [userCart, session_id]);
 
   useEffect(() => {
-    if (products.length > 0 && data && data.metadata.products) {
-      const productsMetadata = JSON.parse(data.metadata.products);
+    if (data?.status === "complete" && !hasSavedOrder) {
+      const userId = data.metadata?.userId;
+      const products = data.metadata?.products ? JSON.parse(data.metadata.products) : [];
+      const newOrder = {
+        name: data.customer_details?.name || "",
+        email: data.customer_details?.email || "",
+        phone: data.customer_details?.phone || "",
+        address: {
+          line1: data.customer_details?.address?.line1 || "",
+          line2: data.customer_details?.address?.line2 || "",
+          city: data.customer_details?.address?.city || "",
+          state: data.customer_details?.address?.state || "",
+          postal_code: data.customer_details?.address?.postal_code || "",
+          country: data.customer_details?.address?.country || "",
+        },
+        products: products,
+        orderId: data.id,
+      };
 
-      const purchasedProductsList = productsMetadata.map((metadata) => {
-        const matchingProduct = products.find(
-          (product) => product._id === metadata.productId
-        );
-        if (matchingProduct) {
-          return {
-            productId: matchingProduct._id,
-            category: matchingProduct.category,
-            color: metadata.color || matchingProduct.variants[0].color,
-            images: matchingProduct.images,
-            name: matchingProduct.name,
-            price: matchingProduct.price,
-            quantity: metadata.quantity || 1,
-            size: metadata.size || matchingProduct.sizes[0],
-            purchased: true
-          };
+      const saveOrder = async () => {
+        try {
+          const response = await axios.get(`/api/orders`);
+          const userOrders = response.data.find((order) => order.userId === userId);
+      
+          if (userOrders) {
+            const orderIdMatch = userOrders.orders.some(order => order.orderId === data.id);
+            if (!orderIdMatch) {
+              const updatedOrders = [...userOrders.orders, newOrder];
+              const response = await axios.put(`/api/orders?id=${userOrders._id}`, {
+                orders: updatedOrders,
+              });
+              console.log("Pedidos actualizados con éxito", response);
+            } else {
+              console.error("Ya se ha guardado este pedido");
+            }
+          } else {
+            const updatedOrders = [newOrder];
+            const response = await axios.post('/api/orders', {
+              userId: userId,
+              order: updatedOrders,
+            });
+            console.log("Pedido creado y guardado con éxito", response);
+          }
+      
+          setHasSavedOrder(true);
+        } catch (error) {
+          console.error('Error al guardar la orden:', error);
         }
-        return null;
-      }).filter((product) => product !== null);
+      };
 
-      setPurchasedProducts(purchasedProductsList);
+      saveOrder();
     }
-  }, [products, data]);
+  }, [data, hasSavedOrder]);
 
   const fetchCheckoutData = async (url) => {
     try {
@@ -95,11 +119,6 @@ function CheckoutSuccess() {
           <p>Cargando...</p>
         )}
       </div>
-
-      {/* Mostrar los productos comprados */}
-      <Products
-        products={purchasedProducts}
-      />
     </section>
   );
 }
