@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/CartContext';
-import { saveOrder } from "../../../helpers/saveOrder"
+import { saveOrder } from "@/helpers/saveOrder";
 
 function CheckoutSuccess() {
   const searchParams = useSearchParams();
@@ -59,11 +59,11 @@ function CheckoutSuccess() {
   return (
     <section>
       <div className="page-container">
-        <h1>Checkout Payment Result</h1>
         {data && data.error ? (
           <p>{data.errorMessage}</p>
         ) : data ? (
           <>
+            <h1>Checkout Payment Result</h1>
             <h2>Pago realizado con éxito</h2>
             <h3>{`Se te ha enviado un correo electrónico a: ${data.customer_details.email}`}</h3>
           </>

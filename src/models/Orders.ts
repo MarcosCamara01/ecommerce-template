@@ -67,7 +67,39 @@ const OrderSchema = new Schema({
     orderId: {
         type : String,
         required: true,
-    }
+    },
+    purchaseDate: {
+        type: Date,
+        default: Date.now,
+    },
+    expectedDeliveryDate: {
+        type: Date,
+        default: function () {
+            const currentDate = new Date();
+            const dayOfWeek = currentDate.getDay(); // Obtener el día de la semana actual
+            const daysToAdd = dayOfWeek >= 5 ? 5 : 3; // Si es viernes o sábado, agregar 3 días, de lo contrario 5 días
+
+            // Función para agregar días laborables a la fecha
+            const addWeekdays = (date: any, days: number) => {
+                const newDate = new Date(date);
+                let addedDays = 0;
+                while (addedDays < days) {
+                    newDate.setDate(newDate.getDate() + 1);
+                    if (newDate.getDay() >= 1 && newDate.getDay() <= 5) {
+                        addedDays++;
+                    }
+                }
+                return newDate;
+            };
+
+            const deliveryDate = addWeekdays(currentDate, daysToAdd);
+            return deliveryDate;
+        },
+    },
+    total_price: {
+        type: Number,
+        required: true,
+    },
 });
 
 const OrdersSchema = new Schema({
