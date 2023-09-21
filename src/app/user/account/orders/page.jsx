@@ -11,18 +11,15 @@ function UserOrders() {
     const [userOrders, setUserOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const { products } = useProductContext();
-    const uniqueUsers = {};
 
     useEffect(() => {
         if (status === "authenticated") {
             const userId = session.user._id;
-            // Utiliza async/await para esperar a que la promesa se resuelva
             const fetchUserOrders = async () => {
                 try {
                     const orders = await getOrders(userId);
                     setUserOrders(orders);
                     setLoading(false);
-                    console.log(orders)
                 } catch (error) {
                     console.error("Error al obtener los pedidos:", error);
                 }
@@ -31,13 +28,11 @@ function UserOrders() {
         }
     }, [status, session]);
 
-
     const getDeliveryStatus = (dateString) => {
         const deliveryDate = new Date(dateString);
         const today = new Date();
 
         if (deliveryDate <= today) {
-            // Si la fecha es igual o anterior al día de hoy
             return `Entregado ${deliveryDate.toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -45,7 +40,6 @@ function UserOrders() {
                 day: 'numeric',
             })}`;
         } else {
-            // Si la fecha es posterior al día de hoy
             return `Fecha de entrega estimada: ${deliveryDate.toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -59,28 +53,32 @@ function UserOrders() {
         if (!order || !order.products || !Array.isArray(order.products)) {
             return order;
         }
-
+    
         const enrichedProducts = order.products.map((product) => {
             const matchingProduct = products.find((p) => p._id === product.productId);
             if (matchingProduct) {
-                return {
-                    ...product,
-                    name: matchingProduct.name,
-                    category: matchingProduct.category,
-                    images: matchingProduct.images,
-                    price: matchingProduct.price,
-                    purchased: true
-                };
+                // Encuentra la variante que coincide con el color de la orden
+                const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
+                if (matchingVariant) {
+                    return {
+                        ...product,
+                        name: matchingProduct.name,
+                        category: matchingProduct.category,
+                        images: [matchingVariant.image],
+                        price: matchingProduct.price,
+                        purchased: true,
+                        color: product.color,
+                    };
+                }
             }
             return product;
         });
-
+    
         return {
             ...order,
             products: enrichedProducts
         };
     };
-
 
     return (
         <div className="page-container">
@@ -90,20 +88,13 @@ function UserOrders() {
             ) : userOrders.orders && userOrders.orders.length > 0 ? (
                 userOrders.orders.map((order, index) => (
                     <div key={index}>
-                        {uniqueUsers[order.email] ? null : (
-                            <div>
-                                <p>Nombre: {order.name}</p>
-                                <p>Email: {order.email}</p>
-                            </div>
-                        )}
                         <h3>Productos:</h3>
-                        <p>Pedido {order._id}</p>
+                        <p>Número de producto: {order._id}</p>
                         <p>Total price: {(order.total_price / 100).toFixed(2)}</p>
                         <p>{getDeliveryStatus(order.expectedDeliveryDate)}</p>
                         <Products
                             products={enrichOrderWithProducts(order, products).products}
                         />
-                        {uniqueUsers[order.email] = true}
                     </div>
                 ))
             ) : (
