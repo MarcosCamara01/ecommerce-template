@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/CartContext';
-import { saveOrder } from "@/helpers/saveOrder";
+import { saveOrder } from "@/helpers/ordersFunctions";
 
 function CheckoutSuccess() {
   const searchParams = useSearchParams();
