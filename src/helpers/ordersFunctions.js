@@ -10,10 +10,25 @@ export const getOrders = async (userId) => {
     }
 }
 
+function generateRandomOrderNumber() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let orderId = '';
+    const length = 10; // Puedes ajustar la longitud del número de pedido
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        orderId += chars.charAt(randomIndex);
+    }
+
+    return orderId;
+}
+
 export const saveOrder = async (data, setHasSavedOrder) => {
     console.log(data)
     const userId = data.metadata?.userId;
     const products = data.metadata?.products ? JSON.parse(data.metadata.products) : [];
+    const randomOrderNumber = generateRandomOrderNumber();
+    
     const newOrder = {
         name: data.customer_details?.name,
         email: data.customer_details?.email,
@@ -28,6 +43,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
         },
         products: products,
         orderId: data.id,
+        orderNumber: randomOrderNumber,
         total_price: data.amount_total,
     };
 
@@ -58,4 +74,35 @@ export const saveOrder = async (data, setHasSavedOrder) => {
     } catch (error) {
         console.error('Error al guardar la orden:', error);
     }
+};
+
+export const orderWithProducts = (order, products) => {
+    if (!order || !order.products || !Array.isArray(order.products)) {
+        return order;
+    }
+
+    const enrichedProducts = order.products.map((product) => {
+        const matchingProduct = products.find((p) => p._id === product.productId);
+        if (matchingProduct) {
+            const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
+            if (matchingVariant) {
+                return {
+                    ...product,
+                    name: matchingProduct.name,
+                    category: matchingProduct.category,
+                    images: [matchingVariant.image],
+                    price: matchingProduct.price,
+                    purchased: true,
+                    color: product.color,
+                };
+            }
+        }
+        
+        return product;
+    });
+
+    return {
+        ...order,
+        products: enrichedProducts
+    };
 };

@@ -1,10 +1,13 @@
 "use client"
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
-import { getOrders } from "@/helpers/saveOrder";
+import { getOrders } from "@/helpers/ordersFunctions";
+import { format } from 'date-fns';
+import { orderWithProducts } from '@/helpers/ordersFunctions';
 import { useProductContext } from '@/hooks/ProductContext';
-import { Products } from '@/components/Products';
+import '@/styles/orders.css';
 
 function UserOrders() {
     const { data: session, status } = useSession();
@@ -17,8 +20,13 @@ function UserOrders() {
             const userId = session.user._id;
             const fetchUserOrders = async () => {
                 try {
-                    const orders = await getOrders(userId);
-                    setUserOrders(orders);
+                    const response = await getOrders(userId);
+                    if (Array.isArray(response.orders)) {
+                        response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
+                        setUserOrders(response.orders);
+                    } else {
+                        console.error("Error: 'orders' no es un array:", response);
+                    }
                     setLoading(false);
                 } catch (error) {
                     console.error("Error al obtener los pedidos:", error);
@@ -28,73 +36,27 @@ function UserOrders() {
         }
     }, [status, session]);
 
-    const getDeliveryStatus = (dateString) => {
-        const deliveryDate = new Date(dateString);
-        const today = new Date();
-
-        if (deliveryDate <= today) {
-            return `Entregado ${deliveryDate.toLocaleDateString('es-ES', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            })}`;
-        } else {
-            return `Fecha de entrega estimada: ${deliveryDate.toLocaleDateString('es-ES', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            })}`;
-        }
-    };
-
-    const enrichOrderWithProducts = (order, products) => {
-        if (!order || !order.products || !Array.isArray(order.products)) {
-            return order;
-        }
-    
-        const enrichedProducts = order.products.map((product) => {
-            const matchingProduct = products.find((p) => p._id === product.productId);
-            if (matchingProduct) {
-                // Encuentra la variante que coincide con el color de la orden
-                const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
-                if (matchingVariant) {
-                    return {
-                        ...product,
-                        name: matchingProduct.name,
-                        category: matchingProduct.category,
-                        images: [matchingVariant.image],
-                        price: matchingProduct.price,
-                        purchased: true,
-                        color: product.color,
-                    };
-                }
-            }
-            return product;
-        });
-    
-        return {
-            ...order,
-            products: enrichedProducts
-        };
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return format(date, 'dd LLL yyyy');
     };
 
     return (
         <div className="page-container">
-            <h1>Compras realizadas</h1>
             {loading ? (
                 <p>Cargando...</p>
-            ) : userOrders.orders && userOrders.orders.length > 0 ? (
-                userOrders.orders.map((order, index) => (
-                    <div key={index}>
-                        <h3>Productos:</h3>
-                        <p>Número de producto: {order._id}</p>
-                        <p>Total price: {(order.total_price / 100).toFixed(2)}</p>
-                        <p>{getDeliveryStatus(order.expectedDeliveryDate)}</p>
-                        <Products
-                            products={enrichOrderWithProducts(order, products).products}
-                        />
+            ) : userOrders.length > 0 ? (
+                userOrders.map((order, index) => (
+                    <div key={index} className="order-card">
+                        <Link href={`/user/account/orders/${order._id}`}>
+                            <h4>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
+                            <p>Número de pedido: {order.orderNumber}</p>
+                            <div className='bx-imgs'>
+                                {orderWithProducts(order, products).products.map((product, productIndex) => (
+                                    <img key={productIndex} src={product.images[0]} alt={product.name} loading='lazy' />
+                                ))}
+                            </div>
+                        </Link>
                     </div>
                 ))
             ) : (

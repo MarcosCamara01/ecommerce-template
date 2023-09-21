@@ -1,5 +1,27 @@
 import { Schema, model, models } from "mongoose";
 
+function calculateExpectedDeliveryDate() {
+    const currentDate = new Date();
+    const dayOfWeek = currentDate.getDay();
+    const daysToAdd = dayOfWeek >= 5 ? 5 : 3;
+
+    // Función para agregar días laborables a la fecha
+    const addWeekdays = (date: any, days: number) => {
+        const newDate = new Date(date);
+        let addedDays = 0;
+        while (addedDays < days) {
+            newDate.setDate(newDate.getDate() + 1);
+            if (newDate.getDay() >= 1 && newDate.getDay() <= 5) {
+                addedDays++;
+            }
+        }
+        return newDate;
+    };
+
+    const deliveryDate = addWeekdays(currentDate, daysToAdd);
+    return deliveryDate;
+}
+
 const ProductsSchema = new Schema({
     productId: {
         type: Schema.Types.ObjectId,
@@ -65,7 +87,7 @@ const OrderSchema = new Schema({
         required: true
     },
     orderId: {
-        type : String,
+        type: String,
         required: true,
     },
     purchaseDate: {
@@ -74,32 +96,16 @@ const OrderSchema = new Schema({
     },
     expectedDeliveryDate: {
         type: Date,
-        default: function () {
-            const currentDate = new Date();
-            const dayOfWeek = currentDate.getDay(); // Obtener el día de la semana actual
-            const daysToAdd = dayOfWeek >= 5 ? 5 : 3; // Si es viernes o sábado, agregar 3 días, de lo contrario 5 días
-
-            // Función para agregar días laborables a la fecha
-            const addWeekdays = (date: any, days: number) => {
-                const newDate = new Date(date);
-                let addedDays = 0;
-                while (addedDays < days) {
-                    newDate.setDate(newDate.getDate() + 1);
-                    if (newDate.getDay() >= 1 && newDate.getDay() <= 5) {
-                        addedDays++;
-                    }
-                }
-                return newDate;
-            };
-
-            const deliveryDate = addWeekdays(currentDate, daysToAdd);
-            return deliveryDate;
-        },
+        default: calculateExpectedDeliveryDate,
     },
     total_price: {
         type: Number,
         required: true,
     },
+    orderNumber: {
+        type: String,
+        required: true,
+    }
 });
 
 const OrdersSchema = new Schema({
