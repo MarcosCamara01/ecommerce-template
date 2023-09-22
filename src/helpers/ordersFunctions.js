@@ -13,7 +13,7 @@ export const getOrders = async (userId) => {
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let orderId = '';
-    const length = 10; // Puedes ajustar la longitud del número de pedido
+    const length = 10;
 
     for (let i = 0; i < length; i++) {
         const randomIndex = Math.floor(Math.random() * chars.length);
