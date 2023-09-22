@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import '../styles/singleproduct.css';
 import { useCart } from '@/hooks/CartContext';
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 export const SingleProduct = ({ product }) => {
+    console.log(product)
     const { addToCart } = useCart();
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [selectedSize, setSelectedSize] = useState('');
@@ -23,6 +26,10 @@ export const SingleProduct = ({ product }) => {
         }
     };
 
+    const allImages = product.images.concat(
+        product.variants.map((variant) => variant.image).flat()
+    );
+
     return (
         <div className="product-bx">
             <div className="information-bx">
@@ -30,7 +37,21 @@ export const SingleProduct = ({ product }) => {
             </div>
 
             <div className="img-bx">
-                <img src={product.images[0]} alt={product.name} className='product-img' />
+                <Carousel
+                    showThumbs={true}
+                    infiniteLoop={true}
+                    axis='vertical'
+                >
+                    {allImages.map((image, index) => (
+                        <div key={index}>
+                            <img
+                                src={image}
+                                alt={`${product.name} - Image ${index + 1}`}
+                                className="product-img"
+                            />
+                        </div>
+                    ))}
+                </Carousel>
             </div>
 
             <div className="information-bx">
