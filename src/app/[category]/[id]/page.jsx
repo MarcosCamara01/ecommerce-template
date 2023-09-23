@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useProductContext } from "@/hooks/ProductContext";
 import { useParams } from "next/navigation";
 import { SingleProduct } from "../../../components/SingleProduct";
+import { RandomProducts } from "../../../components/RandomProducts";
 
 const ProductPage = () => {
     const { products } = useProductContext();
@@ -31,9 +32,15 @@ const ProductPage = () => {
             {isLoading ? (
                 <p>Loading...</p>
             ) : (
-                <SingleProduct
-                    product={product}
-                />
+                <>
+                    <SingleProduct
+                        product={product}
+                    />
+
+                    <RandomProducts
+                        products={products}
+                    />
+                </>
             )}
         </section>
     )
