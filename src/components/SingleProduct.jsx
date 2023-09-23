@@ -5,7 +5,6 @@ import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 export const SingleProduct = ({ product }) => {
-    console.log(product)
     const { addToCart } = useCart();
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [selectedSize, setSelectedSize] = useState('');
