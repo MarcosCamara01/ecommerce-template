@@ -3,7 +3,6 @@ import '../styles/products.css';
 import Link from 'next/link';
 import { ProductCartInfo, DeleteButton, FavoriteButton } from "./CartElements";
 
-// Función para mezclar aleatoriamente un array
 const shuffleArray = (array) => {
   let shuffled = array.slice();
   for (let i = shuffled.length - 1; i > 0; i--) {
