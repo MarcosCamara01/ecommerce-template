@@ -31,16 +31,8 @@ export const SingleProduct = ({ product }) => {
 
     return (
         <div className="product-bx">
-            <div className="information-bx">
-
-            </div>
-
             <div className="img-bx">
-                <Carousel
-                    showThumbs={true}
-                    infiniteLoop={true}
-                    axis='vertical'
-                >
+                <div className='bx-grid'>
                     {allImages.map((image, index) => (
                         <div key={index}>
                             <img
@@ -50,10 +42,10 @@ export const SingleProduct = ({ product }) => {
                             />
                         </div>
                     ))}
-                </Carousel>
+                </div>
             </div>
 
-            <div className="information-bx">
+            <div className="information-bx sticky">
                 <div className='sections-bx'>
                     <div className="section section-top">
                         <h1>{product.name}</h1>
