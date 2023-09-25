@@ -72,7 +72,10 @@ export const SingleProduct = ({ product }) => {
                                     className={`color-item ${selectedVariant === variant ? 'selected' : ''}`}
                                     style={{ backgroundColor: variant.color }}
                                     onClick={() => setSelectedVariant(variant)}
-                                ></button>
+                                >
+                                    <span></span>
+
+                                </button>
                             ))}
 
                         </div>
