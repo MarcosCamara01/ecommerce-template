@@ -73,6 +73,11 @@
     cursor: pointer;
 }
 
+.section-mid .sizes .size-item.selected {
+    background-color: #fff;
+    color: #000;
+}
+
 .section-bot {
     border-top: 1px #fff solid;
 }
@@ -87,20 +92,26 @@
 
 .section-mid .colors {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
     gap: 10px;
+    margin-top: 20px;
+}
+
+.section-mid .colors .color-item.selected span {
+    width: 10px;
+    position: absolute;
+    bottom: -7px;
+    border-bottom: 1px solid #fff;
 }
 
 .section-mid .colors .color-item {
-    border-radius: 9999px;
     border: 1px solid #fff;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     cursor: pointer;
-}
-
-.color-item.selected {
-    border: 5px solid #fff;
+    display: flex; 
+    justify-content: center;
+    position: relative;
 }
 
 .sticky {
