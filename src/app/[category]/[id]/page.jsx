@@ -37,6 +37,8 @@ const ProductPage = () => {
                         product={product}
                     />
 
+                    <h2 className='random-section-h2'>También te podría interesar:</h2>
+
                     <RandomProducts
                         products={products}
                     />

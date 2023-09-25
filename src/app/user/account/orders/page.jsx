@@ -59,9 +59,9 @@ function UserOrders() {
                         </Link>
                     </div>
                 ))
-            ) : (
+            ) :
                 <p>No hay pedidos disponibles.</p>
-            )}
+            }
         </div>
     );
 }
