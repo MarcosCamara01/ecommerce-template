@@ -13,8 +13,8 @@
 
 .bx-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 49%));
-    grid-gap: 5px;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 2px;
 }
 
 .bx-grid div {
@@ -27,6 +27,8 @@
 .bx-grid img {
     width: 100%;
     max-width: 700px;
+    min-width: 280px;
+    display: block;
 }
 
 .information-bx {
@@ -103,7 +105,7 @@
 
 .sticky {
     flex-grow: 1;
-    flex-basis: 400px;
+    flex-basis: 500px;
     position: sticky;
     top: 2rem;
     display: flex;

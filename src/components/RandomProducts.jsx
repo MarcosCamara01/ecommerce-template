@@ -25,7 +25,6 @@ export const RandomProducts = ({ products }) => {
 
   return (
     <div>
-      <h2 className='random-section-h2'>También te podría interesar:</h2>
       <div className='products-section'>
       {loadedProducts.map((product, index) => {
         return (

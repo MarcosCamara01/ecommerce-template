@@ -5,7 +5,6 @@ import React from 'react';
 import '../styles/header.css';
 import { useSession } from "next-auth/react";
 import { useCart } from '@/hooks/CartContext';
-import { FaHeart } from 'react-icons/fa';
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
@@ -31,7 +30,7 @@ export const Navbar = () => {
         }
         <li><Link href="/user/wishlists">Wishlists ({userCart ? userCart?.favorites.length : 0})</Link></li>
 
-        <li><Link href="/user/cart">Cesta ({totalQuantity})</Link></li>
+        <li><Link href="/user/cart">Cart ({totalQuantity})</Link></li>
       </ul>
     </header>
   )
