@@ -24,10 +24,11 @@ const Cart = () => {
         );
 
         if (matchingProduct) {
+          const matchingVariant = matchingProduct.variants.find((variant) => variant.color === cartItem.color);
           return {
             ...cartItem,
             category: matchingProduct.category,
-            images: matchingProduct.images,
+            images: [matchingVariant.image],
             name: matchingProduct.name,
             price: matchingProduct.price,
           };
@@ -36,7 +37,7 @@ const Cart = () => {
         return cartItem;
       });
 
-      setCartWithProducts(updatedCart);
+      setCartWithProducts(updatedCart.reverse());
       setIsLoading(false);
     };
 
