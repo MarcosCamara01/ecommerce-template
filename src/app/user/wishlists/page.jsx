@@ -7,7 +7,6 @@ import { Products } from "@/components/Products";
 import '../../../styles/cart.css';
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { RandomProducts } from "@/components/RandomProducts";
 
 const Wishlists = () => {
     const { userCart } = useCart();
@@ -33,7 +32,7 @@ const Wishlists = () => {
                     return null;
                 });
 
-                setCartWithProducts(updatedCart);
+                setCartWithProducts(updatedCart.reverse());
             }
             setIsLoading(false);
         };
