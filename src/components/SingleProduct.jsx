@@ -8,6 +8,7 @@ export const SingleProduct = ({ product }) => {
     const { addToCart } = useCart();
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [selectedSize, setSelectedSize] = useState('');
+    const [enlargeImage, setEnlargeImage] = useState(null);
 
     const handleAddToCart = () => {
         if (selectedVariant && selectedSize) {
@@ -29,6 +30,14 @@ export const SingleProduct = ({ product }) => {
         product.variants.map((variant) => variant.image).flat()
     );
 
+    const toggleEnlargeImage = (imageIndex) => {
+        if (enlargeImage === null) {
+            setEnlargeImage(imageIndex);
+        } else {
+            setEnlargeImage(null);
+        }
+    };
+
     return (
         <div className="product-bx">
             <div className="img-bx">
@@ -38,7 +47,8 @@ export const SingleProduct = ({ product }) => {
                             <img
                                 src={image}
                                 alt={`${product.name} - Image ${index + 1}`}
-                                className="product-img"
+                                className={`product-img ${enlargeImage === index ? 'enlarged' : ''}`}
+                                onClick={() => toggleEnlargeImage(index)}
                             />
                         </div>
                     ))}
