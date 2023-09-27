@@ -25,8 +25,9 @@ function Signup() {
         email: formData.get("email"),
         password: formData.get("password"),
         fullname: formData.get("fullname"),
+        phone: formData.get("phone"),
       });
-      
+
       const res = await signIn("credentials", {
         email: signupResponse.data.email,
         password: formData.get("password"),
@@ -71,6 +72,14 @@ function Signup() {
           placeholder="Password"
           className=""
           name="password"
+        />
+
+        <label className="">Phone:</label>
+        <input
+          type="text"
+          placeholder="Phone (not required)"
+          className=""
+          name="phone"
         />
 
         <button className="">

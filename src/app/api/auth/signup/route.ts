@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { fullname, email, password } = await request.json();
+    const { fullname, email, password, phone } = await request.json();
 
     if (password.length < 6) {
       return NextResponse.json(
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const user = new User({
       fullname,
       email,
+      phone,
       password: hashedPassword,
     });
 
@@ -129,7 +130,7 @@ export async function DELETE(request: Request) {
   try {
     await connectDB();
 
-    const { userId, itemId } = await request.json();
+    const { userId } = await request.json();
 
     const user = await User.findById(userId);
 
