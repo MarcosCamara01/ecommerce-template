@@ -1,0 +1,40 @@
+.alert-fixed {
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    right: 0;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.box-alert {
+    border: 1px solid #fff;
+    background-color: #000;
+    z-index: 1;
+}
+
+.box-alert h4 {
+    padding: 20px 20px 12px;
+    font-size: 15px;
+}
+
+.box-alert p {
+    padding: 0 20px 20px;
+    font-size: 13px;
+}
+
+.box-alert .box-button {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000;
+    border: transparent;
+    border-top: 1px solid #fff;
+    cursor: pointer;
+}

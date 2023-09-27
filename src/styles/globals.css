@@ -100,7 +100,7 @@ a {
 }
 
 section {
-  padding: 97px 50px;
+  padding: 0 50px 100px 50px;
   min-height: 100vh;
 }
 
