@@ -18,10 +18,13 @@ const UserSchema = new Schema(
     },
     fullname: {
       type: String,
-      required: [true, "fullname is required"],
+      required: [true, "Fullname is required"],
       minLength: [3, "fullname must be at least 3 characters"],
       maxLength: [25, "fullname must be at most 25 characters"],
-    }
+    },
+    phone: {
+      type: String,
+    },    
   },
   {
     timestamps: true,
