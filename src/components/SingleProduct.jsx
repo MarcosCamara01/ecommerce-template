@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/singleproduct.css';
 import { useCart } from '@/hooks/CartContext';
-import { Alert } from "@/components/Alert";
+import { FixedComponent } from "@/components/FixedComponent";
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
@@ -26,7 +26,7 @@ export const SingleProduct = ({ product }) => {
         } else {
             const errorMessage = 'TIENES QUE SELECCIONAR UN COLOR Y UNA TALLA.'
             setError(errorMessage);
-            console.error(errorMessage, error);
+            console.error(errorMessage);
         }
     };
 
@@ -103,9 +103,10 @@ export const SingleProduct = ({ product }) => {
             </div>
 
             {error != "none" &&
-                <Alert
-                    error={error}
-                    setError={setError}
+                <FixedComponent
+                    message={error}
+                    setOpen={setError}
+                    task={"Warning"}
                 />
             }
         </>

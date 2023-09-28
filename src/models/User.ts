@@ -1,5 +1,32 @@
 import { Schema, model, models } from "mongoose";
 
+const AddressSchema = new Schema({
+  city: {
+    type: String,
+    required: true,
+  },
+  country: {
+    type: String,
+    required: true,
+  },
+  line1: {
+    type: String,
+    required: true,
+  },
+  line2: {
+    type: String,
+    required: false,
+  },
+  postal_code: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+});
+
 const UserSchema = new Schema(
   {
     email: {
@@ -24,7 +51,12 @@ const UserSchema = new Schema(
     },
     phone: {
       type: String,
-    },    
+      default: []
+    },
+    address: {
+      type: AddressSchema,
+      default: []
+    }
   },
   {
     timestamps: true,

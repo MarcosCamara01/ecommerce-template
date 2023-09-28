@@ -1,74 +1,66 @@
 "use client";
+
+import { FixedComponent } from "@/components/FixedComponent";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { IoIosArrowForward } from 'react-icons/io';
 
 function ProfilePage() {
-  const [newName, setNewName] = useState("");
+  const [toEdit, setToEdit] = useState({ field: 'none', value: '' });
   const { data: session, status, update } = useSession();
 
-  console.log(session, status);
+  const onUpdate = (toUpdate) => {
+    if (toEdit.field === "name" || toEdit.field === "email") {
+      update({ [toEdit.field]: toUpdate });
+      setToEdit({ field: 'none', value: '' });
+    }
+  };
 
   return (
     <>
       {status === "authenticated" ?
-        (<div className="user">
-          <h2 className="user-name">{session.user.name}</h2>
-
+        <div className="user">
           <div className="user-information">
-            <div className="cell-button">
+            <button
+              onClick={() => setToEdit({ field: "name", value: session.user.name })}
+              className="cell-button"
+            >
               <div className="cell-left">
-                <span>E-MAIL</span>
+                <h4>NOMBRE</h4>
                 <span>{session.user.email}</span>
-                <label>Update Name</label>
-                <input
-                  type="text"
-                  placeholder='Enter new name'
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                />
-                <button
-                  onClick={() => update({ name: newName })}
-                >
-                  Update
-                </button>
               </div>
               <div className="cell-right">
                 <IoIosArrowForward />
               </div>
-            </div>
-            <div className="cell-button">
+            </button>
+            <button
+              className="cell-button"
+              onClick={() => setToEdit({ field: "email", value: session.user.email })}
+            >
               <div className="cell-left">
-                <span>DIRECCIONES</span>
+                <h4>E-MAIL</h4>
+                <span>{session.user.email}</span>
               </div>
               <div className="cell-right">
                 <IoIosArrowForward />
               </div>
-            </div>
-            <div className="cell-button">
+            </button>
+            <button className="cell-button">
               <div className="cell-left">
-                <span>WALLET</span>
+                <h4>DIRECCIONES</h4>
               </div>
               <div className="cell-right">
                 <IoIosArrowForward />
               </div>
-            </div>
-            <div className="cell-button">
+            </button>
+            <button className="cell-button">
               <div className="cell-left">
-                <span>TELÉFONO</span>
+                <h4>TELÉFONO</h4>
               </div>
               <div className="cell-right">
                 <IoIosArrowForward />
               </div>
-            </div>
-            <div className="cell-button">
-              <div className="cell-left">
-                <span>CAMBIAR CONTRASEÑA</span>
-              </div>
-              <div className="cell-right">
-                <IoIosArrowForward />
-              </div>
-            </div>
+            </button>
           </div>
 
           <button
@@ -79,13 +71,20 @@ function ProfilePage() {
           >
             Signout
           </button>
-        </div>)
+        </div>
         :
-        (
-          <div><h2>Usuario no registrado</h2></div>
-        )
+        <div><h2>Usuario no registrado</h2></div>
       }
 
+      {toEdit.field !== "none" && (
+        <FixedComponent
+          message={toEdit.field}
+          setToEdit={setToEdit}
+          task="Update"
+          onUpdate={onUpdate}
+          value={toEdit.value}
+        />
+      )}
     </>
   );
 }
