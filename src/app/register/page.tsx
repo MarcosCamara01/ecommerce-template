@@ -24,16 +24,16 @@ function Signup() {
       const signupResponse = await axios.post("/api/auth/signup", {
         email: formData.get("email"),
         password: formData.get("password"),
-        fullname: formData.get("fullname"),
+        name: formData.get("fullname"),
         phone: formData.get("phone"),
       });
-
+  
       const res = await signIn("credentials", {
         email: signupResponse.data.email,
         password: formData.get("password"),
         redirect: false,
       });
-
+  
       if (res?.ok) return router.push("/");
     } catch (error) {
       console.log(error);

@@ -28,9 +28,6 @@ const createOptions = (req: NextApiRequest): AuthOptions => ({
         );
 
         if (!passwordMatch) throw new Error("Invalid credentials");
-
-        console.log(userFound);
-
         return userFound;
       },
     }),
@@ -42,13 +39,35 @@ const createOptions = (req: NextApiRequest): AuthOptions => ({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.user = user;
+    async jwt({ token, user, session, trigger }) {
+      if (trigger === "update" && session?.name) {
+        token.name = session.name;
+      }
+
+      if (trigger === "update" && session?.email) {
+        token.email = session.email;
+      }
+
+      if (user) {
+        const u = user as unknown as any;
+        return {
+          ...token,
+          id: u.id,
+          phone: u.phone,
+        };
+      }
       return token;
     },
     async session({ session, token }) {
-      session.user = token.user as any;
-      return session;
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          _id: token.id,
+          name: token.name,
+          phone: token.phone,
+        }
+      };
     },
   },
 });

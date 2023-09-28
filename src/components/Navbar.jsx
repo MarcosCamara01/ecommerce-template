@@ -24,7 +24,7 @@ export const Navbar = () => {
       <ul>
         {
           status === "authenticated" ?
-            <li><Link href="/user/account/profile">{session.user.fullname.split(' ')[0]}</Link></li>
+            <li><Link href="/user/account/profile">{session.user.name?.split(' ')[0]}</Link></li>
             :
             <li><Link href="/login">Login</Link></li>
         }
