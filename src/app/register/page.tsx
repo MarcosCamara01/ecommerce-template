@@ -24,7 +24,7 @@ function Signup() {
       const signupResponse = await axios.post("/api/auth/signup", {
         email: formData.get("email"),
         password: formData.get("password"),
-        name: formData.get("fullname"),
+        name: formData.get("name"),
         phone: formData.get("phone"),
       });
   
@@ -55,7 +55,7 @@ function Signup() {
           type="text"
           placeholder="Fullname"
           className=""
-          name="fullname"
+          name="name"
         />
 
         <label className="text-slate-300">Email:</label>

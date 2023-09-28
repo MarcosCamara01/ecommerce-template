@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { fullname, email, password, phone } = await request.json();
+    const { name, email, password, phone } = await request.json();
 
     if (password.length < 6) {
       return NextResponse.json(
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = new User({
-      fullname,
+      name,
       email,
       phone,
       password: hashedPassword,
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        fullname: savedUser.fullname,
+        name: savedUser.name,
         email: savedUser.email,
         createdAt: savedUser.createdAt,
         updatedAt: savedUser.updatedAt,
@@ -65,7 +65,7 @@ export async function PUT(request: Request) {
   try {
     await connectDB();
 
-    const { userId, fullname, email, password } = await request.json();
+    const { userId, name, email, password } = await request.json();
 
     if (password && password.length < 6) {
       return NextResponse.json(
@@ -83,8 +83,8 @@ export async function PUT(request: Request) {
       );
     }
 
-    if (fullname) {
-      userToUpdate.fullname = fullname;
+    if (name) {
+      userToUpdate.name = name;
     }
 
     if (email) {
@@ -105,7 +105,7 @@ export async function PUT(request: Request) {
         message: "User updated successfully",
         updatedUser: {
           id: userToUpdate._id,
-          fullname: userToUpdate.fullname,
+          name: userToUpdate.name,
           email: userToUpdate.email,
           createdAt: userToUpdate.createdAt,
           updatedAt: userToUpdate.updatedAt,
