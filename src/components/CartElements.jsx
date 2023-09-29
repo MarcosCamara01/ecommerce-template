@@ -42,16 +42,16 @@ export const ProductCartInfo = ({ product }) => {
                     :
                     <div className="buttons">
                         <button
-                            disabled={product.quantity == 1}
+                            disabled={product?.quantity == 1}
                             className='add-remove'
-                            onClick={() => addToCart(product.productId, product.color, product.size, -1)}
+                            onClick={() => addToCart(product?.productId, product.color, product.size, -1)}
                         >
                             <MdRemove />
                         </button>
-                        <span className='content'>{product.quantity}</span>
+                        <span className='content'>{product?.quantity}</span>
                         <button
                             className='add-remove'
-                            onClick={() => addToCart(product.productId, product.color, product.size, 1)}
+                            onClick={() => addToCart(product?.productId, product.color, product.size, 1)}
                         >
                             <MdAdd />
                         </button>
@@ -75,12 +75,12 @@ export const FavoriteButton = ({ product }) => {
     const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
-        if (userCart && userCart.favorites.includes(product._id)) {
+        if (userCart && userCart.favorites.includes(product?._id)) {
             setIsFavorite(true);
         } else {
             setIsFavorite(false);
         }
-    }, [userCart, product._id]);
+    }, [userCart, product?._id]);
 
     const addToFavorites = async (productId) => {
         if (status === "authenticated") {

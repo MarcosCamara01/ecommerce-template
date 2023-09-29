@@ -8,6 +8,7 @@ import '../../../styles/cart.css';
 import { ButtonCheckout } from "@/components/CartElements"
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { Loader } from "@/helpers/Loader";
 
 const Cart = () => {
   const { cartItems } = useCart();
@@ -65,7 +66,7 @@ const Cart = () => {
   return (
     <section>
       {isLoading ?
-        <p>Loading...</p>
+        <Loader />
         :
         cartWithProducts.length >= 1 ?
           <>

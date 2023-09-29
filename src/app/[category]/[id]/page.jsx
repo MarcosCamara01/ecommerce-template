@@ -5,6 +5,7 @@ import { useProductContext } from "@/hooks/ProductContext";
 import { useParams } from "next/navigation";
 import { SingleProduct } from "../../../components/SingleProduct";
 import { RandomProducts } from "../../../components/RandomProducts";
+import { Loader } from "@/helpers/Loader";
 
 const ProductPage = () => {
     const { products } = useProductContext();
@@ -30,7 +31,7 @@ const ProductPage = () => {
     return (
         <section>
             {isLoading ? (
-                <p>Loading...</p>
+                <Loader />
             ) : (
                 <>
                     <SingleProduct

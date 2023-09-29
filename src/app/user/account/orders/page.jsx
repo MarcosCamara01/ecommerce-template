@@ -7,6 +7,7 @@ import { getOrders } from "@/helpers/ordersFunctions";
 import { format } from 'date-fns';
 import { orderWithProducts } from '@/helpers/ordersFunctions';
 import { useProductContext } from '@/hooks/ProductContext';
+import { Loader } from "@/helpers/Loader";
 import '@/styles/orders.css';
 
 function UserOrders() {
@@ -19,18 +20,14 @@ function UserOrders() {
         if (status === "authenticated") {
             const userId = session.user._id;
             const fetchUserOrders = async () => {
-                try {
-                    const response = await getOrders(userId);
-                    if (Array.isArray(response.orders)) {
-                        response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
-                        setUserOrders(response.orders);
-                    } else {
-                        console.error("Error: 'orders' no es un array:", response);
-                    }
-                    setLoading(false);
-                } catch (error) {
-                    console.error("Error al obtener los pedidos:", error);
+                const response = await getOrders(userId);
+                if (Array.isArray(response?.orders)) {
+                    response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
+                    setUserOrders(response.orders);
+                } else {
+                    console.log("'orders' no es un array:", response);
                 }
+                setLoading(false);
             };
             fetchUserOrders();
         }
@@ -44,7 +41,7 @@ function UserOrders() {
     return (
         <div className="page-container">
             {loading ? (
-                <p>Cargando...</p>
+                <Loader />
             ) : userOrders.length > 0 ? (
                 userOrders.map((order, index) => (
                     <div key={index} className="order-card">

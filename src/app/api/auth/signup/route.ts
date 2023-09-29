@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { name, email, password, phone, address } = await request.json();
+    const { name, email, password, phone } = await request.json();
 
     if (password.length < 6) {
       return NextResponse.json(

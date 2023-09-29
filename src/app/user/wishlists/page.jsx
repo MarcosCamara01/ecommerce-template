@@ -7,6 +7,7 @@ import { Products } from "@/components/Products";
 import '../../../styles/cart.css';
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { Loader } from "@/helpers/Loader";
 
 const Wishlists = () => {
     const { userCart } = useCart();
@@ -38,12 +39,12 @@ const Wishlists = () => {
         };
 
         updateCartWithProducts();
-    }, [userCart]);
+    }, [userCart, products]);
 
     return (
         <section>
             {isLoading ?
-                <p>Loading...</p>
+                <Loader />
                 :
                 cartWithProducts.length >= 1 ?
                     <>

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/CartContext';
 import { saveOrder } from "@/helpers/ordersFunctions";
+import { Loader } from "@/helpers/Loader";
 
 function CheckoutSuccess() {
   const searchParams = useSearchParams();
@@ -59,17 +60,17 @@ function CheckoutSuccess() {
   return (
     <section>
       <div className="page-container">
-        {data && data.error ? (
+        {data && data.error ?
           <p>{data.errorMessage}</p>
-        ) : data ? (
-          <>
-            <h1>Checkout Payment Result</h1>
-            <h2>Pago realizado con éxito</h2>
-            <h3>{`Se te ha enviado un correo electrónico a: ${data.customer_details.email}`}</h3>
-          </>
-        ) : (
-          <p>Cargando...</p>
-        )}
+          : data ?
+            <>
+              <h1>Checkout Payment Result</h1>
+              <h2>Pago realizado con éxito</h2>
+              <h3>{`Se te ha enviado un correo electrónico a: ${data.customer_details.email}`}</h3>
+            </>
+            :
+            <Loader />
+        }
       </div>
     </section>
   );
