@@ -51,11 +51,11 @@ const UserSchema = new Schema(
     },
     phone: {
       type: String,
-      default: []
+      default: ""
     },
     address: {
       type: AddressSchema,
-      default: []
+      default: null 
     }
   },
   {
