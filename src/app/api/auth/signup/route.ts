@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { name, email, password, phone } = await request.json();
+    const { name, email, password, phone, address } = await request.json();
 
     if (password.length < 6) {
       return NextResponse.json(
@@ -65,7 +65,7 @@ export async function PUT(request: Request) {
   try {
     await connectDB();
 
-    const { userId, name, email, password } = await request.json();
+    const { userId, name, email, password, phone, address } = await request.json();
 
     if (password && password.length < 6) {
       return NextResponse.json(
@@ -73,7 +73,7 @@ export async function PUT(request: Request) {
         { status: 400 }
       );
     }
-
+    
     const userToUpdate = await User.findById(userId);
 
     if (!userToUpdate) {
@@ -94,6 +94,14 @@ export async function PUT(request: Request) {
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 12);
       userToUpdate.password = hashedPassword;
+    }
+
+    if (phone) {
+      userToUpdate.phone = phone;
+    }
+
+    if (address) {
+      userToUpdate.address = address;
     }
 
     await userToUpdate.save();

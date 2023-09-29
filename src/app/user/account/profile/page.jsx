@@ -7,14 +7,7 @@ import { IoIosArrowForward } from 'react-icons/io';
 
 function ProfilePage() {
   const [toEdit, setToEdit] = useState({ field: 'none', value: '' });
-  const { data: session, status, update } = useSession();
-
-  const onUpdate = (toUpdate) => {
-    if (toEdit.field === "name" || toEdit.field === "email") {
-      update({ [toEdit.field]: toUpdate });
-      setToEdit({ field: 'none', value: '' });
-    }
-  };
+  const { data: session, status } = useSession();
 
   return (
     <>
@@ -27,7 +20,7 @@ function ProfilePage() {
             >
               <div className="cell-left">
                 <h4>NOMBRE</h4>
-                <span>{session.user.email}</span>
+                <span>{session.user.name}</span>
               </div>
               <div className="cell-right">
                 <IoIosArrowForward />
@@ -79,10 +72,9 @@ function ProfilePage() {
       {toEdit.field !== "none" && (
         <FixedComponent
           message={toEdit.field}
-          setToEdit={setToEdit}
           task="Update"
-          onUpdate={onUpdate}
-          value={toEdit.value}
+          toEdit={toEdit}
+          setToEdit={setToEdit}
         />
       )}
     </>
