@@ -8,6 +8,7 @@ import { Products } from '@/components/Products';
 import '@/styles/orders.css';
 import { useParams } from 'next/navigation';
 import { orderWithProducts } from '@/helpers/ordersFunctions';
+import { Loader } from "@/helpers/Loader";
 import { format } from 'date-fns';
 
 function OrderDetails() {
@@ -35,7 +36,6 @@ function OrderDetails() {
         }
     }, [status, session, orderId]);
 
-    // Función para encontrar el pedido correspondiente por ID
     const findOrderById = (orderId) => {
         return userOrders.orders.find((order) => order._id === orderId);
     };
@@ -97,7 +97,7 @@ function OrderDetails() {
     return (
         <>
             {loading ? (
-                <p>Cargando...</p>
+               <Loader />
             ) : renderOrderDetails()}
         </>
     );

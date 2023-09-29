@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Products } from "@/components/Products";
 import { useProductContext } from '@/hooks/ProductContext';
+import { Loader } from '@/helpers/Loader';
 
 const CategoryPage = () => {
     const { products } = useProductContext();
@@ -38,7 +39,7 @@ const CategoryPage = () => {
     return (
         <section>
             {isLoading ? (
-                <p>Loading...</p>
+                <Loader />
             ) : (
                 <Products
                     products={productsInCategory}

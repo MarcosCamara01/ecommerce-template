@@ -3,6 +3,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import '../styles/products.css';
 import Link from 'next/link';
 import { ProductCartInfo, DeleteButton, FavoriteButton } from "./CartElements"
+import { Loader } from '@/helpers/Loader';
 
 export const Products = ({ products }) => {
   const [loadedProducts, setLoadedProducts] = useState([]);
@@ -35,7 +36,7 @@ export const Products = ({ products }) => {
       dataLength={loadedProducts.length}
       next={loadMore}
       hasMore={hasMore}
-      loader={<h4>Loading...</h4>}
+      loader={<Loader />}
     >
       <div className='products-section'>
         {loadedProducts.map((product, index) => {
