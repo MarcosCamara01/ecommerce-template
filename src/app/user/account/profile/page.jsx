@@ -9,7 +9,7 @@ import { IoIosArrowForward } from 'react-icons/io';
 function ProfilePage() {
   const [toEdit, setToEdit] = useState({ field: 'none', value: '' });
   const { data: session, status } = useSession();
-
+  console.log(session)
   return (
     <>
       {

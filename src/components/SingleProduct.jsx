@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import '../styles/singleproduct.css';
 import { useCart } from '@/hooks/CartContext';
 import { FixedComponent } from "@/components/FixedComponent";
-import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 export const SingleProduct = ({ product }) => {
     const { addToCart } = useCart();
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [selectedSize, setSelectedSize] = useState('');
     const [error, setError] = useState('none');
-    const [enlargeImage, setEnlargeImage] = useState(null);
 
     const handleAddToCart = () => {
         if (selectedVariant && selectedSize) {
@@ -34,14 +31,6 @@ export const SingleProduct = ({ product }) => {
         product.variants.map((variant) => variant.image).flat()
     );
 
-    const toggleEnlargeImage = (imageIndex) => {
-        if (enlargeImage === null) {
-            setEnlargeImage(imageIndex);
-        } else {
-            setEnlargeImage(null);
-        }
-    };
-
     return (
         <>
             <div className="product-bx">
@@ -52,8 +41,7 @@ export const SingleProduct = ({ product }) => {
                                 <img
                                     src={image}
                                     alt={`${product.name} - Image ${index + 1}`}
-                                    className={`product-img ${enlargeImage === index ? 'enlarged' : ''}`}
-                                    onClick={() => toggleEnlargeImage(index)}
+                                    className={`product-img`}
                                 />
                             </div>
                         ))}

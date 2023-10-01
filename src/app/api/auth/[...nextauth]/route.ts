@@ -3,10 +3,15 @@ import { connectDB } from "@/libs/mongodb";
 import User from "@/models/User";
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 
 const createOptions = (req: NextApiRequest): AuthOptions => ({
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+    }),
     CredentialsProvider({
       name: "Credentials",
       id: "credentials",

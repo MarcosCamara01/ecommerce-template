@@ -54,7 +54,9 @@ function Signin() {
           className=""
           name="password"
         />
-
+         <button onClick={() => signIn("google")}>
+          Sign in with Google
+        </button>
         <button className="">
           Signup
         </button>
