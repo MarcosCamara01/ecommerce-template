@@ -110,7 +110,7 @@ const OrderSchema = new Schema({
 
 const OrdersSchema = new Schema({
     userId: {
-        type: Schema.Types.ObjectId,
+        type: String,
         required: true,
     },
     orders: {

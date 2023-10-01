@@ -11,35 +11,34 @@ import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
 
 const Cart = () => {
-  const { cartItems } = useCart();
+  const { cartItems, loading } = useCart();
   const { products } = useProductContext();
   const [cartWithProducts, setCartWithProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { status } = useSession();
 
   useEffect(() => {
-    const updateCartWithProducts = () => {
-      const updatedCart = cartItems.map((cartItem) => {
-        const matchingProduct = products.find(
-          (product) => product._id === cartItem.productId
-        );
+    const updateCartWithProducts = async () => {
+      if (cartItems) {
+        const updatedCart = await cartItems.map((cartItem) => {
+          const matchingProduct = products.find(
+            (product) => product._id === cartItem.productId
+          );
 
-        if (matchingProduct) {
-          const matchingVariant = matchingProduct.variants.find((variant) => variant.color === cartItem.color);
-          return {
-            ...cartItem,
-            category: matchingProduct.category,
-            images: [matchingVariant.image],
-            name: matchingProduct.name,
-            price: matchingProduct.price,
-          };
-        }
+          if (matchingProduct) {
+            const matchingVariant = matchingProduct.variants.find((variant) => variant.color === cartItem.color);
+            return {
+              ...cartItem,
+              category: matchingProduct.category,
+              images: [matchingVariant.image],
+              name: matchingProduct.name,
+              price: matchingProduct.price,
+            };
+          }
 
-        return cartItem;
-      });
-
-      setCartWithProducts(updatedCart.reverse());
-      setIsLoading(false);
+          return cartItem;
+        });
+        setCartWithProducts(updatedCart.reverse());
+      }
     };
 
     updateCartWithProducts();
@@ -65,7 +64,7 @@ const Cart = () => {
 
   return (
     <section>
-      {isLoading ?
+      {loading ?
         <Loader />
         :
         cartWithProducts.length >= 1 ?

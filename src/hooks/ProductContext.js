@@ -1,11 +1,13 @@
 "use client"
 
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
+  const { data: session, status } = useSession()
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export const ProductProvider = ({ children }) => {
     };
 
     fetchProducts();
-  }, []);
+  }, [status, session]);
 
   return (
     <ProductContext.Provider value={{ products, setProducts }}>

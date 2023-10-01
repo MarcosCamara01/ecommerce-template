@@ -10,6 +10,7 @@ export function CartProvider({ children }) {
   const { data: session, status } = useSession()
   const [cartItems, setCartItems] = useState([]);
   const [userCart, setUserCart] = useState(null);
+  const [loading, setLoading] = useState(true)
 
   const fetchUserCart = async () => {
     if (status === "authenticated") {
@@ -17,6 +18,7 @@ export function CartProvider({ children }) {
         const userId = session.user._id;
         const response = await axios.get(`/api/cart`);
         const userCart = response.data.find((cart) => cart.userId === userId);
+        setLoading(false);
         return userCart;
       } catch (error) {
         console.error('Error fetching cart:', error);
@@ -87,6 +89,7 @@ export function CartProvider({ children }) {
           console.log('Cart updated on the server');
         }
 
+        console.log(userCartToUpdate, updatedCart)
         setUserCart(userCartToUpdate);
         setCartItems(updatedCart);
 
@@ -99,7 +102,7 @@ export function CartProvider({ children }) {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, setCartItems, addToCart, userCart, setUserCart }}>
+    <CartContext.Provider value={{ cartItems, setCartItems, addToCart, userCart, setUserCart, loading }}>
       {children}
     </CartContext.Provider>
   );

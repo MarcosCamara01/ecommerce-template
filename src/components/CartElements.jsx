@@ -11,7 +11,7 @@ export const DeleteButton = ({ product }) => {
     const handleRemoveFromCart = async (cartItemId) => {
         try {
             const response = await axios.delete(`/api/cart?userId=${userCart.userId}&cartItemId=${cartItemId}`);
-
+            
             if (response.status === 200) {
                 setCartItems(response.data.cart);
                 setUserCart(response.data);
