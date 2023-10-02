@@ -10,10 +10,9 @@ import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
 
 const Wishlists = () => {
-    const { userCart } = useCart();
+    const { userCart, loading } = useCart();
     const { products } = useProductContext();
     const [cartWithProducts, setCartWithProducts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
     const { status } = useSession();
 
     useEffect(() => {
@@ -35,7 +34,6 @@ const Wishlists = () => {
 
                 setCartWithProducts(updatedCart.reverse());
             }
-            setIsLoading(false);
         };
 
         updateCartWithProducts();
@@ -43,7 +41,7 @@ const Wishlists = () => {
 
     return (
         <section>
-            {isLoading ?
+            {loading ?
                 <Loader />
                 :
                 cartWithProducts.length >= 1 ?

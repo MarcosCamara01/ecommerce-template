@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import '../../styles/form.css';
 import Link from "next/link";
 import { useSession } from 'next-auth/react';
+import { FcGoogle } from 'react-icons/fc';
 
 function Signin() {
   const [error, setError] = useState("");
@@ -54,8 +55,10 @@ function Signin() {
           className=""
           name="password"
         />
-         <button onClick={() => signIn("google")}>
-          Sign in with Google
+        <button
+          className="google-button"
+          onClick={() => signIn("google")}>
+          <FcGoogle /> Sign in with Google
         </button>
         <button className="">
           Signup
