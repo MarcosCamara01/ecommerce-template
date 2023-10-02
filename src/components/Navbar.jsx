@@ -28,7 +28,7 @@ export const Navbar = () => {
             :
             <li><Link href="/login">Login</Link></li>
         }
-        <li><Link href="/user/wishlists">Wishlists ({userCart ? userCart?.favorites.length : 0})</Link></li>
+        <li><Link href="/user/wishlists">Wishlists ({userCart ? userCart?.favorites?.length : 0})</Link></li>
 
         <li><Link href="/user/cart">Cart ({totalQuantity})</Link></li>
       </ul>

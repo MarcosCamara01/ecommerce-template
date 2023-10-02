@@ -75,7 +75,7 @@ export const FavoriteButton = ({ product }) => {
     const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
-        if (userCart && userCart.favorites.includes(product?._id)) {
+        if (userCart && userCart.favorites?.includes(product?._id)) {
             setIsFavorite(true);
         } else {
             setIsFavorite(false);
@@ -92,26 +92,28 @@ export const FavoriteButton = ({ product }) => {
                     return;
                 }
 
-                let updatedFavorites;
-                if (isFavorite) {
-                    updatedFavorites = userCart.favorites.filter((favId) => favId !== productId);
-                } else {
-                    updatedFavorites = [...userCart.favorites, productId];
-                }
-
                 if (!userCart) {
+                    // Si userCart no existe, crearlo y establecer la propiedad 'favorites'.
                     const postResponse = await axios.post(`/api/cart`, {
-                        favorites: updatedFavorites,
+                        favorites: productId,
                         userId: userId
                     });
 
-                    if (postResponse.status === 201) {
+                    if (postResponse.status === 200) {
                         setUserCart(postResponse.data);
                         console.log('Favorites created on the server');
                     } else {
                         console.error('Failed to create favorites on the server.');
                     }
                 } else {
+                    // Si userCart ya existe, actualizar la propiedad 'favorites'.
+                    let updatedFavorites;
+                    if (isFavorite) {
+                        updatedFavorites = userCart.favorites.filter((favId) => favId !== productId);
+                    } else {
+                        updatedFavorites = [...userCart.favorites, productId];
+                    }
+
                     const putResponse = await axios.put(`/api/cart?id=${userCart._id}`, {
                         favorites: updatedFavorites,
                     });
@@ -124,12 +126,12 @@ export const FavoriteButton = ({ product }) => {
                         console.error('Failed to update favorites on the server.');
                     }
                 }
-
             } catch (error) {
                 console.error('Error updating/creating favorites on the server:', error);
             }
         } else {
-            // Si no hay un usuario autenticado, usar cookies.
+            // Si no hay un usuario autenticado, puedes manejar el estado local de favoritos aquí.
+            // Por ejemplo, puedes utilizar cookies o localStorage para almacenar los favoritos.
         }
     };
 
@@ -139,33 +141,3 @@ export const FavoriteButton = ({ product }) => {
         </button>
     );
 };
-
-export const ButtonCheckout = ({ cartWithProducts }) => {
-    const { userCart } = useCart();
-
-    const buyProducts = async () => {
-        try {
-            const lineItems = await cartWithProducts.map((cartItem) => ({
-                productId: cartItem.productId,
-                quantity: cartItem.quantity,
-                variantId: cartItem.variantId,
-                size: cartItem.size,
-                color: cartItem.color
-            }));
-
-            const { data } = await axios.post('/api/stripe/payment', {
-                lineItems,
-                userId: userCart.userId
-            });
-
-            window.location.href = data.session.url;
-
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    return (
-        <button onClick={buyProducts}>CONTINUAR</button>
-    );
-};  

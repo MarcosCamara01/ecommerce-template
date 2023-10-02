@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
             favorites: favorites
         };
         const savedCart = await Cart.create(dataToSave);
-        return NextResponse.json({ _id: savedCart._id });
+        return NextResponse.json(savedCart);
     } catch (error) {
         console.error('Failed to save product.', error);
         return NextResponse.json({ error: 'Failed to save product.' }, { status: 500 });
