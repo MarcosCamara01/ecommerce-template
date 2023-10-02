@@ -11,7 +11,7 @@ export const DeleteButton = ({ product }) => {
     const handleRemoveFromCart = async (cartItemId) => {
         try {
             const response = await axios.delete(`/api/cart?userId=${userCart.userId}&cartItemId=${cartItemId}`);
-            
+
             if (response.status === 200) {
                 setCartItems(response.data.cart);
                 setUserCart(response.data);
@@ -141,3 +141,33 @@ export const FavoriteButton = ({ product }) => {
         </button>
     );
 };
+
+export const ButtonCheckout = ({ cartWithProducts }) => {
+    const { userCart } = useCart();
+
+    const buyProducts = async () => {
+        try {
+            const lineItems = await cartWithProducts.map((cartItem) => ({
+                productId: cartItem.productId,
+                quantity: cartItem.quantity,
+                variantId: cartItem.variantId,
+                size: cartItem.size,
+                color: cartItem.color
+            }));
+
+            const { data } = await axios.post('/api/stripe/payment', {
+                lineItems,
+                userId: userCart.userId
+            });
+
+            window.location.href = data.session.url;
+
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    return (
+        <button onClick={buyProducts}>CONTINUAR</button>
+    );
+};  

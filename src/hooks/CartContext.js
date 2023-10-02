@@ -89,7 +89,6 @@ export function CartProvider({ children }) {
           console.log('Cart updated on the server');
         }
 
-        console.log(userCartToUpdate, updatedCart)
         setUserCart(userCartToUpdate);
         setCartItems(updatedCart);
 
