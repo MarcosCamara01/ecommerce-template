@@ -25,7 +25,7 @@ function UserOrders() {
                     response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
                     setUserOrders(response.orders);
                 } else {
-                    console.log("'orders' no es un array:", response);
+                    console.log("No hay pedidos disponibles.");
                 }
                 setLoading(false);
             };

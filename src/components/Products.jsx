@@ -51,7 +51,7 @@ export const Products = ({ products }) => {
                     <h2 className='product-name'>{product?.name}</h2>
                   </Link>
                   {
-                    product.quantity !== undefined ? (
+                    product.quantity ? (
                       product.purchased ?
                         product.quantity > 1 && <span>{product.quantity}</span>
                         :
