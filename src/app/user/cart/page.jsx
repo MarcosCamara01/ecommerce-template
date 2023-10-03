@@ -44,7 +44,7 @@ const Cart = () => {
     updateCartWithProducts();
   }, [cartItems, products]);
 
-  const calculateTotalPrice = (cartItems, products) => {
+  const calculateTotalPrice = (cartItems) => {
     const totalPrice = cartItems.reduce((total, cartItem) => {
       const matchingProduct = products.find(
         (product) => product._id === cartItem.productId
@@ -60,7 +60,7 @@ const Cart = () => {
     return totalPrice.toFixed(2);
   };
 
-  const totalPrice = calculateTotalPrice(cartWithProducts, products);
+  const totalPrice = calculateTotalPrice(cartWithProducts);
 
   return (
     <section>

@@ -55,13 +55,19 @@ function Signin() {
           className=""
           name="password"
         />
+        <button className="signup-button">
+          Signup
+        </button>
+
+        <div className="separator">
+          <div></div>
+          <p>or</p>
+        </div>
+
         <button
           className="google-button"
           onClick={() => signIn("google")}>
           <FcGoogle /> Sign in with Google
-        </button>
-        <button className="">
-          Signup
         </button>
         <Link href="/register">Don't have an account?</Link>
       </form>

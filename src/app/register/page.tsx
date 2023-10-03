@@ -82,7 +82,7 @@ function Signup() {
           name="phone"
         />
 
-        <button className="">
+        <button className="signup-button">
           Signup
         </button>
         <Link href="/login">Already have an account?</Link>
