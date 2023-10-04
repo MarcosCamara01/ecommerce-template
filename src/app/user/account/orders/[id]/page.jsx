@@ -54,8 +54,10 @@ function OrderDetails() {
             const productsText = totalProducts === 1 ? "artículo" : "artículos";
 
             return (
-                <div className="page-container">
-                    <Products products={orderWithProducts(order, products).products} />
+                <div className="order-container">
+                    <div className='order-products'>
+                        <Products products={orderWithProducts(order, products).products} />
+                    </div>
                     <div className='order-details'>
                         <div className='details'>
                             <h3>DETALLES DEL PEDIDO</h3>
@@ -75,14 +77,14 @@ function OrderDetails() {
                                 {order.phone && (
                                     <li>{order.phone}</li>
                                 )}
-                                 <li>{order.email}</li>
+                                <li>{order.email}</li>
                             </ul>
                         </div>
                         <div className='details'>
                             <h3>TOTALES</h3>
                             <div className='bx-info'><span>{totalProducts} {productsText}</span> <span>{(order.total_price / 100).toFixed(2)} €</span></div>
                             <div className='bx-info'><span>Entrega</span> <span>GRATIS</span></div>
-                            <div className='bx-info'><span>Descuento total</span> <span>{order.discount ? order.discount : 0 } €</span></div>
+                            <div className='bx-info'><span>Descuento total</span> <span>{order.discount ? order.discount : 0} €</span></div>
                             <div className='bx-info'><span>Total</span> <span>{(order.total_price / 100).toFixed(2)} €</span></div>
                             <div className='bx-info'>(IVA incluido)</div>
                         </div>
@@ -97,7 +99,7 @@ function OrderDetails() {
     return (
         <>
             {loading ? (
-               <Loader />
+                <Loader />
             ) : renderOrderDetails()}
         </>
     );
