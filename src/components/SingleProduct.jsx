@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from 'react';
 import '../styles/singleproduct.css';
 import { useCart } from '@/hooks/CartContext';
@@ -36,7 +38,7 @@ export const SingleProduct = ({ product }) => {
             <div className="product-bx">
                 <div className="img-bx">
                     <div className='bx-grid'>
-                        {allImages.map((image, index) => (
+                    {allImages.map((image, index) => (
                             <div key={index}>
                                 <img
                                     src={image}
