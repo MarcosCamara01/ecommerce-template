@@ -6,6 +6,26 @@
     gap: 30px;
 }
 
+.order-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+}
+
+.order-container .order-products {
+    flex-grow: 999;
+    flex-basis: 0;
+}
+
+.order-container .order-details {
+    flex-grow: 1;
+    flex-basis: 800px;
+    position: sticky;
+    top: 2rem;
+    max-height: 625px;
+}
+
 .page-container .order-card {
     padding: 30px 20px;
     border: 1px solid #fff;

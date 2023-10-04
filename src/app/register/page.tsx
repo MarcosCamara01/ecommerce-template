@@ -5,6 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import '../../styles/form.css';
 import Link from "next/link";
+import { FcGoogle } from "react-icons/fc";
 
 function Signup() {
   const [error, setError] = useState();
@@ -84,6 +85,17 @@ function Signup() {
 
         <button className="signup-button">
           Signup
+        </button>
+
+        <div className="separator">
+          <div></div>
+          <p>or</p>
+        </div>
+
+        <button
+          className="google-button"
+          onClick={() => signIn("google")}>
+          <FcGoogle /> Sign in with Google
         </button>
         <Link href="/login">Already have an account?</Link>
       </form>
