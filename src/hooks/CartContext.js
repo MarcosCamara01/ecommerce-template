@@ -44,11 +44,11 @@ export function CartProvider({ children }) {
 
   const addToCart = async (productId, color, size, quantity, variantId) => {
     const newItem = {
-      productId: productId,
+      productId,
       color,
       size,
       quantity,
-      variantId: variantId
+      variantId
     };
 
     let updatedCart = [...cartItems];

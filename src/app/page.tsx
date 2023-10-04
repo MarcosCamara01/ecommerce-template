@@ -1,10 +1,8 @@
-"use client"
-
+import { getProducts } from "@/helpers/getProducts";
 import { Products } from "../components/Products";
-import { useProductContext } from "@/hooks/ProductContext";
 
-export default function Home() {
-  const { products } = useProductContext();
+export default async function Home() {
+  const products = await getProducts();
 
   return (
     <section className="section-products">
