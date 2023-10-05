@@ -11,7 +11,7 @@ const ProductPage = async() => {
     const parts = pathname.split("/");
     const productId = parts.pop();
 
-    const product = await getProducts("product", productId);
+    const product = await getProducts(`_id=${productId}`);
     const products = await getProducts();
 
     return (
