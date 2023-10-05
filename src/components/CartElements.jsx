@@ -1,9 +1,8 @@
+"use client"
+
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/CartContext';
 import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
-import { FaRegHeart, FaHeart } from 'react-icons/fa';
-import { useSession } from 'next-auth/react';
 
 export const DeleteButton = ({ product }) => {
     const { userCart, setUserCart, setCartItems } = useCart();
@@ -66,79 +65,6 @@ export const ProductCartInfo = ({ product }) => {
                 </div>
             </div>
         </div>
-    );
-};
-
-export const FavoriteButton = ({ product }) => {
-    const { userCart, setUserCart } = useCart();
-    const { data: session, status } = useSession();
-    const [isFavorite, setIsFavorite] = useState(false);
-
-    useEffect(() => {
-        if (userCart && userCart.favorites?.includes(product?._id)) {
-            setIsFavorite(true);
-        } else {
-            setIsFavorite(false);
-        }
-    }, [userCart, product?._id]);
-
-    const addToFavorites = async (productId) => {
-        if (status === "authenticated") {
-            try {
-                const userId = session.user._id;
-
-                if (!userId) {
-                    console.error('No se pudo obtener el _id del usuario.');
-                    return;
-                }
-
-                if (!userCart) {
-                    // Si userCart no existe, crearlo y establecer la propiedad 'favorites'.
-                    const postResponse = await axios.post(`/api/cart`, {
-                        favorites: productId,
-                        userId: userId
-                    });
-
-                    if (postResponse.status === 200) {
-                        setUserCart(postResponse.data);
-                        console.log('Favorites created on the server');
-                    } else {
-                        console.error('Failed to create favorites on the server.');
-                    }
-                } else {
-                    // Si userCart ya existe, actualizar la propiedad 'favorites'.
-                    let updatedFavorites;
-                    if (isFavorite) {
-                        updatedFavorites = userCart.favorites.filter((favId) => favId !== productId);
-                    } else {
-                        updatedFavorites = [...userCart.favorites, productId];
-                    }
-
-                    const putResponse = await axios.put(`/api/cart?id=${userCart._id}`, {
-                        favorites: updatedFavorites,
-                    });
-
-                    if (putResponse.status === 200) {
-                        setUserCart(putResponse.data);
-                        setIsFavorite(!isFavorite);
-                        console.log('Favorites updated on the server');
-                    } else {
-                        console.error('Failed to update favorites on the server.');
-                    }
-                }
-            } catch (error) {
-                console.error('Error updating/creating favorites on the server:', error);
-            }
-        } else {
-            // Si no hay un usuario autenticado, puedes manejar el estado local de favoritos aquí.
-            // Por ejemplo, puedes utilizar cookies o localStorage para almacenar los favoritos.
-        }
-    };
-
-    return (
-        <button onClick={() => addToFavorites(product._id)}>
-            {isFavorite ? <FaHeart /> : <FaRegHeart />}
-        </button>
     );
 };
 
