@@ -8,7 +8,8 @@ const CategoryPage = async () => {
     const pathname = headersList.get("x-invoke-path") || "";
     const cleanedPathname = pathname.startsWith("/") ? pathname.substring(1) : pathname;
 
-    const products = await getProducts("category", cleanedPathname);
+    let products = await getProducts(`cat=${cleanedPathname}`);
+    products.reverse()
 
     return (
         <section>
