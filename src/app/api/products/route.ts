@@ -4,10 +4,20 @@ import { connectDB } from '../../../libs/mongodb';
 
 connectDB();
 
+const shuffleArray = (array: any) => {
+    let shuffled = array.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 export async function GET(req: NextRequest) {
     const query = new URL(req.url).searchParams;
     const category = query.get('cat');
     const _id = query.get('_id');
+    const random = query.get('random');
 
     try {
         let products
@@ -16,10 +26,16 @@ export async function GET(req: NextRequest) {
             products = await Product.find({ category });
         } else if (_id) {
             products = await Product.findOne({ _id });
+        } else if (random) {
+            const allProducts = await Product.find();
+            const shuffledProducts = shuffleArray(allProducts);
+            products = shuffledProducts
+                .filter((product: any) => product._id.toString() !== random)
+                .slice(0, 6);
         } else {
             products = await Product.find();
         }
-         
+
         return NextResponse.json(products);
     } catch (error) {
         console.error('Failed to fetch products.', error);

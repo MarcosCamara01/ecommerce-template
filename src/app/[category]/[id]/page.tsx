@@ -1,10 +1,9 @@
-import { SingleProduct } from "../../../components/SingleProduct";
-import { RandomProducts } from "../../../components/RandomProducts";
+import { SingleProduct } from "@/components/SingleProduct";
 import { getProducts } from "@/helpers/getProducts"
 import { headers } from 'next/headers';
+import { Products } from "@/components/Products";
 
-const ProductPage = async() => {
-
+const ProductPage = async () => {
     const headersList = headers();
 
     const pathname = headersList.get("x-invoke-path") || "";
@@ -12,23 +11,17 @@ const ProductPage = async() => {
     const productId = parts.pop();
 
     const product = await getProducts(`_id=${productId}`);
-    const products = await getProducts();
+    const randomProducts = await getProducts(`random=${productId}`);
 
     return (
         <section>
-            
-            <SingleProduct 
-                product={product}
-            />
+            <SingleProduct product={product} />
 
-            <h2 className='random-section-h2'>QUIZÁ TAMBIÉN TE GUSTE...</h2>
+            <h2 className="random-section-h2">QUIZÁ TAMBIÉN TE GUSTE...</h2>
 
-            <RandomProducts
-                products={products}
-            />
-            
+            <Products products={randomProducts} />
         </section>
-    )
-}
+    );
+};
 
 export default ProductPage;
