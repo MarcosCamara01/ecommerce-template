@@ -3,25 +3,22 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
-import { getOrders } from "@/helpers/ordersFunctions";
 import { format } from 'date-fns';
-import { orderWithProducts } from '@/helpers/ordersFunctions';
-import { useProductContext } from '@/hooks/ProductContext';
 import { Loader } from "@/helpers/Loader";
 import '@/styles/orders.css';
+import { getOrdersWithProducts } from '@/helpers/ordersFunctions';
 
 function UserOrders() {
     const { data: session, status } = useSession();
     const [userOrders, setUserOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { products } = useProductContext();
 
     useEffect(() => {
         if (status === "authenticated") {
             const userId = session.user._id;
             const fetchUserOrders = async () => {
-                const response = await getOrders(userId);
-                if (Array.isArray(response?.orders)) {
+                const response = await getOrdersWithProducts(userId);
+                if (response && Array.isArray(response.orders)) {
                     response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
                     setUserOrders(response.orders);
                 } else {
@@ -29,6 +26,7 @@ function UserOrders() {
                 }
                 setLoading(false);
             };
+
             fetchUserOrders();
         }
     }, [status, session]);
@@ -49,8 +47,10 @@ function UserOrders() {
                             <h4>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
                             <p>Número de pedido: {order.orderNumber}</p>
                             <div className='bx-imgs'>
-                                {orderWithProducts(order, products).products.map((product, productIndex) => (
-                                    <img key={productIndex} src={product.images[0]} alt={product.name} loading='lazy' />
+                                {order.products.map((product, productIndex) => (
+                                    <div key={productIndex} className="product-card">
+                                        <img src={product.images[0]} alt={product.name} loading='lazy' />
+                                    </div>
                                 ))}
                             </div>
                         </Link>
