@@ -1,6 +1,5 @@
 "use client";
 
-import { useProductContext } from "@/hooks/ProductContext";
 import { useCart } from "../../../hooks/CartContext";
 import { useEffect, useState } from "react";
 import { Products } from "@/components/Products";
@@ -9,62 +8,70 @@ import { ButtonCheckout } from "@/components/CartElements"
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
+import { getProducts } from "@/helpers/getProducts"
 
 const Cart = () => {
-  const { cartItems, loading } = useCart();
-  const { products } = useProductContext();
+  const { cartItems, cartLoading } = useCart();
   const [cartWithProducts, setCartWithProducts] = useState([]);
+  const [totalPrice, setTotalPrice] = useState([]);
+  const [isLoading, setIsLoading] = useState(true)
   const { status } = useSession();
 
-  useEffect(() => {
-    const updateCartWithProducts = async () => {
-      if (cartItems) {
-        const updatedCart = await cartItems.map((cartItem) => {
-          const matchingProduct = products.find(
-            (product) => product._id === cartItem.productId
-          );
-
-          if (matchingProduct) {
-            const matchingVariant = matchingProduct.variants.find((variant) => variant.color === cartItem.color);
-            return {
-              ...cartItem,
-              category: matchingProduct.category,
-              images: [matchingVariant.image],
-              name: matchingProduct.name,
-              price: matchingProduct.price,
-            };
-          }
-
-          return cartItem;
-        });
-        setCartWithProducts(updatedCart.reverse());
-      }
-    };
-
-    updateCartWithProducts();
-  }, [cartItems, products]);
+  const fetchProducts = async (productId) => {
+    try {
+      const products = await getProducts(`_id=${productId}`);
+      return products;
+    } catch (error) {
+      console.error("Error al obtener los productos:", error);
+      return null;
+    }
+  };
 
   const calculateTotalPrice = (cartItems) => {
-    const totalPrice = cartItems.reduce((total, cartItem) => {
-      const matchingProduct = products.find(
-        (product) => product._id === cartItem.productId
-      );
+    let totalPrice = 0;
 
-      if (matchingProduct) {
-        return total + matchingProduct.price * cartItem.quantity;
-      }
-
-      return total;
-    }, 0);
+    for (const cartItem of cartItems) {
+      totalPrice += cartItem.price * cartItem.quantity;
+    }
 
     return totalPrice.toFixed(2);
   };
 
-  const totalPrice = calculateTotalPrice(cartWithProducts);
+  useEffect(() => {
+    const updateCartWithProducts = async () => {
+      if (cartItems.length >= 1) {
+        const updatedCart = await Promise.all(cartItems.map(async (cartItem) => {
+          try {
+            const matchingProduct = await fetchProducts(cartItem.productId);
+            if (matchingProduct) {
+              const matchingVariant = matchingProduct.variants.find((variant) => variant.color === cartItem.color);
+              return {
+                ...cartItem,
+                category: matchingProduct.category,
+                images: [matchingVariant.image],
+                name: matchingProduct.name,
+                price: matchingProduct.price,
+              };
+            }
+          } catch (error) {
+            console.error("Error al obtener detalles del producto:", error);
+          }
+        }));
+        const totalPrice = await calculateTotalPrice(updatedCart);
+        setCartWithProducts(updatedCart.reverse());
+        setIsLoading(false);
+        setTotalPrice(totalPrice);
+      } else if (!cartLoading && cartItems.length === 0) {
+        setIsLoading(false)
+      }
+    };
+
+    updateCartWithProducts();
+  }, [cartItems]);
 
   return (
     <section>
-      {loading ?
+      {isLoading ?
         <Loader />
         :
         cartWithProducts.length >= 1 ?

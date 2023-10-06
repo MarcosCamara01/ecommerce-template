@@ -1,6 +1,5 @@
 "use client";
 
-import { useProductContext } from "@/hooks/ProductContext";
 import { useCart } from "@/hooks/CartContext";
 import { useEffect, useState } from "react";
 import { Products } from "@/components/Products";
@@ -8,40 +7,51 @@ import '../../../styles/cart.css';
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
+import { getProducts } from "@/helpers/getProducts";
 
 const Wishlists = () => {
-    const { userCart, loading } = useCart();
-    const { products } = useProductContext();
+    const { userCart, cartLoading } = useCart();
     const [cartWithProducts, setCartWithProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true)
     const { status } = useSession();
 
-    useEffect(() => {
-        const updateCartWithProducts = () => {
-            if (userCart && userCart.favorites) {
-                const updatedCart = userCart.favorites.map((productId) => {
-                    const matchingProduct = products.find(
-                        (product) => product._id === productId
-                    );
+    const fetchProducts = async (productId) => {
+        try {
+            const products = await getProducts(`_id=${productId}`);
+            return products;
+        } catch (error) {
+            console.error("Error al obtener los productos:", error);
+            return null;
+        }
+    };
 
+    useEffect(() => {
+        const updateCartWithProducts = async () => {
+            if (userCart && userCart.favorites) {
+                const updatedCart = await Promise.all(userCart.favorites.map(async (productId) => {
+                    const matchingProduct = await fetchProducts(productId);
                     if (matchingProduct) {
                         return {
                             ...matchingProduct,
                         };
                     }
-
                     return null;
-                });
+                }));
 
                 setCartWithProducts(updatedCart.reverse());
+                setIsLoading(false);
+            } else if (!cartLoading && userCart.favorites.length === 0) {
+                setIsLoading(false)
             }
         };
 
+
         updateCartWithProducts();
-    }, [userCart, products]);
+    }, [userCart]);
 
     return (
         <section>
-            {loading ?
+            {isLoading ?
                 <Loader />
                 :
                 cartWithProducts.length >= 1 ?

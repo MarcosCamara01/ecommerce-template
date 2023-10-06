@@ -77,33 +77,48 @@ export const getOrdersWithProducts = async (userId) => {
             return null;
         }
 
-        const products = await getProducts();
-        const enrichedUserOrders = {
-            ...userOrders,
-            orders: userOrders.orders.map((order) => {
-                const enrichedProducts = order.products.map((product) => {
-                    const matchingProduct = products.find((p) => p._id === product.productId);
-                    if (matchingProduct) {
-                        const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
-                        if (matchingVariant) {
-                            return {
-                                ...product,
-                                name: matchingProduct.name,
-                                category: matchingProduct.category,
-                                images: [matchingVariant.image],
-                                price: matchingProduct.price,
-                                purchased: true,
-                                color: product.color,
-                            };
+        const fetchProducts = async (productId) => {
+            try {
+                const products = await getProducts(`_id=${productId}`);
+                return products;
+            } catch (error) {
+                console.error("Error al obtener el producto con ID:", productId, error);
+                return null;
+            }
+        };
+
+        const ordersWithEnrichedProducts = await Promise.all(
+            userOrders.orders.map(async (order) => {
+                const enrichedProducts = await Promise.all(
+                    order.products.map(async (product) => {
+                        const matchingProduct = await fetchProducts(product.productId);
+                        if (matchingProduct) {
+                            const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
+                            if (matchingVariant) {
+                                return {
+                                    ...product,
+                                    name: matchingProduct.name,
+                                    category: matchingProduct.category,
+                                    images: [matchingVariant.image],
+                                    price: matchingProduct.price,
+                                    purchased: true,
+                                    color: product.color,
+                                };
+                            }
                         }
-                    }
-                    return product;
-                });
+                        return product;
+                    })
+                );
                 return {
                     ...order,
                     products: enrichedProducts
                 };
             })
+        );
+
+        const enrichedUserOrders = {
+            ...userOrders,
+            orders: ordersWithEnrichedProducts
         };
 
         return enrichedUserOrders;
