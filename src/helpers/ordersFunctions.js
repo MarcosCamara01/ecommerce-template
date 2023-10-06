@@ -1,14 +1,5 @@
 import axios from "axios";
-
-export const getOrders = async (userId) => {
-    try {
-        const response = await axios.get(`/api/orders`);
-        const userOrders = response.data.find((order) => order.userId === userId);
-        return userOrders
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-    }
-}
+import { getProducts } from "./getProducts"
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -28,7 +19,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
     const userId = data.metadata?.userId;
     const products = data.metadata?.products ? JSON.parse(data.metadata.products) : [];
     const randomOrderNumber = generateRandomOrderNumber();
-    
+
     const newOrder = {
         name: data.customer_details?.name,
         email: data.customer_details?.email,
@@ -76,33 +67,48 @@ export const saveOrder = async (data, setHasSavedOrder) => {
     }
 };
 
-export const orderWithProducts = (order, products) => {
-    if (!order || !order.products || !Array.isArray(order.products)) {
-        return order;
-    }
+export const getOrdersWithProducts = async (userId) => {
+    try {
+        const response = await axios.get(`/api/orders`);
+        const userOrders = response.data.find((order) => order.userId === userId);
 
-    const enrichedProducts = order.products.map((product) => {
-        const matchingProduct = products.find((p) => p._id === product.productId);
-        if (matchingProduct) {
-            const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
-            if (matchingVariant) {
-                return {
-                    ...product,
-                    name: matchingProduct.name,
-                    category: matchingProduct.category,
-                    images: [matchingVariant.image],
-                    price: matchingProduct.price,
-                    purchased: true,
-                    color: product.color,
-                };
-            }
+        if (!userOrders) {
+            console.log("No se encontraron pedidos para el usuario.");
+            return null;
         }
-        
-        return product;
-    });
 
-    return {
-        ...order,
-        products: enrichedProducts
-    };
+        const products = await getProducts();
+        const enrichedUserOrders = {
+            ...userOrders,
+            orders: userOrders.orders.map((order) => {
+                const enrichedProducts = order.products.map((product) => {
+                    const matchingProduct = products.find((p) => p._id === product.productId);
+                    if (matchingProduct) {
+                        const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
+                        if (matchingVariant) {
+                            return {
+                                ...product,
+                                name: matchingProduct.name,
+                                category: matchingProduct.category,
+                                images: [matchingVariant.image],
+                                price: matchingProduct.price,
+                                purchased: true,
+                                color: product.color,
+                            };
+                        }
+                    }
+                    return product;
+                });
+                return {
+                    ...order,
+                    products: enrichedProducts
+                };
+            })
+        };
+
+        return enrichedUserOrders;
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        return null;
+    }
 };
