@@ -3,6 +3,7 @@
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { fetchUserCart } from "@/helpers/getCart";
 
 const CartContext = createContext();
 
@@ -12,24 +13,9 @@ export function CartProvider({ children }) {
   const [userCart, setUserCart] = useState(null);
   const [cartLoading, setCartLoading] = useState(true)
 
-  const fetchUserCart = async () => {
-    if (status === "authenticated") {
-      try {
-        const userId = session.user._id;
-        const response = await axios.get(`/api/cart`);
-        const userCart = response.data.find((cart) => cart.userId === userId);
-        setCartLoading(false);
-        return userCart;
-      } catch (error) {
-        console.error('Error fetching cart:', error);
-      }
-    }
-    return null;
-  };
-
   useEffect(() => {
     const fetchCartAndUpdateState = async () => {
-      const userCart = await fetchUserCart();
+      const userCart = await fetchUserCart(session, status, setCartLoading);
       if (userCart) {
         setCartItems(userCart.cart);
         setUserCart(userCart);
