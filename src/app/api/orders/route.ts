@@ -4,10 +4,14 @@ import { connectDB } from '../../../libs/mongodb';
 
 connectDB();
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    const query = new URL(req.url).searchParams;
+    const userId = query.get('userId');
+    
     try {
-        const orders = await Orders.find();
-        return NextResponse.json(orders.reverse());
+        const order = await Orders.findOne({ userId });
+
+        return NextResponse.json(order);
     } catch (error) {
         console.error('Failed to fetch products.', error);
         return NextResponse.json({ error: 'Failed to fetch products.' }, { status: 500 });
