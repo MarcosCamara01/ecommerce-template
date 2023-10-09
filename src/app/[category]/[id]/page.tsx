@@ -10,8 +10,8 @@ const ProductPage = async () => {
     const parts = pathname.split("/");
     const productId = parts.pop();
 
-    const product = await getProducts(`_id=${productId}`);
-    const randomProducts = await getProducts(`random=${productId}`);
+    const product = await getProducts(`?_id=${productId}`);
+    const randomProducts = await getProducts(`?random=${productId}`);
 
     return (
         <section>
