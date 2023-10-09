@@ -68,7 +68,7 @@ const Cart = () => {
     };
 
     updateCartWithProducts();
-  }, [cartItems]);
+  }, [cartItems, cartLoading]);
 
   return (
     <section>

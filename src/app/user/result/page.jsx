@@ -19,14 +19,14 @@ function CheckoutSuccess() {
     if (session_id && data === undefined) {
       fetchCheckoutData(`/api/stripe/checkout_sessions?session_id=${session_id}`);
     }
-  }, [session_id]);
+  }, [session_id, data]);  
 
   useEffect(() => {
     if (session_id && userCart != null && userCart.cart.length > 0) {
       emptyCart();
     }
-  }, [userCart, session_id]);
-
+  }, [userCart, session_id, emptyCart]);
+  
   useEffect(() => {
     if (data?.status === "complete" && !hasSavedOrder) {
       saveOrder(data, setHasSavedOrder);
