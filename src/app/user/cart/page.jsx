@@ -62,7 +62,8 @@ const Cart = () => {
         setIsLoading(false);
         setTotalPrice(totalPrice);
       } else if (!cartLoading && cartItems.length === 0) {
-        setIsLoading(false)
+        setCartWithProducts([]);
+        setIsLoading(false);
       }
     };
 
