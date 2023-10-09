@@ -15,7 +15,6 @@ function generateRandomOrderNumber() {
 }
 
 export const saveOrder = async (data, setHasSavedOrder) => {
-    console.log(data)
     const userId = data.metadata?.userId;
     const products = data.metadata?.products ? JSON.parse(data.metadata.products) : [];
     const randomOrderNumber = generateRandomOrderNumber();
@@ -39,7 +38,8 @@ export const saveOrder = async (data, setHasSavedOrder) => {
     };
 
     try {
-        const userOrders = await getOrders(userId);
+        const response = await axios.get(`/api/orders?userId=${userId}`);
+        const userOrders = response.data;
 
         if (userOrders) {
             const orderIdMatch = userOrders.orders.some(order => order.orderId === data.id);
@@ -69,8 +69,8 @@ export const saveOrder = async (data, setHasSavedOrder) => {
 
 export const getOrdersWithProducts = async (userId) => {
     try {
-        const response = await axios.get(`/api/orders`);
-        const userOrders = response.data.find((order) => order.userId === userId);
+        const response = await axios.get(`/api/orders?userId=${userId}`);
+        const userOrders = response.data;
 
         if (!userOrders) {
             console.log("No se encontraron pedidos para el usuario.");
