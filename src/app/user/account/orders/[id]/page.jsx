@@ -19,9 +19,9 @@ function OrderDetails() {
 
     useEffect(() => {
         if (status === "authenticated" && orderId) {
-            const userId = session.user._id;
             const fetchUserOrders = async () => {
                 try {
+                    const userId = session.user._id;
                     const ordersWithProducts = await getOrdersWithProducts(userId);
                     const order = ordersWithProducts.orders.find((order) => order._id === orderId);
                     setUserOrder(order);
@@ -32,7 +32,7 @@ function OrderDetails() {
             };
             fetchUserOrders();
         }
-    }, [status, orderId]);
+    }, [status, orderId, session.user._id]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);

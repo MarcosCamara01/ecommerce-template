@@ -69,7 +69,7 @@ function Signin() {
           onClick={() => signIn("google")}>
           <FcGoogle /> Sign in with Google
         </button>
-        <Link href="/register">Don't have an account?</Link>
+        <Link href="/register">Don&apos;t have an account?</Link>
       </form>
     </section>
   );

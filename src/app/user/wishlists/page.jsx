@@ -47,7 +47,7 @@ const Wishlists = () => {
 
 
         updateCartWithProducts();
-    }, [userCart]);
+    }, [userCart, cartLoading]);
 
     return (
         <section>
