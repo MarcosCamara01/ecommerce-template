@@ -82,7 +82,7 @@ const Cart = () => {
         :
         cartWithProducts.length >= 1 ?
           <>
-            <h2>TU CARRITO DE LA COMPRA</h2>
+            <h2 className="section-h2">TU CARRITO DE LA COMPRA</h2>
             <Products
               products={cartWithProducts}
             />

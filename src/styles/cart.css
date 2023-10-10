@@ -1,3 +1,8 @@
+section {
+    padding-bottom: 102px;
+    padding-top: 25px;
+}
+
 .cart-footer {
     position: fixed;
     bottom: 0;
@@ -43,4 +48,8 @@
     border: transparent;
     color: #000;
     cursor: pointer;
+}
+
+.section-h2 {
+    margin-bottom: 20px;
 }

@@ -25,7 +25,7 @@ function CheckoutSuccess() {
     if (session_id && userCart != null && userCart.cart.length > 0) {
       emptyCart();
     }
-  }, [userCart, session_id, emptyCart]);
+  }, [userCart, session_id]);
   
   useEffect(() => {
     if (data?.status === "complete" && !hasSavedOrder) {
