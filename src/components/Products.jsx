@@ -4,6 +4,8 @@ import { ProductCartInfo, DeleteButton } from "./CartElements";
 import { FavoriteButton } from "./ProductsElements";
 
 export const Products = ({ products }) => {
+
+  console.table(products)
   return (
     <div className="products-section">
       {products.map((product) => {

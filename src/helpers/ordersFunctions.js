@@ -79,8 +79,13 @@ export const getOrdersWithProducts = async (userId) => {
 
         const fetchProducts = async (productId) => {
             try {
-                const products = await getProducts(`_id=${productId}`);
-                return products;
+                const res = await fetch(`/api/products?_id=${productId}`);
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch data')
+                }
+
+                return res.json();
             } catch (error) {
                 console.error("Error al obtener el producto con ID:", productId, error);
                 return null;
