@@ -7,7 +7,6 @@ import '../../../styles/cart.css';
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
-import { getProducts } from "@/helpers/getProducts";
 
 const Wishlists = () => {
     const { userCart, cartLoading } = useCart();
@@ -17,8 +16,13 @@ const Wishlists = () => {
 
     const fetchProducts = async (productId) => {
         try {
-            const products = await getProducts(`_id=${productId}`);
-            return products;
+            const res = await fetch(`/api/products?_id=${productId}`);
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch data')
+            }
+
+            return res.json();
         } catch (error) {
             console.error("Error al obtener los productos:", error);
             return null;
