@@ -21,7 +21,8 @@ const Cart = () => {
       const res = await fetch(`/api/products?_id=${productId}`);
 
       if (!res.ok) {
-        throw new Error('Failed to fetch data')
+        const errorData = await res.json();
+        throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);
       }
 
       return res.json();
