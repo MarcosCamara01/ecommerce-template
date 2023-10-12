@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getProducts } from "./getProducts"
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

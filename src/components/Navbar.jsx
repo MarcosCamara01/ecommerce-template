@@ -17,9 +17,9 @@ export const Navbar = () => {
   return (
     <header>
       <ul>
-        <li><Link href="/camisetas">Camisetas</Link></li>
-        <li><Link href="/pantalones">Pantalones</Link></li>
-        <li><Link href="/sudaderas">Sudaderas</Link></li>
+        <li><Link href="/t-shirt">T-SHIRTS</Link></li>
+        <li><Link href="/pantalones">PANTS</Link></li>
+        <li><Link href="/sudaderas">SWEATSHIRTS</Link></li>
       </ul>
       <ul>
         {
@@ -28,7 +28,7 @@ export const Navbar = () => {
             :
             <li><Link href="/login">Login</Link></li>
         }
-        <li><Link href="/user/wishlists">Wishlists ({userCart ? userCart?.favorites?.length : 0})</Link></li>
+        <li><Link href="/user/wishlists">Wishlists ({userCart?.favorites ? userCart.favorites.length : 0})</Link></li>
 
         <li><Link href="/user/cart">Cart ({totalQuantity})</Link></li>
       </ul>

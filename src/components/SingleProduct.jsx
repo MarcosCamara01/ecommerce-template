@@ -2,8 +2,8 @@ import '../styles/singleproduct.css';
 import { ProductButtons } from "@/components/ProductsElements";
 
 export const SingleProduct = ({ product }) => {
-    const allImages = product.images.concat(
-        product.variants.map((variant) => variant.image).flat()
+    const allImages = product.image.concat(
+        product.variants.map((variant) => variant.images).flat()
     );
 
     return (

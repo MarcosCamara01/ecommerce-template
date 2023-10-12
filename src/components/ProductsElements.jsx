@@ -10,7 +10,9 @@ import axios from 'axios';
 
 export const ProductButtons = ({ product }) => {
     const { addToCart } = useCart();
-    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [selectedVariant, setSelectedVariant] = useState(
+        product.variants.length === 1 ? product.variants[0] : null
+    );
     const [selectedSize, setSelectedSize] = useState('');
     const [error, setError] = useState('none');
 
@@ -25,13 +27,21 @@ export const ProductButtons = ({ product }) => {
                 selectedVariant.priceId,
                 selectedVariant.variantId
             );
-        } else {
-            const errorMessage = 'TIENES QUE SELECCIONAR UN COLOR Y UNA TALLA.'
+        } else if (selectedVariant && !selectedSize) {
+            const errorMessage = 'YOU HAVE TO SELECT A SIZE.'
             setError(errorMessage);
-            console.error(errorMessage);
+            console.warn(errorMessage);
+        } else if (!selectedVariant && selectedSize) {
+            const errorMessage = 'YOU HAVE TO SELECT A COLOR.'
+            setError(errorMessage);
+            console.warn(errorMessage);
+        } else {
+            const errorMessage = 'YOU HAVE TO SELECT A COLOR AND A SIZE.'
+            setError(errorMessage);
+            console.warn(errorMessage);
         }
     };
-    
+
     return (
         <>
             <div className='section section-mid'>

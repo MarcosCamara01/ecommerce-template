@@ -107,6 +107,18 @@ section {
   margin-top: -37px;
 }
 
+@media (max-width: 600px) {
+  section {
+    padding: 0 25px 30px 25px;
+  }
+}
+
+@media (max-width: 350px) {
+  section {
+    padding: 0 15px 30px 15px;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

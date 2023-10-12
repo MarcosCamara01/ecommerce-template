@@ -109,7 +109,7 @@
     width: 35px;
     height: 35px;
     cursor: pointer;
-    display: flex; 
+    display: flex;
     justify-content: center;
     position: relative;
 }
@@ -123,28 +123,3 @@
     align-items: center;
     justify-content: center;
 }
-
-.product-img {
-    transition: transform 0.3s; /* Agrega una transición suave para el efecto de ampliación */
-  }
-  
-  /* Estilo para las imágenes ampliadas */
-  .product-img.enlarged {
-    height: 100vh;
-    position: fixed; /* Coloca la imagen sobre todo el contenido */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: auto; /* Centra la imagen en la pantalla */
-    z-index: 9999; /* Asegura que la imagen esté en la parte superior */
-    cursor: zoom-out; /* Cambia el cursor para indicar que se puede hacer clic para cerrar */
-    transform: scale(2); /* Amplía la imagen al 200% de su tamaño original */
-    transition: transform 0.3s; /* Agrega una transición suave para el efecto de zoom */
-  }
-  
-  /* Estilo para el cursor de zoom-in al hacer hover sobre la imagen ampliada */
-  .product-img.enlarged:hover {
-    cursor: zoom-in;
-  }
-  
