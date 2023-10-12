@@ -16,7 +16,7 @@ export const Products = ({ products }) => {
                 : product._id}`}
             >
               <img
-                src={product?.images[0]}
+                src={product?.image}
                 alt={product?.name}
                 className="product-img"
                 loading="lazy"
