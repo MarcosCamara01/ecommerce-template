@@ -1,8 +1,8 @@
 export async function getProducts(key = "") {
-    const { NEXT_URL } = process.env;
+    const { NEXT_PUBLIC_APP_URL } = process.env;
 
     try {
-        const res = await fetch(`${NEXT_URL}/api/products${key}`)
+        const res = await fetch(`${NEXT_PUBLIC_APP_URL}/api/products${key}`)
 
         if (!res.ok) {
             const errorData = await res.json();

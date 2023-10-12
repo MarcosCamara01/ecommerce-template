@@ -1,4 +1,5 @@
 "use client";
+
 import { FormEvent, useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { signIn, useSession } from "next-auth/react";
@@ -22,7 +23,7 @@ function Signup() {
     event.preventDefault();
     try {
       const formData = new FormData(event.currentTarget);
-      const signupResponse = await axios.post("/api/auth/signup", {
+      const signupResponse = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/signup`, {
         email: formData.get("email"),
         password: formData.get("password"),
         name: formData.get("name"),
