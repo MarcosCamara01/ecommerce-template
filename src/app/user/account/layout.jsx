@@ -6,13 +6,13 @@ export default function RootLayout({ children }) {
         <section>
             <div className="user-links">
                 <Link href="/user/account/orders">
-                    COMPRAS
+                    PURCHASES
                 </Link>
                 <Link href="/user/account/profile">
-                    PERFIL
+                    PROFILE
                 </Link>
                 <Link href="#">
-                    AJUSTES
+                    SETTINGS
                 </Link>
             </div>
             {children}

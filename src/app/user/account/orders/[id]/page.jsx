@@ -27,7 +27,7 @@ function OrderDetails() {
                     setUserOrder(order);
                     setLoading(false);
                 } catch (error) {
-                    console.error("Error al obtener los pedidos:", error);
+                    console.error("Error fetching orders:", error);
                 }
             };
             fetchUserOrders();
@@ -43,7 +43,7 @@ function OrderDetails() {
         if (userOrder) {
             const totalProducts = userOrder.products.reduce((total, product) => total + product.quantity, 0);
 
-            const productsText = totalProducts === 1 ? "artículo" : "artículos";
+            const productsText = totalProducts === 1 ? "item" : "items";
 
             return (
                 <div className="order-container">
@@ -52,13 +52,13 @@ function OrderDetails() {
                     </div>
                     <div className='order-details'>
                         <div className='details'>
-                            <h3>DETALLES DEL PEDIDO</h3>
-                            <div className='bx-info'><span>Número de pedido</span> <span>{userOrder?.orderNumber}</span></div>
-                            <div className='bx-info'><span>Fecha del pedido</span> <span>{formatDate(userOrder.purchaseDate)}</span></div>
-                            <div className='bx-info'><span>Fecha de entrega</span> <span>{formatDate(userOrder.expectedDeliveryDate)}</span></div>
+                            <h3>ORDER DETAILS</h3>
+                            <div className='bx-info'><span>Order Number</span> <span>{userOrder?.orderNumber}</span></div>
+                            <div className='bx-info'><span>Order Date</span> <span>{formatDate(userOrder.purchaseDate)}</span></div>
+                            <div className='bx-info'><span>Expected Delivery Date</span> <span>{formatDate(userOrder.expectedDeliveryDate)}</span></div>
                         </div>
                         <div className='details'>
-                            <h3>DIRECCIÓN DE LA ENTREGA</h3>
+                            <h3>DELIVERY ADDRESS</h3>
                             <ul>
                                 <li>{userOrder.name}</li>
                                 <li>{userOrder.address.line1}</li>
@@ -73,18 +73,18 @@ function OrderDetails() {
                             </ul>
                         </div>
                         <div className='details'>
-                            <h3>TOTALES</h3>
+                            <h3>TOTALS</h3>
                             <div className='bx-info'><span>{totalProducts} {productsText}</span> <span>{(userOrder.total_price / 100).toFixed(2)} €</span></div>
-                            <div className='bx-info'><span>Entrega</span> <span>GRATIS</span></div>
-                            <div className='bx-info'><span>Descuento total</span> <span>{userOrder.discount ? userOrder.discount : 0} €</span></div>
+                            <div className='bx-info'><span>Delivery</span> <span>FREE</span></div>
+                            <div className='bx-info'><span>Total Discount</span> <span>{userOrder.discount ? userOrder.discount : 0} €</span></div>
                             <div className='bx-info'><span>Total</span> <span>{(userOrder.total_price / 100).toFixed(2)} €</span></div>
-                            <div className='bx-info'>(IVA incluido)</div>
+                            <div className='bx-info'>(VAT included)</div>
                         </div>
                     </div>
                 </div>
             );
         } else {
-            return <h4>Pedido no encontrado.</h4>;
+            return <h4>Order not found.</h4>;
         }
     };
 

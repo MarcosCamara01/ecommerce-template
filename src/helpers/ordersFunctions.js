@@ -47,9 +47,9 @@ export const saveOrder = async (data, setHasSavedOrder) => {
                 const response = await axios.put(`/api/orders?id=${userOrders._id}`, {
                     orders: updatedOrders,
                 });
-                console.log("Pedidos actualizados con éxito", response);
+                console.log("Orders successfully updated.", response);
             } else {
-                console.log("Ya se ha guardado este pedido");
+                console.log("This order has already been saved.");
             }
         } else {
             const updatedOrders = [newOrder];
@@ -57,12 +57,12 @@ export const saveOrder = async (data, setHasSavedOrder) => {
                 userId: userId,
                 order: updatedOrders,
             });
-            console.log("Pedido creado y guardado con éxito", response);
+            console.log("Order created and saved successfully.", response);
         }
 
         setHasSavedOrder(true);
     } catch (error) {
-        console.error('Error al guardar la orden:', error);
+        console.error('Error saving the order:', error);
     }
 };
 
@@ -72,7 +72,7 @@ export const getOrdersWithProducts = async (userId) => {
         const userOrders = response.data;
 
         if (!userOrders) {
-            console.log("No se encontraron pedidos para el usuario.");
+            console.log("No orders were found for the user.");
             return null;
         }
 
@@ -87,7 +87,7 @@ export const getOrdersWithProducts = async (userId) => {
 
                 return res.json();
             } catch (error) {
-                console.error("Error al obtener el producto con ID:", productId, error);
+                console.error("Error obtaining product with ID:", productId, error);
                 return null;
             }
         };

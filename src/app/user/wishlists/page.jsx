@@ -72,7 +72,7 @@ const Wishlists = () => {
                         {
                             status === "authenticated" ?
                                 <>
-                                    <h3>When you've added something to the wish list, it will appear here. Want to get started?</h3>
+                                    <h3>When you have added something to the wish list, it will appear here. Want to get started?</h3>
                                     <Link href="/">Start</Link>
                                 </>
                                 :
