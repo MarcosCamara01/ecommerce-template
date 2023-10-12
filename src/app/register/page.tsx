@@ -8,7 +8,7 @@ import '../../styles/form.css';
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 
-function Signup() {
+const Signup = () => {
   const [error, setError] = useState();
   const router = useRouter();
   const { data: session } = useSession();

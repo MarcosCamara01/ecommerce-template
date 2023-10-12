@@ -8,7 +8,7 @@ import { Loader } from "@/helpers/Loader";
 import '@/styles/orders.css';
 import { getOrdersWithProducts } from '@/helpers/ordersFunctions';
 
-function UserOrders() {
+const UserOrders = () => {
     const { data: session, status } = useSession();
     const [userOrders, setUserOrders] = useState([]);
     const [loading, setLoading] = useState(true);
