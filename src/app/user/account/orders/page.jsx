@@ -22,7 +22,7 @@ function UserOrders() {
                     response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
                     setUserOrders(response.orders);
                 } else {
-                    console.log("No hay pedidos disponibles.");
+                    console.log("No orders available.");
                 }
                 setLoading(false);
             };
@@ -45,7 +45,7 @@ function UserOrders() {
                     <div key={index} className="order-card">
                         <Link href={`/user/account/orders/${order._id}`}>
                             <h4>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
-                            <p>Número de pedido: {order.orderNumber}</p>
+                            <p>Order number: {order.orderNumber}</p>
                             <div className='bx-imgs'>
                                 {order.products.map((product, productIndex) => (
                                     <div key={productIndex} className="product-card">
@@ -57,7 +57,7 @@ function UserOrders() {
                     </div>
                 ))
             ) :
-                <p>No hay pedidos disponibles.</p>
+                <p>No orders available.</p>
             }
         </div>
     );

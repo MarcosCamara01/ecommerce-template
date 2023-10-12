@@ -24,7 +24,7 @@ function ProfilePage() {
                   className="cell-button"
                 >
                   <div className="cell-left">
-                    <h4>NOMBRE</h4>
+                    <h4>NAME</h4>
                     <span>{session.user.name}</span>
                   </div>
                   <div className="cell-right">
@@ -48,7 +48,7 @@ function ProfilePage() {
                   onClick={() => setToEdit({ field: "address", value: session.user.address })}
                 >
                   <div className="cell-left">
-                    <h4>DIRECCIONES</h4>
+                    <h4>ADDRESSES</h4>
                     <span>{session.user.address}</span>
                   </div>
                   <div className="cell-right">
@@ -60,7 +60,7 @@ function ProfilePage() {
                   onClick={() => setToEdit({ field: "phone", value: session.user.phone })}
                 >
                   <div className="cell-left">
-                    <h4>TELÉFONO</h4>
+                    <h4>TELEPHONE</h4>
                     <span>{session.user.phone}</span>
                   </div>
                   <div className="cell-right">
@@ -79,7 +79,7 @@ function ProfilePage() {
               </button>
             </div>
             :
-            <div><h2>Usuario no registrado</h2></div>
+            <div><h2>Unregistered user</h2></div>
       }
 
       {toEdit.field !== "none" && (

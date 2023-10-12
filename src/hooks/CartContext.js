@@ -57,7 +57,7 @@ export function CartProvider({ children }) {
         const userId = session.user._id;
 
         if (!userId) {
-          console.error('No se pudo obtener el _id del usuario.');
+          console.error("The user _id could not be obtained.");
           return;
         }
 
