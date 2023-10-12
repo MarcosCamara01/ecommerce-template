@@ -37,7 +37,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
     };
 
     try {
-        const response = await axios.get(`/api/orders?userId=${userId}`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders?userId=${userId}`);
         const userOrders = response.data;
 
         if (userOrders) {
@@ -53,7 +53,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
             }
         } else {
             const updatedOrders = [newOrder];
-            const response = await axios.post('/api/orders', {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders`, {
                 userId: userId,
                 order: updatedOrders,
             });

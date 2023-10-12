@@ -63,13 +63,13 @@ export function CartProvider({ children }) {
 
         let userCartToUpdate = userCart;
         if (!userCartToUpdate) {
-          userCartToUpdate = await axios.post(`/api/cart`, {
+          userCartToUpdate = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`, {
             cart: updatedCart,
             userId: userId
           });
           console.log('Cart created on the server');
         } else {
-          await axios.put(`/api/cart?id=${userCartToUpdate._id}`, {
+          await axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?id=${userCartToUpdate._id}`, {
             cart: updatedCart,
           });
           console.log('Cart updated on the server');

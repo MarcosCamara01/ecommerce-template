@@ -17,7 +17,7 @@ function CheckoutSuccess() {
 
   useEffect(() => {
     if (session_id && data === undefined) {
-      fetchCheckoutData(`/api/stripe/checkout_sessions?session_id=${session_id}`);
+      fetchCheckoutData(`${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/checkout_sessions?session_id=${session_id}`);
     }
   }, [session_id, data]);  
 
