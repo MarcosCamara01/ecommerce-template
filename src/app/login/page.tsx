@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSession } from 'next-auth/react';
 import { FcGoogle } from 'react-icons/fc';
 
-function Signin() {
+const Signin = () => {
   const [error, setError] = useState("");
   const router = useRouter();
   const { data: session } = useSession();

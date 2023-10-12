@@ -7,7 +7,7 @@ import { useCart } from '@/hooks/CartContext';
 import { saveOrder } from "@/helpers/ordersFunctions";
 import { Loader } from "@/helpers/Loader";
 
-function CheckoutSuccess() {
+const CheckoutSuccess = () => {
   const searchParams = useSearchParams();
   const { userCart, setCartItems } = useCart();
   const [data, setData] = useState();

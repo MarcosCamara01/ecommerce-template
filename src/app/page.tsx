@@ -1,7 +1,7 @@
 import { getProducts } from "@/helpers/getProducts";
 import { Products } from "../components/Products";
 
-export default async function Home() {
+const Home = async () =>  {
   let products = await getProducts();
   products.reverse();
 
@@ -13,3 +13,5 @@ export default async function Home() {
     </section>
   );
 }
+
+export default Home;

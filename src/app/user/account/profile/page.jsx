@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { IoIosArrowForward } from 'react-icons/io';
 
-function ProfilePage() {
+const ProfilePage = () => {
   const [toEdit, setToEdit] = useState({ field: 'none', value: '' });
   const { data: session, status } = useSession();
   console.log(session)

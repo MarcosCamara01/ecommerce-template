@@ -9,7 +9,7 @@ import { Loader } from "@/helpers/Loader";
 import { format } from 'date-fns';
 import { getOrdersWithProducts } from '@/helpers/ordersFunctions';
 
-function OrderDetails() {
+const OrderDetails = () => {
     const params = useParams();
     const { data: session, status } = useSession();
     const [userOrder, setUserOrder] = useState(null);
