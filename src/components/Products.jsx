@@ -4,8 +4,6 @@ import { ProductCartInfo, DeleteButton } from "./CartElements";
 import { FavoriteButton } from "./ProductsElements";
 
 export const Products = ({ products }) => {
-
-  console.table(products)
   return (
     <div className="products-section">
       {products.map((product) => {
@@ -18,7 +16,7 @@ export const Products = ({ products }) => {
                 : product._id}`}
             >
               <img
-                src={product?.images[0]}
+                src={product?.image}
                 alt={product?.name}
                 className="product-img"
                 loading="lazy"

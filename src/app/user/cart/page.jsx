@@ -53,7 +53,7 @@ const Cart = () => {
               return {
                 ...cartItem,
                 category: matchingProduct.category,
-                images: [matchingVariant.image],
+                image: matchingVariant.images[0],
                 name: matchingProduct.name,
                 price: matchingProduct.price,
               };
@@ -82,7 +82,7 @@ const Cart = () => {
         :
         cartWithProducts.length >= 1 ?
           <>
-            <h2>TU CARRITO DE LA COMPRA</h2>
+            <h2 className="section-h2">YOUR SHOPPING CART</h2>
             <Products
               products={cartWithProducts}
             />
@@ -93,7 +93,7 @@ const Cart = () => {
                   <span>Total:</span>
                   <span>{totalPrice}€</span>
                 </div>
-                <span className="taxes">+ IMPUESTOS INCLUIDOS</span>
+                <span className="taxes">+ TAX INCL.</span>
               </div>
               <div className="cart-button">
                 <ButtonCheckout
@@ -104,14 +104,14 @@ const Cart = () => {
           </>
           :
           <>
-            <h2>TU CARRITO ESTÁ VACÍO</h2>
+            <h2>YOUR CART IS EMPTY.</h2>
             {status === "authenticated" ?
               <>
-                <h3>Cuando hayas añadido algo al carrito, aparecerá aquí. ¿Quieres empezar?</h3>
-                <Link href="/">Comenzar</Link>
+                <h3>When you've added something to your cart, it will appear here. Want to get started?</h3>
+                <Link href="/">Start</Link>
               </>
               :
-              <p>No estás registrado? Necesitas estarlo para poder guardar tus productos al carrito. <Link href="/login">Login</Link></p>
+              <p>Not registered? You must be in order to save your products in the shopping cart.<Link href="/login">Login</Link></p>
             }
           </>
       }

@@ -49,7 +49,7 @@ const ProductForm = () => {
     const handleVariantImageChange = (e, index) => {
         uploadImages(e, (newImageUrls) => {
             const updatedVariants = [...variants];
-            updatedVariants[index].image = newImageUrls;
+            updatedVariants[index].images = newImageUrls;
             setVariants(updatedVariants);
         });
     };
@@ -95,7 +95,7 @@ const ProductForm = () => {
                 sizes: sizesArray,
                 variants: variants,
                 variantImages: variantImageUrls, // Enviar las imágenes de las variantes al servidor
-                images: imageUrls
+                image: imageUrls
             };
 
             const url = '/api/products';
@@ -188,7 +188,7 @@ const ProductForm = () => {
             </div>
 
             <div className='input-bx'>
-                <label>Main Images:</label>
+                <label>Main Image:</label>
                 <input type="file" name="images" multiple onChange={handleImageChange} disabled={isUploading} />
             </div>
 
