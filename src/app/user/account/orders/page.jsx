@@ -49,7 +49,7 @@ const UserOrders = () => {
                             <div className='bx-imgs'>
                                 {order.products.map((product, productIndex) => (
                                     <div key={productIndex} className="product-card">
-                                        <img src={product.images[0]} alt={product.name} loading='lazy' />
+                                        <img src={product.image} alt={product.name} loading='lazy' />
                                     </div>
                                 ))}
                             </div>

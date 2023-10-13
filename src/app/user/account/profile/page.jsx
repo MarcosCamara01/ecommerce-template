@@ -7,9 +7,10 @@ import { useState } from "react";
 import { IoIosArrowForward } from 'react-icons/io';
 
 const ProfilePage = () => {
-  const [toEdit, setToEdit] = useState({ field: 'none', value: '' });
+  const [toEdit, setToEdit] = useState({ field: 'none', value: 'none' });
   const { data: session, status } = useSession();
-  console.log(session)
+  const warningMessage = "You cannot update the user if you are logged in with Google"
+
   return (
     <>
       {
@@ -20,8 +21,11 @@ const ProfilePage = () => {
             <div className="user">
               <div className="user-information">
                 <button
-                  onClick={() => setToEdit({ field: "name", value: session.user.name })}
                   className="cell-button"
+                  onClick={() => session.user.image ?
+                    setToEdit({ field: "warning", value: warningMessage })
+                    :
+                    setToEdit({ field: "name", value: session.user.name })}
                 >
                   <div className="cell-left">
                     <h4>NAME</h4>
@@ -33,7 +37,10 @@ const ProfilePage = () => {
                 </button>
                 <button
                   className="cell-button"
-                  onClick={() => setToEdit({ field: "email", value: session.user.email })}
+                  onClick={() => session.user.image ?
+                    setToEdit({ field: "warning", value: warningMessage })
+                    :
+                    setToEdit({ field: "email", value: session.user.email })}
                 >
                   <div className="cell-left">
                     <h4>E-MAIL</h4>
@@ -45,7 +52,10 @@ const ProfilePage = () => {
                 </button>
                 <button
                   className="cell-button"
-                  onClick={() => setToEdit({ field: "address", value: session.user.address })}
+                  onClick={() => session.user.image ?
+                    setToEdit({ field: "warning", value: warningMessage })
+                    :
+                    setToEdit({ field: "address", value: session.user.address })}
                 >
                   <div className="cell-left">
                     <h4>ADDRESSES</h4>
@@ -57,7 +67,10 @@ const ProfilePage = () => {
                 </button>
                 <button
                   className="cell-button"
-                  onClick={() => setToEdit({ field: "phone", value: session.user.phone })}
+                  onClick={() => session.user.image ?
+                    setToEdit({ field: "warning", value: warningMessage })
+                    :
+                    setToEdit({ field: "phone", value: session.user.phone })}
                 >
                   <div className="cell-left">
                     <h4>TELEPHONE</h4>
@@ -84,8 +97,8 @@ const ProfilePage = () => {
 
       {toEdit.field !== "none" && (
         <FixedComponent
-          message={toEdit.field}
-          task="Update"
+          message={toEdit.value}
+          task={toEdit.field}
           toEdit={toEdit}
           setToEdit={setToEdit}
         />
