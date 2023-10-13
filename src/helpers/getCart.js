@@ -1,7 +1,6 @@
 import axios from "axios";
 
-export const fetchUserCart = async (session, status, setCartLoading) => {
-  if (status === "authenticated") {
+export const fetchUserCart = async (session, setCartLoading) => {
     try {
       const userId = await session.user._id;
       const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${userId}`);
@@ -11,7 +10,6 @@ export const fetchUserCart = async (session, status, setCartLoading) => {
     } catch (error) {
       console.error('Error fetching cart:', error);
     }
-  }
 
   return null;
 };

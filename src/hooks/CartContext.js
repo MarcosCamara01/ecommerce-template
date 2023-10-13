@@ -14,19 +14,21 @@ export function CartProvider({ children }) {
   const [cartLoading, setCartLoading] = useState(true)
 
   useEffect(() => {
-    const fetchCartAndUpdateState = async () => {
-      const userCart = await fetchUserCart(session, status, setCartLoading);
-      if (userCart) {
-        setCartItems(userCart.cart);
-        setUserCart(userCart);
-      } else {
-        setCartItems([]);
-        setUserCart(null);
-      }
-    };
-
-    fetchCartAndUpdateState();
+    if (status === "authenticated") {
+      fetchCartAndUpdateState();
+    }
   }, [status, session]);
+
+  const fetchCartAndUpdateState = async () => {
+    const userCart = await fetchUserCart(session, setCartLoading);
+    if (userCart) {
+      setCartItems(userCart.cart);
+      setUserCart(userCart);
+    } else {
+      setCartItems([]);
+      setUserCart(null);
+    }
+  };
 
   const addToCart = async (productId, color, size, quantity, variantId) => {
     const newItem = {
