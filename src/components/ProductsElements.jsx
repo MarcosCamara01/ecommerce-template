@@ -14,7 +14,7 @@ export const ProductButtons = ({ product }) => {
         product.variants.length === 1 ? product.variants[0] : null
     );
     const [selectedSize, setSelectedSize] = useState('');
-    const [error, setError] = useState('none');
+    const [warning, setWarning] = useState('none');
 
     const handleAddToCart = () => {
         if (selectedVariant && selectedSize) {
@@ -28,17 +28,17 @@ export const ProductButtons = ({ product }) => {
                 selectedVariant.variantId
             );
         } else if (selectedVariant && !selectedSize) {
-            const errorMessage = 'YOU HAVE TO SELECT A SIZE.'
-            setError(errorMessage);
-            console.warn(errorMessage);
+            const warningMessage = 'YOU HAVE TO SELECT A SIZE.'
+            setWarning(warningMessage);
+            console.warn(warningMessage);
         } else if (!selectedVariant && selectedSize) {
-            const errorMessage = 'YOU HAVE TO SELECT A COLOR.'
-            setError(errorMessage);
-            console.warn(errorMessage);
+            const warningMessage = 'YOU HAVE TO SELECT A COLOR.'
+            setWarning(warningMessage);
+            console.warn(warningMessage);
         } else {
-            const errorMessage = 'YOU HAVE TO SELECT A COLOR AND A SIZE.'
-            setError(errorMessage);
-            console.warn(errorMessage);
+            const warningMessage = 'YOU HAVE TO SELECT A COLOR AND A SIZE.'
+            setWarning(warningMessage);
+            console.warn(warningMessage);
         }
     };
 
@@ -75,11 +75,11 @@ export const ProductButtons = ({ product }) => {
                 <button type="submit" onClick={handleAddToCart}>Add to Cart</button>
             </div>
 
-            {error != "none" &&
+            {warning != "none" &&
                 <FixedComponent
-                    message={error}
-                    setOpen={setError}
-                    task={"Warning"}
+                    message={warning}
+                    setOpen={setWarning}
+                    task={"warning"}
                 />
             }
         </>

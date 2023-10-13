@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 
 export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) => {
     const { data: session, update } = useSession();
-    const isWarning = task === "Warning";
+    const isWarning = task === "warning";
 
     useEffect(() => {
         if (message !== 'none') {
@@ -22,8 +22,6 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) =>
         };
     }, [message]);
 
-    console.log(session);
-
     const handleUpdate = async (e) => {
         e.preventDefault();
         if (!isWarning && (toEdit.field === "name" || toEdit.field === "email")) {
@@ -36,7 +34,7 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) =>
                 });
                 console.log(response);
 
-                setToEdit({ field: 'none', value: '' });
+                setToEdit({ field: 'none', value: 'none' });
             } catch (error) {
                 console.error(error);
             }
@@ -53,8 +51,8 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) =>
                     <div>
                         <input
                             type="text"
-                            value={toEdit.value} // Usar toEdit.value en lugar de toUpdate
-                            onChange={(e) => setToEdit({ ...toEdit, value: e.target.value })} // Actualizar toEdit.value
+                            value={toEdit.value} 
+                            onChange={(e) => setToEdit({ ...toEdit, value: e.target.value })} 
                         />
                         <button onClick={handleUpdate}>Update</button>
                     </div>
@@ -63,8 +61,8 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) =>
                 <button
                     className='box-button'
                     onClick={() => {
-                        if (!isWarning) {
-                            setToEdit({ field: 'none', value: '' });
+                        if (!isWarning || isWarning && toEdit.field == "warning") {
+                            setToEdit({ field: 'none', value: 'none' });
                         } else {
                             setOpen("none");
                         }

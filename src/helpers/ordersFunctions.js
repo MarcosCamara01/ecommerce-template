@@ -104,7 +104,7 @@ export const getOrdersWithProducts = async (userId) => {
                                     ...product,
                                     name: matchingProduct.name,
                                     category: matchingProduct.category,
-                                    images: [matchingVariant.image],
+                                    image: [matchingVariant.images[0]],
                                     price: matchingProduct.price,
                                     purchased: true,
                                     color: product.color,
