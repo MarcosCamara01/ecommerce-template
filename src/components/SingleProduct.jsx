@@ -2,9 +2,23 @@ import '../styles/singleproduct.css';
 import { ProductButtons } from "@/components/ProductsElements";
 
 export const SingleProduct = ({ product }) => {
-    const allImages = product.image.concat(
-        product.variants.map((variant) => variant.images).flat()
-    );
+    if (!product) {
+        return <div>Producto no encontrado</div>;
+    }
+
+    const allImages = [];
+    if (product.image) {
+        allImages.push(...product.image);
+    }
+
+    if (product.variants) {
+        const variantImages = product.variants
+            .filter(variant => variant.images)
+            .map(variant => variant.images)
+            .flat();
+
+        allImages.push(...variantImages);
+    }
 
     return (
         <div className="product-bx">
