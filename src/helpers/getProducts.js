@@ -1,9 +1,8 @@
 export async function getProducts(key = "") {
     const { NEXT_PUBLIC_APP_URL } = process.env;
-
+    console.log(key)
     try {
         const res = await fetch(`${NEXT_PUBLIC_APP_URL}/api/products${key}`)
-
         if (!res.ok) {
             const errorData = await res.json();
             throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);
@@ -14,8 +13,6 @@ export async function getProducts(key = "") {
         return jsonData;
 
     } catch (error) {
-        console.error('Error fetching cart:', error);
+        console.error('Error fetching products:', error);
     }
-
-    return null;
 }
