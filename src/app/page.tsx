@@ -1,9 +1,11 @@
 import { getProducts } from "@/helpers/getProducts";
 import { Products } from "../components/Products";
 
-const Home = async () =>  {
+const Home = async () => {
   let products = await getProducts();
-  products.reverse();
+  if (products) {
+    products.reverse();
+  }
 
   return (
     <section className="section-products">
