@@ -9,6 +9,7 @@ export const fetchUserCart = async (session, setCartLoading) => {
       return userCart;
     } catch (error) {
       console.error('Error fetching cart:', error);
+      setCartLoading(false);
     }
 
   return null;

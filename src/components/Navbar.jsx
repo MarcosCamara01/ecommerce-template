@@ -18,8 +18,8 @@ export const Navbar = () => {
     <header>
       <ul>
         <li><Link href="/t-shirt">T-SHIRTS</Link></li>
-        <li><Link href="/pantalones">PANTS</Link></li>
-        <li><Link href="/sudaderas">SWEATSHIRTS</Link></li>
+        <li><Link href="/pants">PANTS</Link></li>
+        <li><Link href="/sweatshirts">SWEATSHIRTS</Link></li>
       </ul>
       <ul>
         {
