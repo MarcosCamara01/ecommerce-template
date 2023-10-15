@@ -61,7 +61,7 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) =>
                 <button
                     className='box-button'
                     onClick={() => {
-                        if (!isWarning || isWarning && toEdit.field == "warning") {
+                        if (!isWarning || isWarning && toEdit?.field == "warning") {
                             setToEdit({ field: 'none', value: 'none' });
                         } else {
                             setOpen("none");
