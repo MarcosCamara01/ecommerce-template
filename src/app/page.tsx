@@ -1,26 +1,29 @@
-import { getProducts } from "@/helpers/getProducts";
 import { Products } from "../components/Products";
 
 const Home = async () => {
+  let products = [];
+
   try {
-    let products = await getProducts();
-    if (products) {
-      products.reverse();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products`)
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);
     }
 
-    return (
-      <section className="section-products">
-        <Products
-          products={products}
-        />
-      </section>
-    );
+    products = await res.json();
+    products.reverse();
+
   } catch (error) {
     console.error('Error fetching products:', error);
-    return (
-      <div>Error fetching products. Please try again later.</div>
-    );
   }
+
+  return (
+    <section className="section-products">
+      <Products
+        products={products}
+      />
+    </section>
+  );
 }
 
 export default Home;
