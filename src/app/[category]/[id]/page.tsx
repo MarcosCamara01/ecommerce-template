@@ -1,17 +1,24 @@
 import { SingleProduct } from "@/components/SingleProduct";
 import { getProducts } from "@/helpers/getProducts"
-import { headers } from 'next/headers';
 import { Products } from "@/components/Products";
 
-const ProductPage = async () => {
-    const headersList = headers();
+const ProductPage = async ({ params }: { params: { id: string } }) => {
+    let product = [];
 
-    const pathname = headersList.get("x-invoke-path") || "";
-    const parts = pathname.split("/");
-    const productId = parts.pop();
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/${params.id}`)
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);
+        }
 
-    const product = await getProducts(`?_id=${productId}`);
-    const randomProducts = await getProducts(`?random=${productId}`);
+        product = await res.json();
+
+    } catch (error) {
+        console.error('Error fetching products:', error);
+    }
+
+    const randomProducts = await getProducts(`?random=${params.id}`);
 
     return (
         <section>
