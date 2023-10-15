@@ -52,10 +52,6 @@ const ProfilePage = () => {
                 </button>
                 <button
                   className="cell-button"
-                  onClick={() => session.user.image ?
-                    setToEdit({ field: "warning", value: warningMessage })
-                    :
-                    setToEdit({ field: "address", value: session.user.address })}
                 >
                   <div className="cell-left">
                     <h4>ADDRESSES</h4>

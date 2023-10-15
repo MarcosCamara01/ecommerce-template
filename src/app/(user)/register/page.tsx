@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import '../../styles/form.css';
+import '@/styles/form.css';
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 

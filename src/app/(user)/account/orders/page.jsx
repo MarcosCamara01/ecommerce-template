@@ -43,7 +43,7 @@ const UserOrders = () => {
             ) : userOrders.length > 0 ? (
                 userOrders.map((order, index) => (
                     <div key={index} className="order-card">
-                        <Link href={`/user/account/orders/${order._id}`}>
+                        <Link href={`/account/orders/${order._id}`}>
                             <h4>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
                             <p>Order number: {order.orderNumber}</p>
                             <div className='bx-imgs'>

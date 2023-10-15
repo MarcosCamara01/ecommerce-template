@@ -5,10 +5,10 @@ export default function RootLayout({ children }) {
     return (
         <section>
             <div className="user-links">
-                <Link href="/user/account/orders">
+                <Link href="/account/orders">
                     PURCHASES
                 </Link>
-                <Link href="/user/account/profile">
+                <Link href="/account/profile">
                     PROFILE
                 </Link>
                 <Link href="#">
