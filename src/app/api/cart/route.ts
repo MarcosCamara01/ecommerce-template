@@ -5,8 +5,8 @@ import { connectDB } from '../../../libs/mongodb';
 connectDB();
 
 export async function GET(req: NextRequest) {
-    const query = new URL(req.url).searchParams;
-    const userId = query.get('userId');
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get('userId');
 
     try {
         const cart = await Cart.findOne({ userId });
@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-    const query = new URL(req.url).searchParams;
-    const id = query.get('id');
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
 
     try {
         const { cart, favorites } = await req.json();
@@ -54,9 +54,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-    const query = new URL(req.url).searchParams;
-    const cartItemId = query.get('cartItemId');
-    const userId = query.get('userId');
+    const { searchParams } = new URL(req.url);
+    const cartItemId = searchParams.get('cartItemId');
+    const userId = searchParams.get('userId');
 
     if (!cartItemId || !userId) {
         return NextResponse.json({ error: 'Missing cartItemId or userId in the request.' }, { status: 400 });

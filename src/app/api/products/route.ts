@@ -44,8 +44,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-    const query = new URL(req.url).searchParams;
-    const id = query.get('id');
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
 
     try {
         const dataToUpdate = await req.json();
@@ -70,8 +70,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-    const query = new URL(req.url).searchParams;
-    const id = query.get('id');
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
     try {
         const deletedProduct = await Product.findByIdAndDelete(id);
         return NextResponse.json(deletedProduct);

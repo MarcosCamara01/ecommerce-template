@@ -16,6 +16,10 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (status === "authenticated") {
       fetchCartAndUpdateState();
+    } else {
+      setCartItems([]);
+      setUserCart(null);
+      setCartLoading(false)
     }
   }, [status, session]);
 

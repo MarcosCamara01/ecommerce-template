@@ -32,7 +32,7 @@ const Wishlists = () => {
 
     useEffect(() => {
         const updateCartWithProducts = async () => {
-            if (userCart && userCart.favorites) {
+            if (userCart && userCart?.favorites) {
                 const updatedCart = await Promise.all(userCart.favorites.map(async (productId) => {
                     const matchingProduct = await fetchProducts(productId);
                     if (matchingProduct) {
@@ -45,7 +45,9 @@ const Wishlists = () => {
 
                 setCartWithProducts(updatedCart.reverse());
                 setIsLoading(false);
-            } else if (!cartLoading && userCart.favorites.length === 0) {
+            } else if (!cartLoading && userCart?.favorites.length === 0) {
+                setIsLoading(false)
+            } else if (!cartLoading && !userCart){
                 setIsLoading(false)
             }
         };
@@ -76,7 +78,8 @@ const Wishlists = () => {
                                     <Link href="/">Start</Link>
                                 </>
                                 :
-                                <p>Not registered? You must be in order to save your favorite products.<Link href="/login">Login</Link></p>
+                                <p>Not registered? You must be in order to save your favorite products.
+                                <Link href="/login">Login</Link></p>
                         }
                     </>
             }

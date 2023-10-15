@@ -24,13 +24,13 @@ export const Navbar = () => {
       <ul>
         {
           status === "authenticated" ?
-            <li><Link href="/user/account/profile">{session.user.name?.split(' ')[0]}</Link></li>
+            <li><Link href="/account/profile">{session.user.name?.split(' ')[0]}</Link></li>
             :
             <li><Link href="/login">Login</Link></li>
         }
-        <li><Link href="/user/wishlists">Wishlists ({userCart?.favorites ? userCart.favorites.length : 0})</Link></li>
+        <li><Link href="/wishlists">Wishlists ({userCart?.favorites ? userCart.favorites.length : 0})</Link></li>
 
-        <li><Link href="/user/cart">Cart ({totalQuantity})</Link></li>
+        <li><Link href="/cart">Cart ({totalQuantity})</Link></li>
       </ul>
     </header>
   )
