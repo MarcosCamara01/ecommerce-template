@@ -24,7 +24,7 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
         <section>
             <SingleProduct product={product} />
 
-            <h2 className="random-section-h2">QUIZÁ TAMBIÉN TE GUSTE...</h2>
+            <h2 className="random-section-h2">YOU MIGHT ALSO LIKE...</h2>
 
             <Products products={randomProducts} />
         </section>

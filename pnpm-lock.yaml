@@ -26,6 +26,9 @@ dependencies:
   '@types/stripe':
     specifier: ^8.0.417
     version: 8.0.417
+  '@vercel/analytics':
+    specifier: ^1.1.1
+    version: 1.1.1
   axios:
     specifier: ^1.4.0
     version: 1.4.0
@@ -699,6 +702,12 @@ packages:
     dependencies:
       '@typescript-eslint/types': 6.5.0
       eslint-visitor-keys: 3.4.3
+    dev: false
+
+  /@vercel/analytics@1.1.1:
+    resolution: {integrity: sha512-+NqgNmSabg3IFfxYhrWCfB/H+RCUOCR5ExRudNG2+pcRehq628DJB5e1u1xqwpLtn4pAYii4D98w7kofORAGQA==}
+    dependencies:
+      server-only: 0.0.1
     dev: false
 
   /acorn-jsx@5.3.2(acorn@8.10.0):
@@ -2833,6 +2842,10 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: false
+
+  /server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
     dev: false
 
   /shallow-equal@1.2.1:
