@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
                 enabled: true,
             },
             billing_address_collection: "required",
-            success_url: `http://localhost:3000/user/result?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: "http://localhost:3000/user/cart",
+            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/user/result?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/user/cart`,
             automatic_tax: {
                 enabled: true,
             },
