@@ -14,10 +14,10 @@ const shuffleArray = (array: any) => {
 }
 
 export async function GET(req: NextRequest) {
-    const query = new URL(req.url).searchParams;
-    const category = query.get('cat');
-    const _id = query.get('_id');
-    const random = query.get('random');
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get('cat');
+    const random = searchParams.get('random');
+    const _id = searchParams.get('_id');
 
     try {
         let products
