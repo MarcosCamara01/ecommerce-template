@@ -32,7 +32,7 @@ const OrderDetails = () => {
             };
             fetchUserOrders();
         }
-    }, [status, orderId, session.user._id]);
+    }, [status, orderId]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);

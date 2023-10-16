@@ -1,5 +1,8 @@
 import { Product } from '@/models/Products';
 import { NextResponse } from 'next/server';
+import { connectDB } from '@/libs/mongodb';
+
+connectDB();
 
 export const GET = async(req: Request, context: any) => {
     const { params } = context;

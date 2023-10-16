@@ -16,12 +16,12 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (status === "authenticated") {
       fetchCartAndUpdateState();
-    } else {
+    } else if (status === "unauthenticated") {
       setCartItems([]);
       setUserCart(null);
       setCartLoading(false)
     }
-  }, [status, session]);
+  }, [status]);
 
   const fetchCartAndUpdateState = async () => {
     const userCart = await fetchUserCart(session, setCartLoading);
