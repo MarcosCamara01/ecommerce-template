@@ -111,7 +111,10 @@ const Cart = () => {
                 <Link href="/">Start</Link>
               </>
               :
-              <p>Not registered? You must be in order to save your products in the shopping cart.<Link href="/login">Login</Link></p>
+              <>
+                <p>Not registered? You must be in order to save your products in the shopping cart.</p>
+                <Link href="/login">Login</Link>
+              </>
             }
           </>
       }

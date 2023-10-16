@@ -47,11 +47,10 @@ const Wishlists = () => {
                 setIsLoading(false);
             } else if (!cartLoading && userCart?.favorites.length === 0) {
                 setIsLoading(false)
-            } else if (!cartLoading && !userCart){
+            } else if (!cartLoading && !userCart) {
                 setIsLoading(false)
             }
         };
-
 
         updateCartWithProducts();
     }, [userCart, cartLoading]);
@@ -78,8 +77,10 @@ const Wishlists = () => {
                                     <Link href="/">Start</Link>
                                 </>
                                 :
-                                <p>Not registered? You must be in order to save your favorite products.
-                                <Link href="/login">Login</Link></p>
+                                <>
+                                    <p>Not registered? You must be in order to save your favorite products.</p>
+                                    <Link href="/login">Login</Link>
+                                </>
                         }
                     </>
             }

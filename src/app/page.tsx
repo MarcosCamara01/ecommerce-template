@@ -1,17 +1,16 @@
 import { Products } from "../components/Products";
 
 const Home = async () => {
-  let products = [];
+  let products
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products`)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/allProducts`)
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);
     }
 
     products = await res.json();
-    products.reverse();
 
   } catch (error) {
     console.error('Error fetching products:', error);

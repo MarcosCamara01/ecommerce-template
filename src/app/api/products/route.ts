@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Product } from '../../../models/Products';
-import { connectDB } from '../../../libs/mongodb';
+import { Product } from '@/models/Products';
+import { connectDB } from '@/libs/mongodb';
 
 connectDB();
 

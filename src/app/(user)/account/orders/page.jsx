@@ -29,7 +29,7 @@ const UserOrders = () => {
 
             fetchUserOrders();
         }
-    }, [status, session]);
+    }, [status]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
