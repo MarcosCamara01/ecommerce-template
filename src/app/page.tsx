@@ -1,7 +1,7 @@
 import { Products } from "../components/Products";
 
 const Home = async () => {
-  let products
+  let products = [];
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products/allProducts`)
