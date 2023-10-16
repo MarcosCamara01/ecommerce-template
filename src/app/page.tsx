@@ -11,11 +11,12 @@ const Home = async () => {
     }
 
     products = await res.json();
-    products.reverse();
 
   } catch (error) {
     console.error('Error fetching products:', error);
   }
+
+  console.log(products)
 
   return (
     <section className="section-products">
