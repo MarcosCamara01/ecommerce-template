@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
                 .slice(0, 6);
         } else {
             products = await Product.find();
+            products.reverse();
         }
 
         return NextResponse.json(products);

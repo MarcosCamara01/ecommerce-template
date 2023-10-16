@@ -15,9 +15,15 @@ export const ProductButtons = ({ product }) => {
     );
     const [selectedSize, setSelectedSize] = useState('');
     const [warning, setWarning] = useState('none');
+    const { status } = useSession();
 
     const handleAddToCart = () => {
-        if (selectedVariant && selectedSize) {
+
+        if (status === "unauthenticated") {
+            const warningMessage = 'YOU CANNOT SAVE TO CART WITHOUT LOGGING IN.'
+            setWarning(warningMessage);
+            console.warn(warningMessage);
+        } else if (selectedVariant && selectedSize) {
             const quantity = 1;
             addToCart(
                 product._id,
@@ -90,6 +96,7 @@ export const FavoriteButton = ({ product }) => {
     const { userCart, setUserCart } = useCart();
     const { data: session, status } = useSession();
     const [isFavorite, setIsFavorite] = useState(false);
+    const [warning, setWarning] = useState('none');
 
     useEffect(() => {
         if (userCart && userCart.favorites?.includes(product?._id)) {
@@ -144,15 +151,28 @@ export const FavoriteButton = ({ product }) => {
             } catch (error) {
                 console.error('Error updating/creating favorites on the server:', error);
             }
-        } else {
-            // Si no hay un usuario autenticado, puedes manejar el estado local de favoritos aquí.
-            // Por ejemplo, puedes utilizar cookies o localStorage para almacenar los favoritos.
+        } else if (status === "unauthenticated") {
+            const warningMessage = 'YOU CANNOT SAVE TO FAVOURITES WITHOUT LOGGING IN.'
+            setWarning(warningMessage);
+            console.warn(warningMessage);
+            // Si no hay un usuario autenticado, manejar el estado local de favoritos aquí.
+            // utilizar cookies o localStorage para almacenar los favoritos.
         }
     };
 
     return (
-        <button onClick={() => addToFavorites(product._id)}>
-            {isFavorite ? <FaHeart /> : <FaRegHeart />}
-        </button>
+        <>
+            <button onClick={() => addToFavorites(product._id)}>
+                {isFavorite ? <FaHeart /> : <FaRegHeart />}
+            </button>
+
+            {warning != "none" &&
+                <FixedComponent
+                    message={warning}
+                    setOpen={setWarning}
+                    task={"warning"}
+                />
+            }
+        </>
     );
 };
