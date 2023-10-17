@@ -86,8 +86,8 @@ a {
   text-decoration: none;
 }
 
-section {
-  padding: 0 50px 50px 50px;
+main {
+  padding: 0 50px 102px;
   min-height: calc(100vh - 97px);
 }
 
@@ -108,14 +108,14 @@ section {
 }
 
 @media (max-width: 600px) {
-  section {
-    padding: 0 25px 30px 25px;
+  main {
+    padding: 0 25px 102px;
   }
 }
 
 @media (max-width: 350px) {
-  section {
-    padding: 0 15px 30px 15px;
+  main {
+    padding: 0 15px 102px;
   }
 }
 

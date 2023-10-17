@@ -1,22 +1,69 @@
 header {
     width: 100%;
+    padding: 40px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 40px 50px;
+}
+
+header button {
+    background-color: transparent;
+    border: transparent;
+    cursor: pointer;
+}
+
+header svg {
+    font-size: 26px;
 }
 
 header ul {
     display: flex;
+    justify-content: space-between;
     gap: 15px;
     list-style: none;
     font-size: 14px;
 }
 
-header ul div {
+header ul li {
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-header ul svg {
-    font-size: 17px;
+.mobile-content {
+    height: 100vh;
+    width: 100%;
+    background-color: #000;
+    padding: 40px 25px;
+    transition: transform 0.2s ease;
+    z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.mobile-content.open {
+    transform: translateX(0);
+}
+
+.mobile-content.closed {
+    transform: translateX(-100%);
+    overflow: hidden;
+}
+
+.content-mid {
+    height: calc(100vh - 218px);
+    margin: 40px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px #fff solid;
+    border-bottom: 1px #fff solid;
+}
+
+.content-mid ul {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
 }
