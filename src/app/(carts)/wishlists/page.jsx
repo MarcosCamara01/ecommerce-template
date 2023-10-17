@@ -62,7 +62,7 @@ const Wishlists = () => {
                 :
                 cartWithProducts.length >= 1 ?
                     <>
-                        <h2 className="section-h2">YOUR WISH LIST</h2>
+                        <h2 className="section-h2">YOUR WISHLISTS</h2>
                         <Products
                             products={cartWithProducts}
                         />

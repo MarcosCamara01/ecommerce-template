@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     const _id = searchParams.get('_id');
 
     try {
-        let products
+        let products;
 
         if (category) {
             products = await Product.find({ category });
@@ -34,9 +34,8 @@ export async function GET(req: NextRequest) {
                 .slice(0, 6);
         } else {
             products = await Product.find();
-            products.reverse();
         }
-
+        
         return NextResponse.json(products);
     } catch (error) {
         console.error('Failed to fetch products.', error);
