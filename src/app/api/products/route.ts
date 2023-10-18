@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
 
         if (category) {
             products = await Product.find({ category });
+            products.reverse();
         } else if (_id) {
             products = await Product.findOne({ _id });
         } else if (random) {
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest) {
                 .slice(0, 6);
         } else {
             products = await Product.find();
+            products.reverse();
         }
         
         return NextResponse.json(products);

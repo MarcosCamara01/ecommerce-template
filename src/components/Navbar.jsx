@@ -65,6 +65,10 @@ export const Navbar = () => {
     </ul>
   );
 
+  if (isMobile === null) {
+    return <header></header>;
+  }
+
   return (
     <header>
       {isMobile ? (
