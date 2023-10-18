@@ -12,6 +12,7 @@
 }
 
 .box-alert {
+    max-width: 90%;
     border: 1px solid #fff;
     background-color: #000;
     z-index: 1;

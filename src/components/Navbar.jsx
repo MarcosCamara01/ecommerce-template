@@ -83,27 +83,15 @@ export const Navbar = () => {
               </button>
 
               {status === "authenticated" ? (
-                <li><Link href="/cart">Cart ({totalQuantity})</Link></li>
+                <li><Link href="/account/profile" onClick={toggleHeader}>{session.user.name?.split(' ')[0]}</Link></li>
               ) : (
-                <li><Link href="/login">Login</Link></li>
+                <li><Link href="/login" onClick={toggleHeader}>Login</Link></li>
               )}
             </ul>
 
             <div className='content-mid'>
               {commonLinks}
             </div>
-
-            <ul>
-                <li>
-                <Link href="/" onClick={toggleHeader}>Home</Link>
-                </li>
-
-              {status === "authenticated" ? (
-                <li><Link href="/account/profile">{session.user.name?.split(' ')[0]}</Link></li>
-              ) : (
-                <li><Link href="/login">Login</Link></li>
-              )}
-            </ul>
           </div>
         </>
       ) : (
