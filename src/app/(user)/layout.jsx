@@ -1,5 +1,5 @@
 import Link from "next/link";
-import '../../../styles/profile.css';
+import '@/styles/profile.css';
 
 export default function RootLayout({ children }) {
     return (
