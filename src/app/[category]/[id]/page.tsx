@@ -26,7 +26,10 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
 
             <h2 className="random-section-h2">YOU MIGHT ALSO LIKE...</h2>
 
-            <Products products={randomProducts} />
+            <Products
+                products={randomProducts}
+                mobileStyles={"random-mobile"}
+            />
         </section>
     );
 };
