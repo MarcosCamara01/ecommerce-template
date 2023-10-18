@@ -3,9 +3,9 @@ import Link from "next/link";
 import { ProductCartInfo, DeleteButton } from "./CartElements";
 import { FavoriteButton } from "./ProductsElements";
 
-export const Products = ({ products }) => {
+export const Products = ({ products, mobileStyles="" }) => {
   return (
-    <div className="products-section">
+    <div className={`products-section ${mobileStyles}`}>
       {products.map((product) => {
         return (
           <div className="product-card" key={product._id}>
