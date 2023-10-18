@@ -16,8 +16,6 @@ const Home = async () => {
     console.error('Error fetching products:', error);
   }
 
-  console.log(products)
-
   return (
     <section className="section-products">
       <Products

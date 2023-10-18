@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 export function useClientMediaQuery(query) {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(null);
 
   useEffect(() => {
     const mediaQueryList = window.matchMedia(query);
