@@ -28,6 +28,7 @@
 
 .cart-price .taxes {
     font-size: 11px;
+    text-align: center;
 }
 
 .cart-footer .cart-button {
@@ -47,4 +48,18 @@
 
 .section-h2 {
     margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+    .cart-footer {
+        gap: 0;
+    }
+
+    .cart-price {
+        width: 50%;
+    }
+
+    .cart-footer .cart-button {
+        max-width: 50%;
+    }
 }
