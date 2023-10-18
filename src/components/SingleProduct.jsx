@@ -1,5 +1,6 @@
 import '../styles/singleproduct.css';
 import { ProductButtons } from "@/components/ProductsElements";
+import { ProductImages } from "@/components/ProductImages";
 
 export const SingleProduct = ({ product }) => {
     if (!product) {
@@ -23,17 +24,10 @@ export const SingleProduct = ({ product }) => {
     return (
         <div className="product-bx">
             <div className="img-bx">
-                <div className='bx-grid'>
-                    {allImages.map((image, index) => (
-                        <div key={index}>
-                            <img
-                                src={image}
-                                alt={`${product.name} - Image ${index + 1}`}
-                                className={`product-img`}
-                            />
-                        </div>
-                    ))}
-                </div>
+                <ProductImages
+                    images={allImages}
+                    name={product.name}
+                />
             </div>
 
             <div className="information-bx sticky">
