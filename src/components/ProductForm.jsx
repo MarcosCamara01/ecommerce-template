@@ -11,8 +11,8 @@ const ProductForm = () => {
         category: '',
     });
 
-    const [variants, setVariants] = useState([]); // Estado para las variantes
-    const [variantImageUrls, setVariantImageUrls] = useState([]); // Estado para las imágenes de las variantes
+    const [variants, setVariants] = useState([]);
+    const [variantImageUrls, setVariantImageUrls] = useState([]);
     const [imageUrls, setImageUrls] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
 

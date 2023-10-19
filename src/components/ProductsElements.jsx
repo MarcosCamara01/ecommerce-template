@@ -7,6 +7,7 @@ import { FixedComponent } from "@/components/FixedComponent";
 import { useSession } from 'next-auth/react';
 import { FaRegHeart, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
+import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
 export const ProductButtons = ({ product }) => {
     const { addToCart } = useCart();
@@ -16,6 +17,7 @@ export const ProductButtons = ({ product }) => {
     const [selectedSize, setSelectedSize] = useState('');
     const [warning, setWarning] = useState('none');
     const { status } = useSession();
+    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     const handleAddToCart = () => {
 
@@ -86,6 +88,7 @@ export const ProductButtons = ({ product }) => {
                     message={warning}
                     setOpen={setWarning}
                     task={"warning"}
+                    isMobile={isMobile}
                 />
             }
         </>
@@ -97,6 +100,7 @@ export const FavoriteButton = ({ product }) => {
     const { data: session, status } = useSession();
     const [isFavorite, setIsFavorite] = useState(false);
     const [warning, setWarning] = useState('none');
+    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     useEffect(() => {
         if (userCart && userCart.favorites?.includes(product?._id)) {
@@ -171,6 +175,7 @@ export const FavoriteButton = ({ product }) => {
                     message={warning}
                     setOpen={setWarning}
                     task={"warning"}
+                    isMobile={isMobile}
                 />
             }
         </>

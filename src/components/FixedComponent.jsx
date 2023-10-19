@@ -2,17 +2,15 @@ import React, { useEffect } from 'react';
 import '../styles/alert.css';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
-import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
-export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) => {
+export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit, isMobile }) => {
     const { data: session, update } = useSession();
     const isWarning = task === "warning";
-    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     useEffect(() => {
-        if (message !== 'none' && isMobile && isMobile !== null) {
+        if (message !== 'none' && isMobile) {
             document.body.style.overflow = 'hidden';
-        } else if (message !== 'none' && !isMobile && isMobile !== null) {
+        } else if (message !== 'none' && !isMobile) {
             document.body.style.overflow = 'hidden';
             document.body.style.paddingRight = '17px';
         } else {
