@@ -9,6 +9,7 @@
     justify-content: center;
     background-color: transparent;
     background-color: rgba(0, 0, 0, 0.9);
+    z-index: 10;
 }
 
 .box-alert {

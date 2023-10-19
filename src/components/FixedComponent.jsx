@@ -2,13 +2,17 @@ import React, { useEffect } from 'react';
 import '../styles/alert.css';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
+import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
 export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) => {
     const { data: session, update } = useSession();
     const isWarning = task === "warning";
+    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     useEffect(() => {
-        if (message !== 'none') {
+        if (message !== 'none' && isMobile && isMobile !== null) {
+            document.body.style.overflow = 'hidden';
+        } else if (message !== 'none' && !isMobile && isMobile !== null) {
             document.body.style.overflow = 'hidden';
             document.body.style.paddingRight = '17px';
         } else {
@@ -20,7 +24,7 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) =>
             document.body.style.overflow = 'auto';
             document.body.style.paddingRight = '0';
         };
-    }, [message]);
+    }, [message, isMobile]);
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -51,8 +55,8 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit }) =>
                     <div>
                         <input
                             type="text"
-                            value={toEdit.value} 
-                            onChange={(e) => setToEdit({ ...toEdit, value: e.target.value })} 
+                            value={toEdit.value}
+                            onChange={(e) => setToEdit({ ...toEdit, value: e.target.value })}
                         />
                         <button onClick={handleUpdate}>Update</button>
                     </div>

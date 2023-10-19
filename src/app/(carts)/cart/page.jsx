@@ -107,7 +107,7 @@ const Cart = () => {
             <h2>YOUR CART IS EMPTY.</h2>
             {status === "authenticated" ?
               <>
-                <h3>When you have added added something to your cart, it will appear here. Want to get started?</h3>
+                <h3>When you have added something to your cart, it will appear here. Want to get started?</h3>
                 <Link href="/">Start</Link>
               </>
               :
