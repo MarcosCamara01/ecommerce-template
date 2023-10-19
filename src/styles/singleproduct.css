@@ -9,6 +9,7 @@
 .img-bx {
     flex-grow: 999;
     flex-basis: 0;
+    z-index: 0;
 }
 
 .bx-grid {
