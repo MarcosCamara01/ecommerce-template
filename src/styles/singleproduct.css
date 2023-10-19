@@ -16,9 +16,10 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 2px;
+    position: relative;
 }
 
-.bx-grid div {
+.bx-grid .bx-image {
     margin: 0 auto;
     display: inline-block;
     width: 100%;
@@ -147,4 +148,38 @@
 
 .swiper-pagination-clickable .swiper-pagination-bullet-active {
     height: 3px;
+}
+
+.expand-button {
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expand-button button {
+    height: 50px;
+    width: 165px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background-color: #000;
+    border: 1px solid #fff;
+    padding: 0 15px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.expand-button button svg {
+    font-size: 24px;
+    transition: all 0.1s ease;
+}
+
+.expand-button .transform svg {
+    transform: rotate(180deg);
 }
