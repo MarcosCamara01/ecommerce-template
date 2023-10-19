@@ -5,10 +5,13 @@ import { Loader } from "@/helpers/Loader";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { IoIosArrowForward } from 'react-icons/io';
+import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
 const ProfilePage = () => {
   const [toEdit, setToEdit] = useState({ field: 'none', value: 'none' });
   const { data: session, status } = useSession();
+  const isMobile = useClientMediaQuery('(max-width: 600px)');
+
   const warningMessage = "You cannot update the user if you are logged in with Google"
 
   return (
@@ -97,6 +100,7 @@ const ProfilePage = () => {
           task={toEdit.field}
           toEdit={toEdit}
           setToEdit={setToEdit}
+          isMobile={isMobile}
         />
       )}
     </>
