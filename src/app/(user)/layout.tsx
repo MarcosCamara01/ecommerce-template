@@ -1,7 +1,11 @@
 import Link from "next/link";
 import '@/styles/profile.css';
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
     return (
         <section>
             <div className="user-links">

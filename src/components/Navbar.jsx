@@ -60,7 +60,6 @@ export const Navbar = () => {
       ) : (
         <li><Link href="/login">Login</Link></li>
       )}
-      <li><Link href="/wishlists">Wishlists ({userCart?.favorites ? userCart.favorites.length : 0})</Link></li>
       <li><Link href="/cart">Cart ({totalQuantity})</Link></li>
     </ul>
   );
