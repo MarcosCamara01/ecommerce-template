@@ -7,7 +7,6 @@ import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery'
 import { Loader } from '@/helpers/Loader'
 import { MdKeyboardArrowDown } from 'react-icons/md';
-import { MdKeyboardArrowUp } from 'react-icons/md';
 
 import 'swiper/css'
 import "swiper/css/zoom";
