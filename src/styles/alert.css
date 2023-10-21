@@ -40,3 +40,20 @@
     border-top: 1px solid #fff;
     cursor: pointer;
 }
+
+.bx-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    max-width: 700px;
+}
+
+.error-msg {
+    min-height: calc(100vh - 199px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}

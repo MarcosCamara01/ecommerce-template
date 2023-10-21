@@ -1,19 +1,21 @@
 "use client";
 
-import { useCart } from "../../../hooks/CartContext";
+import { useCart } from "@/hooks/CartContext";
 import { useEffect, useState } from "react";
 import { Products } from "@/components/Products";
-import '../../../styles/cart.css';
 import { ButtonCheckout } from "@/components/CartElements"
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
 
+import '@/styles/cart.css';
+import '@/styles/alert.css';
+
 const Cart = () => {
   const { cartItems, cartLoading } = useCart();
   const [cartWithProducts, setCartWithProducts] = useState([]);
   const [totalPrice, setTotalPrice] = useState([]);
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
   const { status } = useSession();
 
   const fetchProducts = async (productId) => {
@@ -103,20 +105,20 @@ const Cart = () => {
             </div>
           </>
           :
-          <>
+          <div className="bx-info">
             <h2>YOUR CART IS EMPTY.</h2>
             {status === "authenticated" ?
               <>
-                <h3>When you have added something to your cart, it will appear here. Want to get started?</h3>
-                <Link href="/">Start</Link>
+                <p>When you have added something to your cart, it will appear here. Want to get started?</p>
+                <span><Link href="/">Start</Link></span>
               </>
               :
               <>
                 <p>Not registered? You must be in order to save your products in the shopping cart.</p>
-                <Link href="/login">Login</Link>
+                <span><Link href="/login">Login</Link></span>
               </>
             }
-          </>
+          </div>
       }
     </section>
   );

@@ -11,7 +11,7 @@ import { HiMiniXMark } from "react-icons/hi2";
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
-  const { cartItems, userCart } = useCart();
+  const { cartItems } = useCart();
   const isMobile = useClientMediaQuery('(max-width: 600px)');
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
 
