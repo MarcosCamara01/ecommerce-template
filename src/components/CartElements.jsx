@@ -94,6 +94,6 @@ export const ButtonCheckout = ({ cartWithProducts }) => {
     };
 
     return (
-        <button onClick={buyProducts}>CONTINUAR</button>
+        <button onClick={buyProducts}>CONTINUE</button>
     );
 };  
