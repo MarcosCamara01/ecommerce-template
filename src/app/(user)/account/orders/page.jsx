@@ -31,7 +31,7 @@ const UserOrders = () => {
             };
 
             fetchUserOrders();
-        } else if (orders.length >= 0) {
+        } else if (orders !== null) {
             setLoading(false);
         }
 
