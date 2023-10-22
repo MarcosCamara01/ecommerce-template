@@ -11,12 +11,12 @@ import { useOrders } from '@/hooks/OrdersContext';
 import '@/styles/orders.css';
 
 const UserOrders = () => {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const { orders, setOrders } = useOrders();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (orders === null) {
+        if (orders === null && status === 'authenticated') {
             const userId = session.user._id;
             const fetchUserOrders = async () => {
                 const response = await getOrders(userId);
@@ -35,7 +35,7 @@ const UserOrders = () => {
             setLoading(false);
         }
 
-    }, [orders]);
+    }, [orders, status]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);

@@ -13,7 +13,7 @@ import '@/styles/orders.css';
 
 const OrderDetails = () => {
     const params = useParams();
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const { orders, setOrders } = useOrders();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ const OrderDetails = () => {
     const orderId = params.id;
 
     useEffect(() => {
-        if (orderId && orders === null) {
+        if (orderId && orders === null && status === 'authenticated') {
             const fetchUserOrders = async () => {
                 try {
                     const userId = session.user._id;
@@ -49,7 +49,7 @@ const OrderDetails = () => {
             setLoading(false);
         }
 
-    }, [orderId]);
+    }, [orderId, status]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
