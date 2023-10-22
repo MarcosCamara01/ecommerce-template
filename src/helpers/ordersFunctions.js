@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getProducts } from "./getProducts";
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -66,7 +67,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
     }
 };
 
-export const getOrdersWithProducts = async (userId) => {
+export const getOrders = async (userId) => {
     try {
         const response = await axios.get(`/api/orders?userId=${userId}`);
         const userOrders = response.data;
@@ -76,27 +77,11 @@ export const getOrdersWithProducts = async (userId) => {
             return null;
         }
 
-        const fetchProducts = async (productId) => {
-            try {
-                const res = await fetch(`/api/products?_id=${productId}`);
-
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);
-                }
-
-                return res.json();
-            } catch (error) {
-                console.error("Error obtaining product with ID:", productId, error);
-                return null;
-            }
-        };
-
         const ordersWithEnrichedProducts = await Promise.all(
             userOrders.orders.map(async (order) => {
                 const enrichedProducts = await Promise.all(
                     order.products.map(async (product) => {
-                        const matchingProduct = await fetchProducts(product.productId);
+                        const matchingProduct = await getProducts(`?_id=${product.productId}`);
                         if (matchingProduct) {
                             const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
                             if (matchingVariant) {
