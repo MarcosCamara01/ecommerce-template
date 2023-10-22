@@ -6,6 +6,7 @@ import { Products } from "@/components/Products";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
+import { productsWislists } from "@/helpers/cartFunctions";
 
 import '@/styles/cart.css';
 import '@/styles/alert.css';
@@ -16,45 +17,8 @@ const Wishlists = () => {
     const [isLoading, setIsLoading] = useState(true)
     const { status } = useSession();
 
-    const fetchProducts = async (productId) => {
-        try {
-            const res = await fetch(`/api/products?_id=${productId}`);
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);
-            }
-
-            return res.json();
-        } catch (error) {
-            console.error("Error al obtener los productos:", error);
-            return null;
-        }
-    };
-
     useEffect(() => {
-        const updateCartWithProducts = async () => {
-            if (userCart && userCart?.favorites) {
-                const updatedCart = await Promise.all(userCart.favorites.map(async (productId) => {
-                    const matchingProduct = await fetchProducts(productId);
-                    if (matchingProduct) {
-                        return {
-                            ...matchingProduct,
-                        };
-                    }
-                    return null;
-                }));
-
-                setCartWithProducts(updatedCart.reverse());
-                setIsLoading(false);
-            } else if (!cartLoading && userCart?.favorites.length === 0) {
-                setIsLoading(false)
-            } else if (!cartLoading && !userCart) {
-                setIsLoading(false)
-            }
-        };
-
-        updateCartWithProducts();
+        productsWislists(userCart, cartLoading, setCartWithProducts, setIsLoading);
     }, [userCart, cartLoading]);
 
     return (
@@ -70,12 +34,12 @@ const Wishlists = () => {
                         />
                     </>
                     :
-                    <div className="bx-info">
+                    <div className="info-msg">
                         <h2>YOUR WISHLIST IS EMPTY</h2>
                         {
                             status === "authenticated" ?
                                 <>
-                                    <p>When you have added something to the wish list, it will appear here. Want to get started?</p>
+                                    <p>When you have added something to the wishlist, it will appear here. Want to get started?</p>
                                     <span><Link href="/">Start</Link></span>
                                 </>
                                 :

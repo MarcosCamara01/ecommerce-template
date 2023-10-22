@@ -41,7 +41,7 @@
     cursor: pointer;
 }
 
-.bx-info {
+.info-msg {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
