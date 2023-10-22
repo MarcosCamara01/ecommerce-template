@@ -3,6 +3,7 @@
 import axios from 'axios';
 import { useCart } from '@/hooks/CartContext';
 import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
+import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
 export const DeleteButton = ({ product }) => {
     const { userCart, setUserCart, setCartItems } = useCart();
@@ -29,43 +30,69 @@ export const DeleteButton = ({ product }) => {
 
 export const ProductCartInfo = ({ product }) => {
     const { addToCart } = useCart();
+    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
-    return (
-        <div className='content-cart'>
-
-            {
-                product.purchased ?
-                    <div className='product-price'>
-                        {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
-                    </div>
-                    :
-                    <div className="buttons">
-                        <button
-                            disabled={product?.quantity == 1}
-                            className='add-remove'
-                            onClick={() => addToCart(product?.productId, product.color, product.size, -1)}
-                        >
-                            <MdRemove />
-                        </button>
-                        <span className='content'>{product?.quantity}</span>
-                        <button
-                            className='add-remove'
-                            onClick={() => addToCart(product?.productId, product.color, product.size, 1)}
-                        >
-                            <MdAdd />
-                        </button>
-                    </div>
-            }
-            <div className="color-size">
-                <div className='size'>
-                    {product.size}
+    const quantityButtons = () => {
+        if (product.purchased) {
+            return (
+                <div className='product-price'>
+                    {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
                 </div>
-                <div className='color'>
-                    {product.color}
+            )
+        } else {
+            return (
+                <div className="buttons">
+                    <button
+                        disabled={product?.quantity == 1}
+                        className='add-remove'
+                        onClick={() => addToCart(product?.productId, product.color, product.size, -1)}
+                    >
+                        <MdRemove />
+                    </button>
+                    <span className='content'>{product?.quantity}</span>
+                    <button
+                        className='add-remove'
+                        onClick={() => addToCart(product?.productId, product.color, product.size, 1)}
+                    >
+                        <MdAdd />
+                    </button>
+                </div>
+            )
+        }
+    }
+
+    if (isMobile) {
+        return (
+            <>
+                <div className="color-size">
+                    <div className='size'>
+                        {product.size}
+                    </div>
+                    <div className='color'>
+                        {product.color}
+                    </div>
+                </div>
+                <div className='content-cart'>
+                    {quantityButtons()}
+                </div>
+            </>
+        );
+    } else {
+        return (
+            <div className='content-cart'>
+                {quantityButtons()}
+                
+                <div className="color-size">
+                    <div className='size'>
+                        {product.size}
+                    </div>
+                    <div className='color'>
+                        {product.color}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
 };
 
 export const ButtonCheckout = ({ cartWithProducts }) => {
