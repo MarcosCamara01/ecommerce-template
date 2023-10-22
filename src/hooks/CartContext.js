@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { fetchUserCart } from "@/helpers/getCart";
+import { fetchUserCart } from "@/helpers/cartFunctions";
 
 const CartContext = createContext();
 
