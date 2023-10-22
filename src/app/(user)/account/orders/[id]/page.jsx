@@ -65,7 +65,10 @@ const OrderDetails = () => {
             return (
                 <div className="order-container">
                     <div className='order-products'>
-                        <Products products={order.products} />
+                        <Products
+                            products={order.products}
+                            extraClassname={"cart-ord-mobile"}
+                        />
                     </div>
                     <div className='order-details'>
                         <div className='details'>

@@ -33,6 +33,7 @@ const Cart = () => {
             <h2 className="section-h2">YOUR SHOPPING CART</h2>
             <Products
               products={cartWithProducts}
+              extraClassname={"cart-ord-mobile"}
             />
 
             <div className="cart-footer">

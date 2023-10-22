@@ -3,13 +3,12 @@ import Link from "next/link";
 import { ProductCartInfo, DeleteButton } from "./CartElements";
 import { FavoriteButton } from "./ProductsElements";
 
-export const Products = ({ products, mobileStyles="" }) => {
+export const Products = ({ products, extraClassname="" }) => {
   return (
-    <div className={`products-section ${mobileStyles}`}>
+    <div className={`products-section ${extraClassname}`}>
       {products.map((product) => {
         return (
           <div className="product-card" key={product._id}>
-
             <Link
               href={`/${product?.category}/${product.quantity
                 ? product.productId

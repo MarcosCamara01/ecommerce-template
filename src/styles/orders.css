@@ -1,6 +1,6 @@
 .page-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     align-items: center;
     justify-content: space-between;
     gap: 30px;
@@ -73,8 +73,18 @@
     border-top: 1px solid #fff;
 }
 
+@media (max-width: 600px) {
+    .order-container {
+        display: block;
+    }
+
+    .order-container .order-details {
+        margin-top: 50px;
+    }
+}
+
 @media (max-width: 350px) {
     .page-container {
-        grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     }
 }

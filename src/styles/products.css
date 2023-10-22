@@ -5,8 +5,15 @@
     row-gap: 30px;
 }
 
+.product-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .product-card .product-img {
     width: 100%;
+    display: block;
 }
 
 .product-information {
@@ -109,10 +116,25 @@
     margin-bottom: 20px;
 }
 
-
-
 @media (max-width: 600px) {
     .products-section.random-mobile {
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     }
-  }
+
+    .cart-ord-mobile {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart-ord-mobile .product-card {
+        display: flex;
+        flex-direction: row;
+        gap: 0;
+        border: 1px solid #fff;
+    }
+
+    .cart-ord-mobile .product-information {
+        width: 50%;
+        padding: 15px;
+    }
+}
