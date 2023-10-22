@@ -5,31 +5,37 @@ import { useEffect, useState } from 'react';
 import { useSession } from "next-auth/react";
 import { format } from 'date-fns';
 import { Loader } from "@/helpers/Loader";
+import { getOrders } from '@/helpers/ordersFunctions';
+import { useOrders } from '@/hooks/OrdersContext';
+
 import '@/styles/orders.css';
-import { getOrdersWithProducts } from '@/helpers/ordersFunctions';
 
 const UserOrders = () => {
-    const { data: session, status } = useSession();
-    const [userOrders, setUserOrders] = useState([]);
+    const { data: session } = useSession();
+    const { orders, setOrders } = useOrders();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (status === "authenticated") {
+        if (orders === null) {
             const userId = session.user._id;
             const fetchUserOrders = async () => {
-                const response = await getOrdersWithProducts(userId);
+                const response = await getOrders(userId);
                 if (response && Array.isArray(response.orders)) {
                     response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
-                    setUserOrders(response.orders);
+                    setOrders(response.orders);
                 } else {
                     console.log("No orders available.");
                 }
+
                 setLoading(false);
             };
 
             fetchUserOrders();
+        } else if (orders.length >= 0) {
+            setLoading(false);
         }
-    }, [status]);
+
+    }, [orders]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -40,8 +46,8 @@ const UserOrders = () => {
         <div className="page-container">
             {loading ? (
                 <Loader />
-            ) : userOrders.length > 0 ? (
-                userOrders.map((order, index) => (
+            ) : orders ? (
+                orders.map((order, index) => (
                     <div key={index} className="order-card">
                         <Link href={`/account/orders/${order._id}`}>
                             <h4>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>

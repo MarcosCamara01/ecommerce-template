@@ -5,6 +5,7 @@ import Providers from "./Providers";
 import styles from '../styles/page.module.css';
 import { Navbar } from "../components/Navbar";
 import { CartProvider } from '../hooks/CartContext';
+import { OrderProvider } from '../hooks/OrdersContext';
 import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] })
@@ -24,11 +25,13 @@ export default function RootLayout({
       <Providers>
         <body className={inter.className}>
           <main className={styles.main}>
-              <CartProvider>
+            <CartProvider>
+              <OrderProvider>
                 <Navbar />
                 {children}
                 <Analytics />
-              </CartProvider>
+              </OrderProvider>
+            </CartProvider>
           </main>
         </body>
       </Providers>
