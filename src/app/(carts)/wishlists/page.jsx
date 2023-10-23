@@ -31,6 +31,7 @@ const Wishlists = () => {
                         <h2 className="section-h2">YOUR WISHLISTS</h2>
                         <Products
                             products={cartWithProducts}
+                            extraClassname={"colums-mobile"}
                         />
                     </>
                     :

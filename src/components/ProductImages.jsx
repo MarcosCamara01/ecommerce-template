@@ -37,57 +37,57 @@ export const ProductImages = ({ images, name }) => {
   if (isMobile === null) {
     return <Loader />
   }
-
-  return (
-    <>
-      {isMobile ? (
-        <div className='container'>
-          <Swiper
-            modules={[Zoom, Pagination, Scrollbar]}
-            scrollbar={{ draggable: true }}
-            pagination={{ clickable: true }}
-            loop={true}
-            zoom={true}
-          >
-            {images.map((image, index) => (
-              <SwiperSlide key={index}>
-                <img
-                  src={image}
-                  alt={`${name} - Image ${index + 1}`}
-                  className='product-img'
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-      ) : (
-        <div className='bx-grid' ref={scrollRef}>
-          {images.slice(0, visibleImages).map((image, index) => (
-            <div className='bx-image' key={index} >
+  
+  if (isMobile) {
+    return (
+      <div className='container'>
+        <Swiper
+          modules={[Zoom, Pagination, Scrollbar]}
+          scrollbar={{ draggable: true }}
+          pagination={{ clickable: true }}
+          loop={true}
+          zoom={true}
+        >
+          {images.map((image, index) => (
+            <SwiperSlide key={index}>
               <img
                 src={image}
                 alt={`${name} - Image ${index + 1}`}
                 className='product-img'
               />
-            </div>
+            </SwiperSlide>
           ))}
-          {
-            images.length > 4 &&
-            (
-              <div className='expand-button'>
-                <button
-                  onClick={showImages}
-                  className={visibleImages < images.length ? "" : "transform"}>
-                  {visibleImages < images.length
-                    ? "SHOW MORE"
-                    : "SHOW LESS"}
-                  <MdKeyboardArrowDown />
-                </button>
-              </div>
-            )
-          }
-        </div>
-      )}
-    </>
-  );
+        </Swiper>
+      </div>
+    )
+  } else {
+    return (
+      <div className='bx-grid' ref={scrollRef}>
+        {images.slice(0, visibleImages).map((image, index) => (
+          <div className='bx-image' key={index} >
+            <img
+              src={image}
+              alt={`${name} - Image ${index + 1}`}
+              className='product-img'
+            />
+          </div>
+        ))}
+        {
+          images.length > 4 &&
+          (
+            <div className='expand-button'>
+              <button
+                onClick={showImages}
+                className={visibleImages < images.length ? "" : "transform"}>
+                {visibleImages < images.length
+                  ? "SHOW MORE"
+                  : "SHOW LESS"}
+                <MdKeyboardArrowDown />
+              </button>
+            </div>
+          )
+        }
+      </div>
+    )
+  }
 }

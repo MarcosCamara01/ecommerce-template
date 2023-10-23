@@ -57,7 +57,6 @@ header ul li {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-top: 1px #fff solid;
 }
 
 .content-mid ul {
