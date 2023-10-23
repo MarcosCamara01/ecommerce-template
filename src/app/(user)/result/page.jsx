@@ -7,6 +7,8 @@ import { useCart } from '@/hooks/CartContext';
 import { saveOrder } from "@/helpers/ordersFunctions";
 import { Loader } from "@/helpers/Loader";
 
+import '@/styles/alert.css';
+
 const CheckoutSuccess = () => {
   const searchParams = useSearchParams();
   const { userCart, setCartItems } = useCart();
@@ -19,7 +21,7 @@ const CheckoutSuccess = () => {
     if (session_id && data === undefined) {
       fetchCheckoutData(`${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/checkout_sessions?session_id=${session_id}`);
     }
-  }, [session_id, data]);  
+  }, [session_id]);  
 
   useEffect(() => {
     if (session_id && userCart != null && userCart.cart.length > 0) {
@@ -31,7 +33,7 @@ const CheckoutSuccess = () => {
     if (data?.status === "complete" && !hasSavedOrder) {
       saveOrder(data, setHasSavedOrder);
     }
-  }, [data, hasSavedOrder]);
+  }, [data]);
 
   const fetchCheckoutData = async (url) => {
     try {
@@ -40,9 +42,9 @@ const CheckoutSuccess = () => {
     } catch (err) {
       setData({
         error: true,
-        errorMessage: "Hubo un error al obtener los datos del servidor.",
+        errorMessage: "There was an error getting the data from the server.",
       });
-      console.error("Error al obtener datos:", err.message);
+      console.error("Error obtaining data:", err.message);
     }
   };
 
@@ -59,14 +61,14 @@ const CheckoutSuccess = () => {
 
   return (
     <section>
-      <div className="page-container">
+      <div className="info-msg">
         {data && data.error ?
           <p>{data.errorMessage}</p>
-          : data ?
+          : data && hasSavedOrder ?
             <>
               <h1>Checkout Payment Result</h1>
-              <h2>Pago realizado con éxito</h2>
-              <h3>{`Se te ha enviado un correo electrónico a: ${data.customer_details.email}`}</h3>
+              <h3>Successful payment</h3>
+              <p>{`An email has been sent to you at: ${data.customer_details.email}`}</p>
             </>
             :
             <Loader />

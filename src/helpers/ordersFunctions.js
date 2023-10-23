@@ -50,7 +50,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
                 });
                 console.log("Orders successfully updated.", response);
             } else {
-                console.log("This order has already been saved.");
+                console.info("This order has already been saved.");
             }
         } else {
             const updatedOrders = [newOrder];
@@ -58,7 +58,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
                 userId: userId,
                 order: updatedOrders,
             });
-            console.log("Order created and saved successfully.", response);
+            console.info("Order created and saved successfully.", response);
         }
 
         setHasSavedOrder(true);
