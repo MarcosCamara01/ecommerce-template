@@ -28,7 +28,7 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
 
             <Products
                 products={randomProducts}
-                extraClassname={"random-mobile"}
+                extraClassname={"colums-mobile"}
             />
         </section>
     );
