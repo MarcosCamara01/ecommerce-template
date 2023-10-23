@@ -45,20 +45,21 @@ export const saveOrder = async (data, setHasSavedOrder) => {
             const orderIdMatch = userOrders.orders.some(order => order.orderId === data.id);
             if (!orderIdMatch) {
                 const updatedOrders = [...userOrders.orders, newOrder];
-                const response = await axios.put(`/api/orders?id=${userOrders._id}`, {
+                axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders?id=${userOrders._id}`, {
                     orders: updatedOrders,
                 });
-                console.log("Orders successfully updated.", response);
+                console.log("Orders successfully updated.");
             } else {
                 console.info("This order has already been saved.");
             }
+            
         } else {
             const updatedOrders = [newOrder];
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders`, {
+            await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders`, {
                 userId: userId,
                 order: updatedOrders,
             });
-            console.info("Order created and saved successfully.", response);
+            console.info("Order created and saved successfully.");
         }
 
         setHasSavedOrder(true);

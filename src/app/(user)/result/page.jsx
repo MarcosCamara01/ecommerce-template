@@ -6,12 +6,14 @@ import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/CartContext';
 import { saveOrder } from "@/helpers/ordersFunctions";
 import { Loader } from "@/helpers/Loader";
+import { useSession } from 'next-auth/react';
 
 import '@/styles/alert.css';
 
 const CheckoutSuccess = () => {
   const searchParams = useSearchParams();
-  const { userCart, setCartItems } = useCart();
+  const { data: session, status } = useSession();
+  const { setCartItems } = useCart();
   const [data, setData] = useState();
   const [hasSavedOrder, setHasSavedOrder] = useState(false);
 
@@ -24,10 +26,11 @@ const CheckoutSuccess = () => {
   }, [session_id]);  
 
   useEffect(() => {
-    if (session_id && userCart != null && userCart.cart.length > 0) {
+    if (data?.status === "complete" && status === "authenticated") {
+      setCartItems([]);
       emptyCart();
     }
-  }, [userCart, session_id]);
+  }, [status, data]);
   
   useEffect(() => {
     if (data?.status === "complete" && !hasSavedOrder) {
@@ -50,10 +53,9 @@ const CheckoutSuccess = () => {
 
   const emptyCart = async () => {
     try {
-      await axios.put(`/api/cart?id=${userCart._id}`, {
+      await axios.put(`/api/cart?userId=${session.user._id}`, {
         cart: [],
       });
-      setCartItems([]);
     } catch (error) {
       throw new Error(error.message);
     }
