@@ -20,16 +20,24 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
+    const userId = searchParams.get('userId');
 
     try {
         const { cart, favorites } = await req.json();
+        let filter
+
+        if (id) {
+            filter = { _id: id };
+        } else if (userId) {
+            filter = { userId: userId };
+        }
 
         const dataToUpdate = {
             cart: cart,
             favorites: favorites
         };
 
-        const updatedCart = await Cart.findByIdAndUpdate(id, dataToUpdate, { new: true });
+        const updatedCart = await Cart.findOneAndUpdate(filter, { $set: dataToUpdate }, { returnOriginal: false });
         return NextResponse.json(updatedCart);
     } catch (error) {
         console.error('Failed to update product.', error);
