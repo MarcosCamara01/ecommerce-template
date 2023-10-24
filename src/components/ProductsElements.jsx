@@ -71,6 +71,7 @@ export const ProductButtons = ({ product }) => {
                             className={`color-item ${selectedVariant === variant ? 'selected' : ''}`}
                             style={{ backgroundColor: variant.color }}
                             onClick={() => setSelectedVariant(variant)}
+                            title={`Color ${variant.color}`}
                         >
                             <span></span>
 
@@ -166,7 +167,10 @@ export const FavoriteButton = ({ product }) => {
 
     return (
         <>
-            <button onClick={() => addToFavorites(product._id)}>
+            <button
+                onClick={() => addToFavorites(product._id)}
+                title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
                 {isFavorite ? <FaHeart /> : <FaRegHeart />}
             </button>
 
