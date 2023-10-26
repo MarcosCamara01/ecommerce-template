@@ -1,12 +1,14 @@
-import '../styles/globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Providers from "./Providers";
 import styles from '../styles/page.module.css';
 import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
 import { CartProvider } from '../hooks/CartContext';
 import { OrderProvider } from '../hooks/OrdersContext';
 import { Analytics } from '@vercel/analytics/react';
+
+import '../styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,6 +35,7 @@ export default function RootLayout({
               </OrderProvider>
             </CartProvider>
           </main>
+          <Footer />
         </body>
       </Providers>
     </html>

@@ -38,7 +38,7 @@ export const Navbar = () => {
   };
 
   const linksData = [
-    { path: '/t-shirt', name: 'T-SHIRTS' },
+    { path: '/t-shirts', name: 'T-SHIRTS' },
     { path: '/pants', name: 'PANTS' },
     { path: '/sweatshirts', name: 'SWEATSHIRTS' },
   ];

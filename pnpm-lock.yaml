@@ -56,6 +56,9 @@ dependencies:
   next-auth:
     specifier: ^4.22.1
     version: 4.23.1(next@13.4.19)(react-dom@18.2.0)(react@18.2.0)
+  next-cloudinary:
+    specifier: ^4.28.0
+    version: 4.28.0(next@13.4.19)(react@18.2.0)
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -319,6 +322,29 @@ packages:
       '@babel/helper-string-parser': 7.22.5
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
+    dev: false
+
+  /@cloudinary-util/url-loader@3.12.0:
+    resolution: {integrity: sha512-cBtB2uAFbCIPOLnMN5IlcA2A9ZuGiTDafbGH8u5iu1qO+ajluhTh9RyzWCsJtXJQj3OREG4W/P3H5ujdxKmpZA==}
+    dependencies:
+      '@cloudinary-util/util': 2.2.1
+      '@cloudinary/url-gen': 1.12.0
+    dev: false
+
+  /@cloudinary-util/util@2.2.1:
+    resolution: {integrity: sha512-MEIqn5WtPP3mxSMTNNfpqlGS1UquAXcjmVdY/t/edD/ZWVjI85viBiOMIuF0W6n6UF5gTstLymfQNYx0YO/GZg==}
+    dev: false
+
+  /@cloudinary/transformation-builder-sdk@1.7.0:
+    resolution: {integrity: sha512-/FLYApYLTextepNq7R3I+nMkisAVnf+ELU0+M1Zfi4vB64n4pUT7Z4jgTfmDbMhnNsGRitLHTdiRkAoVeApxZw==}
+    dependencies:
+      '@cloudinary/url-gen': 1.12.0
+    dev: false
+
+  /@cloudinary/url-gen@1.12.0:
+    resolution: {integrity: sha512-L22tftVId19g8irjuHuXOdTCWC8p45ZiejtFeuqmOtwW7nkPH1vHt5MaEvDM4DiljnW0CKZJxE9RNjyxgx1/+w==}
+    dependencies:
+      '@cloudinary/transformation-builder-sdk': 1.7.0
     dev: false
 
   /@emotion/is-prop-valid@1.2.1:
@@ -2287,6 +2313,18 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       uuid: 8.3.2
+    dev: false
+
+  /next-cloudinary@4.28.0(next@13.4.19)(react@18.2.0):
+    resolution: {integrity: sha512-M5reG+kr1fSvg9qAt8KLOHM3bVNUTAzA9e5MqIdMlRqehmCZZBQ0UyQuASC/u5n0+cESUMQJfCj1ASPlHhyitw==}
+    peerDependencies:
+      next: ^12 || ^13
+      react: ^17 || ^18
+    dependencies:
+      '@cloudinary-util/url-loader': 3.12.0
+      '@cloudinary-util/util': 2.2.1
+      next: 13.4.19(@babel/core@7.23.0)(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
     dev: false
 
   /next@13.4.19(@babel/core@7.23.0)(react-dom@18.2.0)(react@18.2.0):
