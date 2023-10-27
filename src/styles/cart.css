@@ -9,7 +9,7 @@
     align-items: center;
     gap: 45px;
     font-size: 13px;
-    border-top: 1px #fff solid;
+    border-top: 1px solid hsla(0, 0%, 100%, .14);
     background-color: #000;
 }
 
@@ -40,10 +40,16 @@
 .cart-footer .cart-button button {
     height: 77px;
     width: 100%;
-    background-color: #fff;
+    background-color: #111111;
     border: transparent;
-    color: #000;
+    border-left: 1px solid hsla(0, 0%, 100%, .14);
+    color: #fff;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cart-footer .cart-button button:hover {
+    background-color: #1A1A1A;
 }
 
 .section-h2 {

@@ -72,13 +72,13 @@ const OrderDetails = () => {
                     </div>
                     <div className='order-details'>
                         <div className='details'>
-                            <h3>ORDER DETAILS</h3>
+                            <h3>Order Details</h3>
                             <div className='bx-info'><span>Order Number</span> <span>{order?.orderNumber}</span></div>
                             <div className='bx-info'><span>Order Date</span> <span>{formatDate(order.purchaseDate)}</span></div>
                             <div className='bx-info'><span>Expected Delivery Date</span> <span>{formatDate(order.expectedDeliveryDate)}</span></div>
                         </div>
                         <div className='details'>
-                            <h3>DELIVERY ADDRESS</h3>
+                            <h3>Delivery Address</h3>
                             <ul>
                                 <li>{order.name}</li>
                                 <li>{order.address.line1}</li>
@@ -93,7 +93,7 @@ const OrderDetails = () => {
                             </ul>
                         </div>
                         <div className='details'>
-                            <h3>TOTALS</h3>
+                            <h3>Totals</h3>
                             <div className='bx-info'><span>{totalProducts} {productsText}</span> <span>{(order.total_price / 100).toFixed(2)} €</span></div>
                             <div className='bx-info'><span>Delivery</span> <span>FREE</span></div>
                             <div className='bx-info'><span>Total Discount</span> <span>{order.discount ? order.discount : 0} €</span></div>

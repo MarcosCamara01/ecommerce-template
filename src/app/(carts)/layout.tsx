@@ -10,10 +10,10 @@ export default function RootLayout({
         <section>
             <div className="user-links">
                 <Link href="/cart">
-                    CART
+                    Cart
                 </Link>
                 <Link href="/wishlists">
-                    WISHLISTS
+                    Wishlists
                 </Link>
             </div>
             {children}

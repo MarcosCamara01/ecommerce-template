@@ -65,4 +65,9 @@ footer nav {
 
 .footer-group ul li a {
     font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.footer-group ul li a:hover {
+    color: #fff;
 }

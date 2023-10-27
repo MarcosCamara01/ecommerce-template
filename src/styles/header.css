@@ -1,9 +1,11 @@
 header {
     width: 100%;
-    padding: 40px 0;
+    padding: 40px 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background-color: #0A0A0A;
+    border-bottom: 1px solid hsla(0, 0%, 100%, .14);
 }
 
 header button {
@@ -28,6 +30,11 @@ header ul li {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+header ul li a {
+    color: #fff;
+    transition: all 0.2s ease;
 }
 
 .mobile-content {
@@ -64,4 +71,18 @@ header ul li {
     align-items: center;
     justify-content: space-between;
     flex-direction: column;
+}
+
+@media (max-width: 600px) {
+    header {
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+}
+
+@media (max-width: 350px) {
+    header {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
 }

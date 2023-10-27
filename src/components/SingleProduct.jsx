@@ -1,6 +1,7 @@
-import '../styles/singleproduct.css';
 import { ProductButtons } from "@/components/ProductsElements";
 import { ProductImages } from "@/components/ProductImages";
+
+import '../styles/singleproduct.css';
 
 export const SingleProduct = ({ product }) => {
     if (!product) {

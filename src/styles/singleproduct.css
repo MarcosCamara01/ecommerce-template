@@ -24,6 +24,8 @@
     display: inline-block;
     width: 100%;
     max-width: 700px;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .bx-grid img {
@@ -39,7 +41,9 @@
 }
 
 .sections-bx {
-    border: 1px #fff solid;
+    border: 1px hsla(0,0%,100%,.14) solid;
+    border-radius: 5px;
+    background-color: #0A0A0A;
 }
 
 .sections-bx .section {
@@ -47,7 +51,7 @@
 }
 
 .sections-bx .section-top {
-    border-bottom: 1px #fff solid;
+    border-bottom: 1px hsla(0,0%,100%,.14) solid;
     display: flex;
     justify-content: space-between;
     flex-direction: column;
@@ -69,10 +73,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px #fff solid;
+    border: 1px hsla(0,0%,100%,.14) solid;
     padding: 8px 4px;
-    background-color: transparent;
+    background-color: #000;
     cursor: pointer;
+    border-radius: 3px;
+    transition: all .2s ease-in-out;
+}
+
+.section-mid .sizes .size-item:hover {
+    border: 1px hsla(0,0%,100%,.50) solid;
 }
 
 .section-mid .sizes .size-item.selected {
@@ -81,7 +91,7 @@
 }
 
 .section-bot {
-    border-top: 1px #fff solid;
+    border-top: 1px hsla(0,0%,100%,.14) solid;
 }
 
 .section-bot button {
@@ -90,6 +100,11 @@
     border: 0;
     background-color: transparent;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.section-bot button:hover {
+    background-color: #1A1A1A;
 }
 
 .section-mid .colors {
@@ -99,6 +114,22 @@
     margin-top: 20px;
 }
 
+.section-mid .colors .color-item {
+    border: 1px solid hsla(0,0%,100%,.14);
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    border-radius: 3px;
+    transition: all .2s ease-in-out;
+}
+
+.section-mid .colors .color-item:hover {
+    border: 1px hsla(0,0%,100%,.50) solid;
+}
+
 .section-mid .colors .color-item.selected span {
     width: 10px;
     position: absolute;
@@ -106,14 +137,8 @@
     border-bottom: 1px solid #fff;
 }
 
-.section-mid .colors .color-item {
-    border: 1px solid #fff;
-    width: 35px;
-    height: 35px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    position: relative;
+.section-mid .colors .color-item.selected {
+    border: 1px hsla(0,0%,100%,.50) solid;
 }
 
 .sticky {
@@ -152,7 +177,7 @@
 
 .expand-button {
     position: absolute;
-    bottom: -25px;
+    bottom: -20px;
     left: 0;
     width: 100%;
     display: flex;
@@ -161,18 +186,23 @@
 }
 
 .expand-button button {
-    height: 50px;
-    width: 165px;
+    height: 40px;
+    width: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 15px;
-    background-color: #000;
-    border: 1px solid #fff;
-    padding: 0 15px;
+    background-color: #0A0A0A;
+    border: 1px hsla(0,0%,100%,.14) solid;
+    padding: 0 12px;
     cursor: pointer;
     font-size: 14px;
+    border-radius: 3px;
     transition: all 0.2s ease;
+}
+
+.expand-button button:hover {
+    background-color: #1A1A1A;
 }
 
 .expand-button button svg {
