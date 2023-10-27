@@ -31,7 +31,7 @@ const ProfilePage = () => {
                     setToEdit({ field: "name", value: session.user.name })}
                 >
                   <div className="cell-left">
-                    <h4>NAME</h4>
+                    <h4>Name</h4>
                     <span>{session.user.name}</span>
                   </div>
                   <div className="cell-right">
@@ -58,7 +58,7 @@ const ProfilePage = () => {
                 >
                   <div className="cell-left">
                     <h4>ADDRESSES</h4>
-                    <span>{session.user.address}</span>
+                    {session.user.address && <span>{session.user.address}</span>}
                   </div>
                   <div className="cell-right">
                     <IoIosArrowForward />
@@ -73,7 +73,7 @@ const ProfilePage = () => {
                 >
                   <div className="cell-left">
                     <h4>TELEPHONE</h4>
-                    <span>{session.user.phone}</span>
+                    {session.user.phone && <span>{session.user.phone}</span>}
                   </div>
                   <div className="cell-right">
                     <IoIosArrowForward />

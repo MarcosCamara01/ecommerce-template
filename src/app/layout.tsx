@@ -25,18 +25,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Providers>
-        <body className={inter.className}>
-          <main className={styles.main}>
-            <CartProvider>
+        <CartProvider>
+          <body className={inter.className}>
+            <Navbar />
+            <main className={styles.main}>
               <OrderProvider>
-                <Navbar />
                 {children}
                 <Analytics />
               </OrderProvider>
-            </CartProvider>
-          </main>
-          <Footer />
-        </body>
+            </main>
+            <Footer />
+          </body>
+        </CartProvider>
+
       </Providers>
     </html>
   )

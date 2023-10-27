@@ -80,8 +80,8 @@ export const ProductImages = ({ images, name }) => {
                 onClick={showImages}
                 className={visibleImages < images.length ? "" : "transform"}>
                 {visibleImages < images.length
-                  ? "SHOW MORE"
-                  : "SHOW LESS"}
+                  ? "Show more"
+                  : "Show less"}
                 <MdKeyboardArrowDown />
               </button>
             </div>

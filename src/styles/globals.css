@@ -107,6 +107,10 @@ main {
   margin-top: -37px;
 }
 
+section {
+  padding-top: 50px;
+}
+
 @media (max-width: 600px) {
   main {
     padding: 0 25px 102px;

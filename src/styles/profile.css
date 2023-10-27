@@ -1,25 +1,33 @@
 .user-links {
     display: flex;
     gap: 10px;
-    margin-bottom: 60px;
     flex-wrap: wrap;
 }
 
 .user-links a {
-    padding: 4px 8px;
-    border: 1px solid #fff;
+    padding: 6px 15px;
+    border: 1px solid hsla(0, 0%, 100%, .14);
     font-size: 14px;
+    border-radius: 3px;
+    background-color: #0A0A0A;
+    transition: all 0.2s ease;
+}
+
+.user-links a:hover {
+    background-color: #1A1A1A;
 }
 
 .user-information {
     max-width: 750px;
-    padding: 25px;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     flex-direction: column;
-    border: 1px solid #fff;
+    border: 1px solid hsla(0, 0%, 100%, .14);
+    border-radius: 5px;
     margin: 30px 0;
-    gap: 40px;
+    gap: 20px;
+    background-color: #0A0A0A;
 }
 
 .user-information .cell-button {
@@ -29,7 +37,14 @@
     border: transparent;
     cursor: pointer;
     align-items: center;
+    border-radius: 4px;
+    padding: 10px;
+    transition: all 0.2s ease;
 }
+
+.user-information .cell-button:hover {
+    background-color: #1A1A1A;
+} 
 
 .user-information .cell-button .cell-left {
     display: flex;
@@ -38,6 +53,12 @@
     align-items: baseline;
     gap: 5px;
     font-size: 14px;
+}
+
+.cell-button .cell-left span {
+    color: #888;
+    font-size: 13px;
+    margin-top: 5px;
 }
 
 .user-information .cell-button .cell-right {
@@ -55,4 +76,10 @@
     background-color: transparent;
     border: transparent;
     cursor: pointer;
+    color: #999;
+    transition: all 0.2s ease;
+}
+
+.user-button:hover {
+    color: #fff;
 }

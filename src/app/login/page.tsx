@@ -2,10 +2,11 @@
 import { FormEvent, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import '@/styles/form.css';
 import Link from "next/link";
 import { useSession } from 'next-auth/react';
 import { FcGoogle } from 'react-icons/fc';
+
+import '@/styles/form.css';
 
 const Signin = () => {
   const [error, setError] = useState("");
