@@ -17,6 +17,7 @@
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 2px;
     position: relative;
+    min-width: 560px;
 }
 
 .bx-grid .bx-image {
@@ -109,15 +110,15 @@
 
 .section-mid .colors {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
     gap: 10px;
     margin-top: 20px;
 }
 
 .section-mid .colors .color-item {
     border: 1px solid hsla(0,0%,100%,.14);
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -155,12 +156,17 @@
     max-width: 850px;
 }
 
+.swiper {
+    border-radius: 5px;
+}
+
 .swiper-wrapper {
     max-width: 250px;
 }
 
 .swiper-wrapper img {
     width: 100%;
+    display: block;
 }
 
 .swiper-pagination-clickable .swiper-pagination-bullet{
