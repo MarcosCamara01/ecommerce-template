@@ -14,9 +14,11 @@
 
 .box-alert {
     max-width: 90%;
-    border: 1px solid #fff;
+    border: 1px solid hsla(0, 0%, 100%, .14);
     background-color: #000;
     z-index: 1;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .box-alert h4 {
@@ -31,14 +33,19 @@
 
 .box-alert .box-button {
     width: 100%;
-    height: 40px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #000;
     border: transparent;
-    border-top: 1px solid #fff;
+    border-top: 1px solid hsla(0, 0%, 100%, .14);
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.box-alert .box-button:hover {
+    background-color: #1A1A1A;
 }
 
 .info-msg {
@@ -56,4 +63,35 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
+}
+
+.input-box {
+    margin: 0 20px 12px;
+}
+
+.input-box input {
+    width: 64%;
+    padding: 6px;
+    background-color: #0A0A0A;
+    border-top: 1px solid hsla(0, 0%, 100%, .14);
+    border-bottom: 1px solid hsla(0, 0%, 100%, .14);
+    border-left: 1px solid hsla(0, 0%, 100%, .14);
+    border-right: transparent;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.input-box button {
+    width: 36%;
+    background-color: #0A0A0A;
+    border: 1px solid hsla(0, 0%, 100%, .14);
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    padding: 6px 15px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.input-box button:hover {
+    background-color: #1A1A1A;
 }

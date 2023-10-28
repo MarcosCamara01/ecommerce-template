@@ -46,11 +46,11 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit, isMo
     return (
         <div className='alert-fixed'>
             <div className='box-alert'>
-                <h4>{isWarning ? "Warning" : "Update"}</h4>
+                <h4>{isWarning ? "WARNING" : "UPDATE"}</h4>
                 {isWarning ? (
                     <p>{message}</p>
                 ) : (
-                    <div>
+                    <div className='input-box'>
                         <input
                             type="text"
                             value={toEdit.value}
@@ -70,7 +70,7 @@ export const FixedComponent = ({ message, setOpen, task, toEdit, setToEdit, isMo
                         }
                     }}
                 >
-                    CLOSE
+                    Close
                 </button>
             </div>
         </div>

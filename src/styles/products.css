@@ -47,9 +47,8 @@
 
 .content-cart .buttons {
     display: flex;
-    border-top: 1px #fff solid;
-    border-bottom: 1px #fff solid;
     width: min-content;
+    background-color: #000;
 }
 
 .buttons .add-remove,
@@ -60,15 +59,31 @@
     align-items: center;
     justify-content: center;
     padding: 8px;
+    border-top: 1px hsla(0, 0%, 100%, .14) solid;
+    border-bottom: 1px hsla(0, 0%, 100%, .14) solid;
 }
 
 .buttons .add-remove {
     background-color: transparent;
-    border: transparent;
     font-size: 16px;
     cursor: pointer;
-    border-left: 1px #fff solid;
-    border-right: 1px #fff solid;
+    border: 1px hsla(0, 0%, 100%, .14) solid;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.buttons .add-remove:first-of-type {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.buttons .add-remove:last-of-type {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.buttons .add-remove:hover {
+    border: 1px hsla(0,0%,100%,.50) solid;
 }
 
 .buttons .content {

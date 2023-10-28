@@ -44,8 +44,6 @@ export const Footer = () => {
           <h2>About</h2>
           <ul>
             <li><Link href="https://portfoliomarcos.com/" target='_blank'>My Portfolio</Link></li>
-            <li><Link href="https://portfoliomarcos.com/" target='_blank'>My Portfolio</Link></li>
-            <li><Link href="https://portfoliomarcos.com/" target='_blank'>My Portfolio</Link></li>
           </ul>
         </div>
       </nav>
