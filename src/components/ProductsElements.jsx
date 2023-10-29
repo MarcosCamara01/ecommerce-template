@@ -22,7 +22,7 @@ export const ProductButtons = ({ product }) => {
     const handleAddToCart = () => {
 
         if (status === "unauthenticated") {
-            const warningMessage = 'YOU CANNOT SAVE TO CART WITHOUT LOGGING IN.'
+            const warningMessage = 'You cannot save to cart without logging in.'
             setWarning(warningMessage);
             console.warn(warningMessage);
         } else if (selectedVariant && selectedSize) {
@@ -36,15 +36,15 @@ export const ProductButtons = ({ product }) => {
                 selectedVariant.variantId
             );
         } else if (selectedVariant && !selectedSize) {
-            const warningMessage = 'YOU HAVE TO SELECT A SIZE.'
+            const warningMessage = 'You have to select a size.'
             setWarning(warningMessage);
             console.warn(warningMessage);
         } else if (!selectedVariant && selectedSize) {
-            const warningMessage = 'YOU HAVE TO SELECT A COLOR.'
+            const warningMessage = 'You have to select a color.'
             setWarning(warningMessage);
             console.warn(warningMessage);
         } else {
-            const warningMessage = 'YOU HAVE TO SELECT A COLOR AND A SIZE.'
+            const warningMessage = 'You have to select a color and a size.'
             setWarning(warningMessage);
             console.warn(warningMessage);
         }

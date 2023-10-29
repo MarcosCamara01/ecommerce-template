@@ -12,8 +12,8 @@ export default function RootLayout({
                 <Link href="/cart">
                     Cart
                 </Link>
-                <Link href="/wishlists">
-                    Wishlists
+                <Link href="/wishlist">
+                    Wishlist
                 </Link>
             </div>
             {children}

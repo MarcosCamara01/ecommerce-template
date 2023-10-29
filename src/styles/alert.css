@@ -19,6 +19,7 @@
     z-index: 1;
     border-radius: 4px;
     overflow: hidden;
+    min-width: 250px;
 }
 
 .box-alert h4 {
