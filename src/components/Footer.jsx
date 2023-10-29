@@ -41,9 +41,11 @@ export const Footer = () => {
           </ul>
         </div>
         <div className='footer-group'>
-          <h2>About</h2>
+          <h2>About Marcos</h2>
           <ul>
-            <li><Link href="https://portfoliomarcos.com/" target='_blank'>My Portfolio</Link></li>
+            <li><Link href="https://portfoliomarcos.com/" target='_blank'>Portfolio</Link></li>
+            <li><Link href="https://www.linkedin.com/in/marcospenelascamara/" target='_blank'>LinkedIn</Link></li>
+            <li><Link href="https://github.com/MarcosCamara01" target='_blank'>GitHub</Link></li>
           </ul>
         </div>
       </nav>
