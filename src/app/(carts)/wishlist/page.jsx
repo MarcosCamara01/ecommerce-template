@@ -21,6 +21,10 @@ const Wishlists = () => {
         productsWislists(userCart, cartLoading, setCartWithProducts, setIsLoading);
     }, [userCart, cartLoading]);
 
+    useEffect(() => {
+        document.title = "Wishlist | Ecommerce Template"
+    }, [])
+
     return (
         <section>
             {isLoading ?

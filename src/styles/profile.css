@@ -40,10 +40,12 @@
     border-radius: 4px;
     padding: 10px;
     transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
 .user-information .cell-button:hover {
     background-color: #1A1A1A;
+    border: 1px solid hsla(0, 0%, 100%, .14);
 } 
 
 .user-information .cell-button .cell-left {

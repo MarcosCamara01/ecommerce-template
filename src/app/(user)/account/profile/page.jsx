@@ -3,7 +3,7 @@
 import { FixedComponent } from "@/components/FixedComponent";
 import { Loader } from "@/helpers/Loader";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoIosArrowForward } from 'react-icons/io';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
@@ -13,6 +13,10 @@ const ProfilePage = () => {
   const isMobile = useClientMediaQuery('(max-width: 600px)');
 
   const warningMessage = "You cannot update the user if you are logged in with Google"
+
+  useEffect(() => {
+    document.title = "Profile | Ecommerce Template"
+  }, [])
 
   return (
     <>
@@ -46,7 +50,7 @@ const ProfilePage = () => {
                     setToEdit({ field: "email", value: session.user.email })}
                 >
                   <div className="cell-left">
-                    <h4>E-MAIL</h4>
+                    <h4>E-mail</h4>
                     <span>{session.user.email}</span>
                   </div>
                   <div className="cell-right">
@@ -57,7 +61,7 @@ const ProfilePage = () => {
                   className="cell-button"
                 >
                   <div className="cell-left">
-                    <h4>ADDRESSES</h4>
+                    <h4>Addresses</h4>
                     {session.user.address && <span>{session.user.address}</span>}
                   </div>
                   <div className="cell-right">
@@ -72,7 +76,7 @@ const ProfilePage = () => {
                     setToEdit({ field: "phone", value: session.user.phone })}
                 >
                   <div className="cell-left">
-                    <h4>TELEPHONE</h4>
+                    <h4>Telephone</h4>
                     {session.user.phone && <span>{session.user.phone}</span>}
                   </div>
                   <div className="cell-right">

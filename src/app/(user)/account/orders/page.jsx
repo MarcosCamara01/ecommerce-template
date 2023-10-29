@@ -37,6 +37,10 @@ const UserOrders = () => {
 
     }, [orders, status]);
 
+    useEffect(() => {
+        document.title = "Orders | Ecommerce Template"
+    }, [])
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return format(date, 'dd LLL yyyy');

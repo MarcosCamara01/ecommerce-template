@@ -1,7 +1,8 @@
-import "../styles/products.css";
 import Link from "next/link";
 import { ProductCartInfo, DeleteButton } from "./CartElements";
 import { FavoriteButton } from "./ProductsElements";
+
+import "../styles/products.css";
 
 export const Products = ({ products, extraClassname="" }) => {
   return (

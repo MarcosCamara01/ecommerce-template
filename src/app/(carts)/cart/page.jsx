@@ -23,6 +23,10 @@ const Cart = () => {
     productsCart(cartItems, cartLoading, setCartWithProducts, setIsLoading, setTotalPrice);
   }, [cartItems, cartLoading]);
 
+  useEffect(() => {
+    document.title = "Cart | Ecommerce Template"
+  }, [])
+
   return (
     <section>
       {isLoading ?

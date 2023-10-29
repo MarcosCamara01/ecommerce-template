@@ -23,7 +23,7 @@ const CheckoutSuccess = () => {
     if (session_id && data === undefined) {
       fetchCheckoutData(`${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/checkout_sessions?session_id=${session_id}`);
     }
-  }, [session_id]);  
+  }, [session_id]);
 
   useEffect(() => {
     if (data?.status === "complete" && status === "authenticated") {
@@ -31,12 +31,16 @@ const CheckoutSuccess = () => {
       emptyCart();
     }
   }, [status, data]);
-  
+
   useEffect(() => {
     if (data?.status === "complete" && !hasSavedOrder) {
       saveOrder(data, setHasSavedOrder);
     }
   }, [data]);
+
+  useEffect(() => {
+    document.title = "Purchase Result | Ecommerce Template"
+  }, [])
 
   const fetchCheckoutData = async (url) => {
     try {
