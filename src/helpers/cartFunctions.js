@@ -47,7 +47,7 @@ export const productsCart = async (cartItems, cartLoading, setCartWithProducts, 
           return {
             ...cartItem,
             category: matchingProduct.category,
-            image: matchingVariant.images[0],
+            image: [matchingVariant.images[0]],
             name: matchingProduct.name,
             price: matchingProduct.price,
           };

@@ -59,6 +59,7 @@
 .order-card .bx-imgs img {
     width: 80px;
     display: block;
+    border-radius: 3px;
 }
 
 .order-details .bx-info {

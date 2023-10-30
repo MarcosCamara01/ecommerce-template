@@ -16,6 +16,7 @@
 .product-card .product-img {
     width: 100%;
     display: block;
+    height: auto;
 }
 
 .product-information {

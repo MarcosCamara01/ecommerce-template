@@ -7,10 +7,18 @@ import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery'
 import { Loader } from '@/helpers/Loader'
 import { MdKeyboardArrowDown } from 'react-icons/md';
+import Image from 'next/image';
 
 import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
+
+const normalizeSrc = (src) => src[0] === '/' ? src.slice(1) : src
+
+function cloudinaryLoader({ src, width, quality }) {
+  const params = ['f_auto', 'c_limit', 'w_' + width, 'q_' + (quality || 'auto')];
+  return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(',')}/${normalizeSrc(src)}`;
+}
 
 export const ProductImages = ({ images, name }) => {
   const initialImagesToShow = 4;
@@ -37,7 +45,7 @@ export const ProductImages = ({ images, name }) => {
   if (isMobile === null) {
     return <Loader />
   }
-  
+
   if (isMobile) {
     return (
       <div className='container'>
@@ -50,10 +58,11 @@ export const ProductImages = ({ images, name }) => {
         >
           {images.map((image, index) => (
             <SwiperSlide key={index}>
-              <img
-                src={image}
-                alt={`${name} - Image ${index + 1}`}
-                className='product-img'
+              <Images
+                image={[image]}
+                name={`${name} - Image ${index + 1}`}
+                width={384}
+                height={576}
               />
             </SwiperSlide>
           ))}
@@ -65,10 +74,11 @@ export const ProductImages = ({ images, name }) => {
       <div className='bx-grid' ref={scrollRef}>
         {images.slice(0, visibleImages).map((image, index) => (
           <div className='bx-image' key={index} >
-            <img
-              src={image}
-              alt={`${name} - Image ${index + 1}`}
-              className='product-img'
+            <Images
+              image={[image]}
+              name={`${name} - Image ${index + 1}`}
+              width={850}
+              height={1275}
             />
           </div>
         ))}
@@ -90,4 +100,17 @@ export const ProductImages = ({ images, name }) => {
       </div>
     )
   }
+}
+
+export const Images = async ({ image, name, width, height }) => {
+  return (
+    <Image
+      loader={cloudinaryLoader}
+      width={width}
+      height={height}
+      src={image[0]}
+      alt={name}
+      className="product-img"
+    />
+  )
 }

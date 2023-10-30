@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { ProductCartInfo, DeleteButton } from "./CartElements";
 import { FavoriteButton } from "./ProductsElements";
+import { Images } from "./ProductImages";
 
 import "../styles/products.css";
 
-export const Products = ({ products, extraClassname="" }) => {
+export const Products = ({ products, extraClassname = "" }) => {
   return (
     <div className={`products-section ${extraClassname}`}>
       {products.map((product) => {
@@ -15,11 +16,11 @@ export const Products = ({ products, extraClassname="" }) => {
                 ? product.productId
                 : product._id}`}
             >
-              <img
-                src={product?.image}
-                alt={product?.name}
-                className="product-img"
-                loading="lazy"
+              <Images 
+                image={product.image}
+                name={product.name}
+                width={384}
+                height={576}
               />
             </Link>
             <div className="product-information">
