@@ -31,6 +31,7 @@
 
 .bx-grid img {
     width: 100%;
+    height: auto;
     max-width: 700px;
     min-width: 280px;
     display: block;
@@ -167,6 +168,7 @@
 .swiper-wrapper img {
     width: 100%;
     display: block;
+    height: auto;
 }
 
 .swiper-pagination-clickable .swiper-pagination-bullet{

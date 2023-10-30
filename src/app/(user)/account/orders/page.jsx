@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Loader } from "@/helpers/Loader";
 import { getOrders } from '@/helpers/ordersFunctions';
 import { useOrders } from '@/hooks/OrdersContext';
+import { Images } from '@/components/ProductImages';
 
 import '@/styles/orders.css';
 
@@ -59,7 +60,12 @@ const UserOrders = () => {
                             <div className='bx-imgs'>
                                 {order.products.map((product, productIndex) => (
                                     <div key={productIndex} className="product-card">
-                                        <img src={product.image} alt={product.name} loading='lazy' />
+                                        <Images
+                                            width={80}
+                                            height={120}
+                                            image={product.image}
+                                            name={product.name}
+                                        />
                                     </div>
                                 ))}
                             </div>
