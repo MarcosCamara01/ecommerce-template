@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Images } from './ProductImages';
 
 const ProductForm = () => {
     const [productData, setProductData] = useState({
@@ -16,7 +17,6 @@ const ProductForm = () => {
     const [imageUrls, setImageUrls] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
 
-    // Función reutilizable para cargar imágenes
     const uploadImages = async (e, callback) => {
         try {
             setIsUploading(true);
@@ -28,7 +28,8 @@ const ProductForm = () => {
                 const formData = new FormData();
                 formData.append("image", file);
                 const response = await axios.post("/api/upload", formData);
-                newImageUrls.push(response.data.url);
+                const urlParts = response.data.url.split('/');
+                newImageUrls.push(`/${urlParts[urlParts.length - 1]}`);
             }
 
             callback(newImageUrls);
@@ -51,9 +52,10 @@ const ProductForm = () => {
             const updatedVariants = [...variants];
             updatedVariants[index].images = newImageUrls;
             setVariants(updatedVariants);
+            setVariantImageUrls([...variantImageUrls, ...newImageUrls])
         });
     };
-    
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setProductData((prevData) => ({
@@ -71,7 +73,7 @@ const ProductForm = () => {
 
     const addVariant = () => {
         setVariants([...variants, { priceId: '', color: '' }]);
-        setVariantImageUrls([...variantImageUrls, []]); // Inicializar con un array vacío para las imágenes de la nueva variante
+        setVariantImageUrls([...variantImageUrls, []]);
     };
 
     const removeVariant = (index) => {
@@ -94,7 +96,7 @@ const ProductForm = () => {
                 ...productData,
                 sizes: sizesArray,
                 variants: variants,
-                variantImages: variantImageUrls, // Enviar las imágenes de las variantes al servidor
+                variantImages: variantImageUrls,
                 image: imageUrls
             };
 
@@ -164,18 +166,23 @@ const ProductForm = () => {
                             disabled={isUploading}
                         />
                     </div>
-                    {variantImageUrls[index] && (
-                        <div className="image-preview-container">
-                            {variantImageUrls[index].map((url, imageIndex) => (
-                                <img
-                                    key={imageIndex}
-                                    src={url}
-                                    alt={`Variant Image ${imageIndex}`}
-                                    className="image-preview"
+
+                    <div className="image-preview-container">
+                        {variantImageUrls && variantImageUrls.map((url, index) => (
+                            <div
+                                key={index}
+                                className="image-preview"
+                            >
+                                <Images
+                                    width={80}
+                                    height={120}
+                                    image={[url]}
+                                    name={`Variant Image ${index}`}
                                 />
-                            ))}
-                        </div>
-                    )}
+                            </div>
+                        ))}
+                    </div>
+
                     <button type="button" onClick={() => removeVariant(index)}>Remove Variant</button>
                 </div>
             ))}
@@ -194,12 +201,17 @@ const ProductForm = () => {
 
             <div className="image-preview-container">
                 {imageUrls.map((url, index) => (
-                    <img
+                    <div
                         key={index}
-                        src={url}
-                        alt={`Main Image ${index}`}
                         className="image-preview"
-                    />
+                    >
+                        <Images
+                            width={80}
+                            height={120}
+                            image={[url]}
+                            name={`Image ${index}`}
+                        />
+                    </div>
                 ))}
             </div>
             {isUploading && <p>Uploading images...</p>}
