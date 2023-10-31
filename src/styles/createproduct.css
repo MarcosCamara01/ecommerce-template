@@ -12,7 +12,7 @@
 
 .image-preview-container .image-preview {
     max-width: 100px;
-    max-height: 100px;
+    max-height: 120px;
 }
 
 form {

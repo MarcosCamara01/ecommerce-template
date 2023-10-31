@@ -1,13 +1,14 @@
 "use client"
 
 import Link from 'next/link';
-import '../styles/header.css';
 import { useSession } from "next-auth/react";
 import { useCart } from '@/hooks/CartContext';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { useEffect, useState } from 'react';
 import { HiMiniBars2 } from "react-icons/hi2";
 import { HiMiniXMark } from "react-icons/hi2";
+
+import '../styles/header.css';
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
