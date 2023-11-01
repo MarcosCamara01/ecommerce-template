@@ -8,6 +8,7 @@ import { useClientMediaQuery } from '@/hooks/useClientMediaQuery'
 import { Loader } from '@/helpers/Loader'
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import Image from 'next/image';
+import { BlurDataUrl } from "@/utils/BlurDataURL"
 
 import 'swiper/css'
 import "swiper/css/zoom";
@@ -103,6 +104,8 @@ export const ProductImages = ({ images, name }) => {
 }
 
 export const Images = async ({ image, name, width, height }) => {
+  const placeholder = await BlurDataUrl(image);
+
   return (
     <Image
       loader={cloudinaryLoader}
@@ -111,6 +114,8 @@ export const Images = async ({ image, name, width, height }) => {
       src={image[0]}
       alt={name}
       className="product-img"
+      placeholder='blur'
+      blurDataURL={placeholder}
     />
   )
 }
