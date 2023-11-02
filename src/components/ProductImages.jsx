@@ -4,28 +4,20 @@ import React, { useState, useRef } from 'react';
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
-import { useClientMediaQuery } from '@/hooks/useClientMediaQuery'
 import { Loader } from '@/helpers/Loader'
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import Image from 'next/image';
 import { BlurDataUrl } from "@/utils/BlurDataURL"
+import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
 import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
 
-const normalizeSrc = (src) => src[0] === '/' ? src.slice(1) : src
-
-function cloudinaryLoader({ src, width, quality }) {
-  const params = ['f_auto', 'c_limit', 'w_' + width, 'q_' + (quality || 'auto')];
-  return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(',')}/${normalizeSrc(src)}`;
-}
-
-export const ProductImages = ({ images, name }) => {
+export const ProductImages = React.memo(({ images, name }) => {
   const initialImagesToShow = 4;
   const [visibleImages, setVisibleImages] = useState(initialImagesToShow);
   const scrollRef = useRef(null);
-
   const isMobile = useClientMediaQuery('(max-width: 680px)');
 
   const showImages = () => {
@@ -101,6 +93,13 @@ export const ProductImages = ({ images, name }) => {
       </div>
     )
   }
+})
+
+function cloudinaryLoader({ src, width, quality }) {
+  const params = ['f_auto', 'c_limit', 'w_' + width, 'q_' + (quality || 'auto')];
+  const normalizeSrc = (src) => src[0] === '/' ? src.slice(1) : src
+
+  return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(',')}/${normalizeSrc(src)}`;
 }
 
 export const Images = async ({ image, name, width, height }) => {
