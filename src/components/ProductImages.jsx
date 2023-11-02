@@ -14,7 +14,7 @@ import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
 
-export const ProductImages = React.memo(({ images, name }) => {
+export const ProductImages = ({ images, name }) => {
   const initialImagesToShow = 4;
   const [visibleImages, setVisibleImages] = useState(initialImagesToShow);
   const scrollRef = useRef(null);
@@ -93,7 +93,7 @@ export const ProductImages = React.memo(({ images, name }) => {
       </div>
     )
   }
-})
+}
 
 function cloudinaryLoader({ src, width, quality }) {
   const params = ['f_auto', 'c_limit', 'w_' + width, 'q_' + (quality || 'auto')];
@@ -112,6 +112,7 @@ export const Images = async ({ image, name, width, height }) => {
       height={height}
       src={image[0]}
       alt={name}
+      quality={100}
       className="product-img"
       placeholder='blur'
       blurDataURL={placeholder}
