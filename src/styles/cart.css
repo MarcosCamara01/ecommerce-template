@@ -52,10 +52,6 @@
     background-color: #1A1A1A;
 }
 
-.section-h2 {
-    margin-bottom: 20px;
-}
-
 @media (max-width: 600px) {
     .cart-footer {
         gap: 0;

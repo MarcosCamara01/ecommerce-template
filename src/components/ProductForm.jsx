@@ -137,7 +137,7 @@ const ProductForm = () => {
 
             {/* Agregar campos para las variantes */}
             {variants.map((variant, index) => (
-                <div key={index}>
+                <div key={index} className='bx-variant'>
                     <div className='input-bx'>
                         <label>Color:</label>
                         <input
@@ -167,23 +167,12 @@ const ProductForm = () => {
                         />
                     </div>
 
-                    <div className="image-preview-container">
-                        {variantImageUrls && variantImageUrls.map((url, index) => (
-                            <div
-                                key={index}
-                                className="image-preview"
-                            >
-                                <Images
-                                    width={80}
-                                    height={120}
-                                    image={[url]}
-                                    name={`Variant Image ${index}`}
-                                />
-                            </div>
-                        ))}
-                    </div>
-
-                    <button type="button" onClick={() => removeVariant(index)}>Remove Variant</button>
+                    <button
+                        type="button"
+                        className='variant-button'
+                        onClick={() => removeVariant(index)}
+                    >Remove Variant
+                    </button>
                 </div>
             ))}
 

@@ -5,7 +5,7 @@ import '../../styles/createproduct.css';
 const CreateProduct = () => {
     return (
         <section className='create-product'>
-            <h1>Create a New Product</h1>
+            <h2 className='section-h2'>Create a New Product</h2>
             <ProductForm />
         </section>
     );
