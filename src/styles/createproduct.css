@@ -17,23 +17,66 @@
 
 form {
     height: 100%;
+    max-width: 400px;
     width: 100%;
-}
-
-form .input-bx {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 20px;
 }
 
+form .input-bx {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+form .input-bx label {
+    width: 100%;
+    font-size: 14px;
+} 
+
 form .input-bx input {
-    width: 50%;
     min-height: 25px;
+    width: 100%;
+    background-color: #0A0A0A;
+    border: 1px solid hsla(0, 0%, 100%, .14);
+    border-radius: 3px;
 }
 
 form .input-bx textarea {
-    width: 50%;
-    min-width: 50%;
-    max-height: 50px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 200px;
+    min-height: 50px;
+    background-color: #0A0A0A;
+    border: 1px solid hsla(0, 0%, 100%, .14);
+    border-radius: 3px;
+}
+
+form button {
+    padding: 5px 15px;
+    border: 1px solid hsla(0, 0%, 100%, .14);
+    font-size: 14px;
+    border-radius: 3px;
+    background-color: #0A0A0A;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #1A1A1A;
+}
+
+form .variant-button {
+    margin-top: 15px;
+}
+
+.bx-variant {
+    width: 100%;
 }
