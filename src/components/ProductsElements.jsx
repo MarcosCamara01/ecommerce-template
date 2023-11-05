@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import { FaRegHeart, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
+import { colorMapping } from "@/helpers/colorMapping";
 
 export const ProductButtons = ({ product }) => {
     const { addToCart } = useCart();
@@ -69,7 +70,7 @@ export const ProductButtons = ({ product }) => {
                         <button
                             key={index}
                             className={`color-item ${selectedVariant === variant ? 'selected' : ''}`}
-                            style={{ backgroundColor: variant.color }}
+                            style={{ backgroundColor: colorMapping[variant.color] }}
                             onClick={() => setSelectedVariant(variant)}
                             title={`Color ${variant.color}`}
                         >
