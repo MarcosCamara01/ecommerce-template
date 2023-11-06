@@ -171,6 +171,10 @@
         gap: 0;
     }
 
+    .cart-ord-mobile .product-card a {
+        width: 50%;
+    }
+
     .cart-ord-mobile .product-information {
         width: 50%;
         padding: 15px;
