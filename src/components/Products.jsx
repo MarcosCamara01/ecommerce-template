@@ -12,7 +12,7 @@ export const Products = ({ products, extraClassname = "" }) => {
         return (
           <div className="product-card" key={product._id}>
             <Link
-              href={`/${product?.category}/${product.quantity
+              href={`/${product.category}/${product.quantity
                 ? product.productId
                 : product._id}`}
             >

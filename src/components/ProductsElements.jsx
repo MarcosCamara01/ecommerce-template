@@ -9,16 +9,21 @@ import { FaRegHeart, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { colorMapping } from "@/helpers/colorMapping";
+import { useVariant } from '@/hooks/VariantContext';
 
 export const ProductButtons = ({ product }) => {
     const { addToCart } = useCart();
-    const [selectedVariant, setSelectedVariant] = useState(
-        product.variants.length === 1 ? product.variants[0] : null
-    );
+    const { selectedVariant, setSelectedVariant } = useVariant();
     const [selectedSize, setSelectedSize] = useState('');
     const [warning, setWarning] = useState('none');
     const { status } = useSession();
     const isMobile = useClientMediaQuery('(max-width: 600px)');
+
+    useEffect(() => {
+        if (selectedVariant) {
+            setSelectedVariant(product.variants[0])
+        }
+    }, [product])
 
     const handleAddToCart = () => {
 

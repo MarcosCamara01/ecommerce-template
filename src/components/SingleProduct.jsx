@@ -8,25 +8,10 @@ export const SingleProduct = ({ product }) => {
         return <div>Producto no encontrado</div>;
     }
 
-    const allImages = [];
-    if (product.image) {
-        allImages.push(...product.image);
-    }
-
-    if (product.variants) {
-        const variantImages = product.variants
-            .filter(variant => variant.images)
-            .map(variant => variant.images)
-            .flat();
-
-        allImages.push(...variantImages);
-    }
-
     return (
         <div className="product-bx">
             <div className="img-bx">
                 <ProductImages
-                    images={allImages}
                     name={product.name}
                 />
             </div>

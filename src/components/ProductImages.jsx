@@ -1,44 +1,31 @@
 'use client'
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
 import { Loader } from '@/helpers/Loader'
-import { MdKeyboardArrowDown } from 'react-icons/md';
 import Image from 'next/image';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
+import { useVariant } from '@/hooks/VariantContext';
 
 import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
 
-export const ProductImages = ({ images, name }) => {
-  const initialImagesToShow = 4;
-  const [visibleImages, setVisibleImages] = useState(initialImagesToShow);
-  const scrollRef = useRef(null);
+export const ProductImages = ({ name }) => {
+  const { selectedVariant } = useVariant();
   const isMobile = useClientMediaQuery('(max-width: 680px)');
 
-  const showImages = () => {
-    if (visibleImages < images.length) {
-      setVisibleImages(images.length);
-    } else {
-      setVisibleImages(initialImagesToShow);
-      scrollToButton();
-    }
-  };
-
-  const scrollToButton = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-    }
-  };
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [selectedVariant])
 
   if (isMobile === null) {
     return <Loader />
   }
 
-  if (isMobile) {
+  if (isMobile && selectedVariant) {
     return (
       <div className='container'>
         <Swiper
@@ -48,11 +35,11 @@ export const ProductImages = ({ images, name }) => {
           loop={true}
           zoom={true}
         >
-          {images.map((image, index) => (
+          {selectedVariant.images.map((image, index) => (
             <SwiperSlide key={index}>
               <Images
                 image={[image]}
-                name={`${name} - Image ${index + 1}`}
+                name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
                 width={384}
                 height={576}
               />
@@ -63,8 +50,8 @@ export const ProductImages = ({ images, name }) => {
     )
   } else {
     return (
-      <div className='bx-grid' ref={scrollRef}>
-        {images.slice(0, visibleImages).map((image, index) => (
+      <div className='bx-grid'>
+        {selectedVariant.images.map((image, index) => (
           <div className='bx-image' key={index} >
             <Images
               image={[image]}
@@ -74,21 +61,6 @@ export const ProductImages = ({ images, name }) => {
             />
           </div>
         ))}
-        {
-          images.length > 4 &&
-          (
-            <div className='expand-button'>
-              <button
-                onClick={showImages}
-                className={visibleImages < images.length ? "" : "transform"}>
-                {visibleImages < images.length
-                  ? "Show more"
-                  : "Show less"}
-                <MdKeyboardArrowDown />
-              </button>
-            </div>
-          )
-        }
       </div>
     )
   }
@@ -110,7 +82,7 @@ export const Images = ({ image, name, width, height }) => {
       src={image[0]}
       alt={name}
       quality={100}
-      placeholder='empty'
+      loading='lazy'
       className="product-img"
     />
   )
