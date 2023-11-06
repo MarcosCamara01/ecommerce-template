@@ -25,7 +25,7 @@ export const ProductImages = ({ name }) => {
     return <Loader />
   }
 
-  if (isMobile && selectedVariant) {
+  if (isMobile) {
     return (
       <div className='container'>
         <Swiper
