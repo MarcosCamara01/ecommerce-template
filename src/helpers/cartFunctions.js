@@ -70,7 +70,7 @@ const calculateTotalPrice = (cartItems) => {
   let totalPrice = 0;
 
   for (const cartItem of cartItems) {
-    totalPrice += cartItem.price * cartItem.quantity;
+    totalPrice += cartItem?.price * cartItem?.quantity;
   }
 
   return totalPrice.toFixed(2);
