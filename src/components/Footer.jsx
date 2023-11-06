@@ -14,14 +14,25 @@ export const Footer = () => {
       <nav>
         <div className='footer-side-group'>
           <div className='stack'>
-            <Link href="https://portfoliomarcos.com/" target='_blank'>
+            <Link
+              href="https://portfoliomarcos.com/"
+              target='_blank'
+              title="Portfolio of Marcos">
               <SiVercel />
             </Link>
             <span>© 2023</span>
           </div>
           <div className='stack'>
-            <Link href="https://www.linkedin.com/in/marcospenelascamara/" target='_blank'><FaLinkedin /> </Link>
-            <Link href="https://github.com/MarcosCamara01" target='_blank'><FaGithubSquare /> </Link>
+            <Link
+              href="https://www.linkedin.com/in/marcospenelascamara/"
+              target='_blank'
+              title="LindedIn of Marcos"
+            ><FaLinkedin /></Link>
+            <Link
+              href="https://github.com/MarcosCamara01"
+              target='_blank'
+              title="GitHub of Marcos"
+            ><FaGithubSquare /></Link>
           </div>
         </div>
         <div className='footer-group'>

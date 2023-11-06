@@ -6,6 +6,7 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { CartProvider } from '../hooks/CartContext';
 import { OrderProvider } from '../hooks/OrdersContext';
+import { VariantProvider } from '../hooks/VariantContext';
 import { Analytics } from '@vercel/analytics/react';
 
 import '../styles/globals.css';
@@ -30,14 +31,15 @@ export default function RootLayout({
             <Navbar />
             <main className={styles.main}>
               <OrderProvider>
-                {children}
-                <Analytics />
+                <VariantProvider>
+                  {children}
+                  <Analytics />
+                </VariantProvider>
               </OrderProvider>
             </main>
             <Footer />
           </body>
         </CartProvider>
-
       </Providers>
     </html>
   )
