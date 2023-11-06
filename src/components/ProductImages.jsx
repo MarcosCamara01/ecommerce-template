@@ -7,7 +7,6 @@ import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
 import { Loader } from '@/helpers/Loader'
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import Image from 'next/image';
-import { BlurDataUrl } from "@/utils/BlurDataURL"
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 
 import 'swiper/css'
@@ -102,9 +101,7 @@ function cloudinaryLoader({ src, width, quality }) {
   return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(',')}/${normalizeSrc(src)}`;
 }
 
-export const Images = async ({ image, name, width, height }) => {
-  const placeholder = await BlurDataUrl(image);
-
+export const Images = ({ image, name, width, height }) => {
   return (
     <Image
       loader={cloudinaryLoader}
@@ -113,9 +110,8 @@ export const Images = async ({ image, name, width, height }) => {
       src={image[0]}
       alt={name}
       quality={100}
+      placeholder='empty'
       className="product-img"
-      placeholder='blur'
-      blurDataURL={placeholder}
     />
   )
 }
