@@ -17,22 +17,20 @@
     width: 100%;
     display: block;
     height: auto;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
 }
 
-.product-img {
-    background: linear-gradient(270deg, #111, #333, #333, #111);
-    background-size: 400% 100%;
-    animation: 8s shine ease-in-out infinite;
+.img-bx {
+    position: relative;
 }
 
-@keyframes shine {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
+.img-effct {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .product-information {

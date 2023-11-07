@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
@@ -12,6 +12,7 @@ import { useVariant } from '@/hooks/VariantContext';
 import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
+import "../styles/products.css";
 
 export const ProductImages = ({ name }) => {
   const { selectedVariant } = useVariant();
@@ -74,16 +75,26 @@ function cloudinaryLoader({ src, width, quality }) {
 }
 
 export const Images = ({ image, name, width, height }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleImageLoadComplete = () => {
+    setImageLoaded(true);
+  };
+
   return (
-    <Image
-      loader={cloudinaryLoader}
-      width={width}
-      height={height}
-      src={image[0]}
-      alt={name}
-      quality={100}
-      loading='lazy'
-      className="product-img"
-    />
+    <div className='img-bx'>
+      <Image
+        loader={cloudinaryLoader}
+        width={width}
+        height={height}
+        src={image[0]}
+        alt={name}
+        quality={100}
+        loading='lazy'
+        className="product-img"
+        onLoadingComplete={handleImageLoadComplete}
+      />
+      <div className={!imageLoaded ? 'shine img-effct' : '' }></div>
+    </div>
   )
 }

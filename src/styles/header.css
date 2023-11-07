@@ -21,7 +21,7 @@ header svg {
 header ul {
     display: flex;
     justify-content: space-between;
-    gap: 15px;
+    gap: 35px;
     list-style: none;
     font-size: 14px;
 }
@@ -71,6 +71,12 @@ header ul li a {
     align-items: center;
     justify-content: space-between;
     flex-direction: column;
+}
+
+.header-skeleton {
+    height: 17px;
+    width: 20%;
+    border-radius: 3px;
 }
 
 @media (max-width: 600px) {

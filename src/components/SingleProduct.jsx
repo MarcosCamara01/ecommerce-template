@@ -10,7 +10,7 @@ export const SingleProduct = ({ product }) => {
 
     return (
         <div className="product-bx">
-            <div className="img-bx">
+            <div className="imgs-bx">
                 <ProductImages
                     name={product.name}
                 />

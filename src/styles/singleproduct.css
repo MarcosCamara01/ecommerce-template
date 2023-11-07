@@ -1,12 +1,11 @@
 .product-bx {
-    min-height: calc(100vh - 147px);
     display: flex;
     flex-wrap: wrap;
     gap: 2rem;
     justify-content: space-between;
 }
 
-.img-bx {
+.imgs-bx {
     flex-grow: 999;
     flex-basis: 0;
     z-index: 0;
@@ -25,8 +24,10 @@
     display: inline-block;
     width: 100%;
     max-width: 700px;
+}
+
+.bx-image .shine {
     border-radius: 5px;
-    overflow: hidden;
 }
 
 .bx-grid img {
@@ -35,6 +36,7 @@
     max-width: 700px;
     min-width: 280px;
     display: block;
+    border-radius: 5px;
 }
 
 .information-bx {
@@ -80,7 +82,7 @@
     background-color: #000;
     cursor: pointer;
     border-radius: 3px;
-    transition: all .2s ease-in-out;
+    transition: all 0.2s ease-in-out;
 }
 
 .section-mid .sizes .size-item:hover {
