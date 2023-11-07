@@ -66,7 +66,14 @@ export const Navbar = () => {
   );
 
   if (isMobile === null) {
-    return <header></header>;
+    return <header>
+      <div className='header-skeleton shine'>
+
+      </div>
+      <div className='header-skeleton shine'>
+
+      </div>
+    </header>;
   }
 
   return (

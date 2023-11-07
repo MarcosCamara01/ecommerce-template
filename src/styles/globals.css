@@ -115,6 +115,23 @@ section .section-h2 {
   margin-bottom: 20px;
 }
 
+.shine {
+  background: linear-gradient(270deg, #111, #333, #333, #111);
+  background-size: 400% 100%;
+  animation: 8s shine ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes shine {
+  0% {
+      background-position: 200% 0;
+  }
+
+  100% {
+      background-position: -200% 0;
+  }
+}
+
 @media (max-width: 600px) {
   main {
     padding: 0 25px 102px;
