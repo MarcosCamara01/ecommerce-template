@@ -4,7 +4,7 @@ const Home = async () => {
   let products = [];
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products`, { cache: "no-store" });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products`);
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(`Failed to fetch data. Status: ${res.status}, Message: ${errorData.message}`);

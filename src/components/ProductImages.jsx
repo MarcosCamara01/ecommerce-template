@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
-import { Loader } from '@/helpers/Loader'
 import Image from 'next/image';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { useVariant } from '@/hooks/VariantContext';
@@ -56,7 +55,7 @@ export const ProductImages = ({ name }) => {
           <div className='bx-image' key={index} >
             <Images
               image={[image]}
-              name={`${name} - Image ${index + 1}`}
+              name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
               width={850}
               height={1275}
             />
