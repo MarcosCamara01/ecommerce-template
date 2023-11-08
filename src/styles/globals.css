@@ -119,7 +119,6 @@ section .section-h2 {
   background: linear-gradient(270deg, #111, #333, #333, #111);
   background-size: 400% 100%;
   animation: 8s shine ease-in-out infinite;
-  z-index: 10;
 }
 
 @keyframes shine {
