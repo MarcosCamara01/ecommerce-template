@@ -153,6 +153,19 @@
     margin-bottom: 20px;
 }
 
+.skeleton-bx {
+    width: 100%;
+    height: 510px;
+    border-radius: 5px;
+}
+
+@media (min-width: 680px) {
+    .skeleton-bx {
+        min-width: 560px;
+        height: 80vh;
+    }
+}
+
 @media (max-width: 600px) {
     .products-section.colums-mobile {
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));

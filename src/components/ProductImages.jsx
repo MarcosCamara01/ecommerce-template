@@ -23,7 +23,7 @@ export const ProductImages = ({ name }) => {
   }, [selectedVariant])
 
   if (isMobile === null) {
-    return <Loader />
+    return <div className='skeleton-bx shine'></div>
   }
 
   if (isMobile) {
