@@ -8,6 +8,8 @@
 
 .login-register form {
     padding: 40px;
+    width: 100%;
+    max-width: 350px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -27,12 +29,17 @@
     width: 100%;
 }
 
+.login-register form label {
+    font-size: 15px;
+}
+
 .login-register form input {
     width: 100%;
     height: 30px;
     border: 1px solid hsla(0, 0%, 100%, .14);
     padding: 5px 10px;
     background-color: #000;
+    border-radius: 3px;
 }
 
 .login-register form a {
@@ -48,7 +55,7 @@
 .google-button {
     max-width: 320px;
     display: flex;
-    padding: 0.5rem 1.4rem;
+    padding: 5px 10px;
     font-size: 0.875rem;
     line-height: 1.25rem;
     font-weight: 600;
@@ -75,6 +82,7 @@
     cursor: pointer;
     margin-top: 10px;
     transition: all 0.2s ease-in-out;
+    border-radius: 3px;
 }
 
 .signup-button:hover {
@@ -107,4 +115,37 @@
     align-items: center;
     justify-content: center;
     font-size: 14px;
+}
+
+.passwrd-bx {
+    display: flex;
+    width: 100%;
+}
+
+.passwrd-bx button {
+    cursor: pointer;
+    width: 15%;
+    border: 1px solid hsla(0, 0%, 100%, .14);
+    background-color: #000;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.passwrd-bx button:hover {
+    background-color: #1A1A1A;
+}
+
+.passwrd-bx button svg {
+    font-size: 16px;
+}
+
+.passwrd-bx .passwrd-input {
+    width: 85%;
+    border-right: transparent;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
 }

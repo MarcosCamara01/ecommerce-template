@@ -24,14 +24,14 @@ export const authOptions: NextAuthOptions  = {
           email: credentials?.email,
         }).select("+password");
 
-        if (!userFound) throw new Error("Invalid credentials");
+        if (!userFound) throw new Error("Invalid Email");
 
         const passwordMatch = await bcrypt.compare(
           credentials!.password,
           userFound.password
         );
 
-        if (!passwordMatch) throw new Error("Invalid credentials");
+        if (!passwordMatch) throw new Error("Invalid Password");
         return userFound;
       },
     }),
