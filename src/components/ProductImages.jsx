@@ -81,7 +81,7 @@ export const Images = ({ image, name, width, height }) => {
   };
 
   return (
-    <div className='img-bx'>
+    <div className={!imageLoaded ? 'img-bx' : '' }>
       <Image
         loader={cloudinaryLoader}
         width={width}
