@@ -11,6 +11,7 @@
     border: 1px solid hsla(0, 0%, 100%, .14);
     border-radius: 5px;
     overflow: hidden;
+    justify-content: space-between;
 }
 
 .product-card .product-img {
