@@ -7,6 +7,7 @@ import { useCart } from '@/hooks/CartContext';
 import { saveOrder } from "@/helpers/ordersFunctions";
 import { Loader } from "@/helpers/Loader";
 import { useSession } from 'next-auth/react';
+import emailjs from "@emailjs/browser";
 
 import '@/styles/alert.css';
 
@@ -16,7 +17,6 @@ const CheckoutSuccess = () => {
   const { setCartItems } = useCart();
   const [data, setData] = useState();
   const [hasSavedOrder, setHasSavedOrder] = useState(false);
-
   const session_id = searchParams.get('session_id');
 
   useEffect(() => {
@@ -35,6 +35,29 @@ const CheckoutSuccess = () => {
   useEffect(() => {
     if (data?.status === "complete" && !hasSavedOrder) {
       saveOrder(data, setHasSavedOrder);
+
+      const templateParams = {
+        name: data.customer_details.name,
+        email: data.customer_details.email,
+      };
+
+      emailjs
+        .send(
+          "service_r19xijn",
+          "template_p9rex9q",
+          templateParams,
+          "zCpXvv0LiIoJvc0rf"
+        )
+        .then(
+          function (response) {
+            console.log("SUCCESS EMAIL!", response.status, response.text);
+            alert("Thanks, Email sent successfully");
+          },
+          function (error) {
+            alert("OOPs something went wrong when sending your email... Try again later");
+            console.log("EMAIL FAILED...", error);
+          }
+        );
     }
   }, [data]);
 
