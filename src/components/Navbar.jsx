@@ -12,7 +12,7 @@ import '../styles/header.css';
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
-  const { cartItems } = useCart();
+  const { cartItems, cartLoading } = useCart();
   const isMobile = useClientMediaQuery('(max-width: 600px)');
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
 
@@ -55,24 +55,36 @@ export const Navbar = () => {
   );
 
   const authLinks = (
-    <ul>
-      {status === "authenticated" ? (
-        <li><Link href="/account/profile">{session.user.name?.split(' ')[0]}</Link></li>
-      ) : (
-        <li><Link href="/login">Login</Link></li>
-      )}
-      <li><Link href="/cart">Cart ({totalQuantity})</Link></li>
-    </ul>
+    <>
+      {
+        status === "loading" ?
+          <div className='link-skeleton shine'></div>
+          :
+          status === "authenticated" ? (
+            <li><Link href="/account/profile">{session.user.name?.split(' ')[0]}</Link></li>
+          ) : (
+            <li><Link href="/login">Login</Link></li>
+          )
+      }
+    </>
   );
+
+  const cartLink = (
+    <>
+      {
+        cartLoading ?
+          <div className='link-skeleton shine'></div>
+          :
+          <li><Link href="/cart">Cart ({totalQuantity})</Link></li>
+      }
+    </>
+  );
+
 
   if (isMobile === null) {
     return <header>
-      <div className='header-skeleton shine'>
-
-      </div>
-      <div className='header-skeleton shine'>
-
-      </div>
+      <div className='header-skeleton shine'></div>
+      <div className='header-skeleton shine'></div>
     </header>;
   }
 
@@ -84,7 +96,7 @@ export const Navbar = () => {
             <HiMiniBars2 />
           </button>
           <ul>
-            <li><Link href="/cart">Cart ({totalQuantity})</Link></li>
+            {cartLink}
           </ul>
 
           <div className={`mobile-content ${isHeaderOpen ? 'open' : 'closed'}`}>
@@ -93,11 +105,7 @@ export const Navbar = () => {
                 <HiMiniXMark />
               </button>
 
-              {status === "authenticated" ? (
-                <li><Link href="/account/profile" onClick={toggleHeader}>{session.user.name?.split(' ')[0]}</Link></li>
-              ) : (
-                <li><Link href="/login" onClick={toggleHeader}>Login</Link></li>
-              )}
+              {authLinks}
             </ul>
 
             <div className='content-mid'>
@@ -108,7 +116,11 @@ export const Navbar = () => {
       ) : (
         <>
           {commonLinks}
-          {authLinks}
+          <ul>
+            {authLinks}
+            {cartLink}
+          </ul>
+
         </>
       )}
     </header>

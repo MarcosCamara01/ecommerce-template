@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from 'next-auth/react';
-import { FcGoogle } from 'react-icons/fc';
+import { BiLogoGoogle } from 'react-icons/bi';
 import { BiSolidShow } from 'react-icons/bi';
 import { BiSolidHide } from 'react-icons/bi';
 
@@ -89,7 +89,7 @@ const Signin = () => {
             e.preventDefault();
             signIn("google")
           }}>
-          <FcGoogle /> Sign in with Google
+          <BiLogoGoogle /> Sign in with Google
         </button>
         <Link href="/register">Don&apos;t have an account?</Link>
       </form>
