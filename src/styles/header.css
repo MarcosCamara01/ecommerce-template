@@ -79,6 +79,12 @@ header ul li a {
     border-radius: 3px;
 }
 
+.link-skeleton {
+    height: 17px;
+    border-radius: 3px;
+    width: 55px;
+}
+
 @media (max-width: 600px) {
     header {
         padding-left: 25px;
