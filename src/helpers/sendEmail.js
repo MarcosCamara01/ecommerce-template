@@ -1,4 +1,4 @@
-export const sendEmail = async (data) => {
+async function sendCustomerEmail(data) {
     const emailCustomer = {
         name: data.customer_details.name,
         email: data.customer_details.email,
@@ -6,6 +6,24 @@ export const sendEmail = async (data) => {
         subject: "Successful purchase"
     };
 
+    try {
+        const responseCustomer = await fetch('/api/email', {
+            method: 'POST',
+            body: JSON.stringify(emailCustomer),
+        });
+
+        if (!responseCustomer.ok) {
+            throw new Error(`response status: ${responseCustomer.status}`);
+        } else {
+            console.log("Customer's email successfully sent");
+        }
+    } catch (err) {
+        console.error("Error sending customer's email:", err);
+        throw err;
+    }
+}
+
+async function sendOwnerEmail(data) {
     const emailOwner = {
         name: "Marcos",
         email: "marcospenelascamara@gmail.com",
@@ -14,20 +32,8 @@ export const sendEmail = async (data) => {
     };
 
     try {
-        const responseCustomer = await fetch('/api/email', {
-            method: 'post',
-            body: JSON.stringify(emailCustomer),
-        });
-
-        if (!responseCustomer.ok) {
-            console.log("falling over")
-            throw new Error(`response status: ${responseCustomer.status}`);
-        } else {
-            console.log("Customer's email successfully sent");
-        }
-
         const responseEmailOwner = await fetch('/api/email', {
-            method: 'post',
+            method: 'POST',
             body: JSON.stringify(emailOwner),
         });
 
@@ -36,9 +42,18 @@ export const sendEmail = async (data) => {
         } else {
             console.log("Owner's email sent correctly");
         }
+    } catch (err) {
+        console.error("Error sending owner's email:", err);
+        throw err;
+    }
+}
 
+export const sendEmail = async (data) => {
+    try {
+        await sendCustomerEmail(data);
+        await sendOwnerEmail(data);
     } catch (err) {
         console.error(err);
         alert("Error, please try resubmitting the form");
     }
-}
+};

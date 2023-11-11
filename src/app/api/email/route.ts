@@ -2,11 +2,6 @@ import { NextResponse, NextRequest } from 'next/server'
 const nodemailer = require('nodemailer');
 
 export async function POST(request: NextRequest) {
-
-    const username = process.env.NEXT_PUBLIC_EMAIL_USERNAME;
-    const password = process.env.NEXT_PUBLIC_EMAIL_PASSWORD;
-    const myEmail = process.env.NEXT_PUBLIC_PERSONAL_EMAIL;
-
     const { name, email, message, subject } = await request.json();
 
     const transporter = nodemailer.createTransport({
@@ -19,17 +14,16 @@ export async function POST(request: NextRequest) {
 
         auth: {
 
-            user: username,
-            pass: password
+            user: process.env.NEXT_PUBLIC_EMAIL_USERNAME,
+            pass: process.env.NEXT_PUBLIC_EMAIL_PASSWORD
         }
     });
 
-    try {
-
-        const mail = await transporter.sendMail({
-            from: username,
+    try {   
+        await transporter.sendMail({
+            from: process.env.NEXT_PUBLIC_EMAIL_USERNAME,
             to: email,
-            replyTo: myEmail,
+            replyTo: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
             subject: subject,
             html: ` 
             <p>Hello ${name}!</p>
@@ -43,6 +37,4 @@ export async function POST(request: NextRequest) {
         console.log(error)
         NextResponse.json({ message: "COULD NOT SEND MESSAGE" }, { status: 500 })
     }
-
-
 }
