@@ -5,12 +5,15 @@ import axios, { AxiosError } from "axios";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FcGoogle } from "react-icons/fc";
+import { BiLogoGoogle } from 'react-icons/bi';
+import { BiSolidShow } from 'react-icons/bi';
+import { BiSolidHide } from 'react-icons/bi';
 
 import '@/styles/form.css';
 
 const Signup = () => {
   const [error, setError] = useState();
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -30,13 +33,13 @@ const Signup = () => {
         name: formData.get("name"),
         phone: formData.get("phone"),
       });
-  
+
       const res = await signIn("credentials", {
         email: signupResponse.data.email,
         password: formData.get("password"),
         redirect: false,
       });
-  
+
       if (res?.ok) return router.push("/");
     } catch (error) {
       console.log(error);
@@ -70,12 +73,22 @@ const Signup = () => {
         />
 
         <label className="">Password:</label>
-        <input
-          type="password"
-          placeholder="Password"
-          className=""
-          name="password"
-        />
+        <div className="passwrd-bx">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="passwrd-input"
+            name="password"
+          />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setShowPassword(!showPassword)
+            }}
+          >
+            {showPassword ? <BiSolidHide /> : <BiSolidShow />}
+          </button>
+        </div>
 
         <label className="">Phone:</label>
         <input
@@ -97,7 +110,7 @@ const Signup = () => {
         <button
           className="google-button"
           onClick={() => signIn("google")}>
-          <FcGoogle /> Sign in with Google
+          <BiLogoGoogle /> Sign in with Google
         </button>
         <Link href="/login">Already have an account?</Link>
       </form>
