@@ -16,9 +16,6 @@ export const sendEmail = async (data) => {
     try {
         const responseCustomer = await fetch('/api/email', {
             method: 'post',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(emailCustomer),
         });
 
@@ -31,9 +28,6 @@ export const sendEmail = async (data) => {
 
         const responseEmailOwner = await fetch('/api/email', {
             method: 'post',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(emailOwner),
         });
 
