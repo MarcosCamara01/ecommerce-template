@@ -54,6 +54,5 @@ export const sendEmail = async (data) => {
         await sendOwnerEmail(data);
     } catch (err) {
         console.error(err);
-        alert("Error, please try resubmitting the form");
     }
 };
