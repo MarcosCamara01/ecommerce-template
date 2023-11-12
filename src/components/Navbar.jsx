@@ -61,9 +61,9 @@ export const Navbar = () => {
           <div className='link-skeleton shine'></div>
           :
           status === "authenticated" ? (
-            <li><Link href="/account/profile">{session.user.name?.split(' ')[0]}</Link></li>
+            <li><Link href="/account/profile" onClick={toggleHeader}>{session.user.name?.split(' ')[0]}</Link></li>
           ) : (
-            <li><Link href="/login">Login</Link></li>
+            <li><Link href="/login" onClick={toggleHeader}>Login</Link></li>
           )
       }
     </>
