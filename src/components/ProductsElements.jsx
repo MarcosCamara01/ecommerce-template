@@ -123,7 +123,7 @@ export const FavoriteButton = ({ product }) => {
                 const userId = session.user._id;
 
                 if (!userId) {
-                    console.error('No se pudo obtener el _id del usuario.');
+                    console.error('The _id of the user could not be obtained.');
                     return;
                 }
 

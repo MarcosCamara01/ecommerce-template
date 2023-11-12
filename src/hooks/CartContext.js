@@ -75,13 +75,14 @@ export function CartProvider({ children }) {
           });
           console.log('Cart created on the server');
         } else {
-          await axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?id=${userCartToUpdate._id}`, {
+          const id = userCartToUpdate._id
+          userCartToUpdate = await axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?id=${id}`, {
             cart: updatedCart,
           });
           console.log('Cart updated on the server');
         }
 
-        setUserCart(userCartToUpdate);
+        setUserCart(userCartToUpdate.data);
         setCartItems(updatedCart);
 
       } catch (error) {
