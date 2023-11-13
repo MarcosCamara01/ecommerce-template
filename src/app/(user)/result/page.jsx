@@ -17,6 +17,7 @@ const CheckoutSuccess = () => {
   const { setCartItems } = useCart();
   const [data, setData] = useState();
   const [hasSavedOrder, setHasSavedOrder] = useState(false);
+  const [hasSent, sethasSent] = useState(false);
   const session_id = searchParams.get('session_id');
 
   useEffect(() => {
@@ -36,7 +37,7 @@ const CheckoutSuccess = () => {
     if (data?.status === "complete" && !hasSavedOrder) {
       saveOrder(data, setHasSavedOrder);
 
-      sendEmail(data);
+      sendEmail(data , sethasSent);
     }
   }, [data]);
 
@@ -72,7 +73,7 @@ const CheckoutSuccess = () => {
       <div className="info-msg">
         {data && data.error ?
           <p>{data.errorMessage}</p>
-          : data && hasSavedOrder ?
+          : data && hasSavedOrder && hasSent ?
             <>
               <h1>Checkout Payment Result</h1>
               <h3>Successful payment</h3>
