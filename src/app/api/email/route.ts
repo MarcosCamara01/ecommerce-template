@@ -5,13 +5,7 @@ export async function POST(request: NextRequest) {
     const { name, email, message, subject } = await request.json();
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        tls: {
-            ciphers: "SSLv3",
-            rejectUnauthorized: false,
-        },
-
+        service: 'gmail',
         auth: {
 
             user: process.env.NEXT_PUBLIC_EMAIL_USERNAME,
@@ -19,16 +13,26 @@ export async function POST(request: NextRequest) {
         }
     });
 
-    try {   
-        await transporter.sendMail({
-            from: process.env.NEXT_PUBLIC_EMAIL_USERNAME,
-            to: email,
-            replyTo: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
-            subject: subject,
-            html: ` 
+    const mailOptions = {
+        from: process.env.NEXT_PUBLIC_EMAIL_USERNAME,
+        to: email,
+        replyTo: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
+        subject: subject,
+        html: ` 
             <p>Hello ${name}!</p>
             <p>${message}</p>
             `,
+    }
+
+    try {
+        await new Promise((resolve, reject) => {
+            transporter.sendMail(mailOptions, (err: any, response: any) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(response);
+                }
+            });
         });
 
         return NextResponse.json({ message: "Success: email was sent" }, { status: 200 })
