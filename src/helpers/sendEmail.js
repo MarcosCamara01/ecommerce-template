@@ -48,11 +48,13 @@ async function sendOwnerEmail(data) {
     }
 }
 
-export const sendEmail = async (data) => {
+export const sendEmail = async (data, sethasSent) => {
     try {
         await sendCustomerEmail(data);
         await sendOwnerEmail(data);
+        sethasSent(true)
     } catch (err) {
         console.error(err);
+        sethasSent(true)
     }
 };
