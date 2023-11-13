@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     }
 
     const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
         service: 'gmail',
         auth: {
 
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
             { status: 200 },
         );
     } catch (error: any) {
-        return NextResponse.json({ message: error.toString() }, { status: 500 });
+        console.error(error)
+        return NextResponse.json({ message: "COULT NOT SEND THE MESSAGE" }, { status: 500 });
     }
 }
