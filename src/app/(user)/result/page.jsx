@@ -31,7 +31,7 @@ const CheckoutSuccess = () => {
       setCartItems([]);
       emptyCart();
     }
-  }, [status, data]);
+  }, [status, data, hasSavedOrder]);
 
   useEffect(() => {
     if (data?.status === "complete" && !hasSavedOrder) {
