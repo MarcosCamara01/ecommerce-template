@@ -10,7 +10,6 @@
     flex-direction: column;
     border: 1px solid hsla(0, 0%, 100%, .14);
     border-radius: 5px;
-    overflow: hidden;
     justify-content: space-between;
 }
 
@@ -175,6 +174,12 @@
     .cart-ord-mobile {
         display: flex;
         flex-direction: column;
+    }
+
+    .cart-ord-mobile .product-card .product-img {
+        border-radius: 0;
+        border-bottom-left-radius: 5px;
+        border-top-left-radius: 5px;
     }
 
     .cart-ord-mobile .product-card {

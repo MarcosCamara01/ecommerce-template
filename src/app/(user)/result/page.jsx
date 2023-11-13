@@ -14,7 +14,7 @@ import '@/styles/alert.css';
 const CheckoutSuccess = () => {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const { setCartItems } = useCart();
+  const { cartItems, setCartItems } = useCart();
   const [data, setData] = useState();
   const [hasSavedOrder, setHasSavedOrder] = useState(false);
   const [hasSent, sethasSent] = useState(false);
@@ -27,7 +27,7 @@ const CheckoutSuccess = () => {
   }, [session_id]);
 
   useEffect(() => {
-    if (data?.status === "complete" && status === "authenticated") {
+    if (data?.status === "complete" && status === "authenticated" && hasSavedOrder) {
       setCartItems([]);
       emptyCart();
     }
@@ -35,9 +35,9 @@ const CheckoutSuccess = () => {
 
   useEffect(() => {
     if (data?.status === "complete" && !hasSavedOrder) {
-      saveOrder(data, setHasSavedOrder);
+      saveOrder(data, setHasSavedOrder, cartItems);
 
-      sendEmail(data , sethasSent);
+      sendEmail(data, sethasSent);
     }
   }, [data]);
 

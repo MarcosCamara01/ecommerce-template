@@ -14,9 +14,16 @@ function generateRandomOrderNumber() {
     return orderId;
 }
 
-export const saveOrder = async (data, setHasSavedOrder) => {
+export const saveOrder = async (data, setHasSavedOrder, cartItems) => {
     const userId = data.metadata?.userId;
-    const products = data.metadata?.products ? JSON.parse(data.metadata.products) : [];
+
+    const products = cartItems.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color,
+    }));
+
     const randomOrderNumber = generateRandomOrderNumber();
 
     const newOrder = {
@@ -52,7 +59,7 @@ export const saveOrder = async (data, setHasSavedOrder) => {
             } else {
                 console.info("This order has already been saved.");
             }
-            
+
         } else {
             const updatedOrders = [newOrder];
             await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders`, {
