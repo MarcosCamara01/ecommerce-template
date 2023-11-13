@@ -35,14 +35,18 @@
     border-radius: 5px;
     width: 100%;
     transition: all 0.2s ease;
+    height: 260px;
 }
 
 .page-container .order-card:hover {
     background-color: #1A1A1A;
 }
 
-.page-container .order-card h4 {
-    margin-bottom: 5px;
+.page-container .order-card a {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    height: 100%;
 }
 
 .page-container .order-card p {
@@ -52,8 +56,9 @@
 .order-card .bx-imgs {
     margin-top: 15px;
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 20px;
 }
 
 .order-card .bx-imgs img {
