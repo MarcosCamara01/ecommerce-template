@@ -53,7 +53,7 @@ export const productsCart = async (cartItems, cartLoading, setCartWithProducts, 
           };
         }
       } catch (error) {
-        console.error("Error al obtener detalles del producto:", error);
+        console.error("Error getting product details:", error);
       }
     }));
     const totalPrice = calculateTotalPrice(updatedCart);

@@ -26,7 +26,7 @@ const Wishlists = () => {
     }, [])
 
     return (
-        <section>
+        <section className="page-section">
             {isLoading ?
                 <Loader />
                 :

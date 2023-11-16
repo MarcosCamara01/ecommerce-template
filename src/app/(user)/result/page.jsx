@@ -69,7 +69,7 @@ const CheckoutSuccess = () => {
   };
 
   return (
-    <section>
+    <section className="page-section">
       <div className="info-msg">
         {data && data.error ?
           <p>{data.errorMessage}</p>

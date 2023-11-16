@@ -7,7 +7,7 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <section>
+        <section className="page-section">
             <div className="user-links">
                 <Link href="/account/orders">
                     PURCHASES

@@ -28,7 +28,7 @@ const ProductPage = async ({ params }: Props) => {
     const randomProducts = await getProducts(`?random=${params.id}`);
 
     return (
-        <section>
+        <section className="page-section">
             <SingleProduct product={product} />
 
             <h2 className="random-section-h2">YOU MIGHT ALSO LIKE...</h2>

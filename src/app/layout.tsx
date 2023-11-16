@@ -8,6 +8,7 @@ import { CartProvider } from '../hooks/CartContext';
 import { OrderProvider } from '../hooks/OrdersContext';
 import { VariantProvider } from '../hooks/VariantContext';
 import { Analytics } from '@vercel/analytics/react';
+import { Toaster } from 'sonner'
 
 import '../styles/globals.css';
 
@@ -33,6 +34,7 @@ export default function RootLayout({
               <OrderProvider>
                 <VariantProvider>
                   {children}
+                  <Toaster position="bottom-right" />
                   <Analytics />
                 </VariantProvider>
               </OrderProvider>

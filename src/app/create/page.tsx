@@ -17,7 +17,7 @@ const CreateProduct = () => {
     } else if (status === "authenticated") {
         if (session?.user?.email === "marcospenelascamara@gmail.com") {
             return (
-                <section className='create-product'>
+                <section className='create-product page-section'>
                     <h2 className='section-h2'>Create a New Product</h2>
                     <ProductForm />
                 </section>

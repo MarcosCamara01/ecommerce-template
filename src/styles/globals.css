@@ -107,11 +107,11 @@ main {
   margin-top: -37px;
 }
 
-section {
+.page-section {
   padding-top: 50px;
 }
 
-section .section-h2 {
+.page-section .section-h2 {
   margin-bottom: 20px;
 }
 
