@@ -51,7 +51,7 @@ const Signup = () => {
   };
 
   return (
-    <section className="login-register">
+    <section className="login-register page-section">
       <form onSubmit={handleSubmit} className="">
         {error && <div className="">{error}</div>}
         <h1 className="">Signup</h1>

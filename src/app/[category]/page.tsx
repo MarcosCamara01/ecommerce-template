@@ -25,7 +25,7 @@ const CategoryPage = async ({ params }: Props) => {
     let products = await getProducts(`?cat=${params.category}`);
 
     return (
-        <section>
+        <section className="page-section">
             <Products
                 products={products}
             />

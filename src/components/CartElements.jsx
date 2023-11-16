@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useCart } from '@/hooks/CartContext';
 import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
+import { toast } from 'sonner';
 
 export const DeleteButton = ({ product }) => {
     const { userCart, setUserCart, setCartItems } = useCart();
@@ -20,6 +21,7 @@ export const DeleteButton = ({ product }) => {
             }
         } catch (error) {
             console.error('Error removing product from cart:', error);
+            toast.error('Failed to remove product from cart.');
         }
     };
 

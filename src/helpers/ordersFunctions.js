@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getProducts } from "./getProducts";
+import { toast } from 'sonner'
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -72,6 +73,7 @@ export const saveOrder = async (data, setHasSavedOrder, cartItems) => {
         setHasSavedOrder(true);
     } catch (error) {
         console.error('Error saving the order:', error);
+        toast.error('Error saving the order.');
     }
 };
 
@@ -122,6 +124,7 @@ export const getOrders = async (userId) => {
         return enrichedUserOrders;
     } catch (error) {
         console.error('Error fetching orders:', error);
+        toast.error('Error fetching orders.');
         return null;
     }
 };

@@ -1,3 +1,5 @@
+import { toast } from 'sonner';
+
 export async function getProducts(key = "") {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products${key}`);
@@ -12,5 +14,6 @@ export async function getProducts(key = "") {
 
     } catch (error) {
         console.error('Error fetching products:', error);
+        toast.error('Error fetching products.');
     }
 }

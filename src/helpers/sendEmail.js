@@ -1,3 +1,5 @@
+import { toast } from 'sonner';
+
 async function sendCustomerEmail(data) {
     const emailCustomer = {
         name: data.customer_details.name,
@@ -19,6 +21,7 @@ async function sendCustomerEmail(data) {
         }
     } catch (err) {
         console.error("Error sending customer's email:", err);
+        toast.error("Error sending customer's email.");
         throw err;
     }
 }
@@ -44,6 +47,7 @@ async function sendOwnerEmail(data) {
         }
     } catch (err) {
         console.error("Error sending owner's email:", err);
+        toast.error("Error sending owner's email.");
         throw err;
     }
 }

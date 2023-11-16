@@ -10,14 +10,13 @@ import axios from 'axios';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
+import { toast } from 'sonner'
 
 export const ProductButtons = ({ product }) => {
     const { addToCart } = useCart();
     const { selectedVariant, setSelectedVariant } = useVariant();
     const [selectedSize, setSelectedSize] = useState('');
-    const [warning, setWarning] = useState('none');
     const { status } = useSession();
-    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     useEffect(() => {
         if (selectedVariant) {
@@ -29,8 +28,8 @@ export const ProductButtons = ({ product }) => {
 
         if (status === "unauthenticated") {
             const warningMessage = 'You cannot save to cart without logging in.'
-            setWarning(warningMessage);
             console.warn(warningMessage);
+            toast.warning(warningMessage);
         } else if (selectedVariant && selectedSize) {
             const quantity = 1;
             addToCart(
@@ -43,16 +42,16 @@ export const ProductButtons = ({ product }) => {
             );
         } else if (selectedVariant && !selectedSize) {
             const warningMessage = 'You have to select a size.'
-            setWarning(warningMessage);
             console.warn(warningMessage);
+            toast.warning(warningMessage);
         } else if (!selectedVariant && selectedSize) {
             const warningMessage = 'You have to select a color.'
-            setWarning(warningMessage);
             console.warn(warningMessage);
+            toast.warning(warningMessage);
         } else {
             const warningMessage = 'You have to select a color and a size.'
-            setWarning(warningMessage);
             console.warn(warningMessage);
+            toast.warning(warningMessage);
         }
     };
 
@@ -89,15 +88,6 @@ export const ProductButtons = ({ product }) => {
             <div className='section-bot'>
                 <button type="submit" onClick={handleAddToCart}>Add to Cart</button>
             </div>
-
-            {warning != "none" &&
-                <FixedComponent
-                    message={warning}
-                    setOpen={setWarning}
-                    task={"warning"}
-                    isMobile={isMobile}
-                />
-            }
         </>
     );
 };
@@ -124,6 +114,7 @@ export const FavoriteButton = ({ product }) => {
 
                 if (!userId) {
                     console.error('The _id of the user could not be obtained.');
+                    toast.error('The _id of the user could not be obtained.');
                     return;
                 }
 
@@ -135,9 +126,11 @@ export const FavoriteButton = ({ product }) => {
 
                     if (postResponse.status === 200) {
                         setUserCart(postResponse.data);
-                        console.log('Favorites created on the server');
+                        console.log('Favorites created successfully.');
+                        toast.success('Favorites created successfully.');
                     } else {
                         console.error('Failed to create favorites on the server.');
+                        toast.error('Failed to create favorites on the server.');
                     }
                 } else {
                     let updatedFavorites;
@@ -154,18 +147,21 @@ export const FavoriteButton = ({ product }) => {
                     if (putResponse.status === 200) {
                         setUserCart(putResponse.data);
                         setIsFavorite(!isFavorite);
-                        console.log('Favorites updated on the server');
+                        console.log('Favorites updated successfully.');
+                        toast.success('Favorites updated successfully.');
                     } else {
                         console.error('Failed to update favorites on the server.');
+                        toast.error('Failed to update favorites on the server.');
                     }
                 }
             } catch (error) {
                 console.error('Error updating/creating favorites on the server:', error);
+                toast.error('Error updating/creating favorites on the server.');
             }
         } else if (status === "unauthenticated") {
-            const warningMessage = 'YOU CANNOT SAVE TO FAVOURITES WITHOUT LOGGING IN.'
-            setWarning(warningMessage);
+            const warningMessage = 'You cannot save to favourites without logging in.'
             console.warn(warningMessage);
+            toast.warning(warningMessage);
             // Si no hay un usuario autenticado, manejar el estado local de favoritos aquí.
             // utilizar cookies o localStorage para almacenar los favoritos.
         }

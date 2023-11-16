@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { fetchUserCart } from "@/helpers/cartFunctions";
+import { toast } from 'sonner'
 
 const CartContext = createContext();
 
@@ -35,6 +36,7 @@ export function CartProvider({ children }) {
   };
 
   const addToCart = async (productId, color, size, quantity, variantId) => {
+    let message = ""
     const newItem = {
       productId,
       color,
@@ -63,7 +65,9 @@ export function CartProvider({ children }) {
         const userId = session.user._id;
 
         if (!userId) {
-          console.error("The user _id could not be obtained.");
+          message = "The user _id could not be obtained.";
+          console.error(message);
+          toast.error(message);
           return;
         }
 
@@ -73,20 +77,26 @@ export function CartProvider({ children }) {
             cart: updatedCart,
             userId: userId
           });
-          console.log('Cart created on the server');
+          message = "Cart created successfully.";
+          console.log(message);
+          toast.success(message);
         } else {
           const id = userCartToUpdate._id
           userCartToUpdate = await axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?id=${id}`, {
             cart: updatedCart,
           });
-          console.log('Cart updated on the server');
+          message = "Cart updated successfully.";
+          console.log(message);
+          toast.success(message);
         }
 
         setUserCart(userCartToUpdate.data);
         setCartItems(updatedCart);
 
       } catch (error) {
-        console.error('Error updating/creating cart on the server:', error);
+        message = "Error updating/creating cart on the server";
+        console.error(message, error);
+        toast.error(message);
       }
     } else {
       // Si no hay un usuario autenticado, usar cookies.
