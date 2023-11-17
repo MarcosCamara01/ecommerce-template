@@ -18,6 +18,7 @@ async function sendCustomerEmail(data) {
             throw new Error(`response status: ${responseCustomer.status}`);
         } else {
             console.log("Customer's email successfully sent");
+            toast.success("Customer's email successfully sent");
         }
     } catch (err) {
         console.error("Error sending customer's email:", err);
@@ -47,7 +48,6 @@ async function sendOwnerEmail(data) {
         }
     } catch (err) {
         console.error("Error sending owner's email:", err);
-        toast.error("Error sending owner's email.");
         throw err;
     }
 }
