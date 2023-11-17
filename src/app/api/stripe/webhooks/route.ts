@@ -42,7 +42,7 @@ const webhookHandler = async (req: NextRequest) => {
 
         switch (event.type) {
             case "payment_intent.succeeded":
-                console.log("compra realizada con éxito", paymentId);
+                console.log("Successful purchase", paymentId);
                 break;
 
             case "charge.succeeded":
@@ -51,7 +51,7 @@ const webhookHandler = async (req: NextRequest) => {
                 break;
 
             case "payment_intent.canceled":
-                console.log("La compra no se ha completado")
+                console.log("The purchase has not been completed")
                 break;
 
             default:

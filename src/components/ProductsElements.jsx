@@ -10,7 +10,7 @@ import axios from 'axios';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
-import { toast } from 'sonner'
+import { toast } from 'sonner';
 
 export const ProductButtons = ({ product }) => {
     const { addToCart } = useCart();
@@ -114,7 +114,6 @@ export const FavoriteButton = ({ product }) => {
 
                 if (!userId) {
                     console.error('The _id of the user could not be obtained.');
-                    toast.error('The _id of the user could not be obtained.');
                     return;
                 }
 
@@ -127,10 +126,8 @@ export const FavoriteButton = ({ product }) => {
                     if (postResponse.status === 200) {
                         setUserCart(postResponse.data);
                         console.log('Favorites created successfully.');
-                        toast.success('Favorites created successfully.');
                     } else {
                         console.error('Failed to create favorites on the server.');
-                        toast.error('Failed to create favorites on the server.');
                     }
                 } else {
                     let updatedFavorites;
@@ -148,10 +145,8 @@ export const FavoriteButton = ({ product }) => {
                         setUserCart(putResponse.data);
                         setIsFavorite(!isFavorite);
                         console.log('Favorites updated successfully.');
-                        toast.success('Favorites updated successfully.');
                     } else {
                         console.error('Failed to update favorites on the server.');
-                        toast.error('Failed to update favorites on the server.');
                     }
                 }
             } catch (error) {
