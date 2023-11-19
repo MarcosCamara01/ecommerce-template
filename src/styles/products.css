@@ -13,12 +13,10 @@
     justify-content: space-between;
 }
 
-.product-card .product-img {
+.product-img {
     width: 100%;
     display: block;
     height: auto;
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
 }
 
 .img-bx {
@@ -47,7 +45,7 @@
     background-color: #1A1A1A;
 }
 
-.product-card .product-name {
+.product-name {
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -167,7 +165,7 @@
 }
 
 @media (max-width: 600px) {
-    .products-section.colums-mobile {
+    .colums-mobile {
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     }
 

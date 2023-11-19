@@ -7,30 +7,37 @@ import "../styles/products.css";
 
 export const Products = ({ products, extraClassname = "" }) => {
   return (
-    <div className={`products-section ${extraClassname}`}>
+    <div className={`grid gap-x-3.5 gap-y-7 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""}
+     ${extraClassname === "cart-ord-mobile" ? "grid-cols-1" : ""} sm:grid-cols-auto-fill-250`}>
       {products.map((product) => {
         return (
-          <div className="product-card" key={product._id}>
+          <div className={`flex justify-between border border-solid border-border-primary rounded-md overflow-hidden 
+          ${extraClassname === "cart-ord-mobile" ? "flex-row sm:flex-col" : "flex-col"} transition-card`}
+            key={product._id}
+          >
             <Link
               href={`/${product.category}/${product.quantity
                 ? product.productId
                 : product._id}`}
+                className={extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""}
             >
-              <Images 
+              <Images
                 image={product.image}
                 name={product.name}
                 width={384}
                 height={576}
               />
             </Link>
-            <div className="product-information">
-              <div className="name-button">
+            <div className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""} 
+            flex justify-between flex-col gap-2.5	p-3.5 bg-background-secondary`}>
+              <div className="flex justify-between w-full">
                 <Link
                   href={`/${product?.category}/${product.quantity
                     ? product.productId
                     : product._id}`}
+                  className="w-10/12"
                 >
-                  <h2 className="product-name">
+                  <h2 className="text-sm font-semibold truncate">
                     {product?.name}
                   </h2>
                 </Link>
@@ -47,7 +54,7 @@ export const Products = ({ products, extraClassname = "" }) => {
               </div>
               {
                 !product.purchased &&
-                <div className="product-price">
+                <div>
                   {product?.quantity
                     ? (product.price * product.quantity).toFixed(2)
                     : product.price}€

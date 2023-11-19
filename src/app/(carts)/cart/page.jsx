@@ -12,7 +12,6 @@ import { Toaster, toast } from 'sonner'
 import { useSearchParams } from "next/navigation";
 
 import '@/styles/cart.css';
-import '@/styles/alert.css';
 
 const Cart = () => {
   const { cartItems, cartLoading } = useCart();
@@ -44,7 +43,7 @@ const Cart = () => {
         :
         cartWithProducts.length >= 1 ?
           <>
-            <h2 className="section-h2">YOUR SHOPPING CART</h2>
+            <h2 className="text-2xl	font-bold mb-5">YOUR SHOPPING CART</h2>
             <Products
               products={cartWithProducts}
               extraClassname={"cart-ord-mobile"}

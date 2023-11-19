@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --max-width: 1100px;
   --border-radius: 12px;
@@ -87,8 +91,16 @@ a {
 }
 
 main {
-  padding: 0 50px 102px;
+  padding: 0 48px 102px;
   min-height: calc(100vh - 97px);
+}
+
+.transition-card {
+  transition: transform 150ms ease-in-out;
+}
+
+.transition-card:hover {
+  transform: translateY(-10px);
 }
 
 .spinner-center {
@@ -121,6 +133,28 @@ main {
   animation: 8s shine ease-in-out infinite;
 }
 
+.swiper-wrapper {
+  max-width: 250px;
+}
+
+.swiper-wrapper img {
+  width: 100%;
+  display: block;
+  height: auto;
+}
+
+.swiper-pagination-clickable .swiper-pagination-bullet {
+  width: 15px;
+  height: 1px;
+  background-color: #000;
+  opacity: 1;
+  border-radius: 0;
+}
+
+.swiper-pagination-clickable .swiper-pagination-bullet-active {
+  height: 3px;
+}
+
 @keyframes shine {
   0% {
       background-position: 200% 0;
@@ -131,15 +165,15 @@ main {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   main {
-    padding: 0 25px 102px;
+    padding: 0 24px 102px;
   }
 }
 
 @media (max-width: 350px) {
   main {
-    padding: 0 15px 102px;
+    padding: 0 14px 102px;
   }
 }
 

@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react'
 
-import '@/styles/alert.css';
-
 export default function Error({
   error,
   reset,

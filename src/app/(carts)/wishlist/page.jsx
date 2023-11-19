@@ -9,7 +9,6 @@ import { Loader } from "@/helpers/Loader";
 import { productsWislists } from "@/helpers/cartFunctions";
 
 import '@/styles/cart.css';
-import '@/styles/alert.css';
 
 const Wishlists = () => {
     const { userCart, cartLoading } = useCart();
@@ -32,7 +31,7 @@ const Wishlists = () => {
                 :
                 cartWithProducts.length >= 1 ?
                     <>
-                        <h2 className="section-h2">YOUR WISHLISTS</h2>
+                        <h2 className="text-2xl	font-bold mb-5">YOUR WISHLISTS</h2>
                         <Products
                             products={cartWithProducts}
                             extraClassname={"colums-mobile"}

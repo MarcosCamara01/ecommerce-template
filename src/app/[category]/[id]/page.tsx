@@ -31,7 +31,7 @@ const ProductPage = async ({ params }: Props) => {
         <section className="page-section">
             <SingleProduct product={product} />
 
-            <h2 className="random-section-h2">YOU MIGHT ALSO LIKE...</h2>
+            <h2 className="text-2xl	font-bold mt-24 mb-5">YOU MIGHT ALSO LIKE...</h2>
 
             <Products
                 products={randomProducts}

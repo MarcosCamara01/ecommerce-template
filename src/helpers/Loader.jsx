@@ -12,11 +12,7 @@ export const Loader = () => {
                 color="#fff"
                 ariaLabel="line-wave"
                 wrapperStyle={{}}
-                wrapperClass=""
                 visible={true}
-                firstLineColor=""
-                middleLineColor=""
-                lastLineColor=""
             />
         </div>
     )

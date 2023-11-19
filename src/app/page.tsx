@@ -17,7 +17,7 @@ const Home = async () => {
   }
 
   return (
-    <section className="section-products page-section">
+    <section className="pt-14">
       <Products
         products={products}
       />
