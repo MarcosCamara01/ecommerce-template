@@ -15,25 +15,26 @@ import "../styles/products.css";
 
 export const ProductImages = ({ name }) => {
   const { selectedVariant } = useVariant();
-  const isMobile = useClientMediaQuery('(max-width: 680px)');
+  const isMobile = useClientMediaQuery('(max-width: 640px)');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedVariant])
 
   if (isMobile === null) {
-    return <div className='skeleton-bx shine'></div>
+    return <div className='w-full h-60vh sm:h-80vh rounded shine'></div>
   }
 
   if (isMobile) {
     return (
-      <div className='container'>
+      <div>
         <Swiper
           modules={[Zoom, Pagination, Scrollbar]}
           scrollbar={{ draggable: true }}
           pagination={{ clickable: true }}
           loop={true}
           zoom={true}
+          className='rounded-md'
         >
           {selectedVariant.images.map((image, index) => (
             <SwiperSlide key={index}>
@@ -50,9 +51,9 @@ export const ProductImages = ({ name }) => {
     )
   } else {
     return (
-      <div className='bx-grid'>
+      <div className='grid grid-cols-2 gap-0.5 min-w-grid-img'>
         {selectedVariant.images.map((image, index) => (
-          <div className='bx-image' key={index} >
+          <div className='mx-auto inline-block w-full max-w-2xl rounded overflow-hidden' key={index} >
             <Images
               image={[image]}
               name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
@@ -81,7 +82,7 @@ export const Images = ({ image, name, width, height }) => {
   };
 
   return (
-    <div className={!imageLoaded ? 'img-bx' : '' }>
+    <div className={!imageLoaded ? 'relative' : '' }>
       <Image
         loader={cloudinaryLoader}
         width={width}
@@ -90,10 +91,10 @@ export const Images = ({ image, name, width, height }) => {
         alt={name}
         quality={100}
         loading='lazy'
-        className="product-img"
+        className="max-w-img w-full"
         onLoadingComplete={handleImageLoadComplete}
       />
-      <div className={!imageLoaded ? 'shine img-effct' : '' }></div>
+      <div className={!imageLoaded ? 'shine absolute top-0 right-0	w-full	h-full' : '' }></div>
     </div>
   )
 }

@@ -159,32 +159,6 @@
     max-width: 850px;
 }
 
-.swiper {
-    border-radius: 5px;
-}
-
-.swiper-wrapper {
-    max-width: 250px;
-}
-
-.swiper-wrapper img {
-    width: 100%;
-    display: block;
-    height: auto;
-}
-
-.swiper-pagination-clickable .swiper-pagination-bullet {
-    width: 15px;
-    height: 1px;
-    background-color: #000;
-    opacity: 1;
-    border-radius: 0;
-}
-
-.swiper-pagination-clickable .swiper-pagination-bullet-active {
-    height: 3px;
-}
-
 .expand-button {
     position: absolute;
     bottom: -20px;

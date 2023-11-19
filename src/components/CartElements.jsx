@@ -37,23 +37,23 @@ export const ProductCartInfo = ({ product }) => {
     const quantityButtons = () => {
         if (product.purchased) {
             return (
-                <div className='product-price'>
+                <div>
                     {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
                 </div>
             )
         } else {
             return (
-                <div className="buttons">
+                <div className="flex w-min bg-black">
                     <button
                         disabled={product?.quantity == 1}
-                        className='add-remove'
+                        className='w-8 h-8 flex items-center justify-center	p-2 border border-solid border-border-primary rounded-l '
                         onClick={() => addToCart(product?.productId, product.color, product.size, -1)}
                     >
                         <MdRemove />
                     </button>
-                    <span className='content'>{product?.quantity}</span>
+                    <span className='w-8 h-8 flex items-center justify-center p-2 border-y border-solid border-border-primary text-sm'>{product?.quantity}</span>
                     <button
-                        className='add-remove'
+                        className='w-8 h-8 flex items-center justify-center	p-2 border border-solid border-border-primary rounded-r'
                         onClick={() => addToCart(product?.productId, product.color, product.size, 1)}
                     >
                         <MdAdd />
@@ -66,29 +66,29 @@ export const ProductCartInfo = ({ product }) => {
     if (isMobile) {
         return (
             <>
-                <div className="color-size">
-                    <div className='size'>
+                <div className="flex">
+                    <div className='text-sm pr-2.5 border-r'>
                         {product.size}
                     </div>
-                    <div className='color'>
+                    <div className='text-sm pl-2.5'>
                         {product.color}
                     </div>
                 </div>
-                <div className='content-cart'>
+                <div className='flex items-center justify-between'>
                     {quantityButtons()}
                 </div>
             </>
         );
     } else {
         return (
-            <div className='content-cart'>
+            <div className='flex items-center justify-between'>
                 {quantityButtons()}
                 
-                <div className="color-size">
-                    <div className='size'>
+                <div className="flex">
+                    <div className='text-sm pr-2.5 border-r'>
                         {product.size}
                     </div>
-                    <div className='color'>
+                    <div className='text-sm pl-2.5'>
                         {product.color}
                     </div>
                 </div>

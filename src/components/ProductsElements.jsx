@@ -3,11 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/singleproduct.css';
 import { useCart } from '@/hooks/CartContext';
-import { FixedComponent } from "@/components/FixedComponent";
 import { useSession } from 'next-auth/react';
 import { FaRegHeart, FaHeart } from 'react-icons/fa';
 import axios from 'axios';
-import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
 import { toast } from 'sonner';
@@ -57,36 +55,42 @@ export const ProductButtons = ({ product }) => {
 
     return (
         <>
-            <div className='section section-mid'>
-                <div className='sizes'>
+            <div className='p-5'>
+                <div className='grid grid-cols-4 gap-2.5 justify-center'>
                     {product.sizes.map((size, index) => (
                         <button
                             key={index}
-                            className={`size-item ${selectedSize === size ? 'selected' : ''}`}
+                            className={`flex items-center justify-center border border-solid border-border-primary px-1 py-1.5 bg-black rounded 
+                            transition duration-150 ease hover:border-border-secondary text-13 ${selectedSize === size ? 'bg-white text-black' : ''}`}
                             onClick={() => setSelectedSize(size)}
                         >
                             <span>{size}</span>
                         </button>
                     ))}
                 </div>
-                <div className="colors">
+                <div className="grid grid-cols-auto-fill-32 gap-2.5	mt-5">
                     {product.variants.map((variant, index) => (
                         <button
                             key={index}
-                            className={`color-item ${selectedVariant === variant ? 'selected' : ''}`}
+                            className={`border border-solid border-border-primary w-8 h-8 flex justify-center relative rounded 
+                            transition duration-150 ease hover:border-border-secondary ${selectedVariant === variant ? 'border-border-secondary' : ''}`}
                             style={{ backgroundColor: colorMapping[variant.color] }}
                             onClick={() => setSelectedVariant(variant)}
                             title={`Color ${variant.color}`}
                         >
-                            <span></span>
+                            <span className={selectedVariant === variant ? 'w-2.5 absolute bottom-selected h-px	bg-white' : ''}></span>
 
                         </button>
                     ))}
                 </div>
             </div>
 
-            <div className='section-bot'>
-                <button type="submit" onClick={handleAddToCart}>Add to Cart</button>
+            <div className='border-t border-solid border-border-primary'>
+                <button
+                    type="submit"
+                    onClick={handleAddToCart}
+                    className='w-full text-13 p-2 transition duration-150 ease hover:bg-color-secondary'
+                >Add to Cart</button>
             </div>
         </>
     );
@@ -96,8 +100,6 @@ export const FavoriteButton = ({ product }) => {
     const { userCart, setUserCart } = useCart();
     const { data: session, status } = useSession();
     const [isFavorite, setIsFavorite] = useState(false);
-    const [warning, setWarning] = useState('none');
-    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     useEffect(() => {
         if (userCart && userCart.favorites?.includes(product?._id)) {
@@ -170,15 +172,6 @@ export const FavoriteButton = ({ product }) => {
             >
                 {isFavorite ? <FaHeart /> : <FaRegHeart />}
             </button>
-
-            {warning != "none" &&
-                <FixedComponent
-                    message={warning}
-                    setOpen={setWarning}
-                    task={"warning"}
-                    isMobile={isMobile}
-                />
-            }
         </>
     );
 };

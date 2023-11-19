@@ -8,8 +8,6 @@ import { useEffect, useState } from 'react';
 import { HiMiniBars2 } from "react-icons/hi2";
 import { HiMiniXMark } from "react-icons/hi2";
 
-import '../styles/header.css';
-
 export const Navbar = () => {
   const { data: session, status } = useSession();
   const { cartItems, cartLoading } = useCart();
@@ -44,24 +42,16 @@ export const Navbar = () => {
     { path: '/sweatshirts', name: 'SWEATSHIRTS' },
   ];
 
-  const commonLinks = (
-    <ul>
-      {linksData.map((link, index) => (
-        <li key={index}>
-          <Link href={link.path} onClick={toggleHeader}>{link.name}</Link>
-        </li>
-      ))}
-    </ul>
-  );
+  const headerStyles = "w-full px-3.5 xs:px-6 sm:px-12 py-10 flex items-center justify-between bg-background-secondary border-b border-solid border-border-primary";
 
   const authLinks = (
     <>
       {
         status === "loading" ?
-          <div className='link-skeleton shine'></div>
+          <div className='h-5 rounded-sm w-14 shine'></div>
           :
           status === "authenticated" ? (
-            <li>
+            <li className='flex items-center justify-center'>
               <Link
                 href="/account/profile"
                 onClick={toggleHeader}
@@ -69,7 +59,7 @@ export const Navbar = () => {
               </Link>
             </li>
           ) : (
-            <li>
+            <li className='flex items-center justify-center'>
               <Link
                 href="/login"
                 onClick={toggleHeader}
@@ -85,54 +75,64 @@ export const Navbar = () => {
     <>
       {
         cartLoading ?
-          <div className='link-skeleton shine'></div>
+          <div className='h-5 rounded-sm w-14 shine'></div>
           :
-          <li><Link href="/cart">Cart ({totalQuantity})</Link></li>
+          <li className='flex items-center justify-center'><Link href="/cart">Cart ({totalQuantity})</Link></li>
       }
     </>
   );
 
-
   if (isMobile === null) {
-    return <header>
-      <div className='header-skeleton shine'></div>
-      <div className='header-skeleton shine'></div>
+    return <header className={headerStyles}>
+      <div className='h-6 w-3/12 rounded-sm shine'></div>
+      <div className='h-6	w-3/12 rounded-sm shine'></div>
     </header>;
   }
 
   return (
-    <header>
+    <header className={headerStyles}>
       {isMobile ? (
         <>
           <button onClick={toggleHeader}>
-            <HiMiniBars2 />
+            <HiMiniBars2 className="text-2xl" />
           </button>
-          <ul>
+          <ul className='flex justify-between gap-9	text-sm'>
             {cartLink}
           </ul>
 
-          <div className={`mobile-content ${isHeaderOpen ? 'open' : 'closed'}`}>
-            <ul>
+          <div className={`fixed top-0 left-0 h-screen	w-full bg-black	py-10	px-7 transition ease duration-200 z-10	 ${isHeaderOpen ? 'translate-x-0' : 'translate-x-hide'}`}>
+            <ul className='flex justify-between gap-9	text-sm'>
               <button onClick={toggleHeader}>
-                <HiMiniXMark />
+                <HiMiniXMark className="text-2xl" />
               </button>
 
               {authLinks}
             </ul>
 
-            <div className='content-mid'>
-              {commonLinks}
+            <div className='h-5/6 my-10	flex items-center justify-center'>
+              <ul className='flex flex-col justify-between gap-9 text-sm'>
+                {linksData.map((link, index) => (
+                  <li key={index} className='flex items-center justify-center'>
+                    <Link href={link.path} onClick={toggleHeader}>{link.name}</Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </>
       ) : (
         <>
-          {commonLinks}
-          <ul>
+          <ul className='flex justify-between gap-9	text-sm'>
+            {linksData.map((link, index) => (
+              <li key={index} className='flex items-center justify-center'>
+                <Link href={link.path} onClick={toggleHeader}>{link.name}</Link>
+              </li>
+            ))}
+          </ul>
+          <ul className='flex justify-between gap-9	text-sm'>
             {authLinks}
             {cartLink}
           </ul>
-
         </>
       )}
     </header>
