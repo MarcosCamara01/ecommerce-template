@@ -28,10 +28,10 @@ const ProductPage = async ({ params }: Props) => {
     const randomProducts = await getProducts(`?random=${params.id}`);
 
     return (
-        <section className="page-section">
+        <section className="pt-14">
             <SingleProduct product={product} />
 
-            <h2 className="text-2xl	font-bold mt-24 mb-5">YOU MIGHT ALSO LIKE...</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mt-24 mb-5">YOU MIGHT ALSO LIKE...</h2>
 
             <Products
                 products={randomProducts}

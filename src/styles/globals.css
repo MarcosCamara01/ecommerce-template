@@ -95,8 +95,17 @@ main {
   min-height: calc(100vh - 97px);
 }
 
+.orders-img div {
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.orders-img img {
+  width: 80px;
+}
+
 .transition-card {
-  transition: transform 150ms ease-in-out;
+  transition: transform 125ms ease-in-out;
 }
 
 .transition-card:hover {

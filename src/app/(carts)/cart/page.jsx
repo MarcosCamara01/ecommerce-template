@@ -37,27 +37,27 @@ const Cart = () => {
   }, [canceled])
 
   return (
-    <section className="page-section">
+    <div className="pt-12">
       {isLoading ?
         <Loader />
         :
         cartWithProducts.length >= 1 ?
           <>
-            <h2 className="text-2xl	font-bold mb-5">YOUR SHOPPING CART</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-5">YOUR SHOPPING CART</h2>
             <Products
               products={cartWithProducts}
               extraClassname={"cart-ord-mobile"}
             />
 
-            <div className="cart-footer">
-              <div className="cart-price">
-                <div className="price">
+            <div className="fixed bottom-0 right-0 w-full h-20 flex justify-end	items-center gap-0 sm:gap-12 text-sm border-t border-solid border-border-primary bg-black">
+              <div className="flex flex-col justify-between text-center gap-2 w-3/6	sm:w-min">
+                <div className="flex gap-2.5 justify-center">
                   <span>Total:</span>
                   <span>{totalPrice}€</span>
                 </div>
-                <span className="taxes">+ TAX INCL.</span>
+                <span className="text-xs">+ TAX INCL.</span>
               </div>
-              <div className="cart-button">
+              <div className="h-20 w-3/6 sm:max-w-180 sm:w-full">
                 <ButtonCheckout
                   cartWithProducts={cartWithProducts}
                 />
@@ -65,8 +65,8 @@ const Cart = () => {
             </div>
           </>
           :
-          <div className="info-msg">
-            <h2>YOUR CART IS EMPTY.</h2>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold mb-5">YOUR CART IS EMPTY</h2>
             {status === "authenticated" ?
               <>
                 <p>When you have added something to your cart, it will appear here. Want to get started?</p>
@@ -81,7 +81,7 @@ const Cart = () => {
           </div>
       }
       <Toaster position="bottom-right" />
-    </section>
+    </div>
   );
 }
 

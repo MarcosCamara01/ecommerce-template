@@ -7,7 +7,7 @@ import "../styles/products.css";
 
 export const Products = ({ products, extraClassname = "" }) => {
   return (
-    <div className={`grid gap-x-3.5 gap-y-7 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""}
+    <div className={`grid gap-x-3.5 gap-y-6 sm:gap-y-9 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""}
      ${extraClassname === "cart-ord-mobile" ? "grid-cols-1" : ""} sm:grid-cols-auto-fill-250`}>
       {products.map((product) => {
         return (

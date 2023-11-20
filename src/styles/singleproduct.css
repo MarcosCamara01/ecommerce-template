@@ -145,16 +145,6 @@
     border: 1px hsla(0, 0%, 100%, .50) solid;
 }
 
-.sticky {
-    flex-grow: 1;
-    flex-basis: 600px;
-    position: sticky;
-    top: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .product-img {
     max-width: 850px;
 }

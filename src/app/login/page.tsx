@@ -9,13 +9,13 @@ import { BiLogoGoogle } from 'react-icons/bi';
 import { BiSolidShow } from 'react-icons/bi';
 import { BiSolidHide } from 'react-icons/bi';
 
-import '@/styles/form.css';
-
 const Signin = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
+
+  const labelStyles = "w-full text-sm";
 
   useEffect(() => {
     if (session?.user) {
@@ -42,30 +42,34 @@ const Signin = () => {
   };
 
   return (
-    <section className="login-register page-section">
+    <section className="w-full xs:h-80vh flex items-center justify-center pt-12">
       <form
+        className="p-6 xs:p-10	w-full max-w-350 flex flex-col justify-between items-center gap-2.5	
+        border border-solid border-border-primary bg-background-secondary rounded"
         onSubmit={handleSubmit}
       >
         {error && <div className="">{error}</div>}
-        <h1 className="">Signin</h1>
+        <h1 className="mb-5 w-full text-2xl	font-bold">Signin</h1>
 
-        <label className="">Email:</label>
+        <label className={labelStyles}>Email:</label>
         <input
           type="email"
           placeholder="Email"
-          className="bg-zinc-800 px-4 py-2 block mb-2 w-full"
+          className="w-full h-8 border border-solid border-border-primary py-1 px-2.5 rounded bg-black text-13"
           name="email"
         />
 
-        <label className="">Password:</label>
-        <div className="passwrd-bx">
+        <label className={labelStyles}>Password:</label>
+        <div className="flex w-full">
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
-            className="passwrd-input"
+            className="w-full h-8 border border-solid border-border-primary py-1 px-2.5 rounded-l bg-black text-13"
             name="password"
           />
           <button
+            className="w-2/12	border-y border-r border-solid border-border-primary bg-black rounded-r 
+          flex items-center justify-center transition duration-150 ease hover:bg-color-secondary"
             onClick={(e) => {
               e.preventDefault();
               setShowPassword(!showPassword)
@@ -74,24 +78,27 @@ const Signin = () => {
             {showPassword ? <BiSolidHide /> : <BiSolidShow />}
           </button>
         </div>
-        <button className="signup-button">
+        <button className="w-full bg-black border border-solid border-border-primary py-1.5 mt-2.5 rounded
+        transition duration-150 ease hover:bg-color-secondary text-13"
+        >
           Signup
         </button>
 
-        <div className="separator">
-          <div></div>
-          <p>or</p>
+        <div className="w-full h-10	relative flex items-center justify-center">
+          <div className="absolute h-px w-full top-2/4 bg-border-primary"></div>
+          <p className="w-8	h-6 bg-background-secondary z-10	flex items-center justify-center">or</p>
         </div>
 
         <button
-          className="google-button"
+          className="flex py-2 px-4 text-sm	align-middle items-center rounded text-999 bg-black 
+          border border-solid border-border-primary transition duration-150 ease hover:bg-color-secondary gap-3"
           onClick={(e) => {
             e.preventDefault();
             signIn("google")
           }}>
-          <BiLogoGoogle /> Sign in with Google
+          <BiLogoGoogle className="text-2xl" /> Sign in with Google
         </button>
-        <Link href="/register">Don&apos;t have an account?</Link>
+        <Link href="/register" className="text-sm	text-color-tertiary transition duration-150 ease hover:text-white">Don&apos;t have an account?</Link>
       </form>
     </section>
   );

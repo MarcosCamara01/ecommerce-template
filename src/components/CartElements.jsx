@@ -123,6 +123,9 @@ export const ButtonCheckout = ({ cartWithProducts }) => {
     };
 
     return (
-        <button onClick={buyProducts}>CONTINUE</button>
+        <button
+         onClick={buyProducts}
+         className='h-20 w-full bg-background-secondary border-l border-solid border-border-primary transition duration-150 ease hover:bg-color-secondary'
+         >CONTINUE</button>
     );
 };  

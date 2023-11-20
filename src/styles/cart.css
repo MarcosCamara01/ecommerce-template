@@ -31,13 +31,13 @@
     text-align: center;
 }
 
-.cart-footer .cart-button {
+.cart-button {
     height: 77px;
     width: 100%;
     max-width: 180px;
 }
 
-.cart-footer .cart-button button {
+.cart-button button {
     height: 77px;
     width: 100%;
     background-color: #111111;
@@ -48,7 +48,7 @@
     transition: all 0.2s ease;
 }
 
-.cart-footer .cart-button button:hover {
+.cart-button button:hover {
     background-color: #1A1A1A;
 }
 
@@ -61,7 +61,7 @@
         width: 50%;
     }
 
-    .cart-footer .cart-button {
+    .cart-button {
         max-width: 50%;
     }
 }
