@@ -18,7 +18,8 @@ module.exports = {
         'background-secondary': '#0a0a0a',
         'background-alert': 'rgba(0, 0, 0, 0.9)',
         'color-secondary': '#1A1A1A',
-        'color-tertiary': '#888'
+        'color-tertiary': '#888',
+        '999': '#999'
       },
       height: {
         '60vh': '60vh',
@@ -30,10 +31,13 @@ module.exports = {
       },
       maxWidth: {
         'img': '850px',
+        '350': '350px',
         '90': '90%',
+        '180': '180px'
       },
       flexBasis: {
-        '600': '600px'
+        '600': '600px',
+        '800': '800px'
       },
       translate: {
         'hide': '-100%',

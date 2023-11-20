@@ -9,8 +9,6 @@ import { getOrders } from '@/helpers/ordersFunctions';
 import { useOrders } from '@/hooks/OrdersContext';
 import { Images } from '@/components/ProductImages';
 
-import '@/styles/orders.css';
-
 const UserOrders = () => {
     const { data: session, status } = useSession();
     const { orders, setOrders } = useOrders();
@@ -48,18 +46,18 @@ const UserOrders = () => {
     };
 
     return (
-        <div className="page-container">
+        <div className="grid grid-cols-auto-fill-250 items-center justify-between gap-7	pt-12">
             {loading ? (
                 <Loader />
             ) : orders ? (
                 orders.map((order, index) => (
-                    <div key={index} className="order-card">
-                        <Link href={`/account/orders/${order._id}`}>
+                    <div key={index} className="py-7 px-5 border border-solid border-border-primary bg-background-secondary rounded w-full h-72	transition duration-150 ease hover:bg-color-secondary">
+                        <Link href={`/account/orders/${order._id}`} className='flex flex-col justify-between h-full'>
                             <h4>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
                             <p>Order number: {order.orderNumber}</p>
-                            <div className='bx-imgs'>
+                            <div className='mt-3.5 flex gap-2.5 overflow-x-auto pb-2.5'>
                                 {order.products.map((product, productIndex) => (
-                                    <div key={productIndex} className="product-card">
+                                    <div key={productIndex} className="w-20	block orders-img">
                                         <Images
                                             width={80}
                                             height={120}

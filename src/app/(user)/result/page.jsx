@@ -9,8 +9,6 @@ import { Loader } from "@/helpers/Loader";
 import { useSession } from 'next-auth/react';
 import { sendEmail } from "@/helpers/sendEmail"
 
-import '@/styles/alert.css';
-
 const CheckoutSuccess = () => {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();

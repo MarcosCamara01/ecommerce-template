@@ -11,7 +11,7 @@ import { HiMiniXMark } from "react-icons/hi2";
 export const Navbar = () => {
   const { data: session, status } = useSession();
   const { cartItems, cartLoading } = useCart();
-  const isMobile = useClientMediaQuery('(max-width: 600px)');
+  const isMobile = useClientMediaQuery('(max-width: 640px)');
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export const Navbar = () => {
             {cartLink}
           </ul>
 
-          <div className={`fixed top-0 left-0 h-screen	w-full bg-black	py-10	px-7 transition ease duration-200 z-10	 ${isHeaderOpen ? 'translate-x-0' : 'translate-x-hide'}`}>
+          <div className={`fixed top-0 left-0 h-screen w-full bg-black py-10 px-3.5 xs:px-6 transition ease duration-200 z-20	 ${isHeaderOpen ? 'translate-x-0' : 'translate-x-hide'}`}>
             <ul className='flex justify-between gap-9	text-sm'>
               <button onClick={toggleHeader}>
                 <HiMiniXMark className="text-2xl" />

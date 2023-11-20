@@ -25,21 +25,21 @@ const Wishlists = () => {
     }, [])
 
     return (
-        <section className="page-section">
+        <section className="pt-12">
             {isLoading ?
                 <Loader />
                 :
                 cartWithProducts.length >= 1 ?
                     <>
-                        <h2 className="text-2xl	font-bold mb-5">YOUR WISHLISTS</h2>
+                        <h2 className="text-xl sm:text-2xl font-bold mb-5">YOUR WISHLISTS</h2>
                         <Products
                             products={cartWithProducts}
                             extraClassname={"colums-mobile"}
                         />
                     </>
                     :
-                    <div className="info-msg">
-                        <h2>YOUR WISHLIST IS EMPTY</h2>
+                    <div className="flex flex-col gap-2">
+                        <h2 className="text-xl sm:text-2xl font-bold mb-5">YOUR WISHLIST IS EMPTY</h2>
                         {
                             status === "authenticated" ?
                                 <>
