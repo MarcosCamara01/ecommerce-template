@@ -11,8 +11,6 @@ import { productsCart } from "@/helpers/cartFunctions";
 import { Toaster, toast } from 'sonner'
 import { useSearchParams } from "next/navigation";
 
-import '@/styles/cart.css';
-
 const Cart = () => {
   const { cartItems, cartLoading } = useCart();
   const [cartWithProducts, setCartWithProducts] = useState([]);

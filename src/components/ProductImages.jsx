@@ -11,7 +11,6 @@ import { useVariant } from '@/hooks/VariantContext';
 import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
-import "../styles/products.css";
 
 export const ProductImages = ({ name }) => {
   const { selectedVariant } = useVariant();

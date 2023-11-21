@@ -67,14 +67,14 @@ const CheckoutSuccess = () => {
   };
 
   return (
-    <section className="page-section">
-      <div className="info-msg">
+    <section className="pt-12">
+      <div className="flex flex-col gap-2">
         {data && data.error ?
           <p>{data.errorMessage}</p>
           : data && hasSavedOrder && hasSent ?
             <>
-              <h1>Checkout Payment Result</h1>
-              <h3>Successful payment</h3>
+              <h1 className='text-xl sm:text-2xl font-bold mb-3'>Checkout Payment Result</h1>
+              <h3 className='text-lg	font-semibold'>Successful payment</h3>
               <p>{`An email has been sent to you at: ${data.customer_details.email}`}</p>
             </>
             :
