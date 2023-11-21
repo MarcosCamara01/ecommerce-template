@@ -24,6 +24,7 @@ module.exports = {
       height: {
         '60vh': '60vh',
         '80vh': '80vh',
+        '260': '260px'
       },
       minWidth: {
         'grid-img': '560px',

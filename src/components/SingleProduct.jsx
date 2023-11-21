@@ -1,8 +1,6 @@
 import { ProductButtons } from "@/components/ProductsElements";
 import { ProductImages } from "@/components/ProductImages";
 
-import '../styles/singleproduct.css';
-
 export const SingleProduct = ({ product }) => {
     if (!product) {
         return <div>Producto no encontrado</div>;

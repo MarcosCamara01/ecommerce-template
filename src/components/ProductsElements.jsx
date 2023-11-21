@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import '../styles/singleproduct.css';
 import { useCart } from '@/hooks/CartContext';
 import { useSession } from 'next-auth/react';
 import { FaRegHeart, FaHeart } from 'react-icons/fa';

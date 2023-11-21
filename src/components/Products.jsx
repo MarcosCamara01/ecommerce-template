@@ -3,8 +3,6 @@ import { ProductCartInfo, DeleteButton } from "./CartElements";
 import { FavoriteButton } from "./ProductsElements";
 import { Images } from "./ProductImages";
 
-import "../styles/products.css";
-
 export const Products = ({ products, extraClassname = "" }) => {
   return (
     <div className={`grid gap-x-3.5 gap-y-6 sm:gap-y-9 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""}

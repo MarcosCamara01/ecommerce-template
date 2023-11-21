@@ -51,11 +51,13 @@ const UserOrders = () => {
                 <Loader />
             ) : orders ? (
                 orders.map((order, index) => (
-                    <div key={index} className="py-7 px-5 border border-solid border-border-primary bg-background-secondary rounded w-full h-72	transition duration-150 ease hover:bg-color-secondary">
+                    <div key={index} className="py-7 px-5 border border-solid border-border-primary bg-background-secondary rounded w-full h-260 transition duration-150 ease hover:bg-color-secondary">
                         <Link href={`/account/orders/${order._id}`} className='flex flex-col justify-between h-full'>
-                            <h4>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
-                            <p>Order number: {order.orderNumber}</p>
-                            <div className='mt-3.5 flex gap-2.5 overflow-x-auto pb-2.5'>
+                            <div>
+                                <h4 className='font-semibold'>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
+                                <p className='text-sm'>Order number: {order.orderNumber}</p>
+                            </div>
+                            <div className='flex gap-2.5 overflow-x-auto pb-2.5'>
                                 {order.products.map((product, productIndex) => (
                                     <div key={productIndex} className="w-20	block orders-img">
                                         <Images

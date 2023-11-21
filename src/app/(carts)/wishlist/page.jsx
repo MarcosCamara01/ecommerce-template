@@ -8,8 +8,6 @@ import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
 import { productsWislists } from "@/helpers/cartFunctions";
 
-import '@/styles/cart.css';
-
 const Wishlists = () => {
     const { userCart, cartLoading } = useCart();
     const [cartWithProducts, setCartWithProducts] = useState([]);
