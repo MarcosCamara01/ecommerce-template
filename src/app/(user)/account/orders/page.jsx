@@ -1,44 +1,32 @@
-"use client"
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useSession } from "next-auth/react";
 import { format } from 'date-fns';
-import { Loader } from "@/helpers/Loader";
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/libs/auth";
 import { getOrders } from '@/helpers/ordersFunctions';
-import { useOrders } from '@/hooks/OrdersContext';
 import { Images } from '@/components/ProductImages';
 
-const UserOrders = () => {
-    const { data: session, status } = useSession();
-    const { orders, setOrders } = useOrders();
-    const [loading, setLoading] = useState(true);
+export async function generateMetadata() {
+    return {
+        title: `Orders | Ecommerce Template`,
+    };
+}
 
-    useEffect(() => {
-        if (orders === null && status === 'authenticated') {
-            const userId = session.user._id;
-            const fetchUserOrders = async () => {
-                const response = await getOrders(userId);
-                if (response && Array.isArray(response.orders)) {
-                    response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
-                    setOrders(response.orders);
-                } else {
-                    console.log("No orders available.");
-                }
+const UserOrders = async () => {
+    let userOrders = [];
 
-                setLoading(false);
-            };
-
-            fetchUserOrders();
-        } else if (orders !== null) {
-            setLoading(false);
+    try {
+        const session = await getServerSession(authOptions);
+        const userId = session.user._id;
+        const response = await getOrders(userId);
+        if (response && Array.isArray(response.orders)) {
+            response.orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
+            userOrders = response.orders
+        } else {
+            console.log("No orders available.");
         }
+    } catch (error) {
 
-    }, [orders, status]);
-
-    useEffect(() => {
-        document.title = "Orders | Ecommerce Template"
-    }, [])
+    }
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -47,10 +35,8 @@ const UserOrders = () => {
 
     return (
         <div className="grid grid-cols-auto-fill-250 items-center justify-between gap-7	pt-12">
-            {loading ? (
-                <Loader />
-            ) : orders ? (
-                orders.map((order, index) => (
+            {userOrders.length >= 1 ? (
+                userOrders.map((order, index) => (
                     <div key={index} className="py-7 px-5 border border-solid border-border-primary bg-background-secondary rounded w-full h-260 transition duration-150 ease hover:bg-color-secondary">
                         <Link href={`/account/orders/${order._id}`} className='flex flex-col justify-between h-full'>
                             <div>
