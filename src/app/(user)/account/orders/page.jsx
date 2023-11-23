@@ -25,7 +25,7 @@ const UserOrders = async () => {
             console.log("No orders available.");
         }
     } catch (error) {
-
+        console.error("Error fetching orders:", error);
     }
 
     const formatDate = (dateString) => {

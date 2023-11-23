@@ -113,52 +113,56 @@ const ProductForm = () => {
         }
     };
 
+    const inputBxStyles = "w-full flex flex-col items-center jusify-center gap-2.5";
+    const labelStyles = "w-full text-sm";
+    const inputStyles = "h-7 w-full bg-background-secondary border border-solid border-border-primary rounded";
+    const buttonSyles = "py-1 px-3.5  border border-solid border-border-primary text-sm rounded bg-background-secondary transition duration-150 ease hover:bg-color-secondary"
+
     return (
-        <form onSubmit={handleSubmit}>
-            <div className='input-bx'>
-                <label>Name:</label>
-                <input type="text" name="name" value={productData.name} onChange={handleInputChange} />
+        <form onSubmit={handleSubmit} className='h-full max-w-md w-full flex flex-col items-center jusify-center gap-5'>
+            <div className={inputBxStyles}>
+                <label className={labelStyles}>Name:</label>
+                <input className={inputStyles} type="text" name="name" value={productData.name} onChange={handleInputChange} />
             </div>
 
-            <div className='input-bx'>
-                <label>Description:</label>
-                <textarea name="description" value={productData.description} onChange={handleInputChange} />
+            <div className={inputBxStyles}>
+                <label className={labelStyles}>Description:</label>
+                <textarea className="w-full max-w-full min-w-full max-h-52 bg-background-secondary border border-solid border-border-primary rounded" name="description" value={productData.description} onChange={handleInputChange} />
             </div>
 
-            <div className='input-bx'>
-                <label>Price:</label>
-                <input type="number" name="price" value={productData.price} onChange={handleInputChange} />
+            <div className={inputBxStyles}>
+                <label className={labelStyles}>Price:</label>
+                <input className={inputStyles} type="number" name="price" value={productData.price} onChange={handleInputChange} />
             </div>
 
-            <div className='input-bx'>
-                <label>Category:</label>
-                <input type="text" name="category" value={productData.category} onChange={handleInputChange} />
+            <div className={inputBxStyles}>
+                <label className={labelStyles}>Category:</label>
+                <input className={inputStyles} type="text" name="category" value={productData.category} onChange={handleInputChange} />
             </div>
 
-            {/* Agregar campos para las variantes */}
             {variants.map((variant, index) => (
-                <div key={index} className='bx-variant'>
-                    <div className='input-bx'>
-                        <label>Color:</label>
-                        <input
+                <div key={index} className='w-full flex flex-col justify-center items-center gap-2.5'>
+                    <div className={inputBxStyles}>
+                        <label className={labelStyles}>Color:</label>
+                        <input className={inputStyles}
                             type="text"
                             name="color"
                             value={variant.color}
                             onChange={(e) => handleVariantChange(e, index)}
                         />
                     </div>
-                    <div className='input-bx'>
-                        <label>Price ID:</label>
-                        <input
+                    <div className={inputBxStyles}>
+                        <label className={labelStyles}>Price ID:</label>
+                        <input className={inputStyles}
                             type="text"
                             name="priceId"
                             value={variant.priceId}
                             onChange={(e) => handleVariantChange(e, index)}
                         />
                     </div>
-                    <div className='input-bx'>
-                        <label>Variant Images:</label>
-                        <input
+                    <div className={inputBxStyles}>
+                        <label className={labelStyles}>Variant Images:</label>
+                        <input className={inputStyles}
                             type="file"
                             name="variantImages"
                             multiple
@@ -169,23 +173,23 @@ const ProductForm = () => {
 
                     <button
                         type="button"
-                        className='variant-button'
+                        className={`${buttonSyles} mt-3.5`}
                         onClick={() => removeVariant(index)}
                     >Remove Variant
                     </button>
                 </div>
             ))}
 
-            <button type="button" onClick={addVariant}>Add Variant</button>
+            <button className={buttonSyles} type="button" onClick={addVariant}>Add Variant</button>
 
-            <div className='input-bx'>
-                <label>Sizes:</label>
-                <input type="text" name="sizes" value={productData.sizes} onChange={handleInputChange} />
+            <div className={inputBxStyles}>
+                <label className={labelStyles}>Sizes:</label>
+                <input className={inputStyles} type="text" name="sizes" value={productData.sizes} onChange={handleInputChange} />
             </div>
 
-            <div className='input-bx'>
-                <label>Main Image:</label>
-                <input type="file" name="images" multiple onChange={handleImageChange} disabled={isUploading} />
+            <div className={inputBxStyles}>
+                <label className={labelStyles}>Main Image:</label>
+                <input className={inputStyles} type="file" name="images" multiple onChange={handleImageChange} disabled={isUploading} />
             </div>
 
             <div className="image-preview-container">
@@ -204,7 +208,7 @@ const ProductForm = () => {
                 ))}
             </div>
             {isUploading && <p>Uploading images...</p>}
-            <button type="submit" disabled={isUploading}>Create Product</button>
+            <button className={buttonSyles} type="submit" disabled={isUploading}>Create Product</button>
         </form>
     );
 };
