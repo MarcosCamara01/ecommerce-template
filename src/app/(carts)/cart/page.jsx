@@ -8,16 +8,12 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader } from "@/helpers/Loader";
 import { productsCart } from "@/helpers/cartFunctions";
-import { Toaster, toast } from 'sonner'
-import { useSearchParams } from "next/navigation";
 
 const Cart = () => {
   const { cartItems, cartLoading } = useCart();
   const [cartWithProducts, setCartWithProducts] = useState([]);
   const [totalPrice, setTotalPrice] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const searchParams = useSearchParams();
-  const canceled = searchParams.get('canceled');
   const { status } = useSession();
 
   useEffect(() => {
@@ -27,12 +23,6 @@ const Cart = () => {
   useEffect(() => {
     document.title = "Cart | Ecommerce Template";
   }, [])
-
-  useEffect(() => {
-    if (canceled == "true") {
-      toast.info('Payment successfully cancelled');
-    }
-  }, [canceled])
 
   return (
     <div className="pt-12">
@@ -78,7 +68,6 @@ const Cart = () => {
             }
           </div>
       }
-      <Toaster position="bottom-right" />
     </div>
   );
 }

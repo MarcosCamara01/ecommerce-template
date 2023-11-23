@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
             },
             billing_address_collection: "required",
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/result?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart?canceled=true`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
             automatic_tax: {
                 enabled: true,
             },

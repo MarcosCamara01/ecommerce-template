@@ -128,14 +128,6 @@ main {
   margin-top: -37px;
 }
 
-.page-section {
-  padding-top: 50px;
-}
-
-.page-section .section-h2 {
-  margin-bottom: 20px;
-}
-
 .shine {
   background: linear-gradient(270deg, #111, #333, #333, #111);
   background-size: 400% 100%;

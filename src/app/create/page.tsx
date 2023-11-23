@@ -6,8 +6,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader } from '@/helpers/Loader';
 
-import '../../styles/createproduct.css';
-
 const CreateProduct = () => {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -17,8 +15,8 @@ const CreateProduct = () => {
     } else if (status === "authenticated") {
         if (session?.user?.email === "marcospenelascamara@gmail.com") {
             return (
-                <section className='create-product page-section'>
-                    <h2 className='section-h2'>Create a New Product</h2>
+                <section className='min-h-screen w-full pt-10'>
+                    <h2 className='text-xl font-semibold mb-7'>Create a New Product</h2>
                     <ProductForm />
                 </section>
             );
