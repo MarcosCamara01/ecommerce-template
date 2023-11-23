@@ -2,8 +2,8 @@
 
 import { useCart } from "@/hooks/CartContext";
 import { useEffect, useState } from "react";
-import { Products } from "@/components/Products";
-import { ButtonCheckout } from "@/components/CartElements"
+import { Products } from "@/components/products/Products";
+import { ButtonCheckout } from "@/components/cart/CartElements"
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader } from "@/helpers/Loader";

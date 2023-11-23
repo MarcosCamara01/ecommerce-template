@@ -1,6 +1,6 @@
-import { SingleProduct } from "@/components/SingleProduct";
+import { SingleProduct } from "@/components/products/SingleProduct";
 import { getProducts } from "@/helpers/getProducts"
-import { Products } from "@/components/Products";
+import { Products } from "@/components/products/Products";
 
 type Props = {
     params: {
