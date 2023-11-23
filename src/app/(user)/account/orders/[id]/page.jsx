@@ -1,4 +1,4 @@
-import { Products } from '@/components/Products';
+import { Products } from '@/components/products/Products';
 import { format } from 'date-fns';
 import { getOrders } from '@/helpers/ordersFunctions';
 import { getServerSession } from "next-auth/next"

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ProductCartInfo, DeleteButton } from "./CartElements";
+import { ProductCartInfo, DeleteButton } from "../cart/CartElements";
 import { FavoriteButton } from "./ProductsElements";
 import { Images } from "./ProductImages";
 

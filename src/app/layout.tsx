@@ -4,7 +4,6 @@ import Providers from "./Providers";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { CartProvider } from '../hooks/CartContext';
-import { OrderProvider } from '../hooks/OrdersContext';
 import { VariantProvider } from '../hooks/VariantContext';
 import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from 'sonner'
@@ -30,13 +29,11 @@ export default function RootLayout({
           <body className={inter.className}>
             <Navbar />
             <main>
-              <OrderProvider>
                 <VariantProvider>
                   {children}
                   <Toaster position="bottom-right" />
                   <Analytics />
                 </VariantProvider>
-              </OrderProvider>
             </main>
             <Footer />
           </body>

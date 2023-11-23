@@ -1,5 +1,5 @@
-import { ProductButtons } from "@/components/ProductsElements";
-import { ProductImages } from "@/components/ProductImages";
+import { ProductButtons } from "@/components/products/ProductsElements";
+import { ProductImages } from "@/components/products/ProductImages";
 
 export const SingleProduct = ({ product }) => {
     if (!product) {

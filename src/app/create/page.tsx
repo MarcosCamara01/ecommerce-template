@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import ProductForm from '../../components/ProductForm';
+import ProductForm from '../../components/products/ProductForm';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader } from '@/helpers/Loader';

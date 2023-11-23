@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth";
 import { getOrders } from '@/helpers/ordersFunctions';
-import { Images } from '@/components/ProductImages';
+import { Images } from '@/components/products/ProductImages';
 
 export async function generateMetadata() {
     return {
