@@ -79,8 +79,8 @@ export const saveOrder = async (data, setHasSavedOrder, cartItems) => {
 
 export const getOrders = async (userId) => {
     try {
-        const response = await axios.get(`/api/orders?userId=${userId}`);
-        const userOrders = response.data;
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders?userId=${userId}`);
+        const userOrders = await response.json();
 
         if (!userOrders) {
             console.log("No orders were found for the user.");
