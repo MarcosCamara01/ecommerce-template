@@ -6,6 +6,7 @@ import { Footer } from "../components/Footer";
 import { CartProvider } from '../hooks/CartContext';
 import { VariantProvider } from '../hooks/VariantContext';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from 'sonner'
 
 import '../styles/globals.css';
@@ -33,6 +34,7 @@ export default function RootLayout({
                   {children}
                   <Toaster position="bottom-right" />
                   <Analytics />
+                  <SpeedInsights />
                 </VariantProvider>
             </main>
             <Footer />
