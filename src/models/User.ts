@@ -1,6 +1,25 @@
-import { Schema, model, models } from "mongoose";
+import { Document, Schema, model, models } from "mongoose";
 
-const AddressSchema = new Schema({
+export interface UserDocument extends Document {
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
+  address: AddressDocument;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface AddressDocument {
+  city: string;
+  country: string;
+  line1: string;
+  line2: string;
+  postal_code: string;
+  state: string;
+}
+
+const AddressSchema = new Schema<AddressDocument>({
   city: {
     type: String,
     required: true,
@@ -27,8 +46,7 @@ const AddressSchema = new Schema({
   },
 });
 
-const UserSchema = new Schema(
-  {
+const UserSchema = new Schema<UserDocument>({
     email: {
       type: String,
       unique: true,
@@ -63,5 +81,5 @@ const UserSchema = new Schema(
   }
 );
 
-const User = models.User || model('User', UserSchema);
+const User = models.User || model<UserDocument>('User', UserSchema);
 export default User;
