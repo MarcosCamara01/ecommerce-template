@@ -1,6 +1,20 @@
 import { Schema, model, models } from "mongoose";
+export interface CartDocument extends Document {
+  userId: string;
+  cart: [ItemDocument];
+  favorites: [Schema.Types.ObjectId];
+}
 
-const CartItemSchema = new Schema({
+export interface ItemDocument {
+  productId: Schema.Types.ObjectId;
+  color: string;
+  size: string;
+  quantity: number;
+  variantId: string;
+  price: number;
+}
+
+const CartItemSchema = new Schema<ItemDocument>({
   productId: {
     type: Schema.Types.ObjectId,
     required: true,
@@ -23,7 +37,7 @@ const CartItemSchema = new Schema({
   },
 });
 
-const CartSchema = new Schema({
+const CartSchema = new Schema<CartDocument>({
   userId: {
     type: String,
     required: true,
