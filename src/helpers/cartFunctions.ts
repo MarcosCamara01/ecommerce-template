@@ -2,6 +2,7 @@ import axios from "axios";
 import { getProducts } from "./getProducts";
 import { Session } from "next-auth";
 import { CartDocument, ItemDocument } from "@/models/Cart";
+import { VariantsDocument } from "@/models/Products";
 
 export const fetchUserCart = async (session: Session, setCartLoading: any) => {
   try {
@@ -53,7 +54,7 @@ export const productsCart = async (
           const matchingProduct = await getProducts(`?_id=${cartItem.productId}`);
           if (matchingProduct) {
             const matchingVariant = matchingProduct.variants.find(
-              (variant: any) => variant.color === cartItem.color
+              (variant: VariantsDocument) => variant.color === cartItem.color
             );
             return {
               ...cartItem,
