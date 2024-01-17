@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
-import Image from 'next/image';
+import Image, { ImageLoader } from 'next/image';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { useVariant } from '@/hooks/VariantContext';
 
@@ -12,7 +12,7 @@ import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
 
-export const ProductImages = ({ name }) => {
+export const ProductImages = ({ name }: { name: string }) => {
   const { selectedVariant } = useVariant();
   const isMobile = useClientMediaQuery('(max-width: 640px)');
 
@@ -21,7 +21,7 @@ export const ProductImages = ({ name }) => {
   }, [selectedVariant])
 
   if (isMobile === null) {
-    return <div className='w-full h-60vh sm:h-80vh rounded shine'></div>
+    return <div className='w-full rounded h-60vh sm:h-80vh shine'></div>
   }
 
   if (isMobile) {
@@ -35,7 +35,7 @@ export const ProductImages = ({ name }) => {
           zoom={true}
           className='rounded-md'
         >
-          {selectedVariant.images.map((image, index) => (
+          {selectedVariant.images.map((image: string, index: number) => (
             <SwiperSlide key={index}>
               <Images
                 image={[image]}
@@ -51,8 +51,8 @@ export const ProductImages = ({ name }) => {
   } else {
     return (
       <div className='grid grid-cols-2 gap-0.5 min-w-grid-img'>
-        {selectedVariant.images.map((image, index) => (
-          <div className='mx-auto inline-block w-full max-w-2xl rounded overflow-hidden' key={index} >
+        {selectedVariant.images.map((image: string, index: number) => (
+          <div className='inline-block w-full max-w-2xl mx-auto overflow-hidden rounded' key={index} >
             <Images
               image={[image]}
               name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
@@ -66,14 +66,17 @@ export const ProductImages = ({ name }) => {
   }
 }
 
-function cloudinaryLoader({ src, width, quality }) {
+const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
   const params = ['f_auto', 'c_limit', 'w_' + width, 'q_' + (quality || 'auto')];
-  const normalizeSrc = (src) => src[0] === '/' ? src.slice(1) : src
+  const normalizeSrc = (src: string) => (src[0] === '/' ? src.slice(1) : src);
 
   return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(',')}/${normalizeSrc(src)}`;
-}
+};
 
-export const Images = ({ image, name, width, height }) => {
+export const Images = (
+  { image, name, width, height }:
+    { image: [string], name: string, width: number, height: number }
+) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleImageLoadComplete = () => {
@@ -81,7 +84,7 @@ export const Images = ({ image, name, width, height }) => {
   };
 
   return (
-    <div className={!imageLoaded ? 'relative' : '' }>
+    <div className={!imageLoaded ? 'relative' : ''}>
       <Image
         loader={cloudinaryLoader}
         width={width}
@@ -90,10 +93,10 @@ export const Images = ({ image, name, width, height }) => {
         alt={name}
         quality={100}
         loading='lazy'
-        className="max-w-img w-full"
+        className="w-full max-w-img"
         onLoadingComplete={handleImageLoadComplete}
       />
-      <div className={!imageLoaded ? 'shine absolute top-0 right-0	w-full	h-full' : '' }></div>
+      <div className={!imageLoaded ? 'shine absolute top-0 right-0	w-full	h-full' : ''}></div>
     </div>
   )
 }

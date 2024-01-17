@@ -1,7 +1,8 @@
 import { ProductButtons } from "@/components/products/ProductsElements";
 import { ProductImages } from "@/components/products/ProductImages";
+import { ProductDocument } from "@/models/Products";
 
-export const SingleProduct = ({ product }) => {
+export const SingleProduct = ({ product }: {product: ProductDocument}) => {
     if (!product) {
         return <div>Producto no encontrado</div>;
     }
@@ -14,9 +15,9 @@ export const SingleProduct = ({ product }) => {
                 />
             </div>
 
-            <div className="h-full w-full grow basis-600 sticky top-8 flex items-center justify-center">
-                <div className='w-full border border-solid border-border-primary rounded bg-background-secondary'>
-                    <div className="p-5 border-b border-solid border-border-primary flex justify-between flex-col gap-3" >
+            <div className="sticky flex items-center justify-center w-full h-full grow basis-600 top-8">
+                <div className='w-full border border-solid rounded border-border-primary bg-background-secondary'>
+                    <div className="flex flex-col justify-between gap-3 p-5 border-b border-solid border-border-primary" >
                         <h1 className="text-base font-semibold">{product.name}</h1>
                         <span className="text-base">{product.price}€</span>
                         <p className="text-sm">{product.description}</p>

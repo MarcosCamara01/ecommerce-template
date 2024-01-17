@@ -119,7 +119,7 @@ const ProductForm = () => {
     const buttonSyles = "py-1 px-3.5  border border-solid border-border-primary text-sm rounded bg-background-secondary transition duration-150 ease hover:bg-color-secondary"
 
     return (
-        <form onSubmit={handleSubmit} className='h-full max-w-md w-full flex flex-col items-center jusify-center gap-5'>
+        <form onSubmit={handleSubmit} className='flex flex-col items-center w-full h-full max-w-md gap-5 jusify-center'>
             <div className={inputBxStyles}>
                 <label className={labelStyles}>Name:</label>
                 <input className={inputStyles} type="text" name="name" value={productData.name} onChange={handleInputChange} />
@@ -127,7 +127,7 @@ const ProductForm = () => {
 
             <div className={inputBxStyles}>
                 <label className={labelStyles}>Description:</label>
-                <textarea className="w-full max-w-full min-w-full max-h-52 bg-background-secondary border border-solid border-border-primary rounded" name="description" value={productData.description} onChange={handleInputChange} />
+                <textarea className="w-full max-w-full min-w-full border border-solid rounded max-h-52 bg-background-secondary border-border-primary" name="description" value={productData.description} onChange={handleInputChange} />
             </div>
 
             <div className={inputBxStyles}>

@@ -1,6 +1,10 @@
-export const colorMapping = {
+interface ColorMapping {
+    [key: string]: string;
+}
+
+export const colorMapping: ColorMapping = {
     'Black': '#000',
-    'White': '#fff',    
+    'White': '#fff',
     'Blue': 'rgb(67, 77, 88)',
     'Mid-blue': 'rgb(77, 107, 135)',
     'Dark-brown': 'rgb(71, 60, 52)',

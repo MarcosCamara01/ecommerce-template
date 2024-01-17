@@ -8,6 +8,9 @@ export interface ProductDocument extends Document {
     sizes: [string];
     image: [string];
     variants: [VariantsDocument];
+    quantity: number;
+    productId: Schema.Types.ObjectId;
+    purchased: boolean;
 }
 
 export interface VariantsDocument {

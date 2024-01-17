@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { ItemDocument } from "@/models/Cart";
 import { OrderDocument } from "@/models/Orders";
 import { VariantsDocument } from "@/models/Products";
+import Stripe from 'stripe';
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -18,7 +19,11 @@ function generateRandomOrderNumber() {
     return orderId;
 }
 
-export const saveOrder = async (data: any, setHasSavedOrder: any, cartItems: [ItemDocument]) => {
+export const saveOrder = async (
+    data: Stripe.Checkout.Session,
+    setHasSavedOrder: any,
+    cartItems: [ItemDocument]
+) => {
     const userId = data.metadata?.userId;
 
     const products = cartItems.map((item: ItemDocument) => ({

@@ -7,6 +7,7 @@ import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { useEffect, useState } from 'react';
 import { HiMiniBars2 } from "react-icons/hi2";
 import { HiMiniXMark } from "react-icons/hi2";
+import { ItemDocument } from '@/models/Cart';
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
@@ -26,7 +27,7 @@ export const Navbar = () => {
     };
   }, [isHeaderOpen]);
 
-  const totalQuantity = cartItems.reduce((total, cartItem) => {
+  const totalQuantity = cartItems.reduce((total: number, cartItem: ItemDocument) => {
     return total + cartItem.quantity;
   }, 0);
 
@@ -84,8 +85,8 @@ export const Navbar = () => {
 
   if (isMobile === null) {
     return <header className={headerStyles}>
-      <div className='h-6 w-3/12 rounded-sm shine'></div>
-      <div className='h-6	w-3/12 rounded-sm shine'></div>
+      <div className='w-3/12 h-6 rounded-sm shine'></div>
+      <div className='w-3/12 h-6 rounded-sm shine'></div>
     </header>;
   }
 
@@ -96,12 +97,12 @@ export const Navbar = () => {
           <button onClick={toggleHeader}>
             <HiMiniBars2 className="text-2xl" />
           </button>
-          <ul className='flex justify-between gap-9	text-sm'>
+          <ul className='flex justify-between text-sm gap-9'>
             {cartLink}
           </ul>
 
           <div className={`fixed top-0 left-0 h-screen w-full bg-black py-10 px-3.5 xs:px-6 transition ease duration-200 z-20	 ${isHeaderOpen ? 'translate-x-0' : 'translate-x-hide'}`}>
-            <ul className='flex justify-between gap-9	text-sm'>
+            <ul className='flex justify-between text-sm gap-9'>
               <button onClick={toggleHeader}>
                 <HiMiniXMark className="text-2xl" />
               </button>
@@ -109,8 +110,8 @@ export const Navbar = () => {
               {authLinks}
             </ul>
 
-            <div className='h-5/6 my-10	flex items-center justify-center'>
-              <ul className='flex flex-col justify-between gap-9 text-sm'>
+            <div className='flex items-center justify-center my-10 h-5/6'>
+              <ul className='flex flex-col justify-between text-sm gap-9'>
                 {linksData.map((link, index) => (
                   <li key={index} className='flex items-center justify-center'>
                     <Link href={link.path} onClick={toggleHeader}>{link.name}</Link>
@@ -122,14 +123,14 @@ export const Navbar = () => {
         </>
       ) : (
         <>
-          <ul className='flex justify-between gap-9	text-sm'>
+          <ul className='flex justify-between text-sm gap-9'>
             {linksData.map((link, index) => (
               <li key={index} className='flex items-center justify-center'>
                 <Link href={link.path} onClick={toggleHeader}>{link.name}</Link>
               </li>
             ))}
           </ul>
-          <ul className='flex justify-between gap-9	text-sm'>
+          <ul className='flex justify-between text-sm gap-9'>
             {authLinks}
             {cartLink}
           </ul>
