@@ -1,6 +1,8 @@
 import axios from "axios";
 import { getProducts } from "./getProducts";
 import { toast } from 'sonner'
+import { ItemDocument } from "@/models/Cart";
+import { OrderDocument } from "@/models/Orders";
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -15,10 +17,10 @@ function generateRandomOrderNumber() {
     return orderId;
 }
 
-export const saveOrder = async (data, setHasSavedOrder, cartItems) => {
+export const saveOrder = async (data: any, setHasSavedOrder: any, cartItems: [ItemDocument]) => {
     const userId = data.metadata?.userId;
 
-    const products = cartItems.map(item => ({
+    const products = cartItems.map((item: ItemDocument) => ({
         productId: item.productId,
         quantity: item.quantity,
         size: item.size,
@@ -50,7 +52,7 @@ export const saveOrder = async (data, setHasSavedOrder, cartItems) => {
         const userOrders = response.data;
 
         if (userOrders) {
-            const orderIdMatch = userOrders.orders.some(order => order.orderId === data.id);
+            const orderIdMatch = userOrders.orders.some((order: OrderDocument) => order.orderId === data.id);
             if (!orderIdMatch) {
                 const updatedOrders = [...userOrders.orders, newOrder];
                 axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders?id=${userOrders._id}`, {
@@ -77,7 +79,7 @@ export const saveOrder = async (data, setHasSavedOrder, cartItems) => {
     }
 };
 
-export const getOrders = async (userId) => {
+export const getOrders = async (userId: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders?userId=${userId}`);
         const userOrders = await response.json();
@@ -88,12 +90,12 @@ export const getOrders = async (userId) => {
         }
 
         const ordersWithEnrichedProducts = await Promise.all(
-            userOrders.orders.map(async (order) => {
+            userOrders.orders.map(async (order: OrderDocument) => {
                 const enrichedProducts = await Promise.all(
                     order.products.map(async (product) => {
                         const matchingProduct = await getProducts(`?_id=${product.productId}`);
                         if (matchingProduct) {
-                            const matchingVariant = matchingProduct.variants.find((variant) => variant.color === product.color);
+                            const matchingVariant = matchingProduct.variants.find((variant: any) => variant.color === product.color);
                             if (matchingVariant) {
                                 return {
                                     ...product,
