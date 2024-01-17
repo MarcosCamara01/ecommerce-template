@@ -1,28 +1,41 @@
-import { Schema, model, models } from "mongoose";
+import { calculateExpectedDeliveryDate } from "@/helpers/expectedDeliveryDate";
+import { Date, Document, Schema, model, models } from "mongoose";
 
-function calculateExpectedDeliveryDate() {
-    const currentDate = new Date();
-    const dayOfWeek = currentDate.getDay();
-    const daysToAdd = dayOfWeek >= 5 ? 5 : 3;
-
-    // Función para agregar días laborables a la fecha
-    const addWeekdays = (date: any, days: number) => {
-        const newDate = new Date(date);
-        let addedDays = 0;
-        while (addedDays < days) {
-            newDate.setDate(newDate.getDate() + 1);
-            if (newDate.getDay() >= 1 && newDate.getDay() <= 5) {
-                addedDays++;
-            }
-        }
-        return newDate;
-    };
-
-    const deliveryDate = addWeekdays(currentDate, daysToAdd);
-    return deliveryDate;
+export interface OrdersDocument extends Document {
+    userId: string;
+    orders: [OrderDocument];
 }
 
-const ProductsSchema = new Schema({
+export interface OrderDocument {
+    name: string;
+    email: string;
+    phone: number;
+    address: AddressDocument;
+    products: [ProductsDocument];
+    orderId: string;
+    purchaseDate: Date;
+    expectedDeliveryDate: Date;
+    total_price: number;
+    orderNumber: string;
+}
+
+export interface AddressDocument {
+    city: string;
+    country: string;
+    line1: string;
+    line2: string;
+    postal_code: string;
+    state: string;
+}
+
+export interface ProductsDocument {
+    productId: Schema.Types.ObjectId;
+    color: string;
+    size: string;
+    quantity: number;
+}
+
+const ProductsSchema = new Schema<ProductsDocument>({
     productId: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -41,7 +54,7 @@ const ProductsSchema = new Schema({
     },
 });
 
-const AddressSchema = new Schema({
+const AddressSchema = new Schema<AddressDocument>({
     city: {
         type: String,
         required: true,
@@ -68,7 +81,7 @@ const AddressSchema = new Schema({
     },
 });
 
-const OrderSchema = new Schema({
+const OrderSchema = new Schema<OrderDocument>({
     name: {
         type: String,
         required: true,
@@ -108,7 +121,7 @@ const OrderSchema = new Schema({
     }
 });
 
-const OrdersSchema = new Schema({
+const OrdersSchema = new Schema<OrdersDocument>({
     userId: {
         type: String,
         required: true,
