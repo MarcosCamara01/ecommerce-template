@@ -1,6 +1,22 @@
-import mongoose, { model, Model, Schema } from 'mongoose';
+import mongoose, { Document, model, Model, Schema } from 'mongoose';
 
-const VariantsSchema = new Schema({
+export interface ProductDocument extends Document {
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    sizes: [string];
+    image: [string];
+    variants: [VariantsDocument];
+}
+
+export interface VariantsDocument {
+    priceId: string;
+    color: string;
+    images: [string];
+}
+
+const VariantsSchema = new Schema<VariantsDocument>({
     priceId: {
         type: String,
         required: true,
@@ -15,7 +31,7 @@ const VariantsSchema = new Schema({
     },
 });
 
-const ProductSchema: Schema = new Schema({
+const ProductSchema: Schema = new Schema<ProductDocument>({
     name: {
         type: String,
         required: true,

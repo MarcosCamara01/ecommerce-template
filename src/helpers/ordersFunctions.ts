@@ -3,6 +3,7 @@ import { getProducts } from "./getProducts";
 import { toast } from 'sonner'
 import { ItemDocument } from "@/models/Cart";
 import { OrderDocument } from "@/models/Orders";
+import { VariantsDocument } from "@/models/Products";
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -95,7 +96,7 @@ export const getOrders = async (userId: string) => {
                     order.products.map(async (product) => {
                         const matchingProduct = await getProducts(`?_id=${product.productId}`);
                         if (matchingProduct) {
-                            const matchingVariant = matchingProduct.variants.find((variant: any) => variant.color === product.color);
+                            const matchingVariant = matchingProduct.variants.find((variant: VariantsDocument) => variant.color === product.color);
                             if (matchingVariant) {
                                 return {
                                     ...product,
