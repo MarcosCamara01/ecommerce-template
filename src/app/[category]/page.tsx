@@ -28,6 +28,7 @@ const CategoryPage = async ({ params }: Props) => {
         <section className="pt-14">
             <Products
                 products={products}
+                extraClassname=""
             />
         </section>
     );

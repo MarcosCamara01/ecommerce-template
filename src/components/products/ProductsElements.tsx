@@ -8,8 +8,9 @@ import axios from 'axios';
 import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
 import { toast } from 'sonner';
+import { ProductDocument, VariantsDocument } from '@/models/Products';
 
-export const ProductButtons = ({ product }) => {
+export const ProductButtons = ({ product }: { product: ProductDocument }) => {
     const { addToCart } = useCart();
     const { selectedVariant, setSelectedVariant } = useVariant();
     const [selectedSize, setSelectedSize] = useState('');
@@ -56,7 +57,7 @@ export const ProductButtons = ({ product }) => {
         <>
             <div className='p-5'>
                 <div className='grid grid-cols-4 gap-2.5 justify-center'>
-                    {product.sizes.map((size, index) => (
+                    {product.sizes.map((size: string, index: number) => (
                         <button
                             key={index}
                             className={`flex items-center justify-center border border-solid border-border-primary px-1 py-1.5 bg-black rounded 
@@ -68,7 +69,7 @@ export const ProductButtons = ({ product }) => {
                     ))}
                 </div>
                 <div className="grid grid-cols-auto-fill-32 gap-2.5	mt-5">
-                    {product.variants.map((variant, index) => (
+                    {product.variants.map((variant: VariantsDocument, index: number) => (
                         <button
                             key={index}
                             className={`border border-solid border-border-primary w-8 h-8 flex justify-center relative rounded 
@@ -88,14 +89,14 @@ export const ProductButtons = ({ product }) => {
                 <button
                     type="submit"
                     onClick={handleAddToCart}
-                    className='w-full text-13 p-2 transition duration-150 ease hover:bg-color-secondary'
+                    className='w-full p-2 transition duration-150 text-13 ease hover:bg-color-secondary'
                 >Add to Cart</button>
             </div>
         </>
     );
 };
 
-export const FavoriteButton = ({ product }) => {
+export const FavoriteButton = ({ product }: { product: ProductDocument }) => {
     const { userCart, setUserCart } = useCart();
     const { data: session, status } = useSession();
     const [isFavorite, setIsFavorite] = useState(false);
@@ -108,7 +109,7 @@ export const FavoriteButton = ({ product }) => {
         }
     }, [userCart, product?._id]);
 
-    const addToFavorites = async (productId) => {
+    const addToFavorites = async (productId: string) => {
         if (status === "authenticated") {
             try {
                 const userId = session.user._id;
@@ -133,7 +134,7 @@ export const FavoriteButton = ({ product }) => {
                 } else {
                     let updatedFavorites;
                     if (isFavorite) {
-                        updatedFavorites = userCart.favorites.filter((favId) => favId !== productId);
+                        updatedFavorites = userCart.favorites.filter((favId: string) => favId !== productId);
                     } else {
                         updatedFavorites = [...userCart.favorites, productId];
                     }

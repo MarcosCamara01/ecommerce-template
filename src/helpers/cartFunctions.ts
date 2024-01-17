@@ -19,7 +19,12 @@ export const fetchUserCart = async (session: Session, setCartLoading: any) => {
   return null;
 };
 
-export const productsWislists = async (userCart: CartDocument, cartLoading: boolean, setCartWithProducts: any, setIsLoading: any) => {
+export const productsWislists = async (
+  userCart: CartDocument,
+  cartLoading: boolean,
+  setCartWithProducts: any,
+  setIsLoading: any
+) => {
   if (userCart && userCart?.favorites) {
     const updatedCart = await Promise.all(userCart.favorites.map(async (productId: any) => {
       const matchingProduct = await getProducts(`?_id=${productId}`);
