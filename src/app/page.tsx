@@ -20,6 +20,7 @@ const Home = async () => {
     <section className="pt-14">
       <Products
         products={products}
+        extraClassname=""
       />
     </section>
   );
