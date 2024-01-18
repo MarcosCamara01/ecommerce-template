@@ -8,7 +8,7 @@ import axios from 'axios';
 import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
 import { toast } from 'sonner';
-import { ProductDocument, VariantsDocument } from '@/models/Products';
+import { ProductDocument, VariantsDocument } from '@/types/types';
 
 export const ProductButtons = ({ product }: { product: ProductDocument }) => {
     const { addToCart } = useCart();

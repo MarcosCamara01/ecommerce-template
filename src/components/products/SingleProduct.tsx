@@ -1,6 +1,6 @@
 import { ProductButtons } from "@/components/products/ProductsElements";
 import { ProductImages } from "@/components/products/ProductImages";
-import { ProductDocument } from "@/models/Products";
+import { ProductDocument } from "@/types/types";
 
 export const SingleProduct = ({ product }: {product: ProductDocument}) => {
     if (!product) {

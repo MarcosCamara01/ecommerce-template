@@ -1,8 +1,7 @@
 import axios from "axios";
 import { getProducts } from "./getProducts";
 import { Session } from "next-auth";
-import { CartDocument, ItemDocument } from "@/models/Cart";
-import { VariantsDocument } from "@/models/Products";
+import { CartDocument, ItemDocument, VariantsDocument } from "@/types/types";
 
 export const fetchUserCart = async (session: Session, setCartLoading: any) => {
   try {

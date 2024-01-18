@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ProductCartInfo, DeleteButton } from "../cart/CartElements";
 import { FavoriteButton } from "./ProductsElements";
 import { Images } from "./ProductImages";
-import { ProductDocument } from "@/models/Products";
+import { ProductDocument } from "@/types/types";
 
 export const Products = (
   { products, extraClassname = "" }:
