@@ -1,23 +1,5 @@
-import { Document, Schema, model, models } from "mongoose";
-
-export interface UserDocument extends Document {
-  email: string;
-  password: string;
-  name: string;
-  phone: string;
-  address: AddressDocument;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface AddressDocument {
-  city: string;
-  country: string;
-  line1: string;
-  line2: string;
-  postal_code: string;
-  state: string;
-}
+import { AddressDocument, UserDocument } from "@/types/types";
+import { Schema, model, models } from "mongoose";
 
 const AddressSchema = new Schema<AddressDocument>({
   city: {
