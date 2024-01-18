@@ -1,10 +1,8 @@
 import axios from "axios";
 import { getProducts } from "./getProducts";
 import { toast } from 'sonner'
-import { ItemDocument } from "@/models/Cart";
-import { OrderDocument } from "@/models/Orders";
-import { VariantsDocument } from "@/models/Products";
 import Stripe from 'stripe';
+import { ItemDocument, OrderDocument, ProductsDocument, VariantsDocument } from "@/types/types";
 
 function generateRandomOrderNumber() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -98,7 +96,7 @@ export const getOrders = async (userId: string) => {
         const ordersWithEnrichedProducts = await Promise.all(
             userOrders.orders.map(async (order: OrderDocument) => {
                 const enrichedProducts = await Promise.all(
-                    order.products.map(async (product) => {
+                    order.products.map(async (product: ProductsDocument) => {
                         const matchingProduct = await getProducts(`?_id=${product.productId}`);
                         if (matchingProduct) {
                             const matchingVariant = matchingProduct.variants.find((variant: VariantsDocument) => variant.color === product.color);
