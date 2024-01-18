@@ -1,23 +1,5 @@
-import mongoose, { Document, model, Model, Schema } from 'mongoose';
-
-export interface ProductDocument extends Document {
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-    sizes: [string];
-    image: [string];
-    variants: [VariantsDocument];
-    quantity: number;
-    productId: Schema.Types.ObjectId;
-    purchased: boolean;
-}
-
-export interface VariantsDocument {
-    priceId: string;
-    color: string;
-    images: [string];
-}
+import { ProductDocument, VariantsDocument } from '@/types/types';
+import mongoose, { model, Model, Schema } from 'mongoose';
 
 const VariantsSchema = new Schema<VariantsDocument>({
     priceId: {

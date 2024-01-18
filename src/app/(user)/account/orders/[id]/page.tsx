@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { getOrders } from '@/helpers/ordersFunctions';
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth";
+import { EnrichedOrders, EnrichedProducts } from '@/types/types';
 
 export async function generateMetadata() {
     return {
@@ -10,7 +11,7 @@ export async function generateMetadata() {
     };
 }
 
-const OrderDetails = async ({ params }) => {
+const OrderDetails = async ({ params }: { params: { id: string } }) => {
     const orderId = params.id;
 
     let order = [];
@@ -21,10 +22,10 @@ const OrderDetails = async ({ params }) => {
 
     try {
         const session = await getServerSession(authOptions);
-        const userId = session.user._id;
+        const userId = session?.user._id;
         const response = await getOrders(userId);
         if (response && Array.isArray(response.orders)) {
-            const orderFound = response.orders.find((order) => order._id === orderId);
+            const orderFound = response.orders.find((order: EnrichedOrders) => order._id === orderId);
             order = orderFound;
         } else {
             console.log("No orders available.");
@@ -33,32 +34,32 @@ const OrderDetails = async ({ params }) => {
         console.error("Error fetching orders:", error);
     }
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return format(date, 'dd LLL yyyy');
+    const formatDate = (dateString: string) => {
+        const date = dateString ? new Date(dateString) : null;
+        return date ? format(date, 'dd LLL yyyy') : 'Date not found';
     };
 
     if (order) {
-        const totalProducts = order.products.reduce((total, product) => total + product.quantity, 0);
+        const totalProducts = order.products.reduce((total: number, product: EnrichedProducts) => total + product.quantity, 0);
 
         const productsText = totalProducts === 1 ? "item" : "items";
 
         return (
-            <div className="flex flex-col-reverse sm:flex-row flex-wrap gap-11 sm:gap-8 justify-between pt-12">
+            <div className="flex flex-col-reverse flex-wrap justify-between pt-12 sm:flex-row gap-11 sm:gap-8">
                 <div className='grow-999 basis-0'>
                     <Products
                         products={order.products}
                         extraClassname={"cart-ord-mobile"}
                     />
                 </div>
-                <div className='grow sm:basis-800 sm:sticky top-8 h-full'>
+                <div className='h-full grow sm:basis-800 sm:sticky top-8'>
                     <div className='mb-10'>
                         <h3 className={detailsH3Styles}>Order Details</h3>
                         <div className={bxInfoStyles}><span>Order Number</span> <span>{order?.orderNumber}</span></div>
                         <div className={bxInfoStyles}><span>Order Date</span> <span>{formatDate(order.purchaseDate)}</span></div>
                         <div className={bxInfoStyles}><span>Expected Delivery Date</span> <span>{formatDate(order.expectedDeliveryDate)}</span></div>
                     </div>
-                    <div className='mb-10 pt-10 border-t border-solid border-border-primary'>
+                    <div className='pt-10 mb-10 border-t border-solid border-border-primary'>
                         <h3 className={detailsH3Styles}>Delivery Address</h3>
                         <ul>
                             <li className={detailsLiStyles}>{order.name}</li>

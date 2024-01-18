@@ -1,39 +1,6 @@
 import { calculateExpectedDeliveryDate } from "@/helpers/expectedDeliveryDate";
-import { Date, Document, Schema, model, models } from "mongoose";
-
-export interface OrdersDocument extends Document {
-    userId: string;
-    orders: [OrderDocument];
-}
-
-export interface OrderDocument {
-    name: string;
-    email: string;
-    phone: number;
-    address: AddressDocument;
-    products: [ProductsDocument];
-    orderId: string;
-    purchaseDate: Date;
-    expectedDeliveryDate: Date;
-    total_price: number;
-    orderNumber: string;
-}
-
-export interface AddressDocument {
-    city: string;
-    country: string;
-    line1: string;
-    line2: string;
-    postal_code: string;
-    state: string;
-}
-
-export interface ProductsDocument {
-    productId: Schema.Types.ObjectId;
-    color: string;
-    size: string;
-    quantity: number;
-}
+import { AddressDocument, OrderDocument, OrdersDocument, ProductsDocument } from "@/types/types";
+import { Schema, model, models } from "mongoose";
 
 const ProductsSchema = new Schema<ProductsDocument>({
     productId: {
