@@ -5,11 +5,12 @@ import { useCart } from '@/hooks/CartContext';
 import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { toast } from 'sonner';
+import { EnrichedProducts, ItemDocument } from '@/types/types';
 
-export const DeleteButton = ({ product }) => {
+export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
     const { userCart, setUserCart, setCartItems } = useCart();
 
-    const handleRemoveFromCart = async (cartItemId) => {
+    const handleRemoveFromCart = async (cartItemId: string) => {
         try {
             const response = await axios.delete(`/api/cart?userId=${userCart.userId}&cartItemId=${cartItemId}`);
 
@@ -30,7 +31,7 @@ export const DeleteButton = ({ product }) => {
     );
 };
 
-export const ProductCartInfo = ({ product }) => {
+export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
     const { addToCart } = useCart();
     const isMobile = useClientMediaQuery('(max-width: 600px)');
 
@@ -43,17 +44,17 @@ export const ProductCartInfo = ({ product }) => {
             )
         } else {
             return (
-                <div className="flex w-min bg-black">
+                <div className="flex bg-black w-min">
                     <button
                         disabled={product?.quantity == 1}
-                        className='w-8 h-8 flex items-center justify-center	p-2 border border-solid border-border-primary rounded-l '
+                        className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l border-border-primary '
                         onClick={() => addToCart(product?.productId, product.color, product.size, -1)}
                     >
                         <MdRemove />
                     </button>
-                    <span className='w-8 h-8 flex items-center justify-center p-2 border-y border-solid border-border-primary text-sm'>{product?.quantity}</span>
+                    <span className='flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary'>{product?.quantity}</span>
                     <button
-                        className='w-8 h-8 flex items-center justify-center	p-2 border border-solid border-border-primary rounded-r'
+                        className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r border-border-primary'
                         onClick={() => addToCart(product?.productId, product.color, product.size, 1)}
                     >
                         <MdAdd />
@@ -83,7 +84,7 @@ export const ProductCartInfo = ({ product }) => {
         return (
             <div className='flex items-center justify-between'>
                 {quantityButtons()}
-                
+
                 <div className="flex">
                     <div className='text-sm pr-2.5 border-r'>
                         {product.size}
@@ -97,12 +98,12 @@ export const ProductCartInfo = ({ product }) => {
     }
 };
 
-export const ButtonCheckout = ({ cartWithProducts }) => {
+export const ButtonCheckout = ({ cartWithProducts }: { cartWithProducts: ItemDocument[] }) => {
     const { userCart } = useCart();
 
     const buyProducts = async () => {
         try {
-            const lineItems = await cartWithProducts.map((cartItem) => ({
+            const lineItems = cartWithProducts.map((cartItem: ItemDocument) => ({
                 productId: cartItem.productId,
                 quantity: cartItem.quantity,
                 variantId: cartItem.variantId,
@@ -124,8 +125,8 @@ export const ButtonCheckout = ({ cartWithProducts }) => {
 
     return (
         <button
-         onClick={buyProducts}
-         className='h-20 w-full bg-background-secondary border-l border-solid border-border-primary transition duration-150 ease hover:bg-color-secondary'
-         >CONTINUE</button>
+            onClick={buyProducts}
+            className='w-full h-20 transition duration-150 border-l border-solid bg-background-secondary border-border-primary ease hover:bg-color-secondary'
+        >CONTINUE</button>
     );
 };  

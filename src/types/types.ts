@@ -12,7 +12,6 @@ export interface EnrichedOrders {
     expectedDeliveryDate: Date;
     purchaseDate: string;
     _id: string;
-
 }
 
 export interface EnrichedProducts {
@@ -22,7 +21,10 @@ export interface EnrichedProducts {
     price: number,
     purchased: boolean,
     color: string,
+    size: string;
     quantity: number;
+    productId: string;
+    _id: string;
 }
 
 export interface OrdersDocument extends Document {
@@ -57,6 +59,7 @@ export interface ProductsDocument {
     color: string;
     size: string;
     quantity: number;
+    _id: string;
 }
 
 export interface CartDocument extends Document {
@@ -92,13 +95,14 @@ export interface VariantsDocument {
     color: string;
     images: [string];
 }
-
-export interface UserDocument extends Document {
+export interface UserDocument {
     email: string;
     password: string;
     name: string;
     phone: string;
     address: AddressDocument;
+    image: string;
+    _id: string;
     createdAt: Date;
     updatedAt: Date;
 }

@@ -72,8 +72,8 @@ export const UpdateButton = ({ text }) => {
             </button>
 
             {toEdit.field !== "none" && (
-                <div className='w-full h-screen fixed top-0 right-0 flex items-center justify-center bg-background-alert z-10'>
-                    <div className='max-w-90 bg-black border border-solid border-border-primary rounded overflow-hidden min-w-250'>
+                <div className='fixed top-0 right-0 z-10 flex items-center justify-center w-full h-screen bg-background-alert'>
+                    <div className='overflow-hidden bg-black border border-solid rounded max-w-90 border-border-primary min-w-250'>
                         <h4 className='px-5 pt-5 pb-3 text-base font-semibold'>Update <span className={text === "api" ? "uppercase" : "capitalize"}>{text}</span></h4>
                         <div className='mx-5 mb-3'>
                             <input
@@ -91,7 +91,7 @@ export const UpdateButton = ({ text }) => {
                         </div>
 
                         <button
-                            className='text-sm w-full h-8 flex items-center justify-center bg-black border-t border-solid border-border-primary transition duration-150 ease hover:bg-color-secondary'
+                            className='flex items-center justify-center w-full h-8 text-sm transition duration-150 bg-black border-t border-solid border-border-primary ease hover:bg-color-secondary'
                             onClick={() => {
                                 setToEdit({ field: 'none', value: 'none' });
                             }}
