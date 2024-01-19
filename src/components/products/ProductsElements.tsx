@@ -8,7 +8,7 @@ import axios from 'axios';
 import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
 import { toast } from 'sonner';
-import { ProductDocument, VariantsDocument } from '@/types/types';
+import { EnrichedProducts, ProductDocument, VariantsDocument } from '@/types/types';
 
 export const ProductButtons = ({ product }: { product: ProductDocument }) => {
     const { addToCart } = useCart();
@@ -96,7 +96,7 @@ export const ProductButtons = ({ product }: { product: ProductDocument }) => {
     );
 };
 
-export const FavoriteButton = ({ product }: { product: ProductDocument }) => {
+export const FavoriteButton = ({ product }: { product: EnrichedProducts }) => {
     const { userCart, setUserCart } = useCart();
     const { data: session, status } = useSession();
     const [isFavorite, setIsFavorite] = useState(false);
