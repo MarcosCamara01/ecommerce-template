@@ -99,7 +99,7 @@ export function CartProvider({ children }) {
         toast.error(message);
       }
     } else {
-      // Si no hay un usuario autenticado, usar cookies.
+      // If there is no authenticated user, use cookies
     }
   };
 

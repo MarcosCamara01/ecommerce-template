@@ -83,7 +83,7 @@ export const saveOrder = async (
     }
 };
 
-export const getOrders = async (userId: string) => {
+export const getOrders = async (userId: string | undefined) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders?userId=${userId}`);
         const userOrders = await response.json();

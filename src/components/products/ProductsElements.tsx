@@ -159,8 +159,8 @@ export const FavoriteButton = ({ product }: { product: EnrichedProducts }) => {
             const warningMessage = 'You cannot save to favourites without logging in.'
             console.warn(warningMessage);
             toast.warning(warningMessage);
-            // Si no hay un usuario autenticado, manejar el estado local de favoritos aquí.
-            // utilizar cookies o localStorage para almacenar los favoritos.
+            // If there is no authenticated user, handle local bookmark status here
+            // use cookies or localStorage to store favourites
         }
     };
 
