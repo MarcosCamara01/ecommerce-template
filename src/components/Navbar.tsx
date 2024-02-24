@@ -3,16 +3,14 @@
 import Link from 'next/link';
 import { useSession } from "next-auth/react";
 import { useCart } from '@/hooks/CartContext';
-import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { useEffect, useState } from 'react';
 import { HiMiniBars2 } from "react-icons/hi2";
 import { HiMiniXMark } from "react-icons/hi2";
 import { ItemDocument } from '@/types/types';
 
-export const Navbar = () => {
+export const Navbar = ({ isMobile }: { isMobile: boolean }) => {
   const { data: session, status } = useSession();
   const { cartItems, cartLoading } = useCart();
-  const isMobile = useClientMediaQuery('(max-width: 640px)');
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
 
   useEffect(() => {

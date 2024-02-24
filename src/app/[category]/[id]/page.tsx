@@ -31,7 +31,7 @@ const ProductPage = async ({ params }: Props) => {
         <section className="pt-14">
             <SingleProduct product={product} />
 
-            <h2 className="text-xl sm:text-2xl font-bold mt-24 mb-5">YOU MIGHT ALSO LIKE...</h2>
+            <h2 className="mt-24 mb-5 text-xl font-bold sm:text-2xl">YOU MIGHT ALSO LIKE...</h2>
 
             <Products
                 products={randomProducts}

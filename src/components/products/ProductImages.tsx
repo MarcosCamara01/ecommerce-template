@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
 import Image, { ImageLoader } from 'next/image';
-import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
+import { isMobileDevice } from '@/libs/responsive';
 import { useVariant } from '@/hooks/VariantContext';
 
 import 'swiper/css'
@@ -14,7 +14,7 @@ import 'swiper/css/pagination'
 
 export const ProductImages = ({ name }: { name: string }) => {
   const { selectedVariant } = useVariant();
-  const isMobile = useClientMediaQuery('(max-width: 640px)');
+  const isMobile = isMobileDevice();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
