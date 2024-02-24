@@ -11,10 +11,6 @@
     "dependencies": {
         "@stripe/react-stripe-js": "^2.2.0",
         "@stripe/stripe-js": "^2.1.2",
-        "@types/bcryptjs": "^2.4.3",
-        "@types/node": "20.5.6",
-        "@types/react": "18.2.21",
-        "@types/react-dom": "18.2.7",
         "@vercel/analytics": "^1.1.1",
         "@vercel/speed-insights": "^1.0.1",
         "autoprefixer": "^10.4.16",
@@ -32,14 +28,21 @@
         "react-dom": "18.2.0",
         "react-icons": "^4.10.1",
         "react-loader-spinner": "^5.4.5",
+        "react-useanimations": "^2.10.0",
         "sonner": "^1.2.0",
         "stripe": "^13.5.0",
         "swiper": "^10.3.1",
         "swr": "^2.2.2",
         "tailwindcss": "^3.3.5",
-        "typescript": "5.2.2"
+        "typescript": "5.2.2",
+        "ua-parser-js": "^1.0.37"
     },
     "devDependencies": {
-        "@types/multiparty": "^0.0.33"
+        "@types/multiparty": "^0.0.33",
+        "@types/ua-parser-js": "^0.7",
+        "@types/bcryptjs": "^2.4.3",
+        "@types/node": "20.5.6",
+        "@types/react": "18.2.21",
+        "@types/react-dom": "18.2.7"
     }
 }

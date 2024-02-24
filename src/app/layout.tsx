@@ -7,7 +7,8 @@ import { CartProvider } from '../hooks/CartContext';
 import { VariantProvider } from '../hooks/VariantContext';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Toaster } from 'sonner'
+import { Toaster } from 'sonner';
+import { isMobileDevice } from "@/libs/responsive";
 
 import '../styles/globals.css';
 
@@ -23,19 +24,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const mobile = isMobileDevice();
+
   return (
     <html lang="en">
       <Providers>
         <CartProvider>
           <body className={inter.className}>
-            <Navbar />
+            <Navbar
+              isMobile={mobile}
+            />
             <main>
-                <VariantProvider>
-                  {children}
-                  <Toaster position="bottom-right" />
-                  <Analytics />
-                  <SpeedInsights />
-                </VariantProvider>
+              <VariantProvider>
+                {children}
+                <Toaster position="bottom-right" />
+                <Analytics />
+                <SpeedInsights />
+              </VariantProvider>
             </main>
             <Footer />
           </body>

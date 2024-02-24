@@ -3,9 +3,9 @@ import { getProducts } from "./getProducts";
 import { Session } from "next-auth";
 import { CartDocument, ItemDocument, VariantsDocument } from "@/types/types";
 
-export const fetchUserCart = async (session: Session, setCartLoading: any) => {
+export const fetchUserCart = async (session: Session | null, setCartLoading: any) => {
   try {
-    const userId = await session.user._id;
+    const userId = await session?.user._id;
     const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${userId}`);
     const userCart = response.data;
     setCartLoading(false);
@@ -13,7 +13,7 @@ export const fetchUserCart = async (session: Session, setCartLoading: any) => {
   } catch (error) {
     console.error('Error fetching cart:', error);
     setCartLoading(false);
-  }
+  } 
 
   return null;
 };
