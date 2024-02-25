@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { IoIosArrowForward } from 'react-icons/io';
-import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
+import { isMobileDevice } from '@/libs/responsive';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 export const UpdateButton = ({ text }) => {
     const { data: session, update, status } = useSession();
     const [toEdit, setToEdit] = useState({ field: 'none', value: 'none' });
-    const isMobile = useClientMediaQuery('(max-width: 600px)');
+    const isMobile = isMobileDevice();
 
     useEffect(() => {
         if (toEdit.field !== 'none' && isMobile) {
