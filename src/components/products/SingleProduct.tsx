@@ -1,8 +1,11 @@
 import { ProductButtons } from "@/components/products/ProductsElements";
 import { ProductImages } from "@/components/products/ProductImages";
 import { ProductDocument } from "@/types/types";
+import { isMobileDevice } from "@/libs/responsive";
 
 export const SingleProduct = ({ product }: {product: ProductDocument}) => {
+    const isMobile = isMobileDevice();
+
     if (!product) {
         return <div>Producto no encontrado</div>;
     }
@@ -12,6 +15,7 @@ export const SingleProduct = ({ product }: {product: ProductDocument}) => {
             <div className="grow-999 basis-0">
                 <ProductImages
                     name={product.name}
+                    isMobile={isMobile}
                 />
             </div>
 

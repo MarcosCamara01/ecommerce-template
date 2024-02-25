@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { useCart } from '@/hooks/CartContext';
 import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
-import { isMobileDevice } from "@/libs/responsive";
+import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { toast } from 'sonner';
 import { EnrichedProducts, ItemDocument } from '@/types/types';
 
@@ -33,7 +33,7 @@ export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
 
 export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
     const { addToCart } = useCart();
-    const isMobile = isMobileDevice();
+    const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     const quantityButtons = () => {
         if (product.purchased) {

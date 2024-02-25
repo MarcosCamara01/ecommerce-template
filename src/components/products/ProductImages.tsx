@@ -5,22 +5,20 @@ import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
 import Image, { ImageLoader } from 'next/image';
-import { isMobileDevice } from '@/libs/responsive';
 import { useVariant } from '@/hooks/VariantContext';
 
 import 'swiper/css'
 import "swiper/css/zoom";
 import 'swiper/css/pagination'
 
-export const ProductImages = ({ name }: { name: string }) => {
+export const ProductImages = ({ name, isMobile }: { name: string, isMobile: boolean }) => {
   const { selectedVariant } = useVariant();
-  const isMobile = isMobileDevice();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedVariant])
 
-  if (isMobile === null) {
+  if (!selectedVariant || !selectedVariant.images || isMobile === null) {
     return <div className='w-full rounded h-60vh sm:h-80vh shine'></div>
   }
 
