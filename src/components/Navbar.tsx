@@ -81,13 +81,6 @@ export const Navbar = ({ isMobile }: { isMobile: boolean }) => {
     </>
   );
 
-  if (isMobile === null) {
-    return <header className={headerStyles}>
-      <div className='w-3/12 h-6 rounded-sm shine'></div>
-      <div className='w-3/12 h-6 rounded-sm shine'></div>
-    </header>;
-  }
-
   return (
     <header className={headerStyles}>
       {isMobile ? (

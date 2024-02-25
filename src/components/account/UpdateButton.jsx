@@ -2,15 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { IoIosArrowForward } from 'react-icons/io';
-import { isMobileDevice } from '@/libs/responsive';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
-export const UpdateButton = ({ text }) => {
+export const UpdateButton = ({ text, isMobile }) => {
     const { data: session, update, status } = useSession();
     const [toEdit, setToEdit] = useState({ field: 'none', value: 'none' });
-    const isMobile = isMobileDevice();
 
     useEffect(() => {
         if (toEdit.field !== 'none' && isMobile) {
