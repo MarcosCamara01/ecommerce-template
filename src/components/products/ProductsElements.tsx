@@ -9,9 +9,10 @@ import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
 import { toast } from 'sonner';
 import { EnrichedProducts, ProductDocument, VariantsDocument } from '@/types/types';
+import { addToCart } from '@/helpers/cartFunctions';
 
 export const ProductButtons = ({ product }: { product: ProductDocument }) => {
-    const { addToCart } = useCart();
+    const { cartItems, setCartItems, userCart, setUserCart } = useCart();
     const { selectedVariant, setSelectedVariant } = useVariant();
     const [selectedSize, setSelectedSize] = useState('');
     const { status } = useSession();
@@ -22,7 +23,7 @@ export const ProductButtons = ({ product }: { product: ProductDocument }) => {
         }
     }, [product])
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
 
         if (status === "unauthenticated") {
             const warningMessage = 'You cannot save to cart without logging in.'
@@ -30,14 +31,19 @@ export const ProductButtons = ({ product }: { product: ProductDocument }) => {
             toast.warning(warningMessage);
         } else if (selectedVariant && selectedSize) {
             const quantity = 1;
-            addToCart(
+            await addToCart(
                 product._id,
                 selectedVariant.color,
                 selectedSize,
                 quantity,
-                selectedVariant.priceId,
-                selectedVariant.variantId
+                selectedVariant.variantId,
+                cartItems,
+                setCartItems,
+                userCart,
+                setUserCart
             );
+            
+            toast.info("Cart updated successfully")
         } else if (selectedVariant && !selectedSize) {
             const warningMessage = 'You have to select a size.'
             console.warn(warningMessage);
