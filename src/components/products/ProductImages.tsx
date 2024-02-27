@@ -92,7 +92,7 @@ export const Images = (
         quality={100}
         loading='lazy'
         className="w-full max-w-img"
-        onLoadingComplete={handleImageLoadComplete}
+        onLoad={handleImageLoadComplete}
       />
       <div className={!imageLoaded ? 'shine absolute top-0 right-0	w-full	h-full' : ''}></div>
     </div>

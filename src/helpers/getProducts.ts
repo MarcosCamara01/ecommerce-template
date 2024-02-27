@@ -1,3 +1,5 @@
+"use server"
+
 export async function getProducts(key = "") {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/products${key}`);

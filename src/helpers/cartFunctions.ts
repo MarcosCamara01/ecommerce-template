@@ -1,21 +1,77 @@
-import axios from "axios";
+"use client";
+
 import { getProducts } from "./getProducts";
-import { Session } from "next-auth";
 import { CartDocument, ItemDocument, VariantsDocument } from "@/types/types";
+import { serverSession } from "./serverSession";
+import { createCart, saveCart } from "./svCartFunctions";
 
-export const fetchUserCart = async (session: Session | null, setCartLoading: any) => {
-  try {
-    const userId = await session?.user._id;
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${userId}`);
-    const userCart = response.data;
-    setCartLoading(false);
-    return userCart;
-  } catch (error) {
-    console.error('Error fetching cart:', error);
-    setCartLoading(false);
-  } 
+export const addToCart = async (
+  productId: string,
+  color: string,
+  size: string,
+  quantity: number,
+  variantId: string,
+  cartItems: any,
+  setCartItems: any,
+  userCart: any,
+  setUserCart: any
+) => {
 
-  return null;
+  const newItem = {
+    productId,
+    color,
+    size,
+    quantity,
+    variantId
+  };
+
+  const session = await serverSession();
+
+  let updatedCart = [...cartItems];
+
+  const existingItemIndex = updatedCart.findIndex(
+    (item) =>
+      item.productId === productId &&
+      item.color === color &&
+      item.size === size
+  );
+
+  if (existingItemIndex !== -1) {
+    updatedCart[existingItemIndex].quantity += quantity;
+  } else {
+    updatedCart = [...updatedCart, newItem];
+  }
+
+  if (session) {
+    try {
+      const userId = session.user._id;
+
+      if (!userId) {
+        console.error("The user _id could not be obtained.");
+        return;
+      }
+
+      let userCartToUpdate = userCart;
+
+      if (!userCartToUpdate) {
+        userCartToUpdate = await createCart(updatedCart, userId)
+        console.log("Cart created successfully.");
+      } else {
+        const id = userCartToUpdate._id
+        userCartToUpdate = await saveCart(updatedCart, id)
+        console.log("Cart updated successfully.");
+      }
+
+      setUserCart(userCartToUpdate.data);
+      setCartItems(updatedCart);
+
+    } catch (error) {
+      console.error("Error updating/creating cart on the server", error);
+    }
+  } else {
+    return;
+    // If there is no authenticated user, use cookies
+  }
 };
 
 export const productsWislists = async (
@@ -83,7 +139,6 @@ export const productsCart = async (
     setIsLoading(false);
   }
 };
-
 
 const calculateTotalPrice = (cartItems: ItemDocument[]) => {
   let totalPrice = 0;
