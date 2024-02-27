@@ -9,7 +9,7 @@ import { colorMapping } from "@/helpers/colorMapping";
 import { useVariant } from '@/hooks/VariantContext';
 import { toast } from 'sonner';
 import { EnrichedProducts, ProductDocument, VariantsDocument } from '@/types/types';
-import { addToCart } from '@/helpers/cartFunctions';
+import { addToCart } from '@/helpers/clientCart';
 
 export const ProductButtons = ({ product }: { product: ProductDocument }) => {
     const { cartItems, setCartItems, userCart, setUserCart } = useCart();

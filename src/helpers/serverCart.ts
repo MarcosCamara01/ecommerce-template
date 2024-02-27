@@ -21,6 +21,20 @@ export const fetchUserCart = async () => {
     }
 };
 
+export const deleteProduct = async (cartItemId: string) => {
+    try {
+        const session = await serverSession();
+        const userId = session?.user._id;
+
+        const response = await axios.delete(`/api/cart?userId=${userId}&cartItemId=${cartItemId}`);
+
+        return response;
+    } catch (error) {
+        console.error('Error fetching cart:', error);
+        return null;
+    }
+};
+
 export const createCart = async (updatedCart: any[], userId: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`, {
