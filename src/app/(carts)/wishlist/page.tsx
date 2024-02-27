@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { Products } from "@/components/products/Products";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Loader } from "@/helpers/Loader";
-import { productsWislists } from "@/helpers/cartFunctions";
+import { Loader } from "@/components/Loader";
+import { productsWislists } from "@/helpers/clientCart";
 
 const Wishlists = () => {
     const { userCart, cartLoading } = useCart();

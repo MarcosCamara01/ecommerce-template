@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/CartContext';
 import { saveOrder } from "@/helpers/ordersFunctions";
-import { Loader } from "@/helpers/Loader";
+import { Loader } from "@/components/Loader";
 import { useSession } from 'next-auth/react';
 import { sendEmail } from "@/helpers/sendEmail";
 import Stripe from 'stripe';

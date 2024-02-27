@@ -6,8 +6,8 @@ import { Products } from "@/components/products/Products";
 import { ButtonCheckout } from "@/components/cart/CartElements"
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Loader } from "@/helpers/Loader";
-import { productsCart } from "@/helpers/cartFunctions";
+import { Loader } from "@/components/Loader";
+import { productsCart } from "@/helpers/clientCart";
 
 const Cart = () => {
   const { cartItems, cartLoading } = useCart();

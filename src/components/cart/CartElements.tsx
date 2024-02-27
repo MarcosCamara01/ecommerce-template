@@ -6,22 +6,19 @@ import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { toast } from 'sonner';
 import { EnrichedProducts, ItemDocument } from '@/types/types';
+import { deleteProduct } from '@/helpers/serverCart';
 
 export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
-    const { userCart, setUserCart, setCartItems } = useCart();
+    const { setUserCart, setCartItems } = useCart();
 
     const handleRemoveFromCart = async (cartItemId: string) => {
-        try {
-            const response = await axios.delete(`/api/cart?userId=${userCart.userId}&cartItemId=${cartItemId}`);
+        const response = await deleteProduct(cartItemId)
 
-            if (response.status === 200) {
-                setCartItems(response.data.cart);
-                setUserCart(response.data);
-            } else {
-                console.error('Failed to remove product from cart.');
-            }
-        } catch (error) {
-            console.error('Error removing product from cart:', error);
+        if (response && response.status === 200) {
+            setCartItems(response.data.cart);
+            setUserCart(response.data);
+        } else {
+            console.error('Failed to remove product from cart.');
             toast.error('Failed to remove product from cart.');
         }
     };

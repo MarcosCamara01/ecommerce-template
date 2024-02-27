@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { fetchUserCart } from "@/helpers/svCartFunctions";
+import { fetchUserCart } from "@/helpers/serverCart";
 
 const CartContext = createContext();
 

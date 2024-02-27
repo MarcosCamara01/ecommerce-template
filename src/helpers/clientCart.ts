@@ -3,7 +3,7 @@
 import { getProducts } from "./getProducts";
 import { CartDocument, ItemDocument, VariantsDocument } from "@/types/types";
 import { serverSession } from "./serverSession";
-import { createCart, saveCart } from "./svCartFunctions";
+import { createCart, saveCart } from "./serverCart";
 
 export const addToCart = async (
   productId: string,
