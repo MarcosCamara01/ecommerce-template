@@ -6,17 +6,24 @@ import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { toast } from 'sonner';
 import { EnrichedProducts, ItemDocument } from '@/types/types';
-import { deleteProduct } from '@/helpers/serverCart';
+import { deleteProduct } from '@/helpers/clientCart';
+import { useSession } from 'next-auth/react';
 
 export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
     const { setUserCart, setCartItems } = useCart();
+    const { data: session } = useSession();
 
     const handleRemoveFromCart = async (cartItemId: string) => {
-        const response = await deleteProduct(cartItemId)
+        if (session && session.user._id) {
+            const response = await deleteProduct(cartItemId, session);
 
-        if (response && response.status === 200) {
-            setCartItems(response.data.cart);
-            setUserCart(response.data);
+            if (response && response.status === 200) {
+                setCartItems(response.data.cart);
+                setUserCart(response.data);
+            } else {
+                console.error('Failed to remove product from cart.');
+                toast.error('Failed to remove product from cart.');
+            }
         } else {
             console.error('Failed to remove product from cart.');
             toast.error('Failed to remove product from cart.');
