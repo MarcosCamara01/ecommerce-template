@@ -3,7 +3,8 @@
 import { getProducts } from "./getProducts";
 import { CartDocument, ItemDocument, VariantsDocument } from "@/types/types";
 import { serverSession } from "./serverSession";
-import { createCart, saveCart } from "./serverCart";
+import axios from "axios";
+import { Session } from "next-auth";
 
 export const addToCart = async (
   productId: string,
@@ -54,11 +55,29 @@ export const addToCart = async (
       let userCartToUpdate = userCart;
 
       if (!userCartToUpdate) {
-        userCartToUpdate = await createCart(updatedCart, userId)
+        userCartToUpdate = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cart: updatedCart,
+            userId: userId
+          })
+        });
+
         console.log("Cart created successfully.");
       } else {
         const id = userCartToUpdate._id
-        userCartToUpdate = await saveCart(updatedCart, id)
+        userCartToUpdate = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?id=${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cart: updatedCart,
+          })
+        });
         console.log("Cart updated successfully.");
       }
 
@@ -148,4 +167,19 @@ const calculateTotalPrice = (cartItems: ItemDocument[]) => {
   }
 
   return totalPrice.toFixed(2);
+};
+
+export const deleteProduct = async (cartItemId: string, session: Session) => {
+  try {
+    const userId = session?.user._id;
+
+    const response = await axios.delete(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${userId}&cartItemId=${cartItemId}`
+    );
+
+    return response;
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    return null;
+  }
 };
