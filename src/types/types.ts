@@ -25,6 +25,7 @@ export interface EnrichedProducts {
     quantity: number;
     productId: string;
     _id: string;
+    variantId: string;
 }
 
 export interface OrdersDocument extends Document {

@@ -1,8 +1,26 @@
-import { toast } from 'sonner';
-import Stripe from 'stripe';
-import { SetStateAction, Dispatch } from 'react';
+import Stripe from "stripe";
+import axios from "axios";
 
-type SetHasSentFunction = Dispatch<SetStateAction<boolean>>;
+export const fetchCheckoutData = async (sessionId: string): Promise<Stripe.Checkout.Session | undefined> => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/checkout_sessions?session_id=${sessionId}`)
+            .then((res) => res.json());
+        return response;
+    } catch (err: any) {
+        console.error("Error obtaining data:", err.message);
+    }
+};
+
+export const emptyCart = async (id: string) => {
+    try {
+        await axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${id}`, {
+            cart: [],
+        });
+
+    } catch (error: any) {
+        console.error(error)
+    }
+};
 
 async function sendCustomerEmail(data: Stripe.Checkout.Session) {
     const emailCustomer = {
@@ -13,7 +31,7 @@ async function sendCustomerEmail(data: Stripe.Checkout.Session) {
     };
 
     try {
-        const responseCustomer = await fetch('/api/email', {
+        const responseCustomer = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email`, {
             method: 'POST',
             body: JSON.stringify(emailCustomer),
         });
@@ -22,11 +40,9 @@ async function sendCustomerEmail(data: Stripe.Checkout.Session) {
             throw new Error(`response status: ${responseCustomer.status}`);
         } else {
             console.log("Customer's email successfully sent");
-            toast.success("Customer's email successfully sent");
         }
     } catch (err) {
         console.error("Error sending customer's email:", err);
-        toast.error("Error sending customer's email.");
         throw err;
     }
 }
@@ -40,7 +56,7 @@ async function sendOwnerEmail(data: Stripe.Checkout.Session) {
     };
 
     try {
-        const responseEmailOwner = await fetch('/api/email', {
+        const responseEmailOwner = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email`, {
             method: 'POST',
             body: JSON.stringify(emailOwner),
         });
@@ -56,13 +72,11 @@ async function sendOwnerEmail(data: Stripe.Checkout.Session) {
     }
 }
 
-export const sendEmail = async (data: Stripe.Checkout.Session, sethasSent: SetHasSentFunction) => {
+export const sendEmail = async (data: Stripe.Checkout.Session) => {
     try {
         await sendCustomerEmail(data);
         await sendOwnerEmail(data);
-        sethasSent(true)
     } catch (err) {
         console.error(err);
-        sethasSent(true)
     }
 };

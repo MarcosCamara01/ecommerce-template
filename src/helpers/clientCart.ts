@@ -131,12 +131,14 @@ export const productsCart = async (
       cartItems.map(async (cartItem: ItemDocument) => {
         try {
           const matchingProduct = await getProducts(`?_id=${cartItem.productId}`);
+          
           if (matchingProduct) {
             const matchingVariant = matchingProduct.variants.find(
               (variant: VariantsDocument) => variant.color === cartItem.color
             );
             return {
               ...cartItem,
+              variantId: matchingVariant.priceId,
               category: matchingProduct.category,
               image: [matchingVariant.images[0]],
               name: matchingProduct.name,
