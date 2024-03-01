@@ -6,8 +6,9 @@ import { MdAdd, MdRemove, MdClose } from 'react-icons/md';
 import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { toast } from 'sonner';
 import { EnrichedProducts, ItemDocument } from '@/types/types';
-import { deleteProduct } from '@/helpers/clientCart';
+import { addToCart, deleteProduct } from '@/helpers/clientCart';
 import { useSession } from 'next-auth/react';
+import { serverSession } from '@/helpers/serverSession';
 
 export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
     const { setUserCart, setCartItems } = useCart();
@@ -36,7 +37,7 @@ export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
 };
 
 export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
-    const { addToCart } = useCart();
+    const { cartItems, setCartItems, userCart, setUserCart } = useCart();
     const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     const quantityButtons = () => {
@@ -52,14 +53,34 @@ export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
                     <button
                         disabled={product?.quantity == 1}
                         className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l border-border-primary '
-                        onClick={() => addToCart(product?.productId, product.color, product.size, -1)}
+                        onClick={() => addToCart(
+                            product?.productId,
+                            product.color,
+                            product.size,
+                            -1,
+                            product.variantId,
+                            cartItems,
+                            setCartItems,
+                            userCart,
+                            setUserCart
+                        )}
                     >
                         <MdRemove />
                     </button>
                     <span className='flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary'>{product?.quantity}</span>
                     <button
                         className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r border-border-primary'
-                        onClick={() => addToCart(product?.productId, product.color, product.size, 1)}
+                        onClick={() => addToCart(
+                            product?.productId,
+                            product.color,
+                            product.size,
+                            1,
+                            product.variantId,
+                            cartItems,
+                            setCartItems,
+                            userCart,
+                            setUserCart
+                        )}
                     >
                         <MdAdd />
                     </button>
@@ -103,10 +124,9 @@ export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
 };
 
 export const ButtonCheckout = ({ cartWithProducts }: { cartWithProducts: ItemDocument[] }) => {
-    const { userCart } = useCart();
-
     const buyProducts = async () => {
         try {
+            const session = await serverSession();
             const lineItems = cartWithProducts.map((cartItem: ItemDocument) => ({
                 productId: cartItem.productId,
                 quantity: cartItem.quantity,
@@ -117,7 +137,7 @@ export const ButtonCheckout = ({ cartWithProducts }: { cartWithProducts: ItemDoc
 
             const { data } = await axios.post('/api/stripe/payment', {
                 lineItems,
-                userId: userCart.userId
+                userId: session?.user._id
             });
 
             window.location.href = data.session.url;

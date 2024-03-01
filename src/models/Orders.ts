@@ -1,4 +1,4 @@
-import { calculateExpectedDeliveryDate } from "@/helpers/expectedDeliveryDate";
+import { calculateExpectedDeliveryDate, generateRandomOrderNumber } from "@/helpers/orderModel";
 import { AddressDocument, OrderDocument, OrdersDocument, ProductsDocument } from "@/types/types";
 import { Schema, model, models } from "mongoose";
 
@@ -84,7 +84,7 @@ const OrderSchema = new Schema<OrderDocument>({
     },
     orderNumber: {
         type: String,
-        required: true,
+        default: generateRandomOrderNumber,
     }
 });
 
