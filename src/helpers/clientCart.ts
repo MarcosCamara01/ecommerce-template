@@ -55,7 +55,7 @@ export const addToCart = async (
       let userCartToUpdate = userCart;
 
       if (!userCartToUpdate) {
-        userCartToUpdate = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -66,10 +66,11 @@ export const addToCart = async (
           })
         });
 
+        userCartToUpdate = await response.json();
         console.log("Cart created successfully.");
       } else {
         const id = userCartToUpdate._id
-        userCartToUpdate = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?id=${id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?id=${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -78,12 +79,13 @@ export const addToCart = async (
             cart: updatedCart,
           })
         });
+
+        userCartToUpdate = await response.json();
         console.log("Cart updated successfully.");
       }
 
-      setUserCart(userCartToUpdate.data);
+      setUserCart(userCartToUpdate);
       setCartItems(updatedCart);
-
     } catch (error) {
       console.error("Error updating/creating cart on the server", error);
     }
@@ -131,7 +133,7 @@ export const productsCart = async (
       cartItems.map(async (cartItem: ItemDocument) => {
         try {
           const matchingProduct = await getProducts(`?_id=${cartItem.productId}`);
-          
+
           if (matchingProduct) {
             const matchingVariant = matchingProduct.variants.find(
               (variant: VariantsDocument) => variant.color === cartItem.color
