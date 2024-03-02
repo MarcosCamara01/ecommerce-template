@@ -15,6 +15,8 @@ export const saveOrder = async (
         const cartResponse = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${userId}`);
         const cart: CartDocument = cartResponse.data;
 
+        console.log(cart);
+
         const products = cart.cart.map((item: ItemDocument) => ({
             productId: item.productId,
             quantity: item.quantity,
