@@ -11,6 +11,7 @@ import { Toaster } from 'sonner';
 import { isMobileDevice } from "@/libs/responsive";
 
 import '../styles/globals.css';
+import { userAgent } from 'next/server';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const mobile = isMobileDevice();
+  let mobile = isMobileDevice();
 
   return (
     <html lang="en">

@@ -1,6 +1,13 @@
 import { saveOrder } from "@/helpers/ordersFunctions";
 import { emptyCart, fetchCheckoutData, sendEmail } from "@/helpers/checkoutFunctions";
 
+export async function generateMetadata() {
+  return {
+    title: 'Purchase Result | Ecommerce Template',
+    description: 'Result of the purchase in the test ecommerce created by Marcos Cámara',
+  };
+}
+
 const CheckoutSuccess = async ({
   searchParams,
 }: {
