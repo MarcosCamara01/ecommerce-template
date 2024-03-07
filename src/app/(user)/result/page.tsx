@@ -31,7 +31,7 @@ const CheckoutSuccess = async ({
             <p>{`An email has been sent to you at: ${response.customer_details.email}`}</p>
           </>
           :
-          <h1>Ha ocurrido un error.</h1>
+          <h1>An error has occurred.</h1>
         }
       </div>
     </section>
