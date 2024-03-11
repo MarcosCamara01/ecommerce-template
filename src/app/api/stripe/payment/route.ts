@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         const { lineItems, userId } = await request.json();
 
         if (!lineItems || !userId) throw Error("Missing data");
-        
+
         const products = await loadPrices();
 
         const lineItemsList = await lineItems.map((item: any) => {
@@ -42,6 +42,9 @@ export async function POST(request: NextRequest) {
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/result?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
             automatic_tax: {
+                enabled: true,
+            },
+            phone_number_collection: {
                 enabled: true,
             },
             metadata: {
