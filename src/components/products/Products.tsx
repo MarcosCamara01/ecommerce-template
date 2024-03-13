@@ -6,12 +6,12 @@ import { EnrichedProducts } from "@/types/types";
 
 export const Products = (
   { products, extraClassname = "" }:
-    { products: EnrichedProducts[], extraClassname: string }
+    { products: any, extraClassname: string }
 ) => {
   return (
     <div className={`grid gap-x-3.5 gap-y-6 sm:gap-y-9 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""}
      ${extraClassname === "cart-ord-mobile" ? "grid-cols-1" : ""} sm:grid-cols-auto-fill-250`}>
-      {products.map((product: EnrichedProducts, index) => {
+      {products.map((product: EnrichedProducts, index: number) => {
         return (
           <div className={`flex justify-between border border-solid border-border-primary rounded-md overflow-hidden 
           ${extraClassname === "cart-ord-mobile" ? "flex-row sm:flex-col" : "flex-col"} transition-card`}

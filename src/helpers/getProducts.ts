@@ -9,7 +9,6 @@ export async function getProducts(key = "") {
         }
 
         const jsonData = await res.json();
-
         return jsonData;
 
     } catch (error) {

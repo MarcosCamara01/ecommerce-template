@@ -1,43 +1,57 @@
 "use client";
 
-import { useCart } from "@/hooks/CartContext";
 import { useEffect, useState } from "react";
 import { Products } from "@/components/products/Products";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useFavorites } from "@/hooks/FavoritesContext";
+import { ProductDocument } from "@/types/types";
+import { getProducts } from "@/helpers/getProducts";
 import { Loader } from "@/components/Loader";
-import { productsWislists } from "@/helpers/clientCart";
+
 
 const Wishlists = () => {
-    const { userCart, cartLoading } = useCart();
-    const [cartWithProducts, setCartWithProducts] = useState([]);
+    const { userFavorites } = useFavorites();
+    const [productsFavorites, setProductsFavorites] = useState<ProductDocument[]>([]);
     const [isLoading, setIsLoading] = useState(true)
     const { status } = useSession();
 
     useEffect(() => {
-        productsWislists(userCart, cartLoading, setCartWithProducts, setIsLoading);
-    }, [userCart, cartLoading]);
+        document.title = "Wishlist | Ecommerce Template"
+    }, []);
 
     useEffect(() => {
-        document.title = "Wishlist | Ecommerce Template"
-    }, [])
+        const fetchWishlistProducts = async () => {
+            if (userFavorites && userFavorites.favorites) {
+                const updatedCart = await Promise.all(userFavorites.favorites.map(async (productId: string) => {
+                    const matchingProduct = await getProducts(`?_id=${productId}`);
+                    return matchingProduct;
+                }));
+
+                setProductsFavorites(updatedCart.filter(product => product !== null) as ProductDocument[]);
+                setIsLoading(false);
+            }
+        };
+
+        fetchWishlistProducts();
+    }, [userFavorites]);
 
     return (
         <section className="pt-12">
             {isLoading ?
                 <Loader />
                 :
-                cartWithProducts.length >= 1 ?
+                productsFavorites.length >= 1 ?
                     <>
-                        <h2 className="text-xl sm:text-2xl font-bold mb-5">YOUR WISHLISTS</h2>
+                        <h2 className="mb-5 text-xl font-bold sm:text-2xl">YOUR WISHLISTS</h2>
                         <Products
-                            products={cartWithProducts}
+                            products={productsFavorites}
                             extraClassname={"colums-mobile"}
                         />
                     </>
                     :
                     <div className="flex flex-col gap-2">
-                        <h2 className="text-xl sm:text-2xl font-bold mb-5">YOUR WISHLIST IS EMPTY</h2>
+                        <h2 className="mb-5 text-xl font-bold sm:text-2xl">YOUR WISHLIST IS EMPTY</h2>
                         {
                             status === "authenticated" ?
                                 <>
