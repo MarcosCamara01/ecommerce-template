@@ -1,39 +1,39 @@
-"use client";
-
-import { useCart } from "@/hooks/CartContext";
-import { useEffect, useState } from "react";
 import { Products } from "@/components/products/Products";
-import { ButtonCheckout } from "@/components/cart/CartElements"
-import { useSession } from "next-auth/react";
+import { ButtonCheckout } from "@/components/cart/CartElements";
 import Link from "next/link";
-import { Loader } from "@/components/Loader";
-import { productsCart } from "@/helpers/clientCart";
+import { getItems } from "./action";
+import { Session, getServerSession } from "next-auth";
+import { authOptions } from "@/libs/auth";
 
-const Cart = () => {
-  const { cartItems, cartLoading } = useCart();
-  const [cartWithProducts, setCartWithProducts] = useState([]);
-  const [totalPrice, setTotalPrice] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { status } = useSession();
+const CartPage = async () => {
+  const session: Session | null = await getServerSession(authOptions);
+  let filteredCart;
+  let totalPrice;
 
-  useEffect(() => {
-    productsCart(cartItems, cartLoading, setCartWithProducts, setIsLoading, setTotalPrice);
-  }, [cartItems, cartLoading]);
-
-  useEffect(() => {
-    document.title = "Cart | Ecommerce Template";
-  }, [])
+  if (session) {
+     const calculateTotalPrice = (cart: any) => {
+      let totalPrice = 0;
+    
+      if (cart) {
+        for (const cartItem of cart) {
+          totalPrice += cartItem.price * cartItem.quantity;
+        }
+      }
+    
+      return totalPrice.toFixed(2);
+    };
+    filteredCart = await getItems(session);
+    totalPrice = calculateTotalPrice(filteredCart);
+  }
 
   return (
     <div className="pt-12">
-      {isLoading ?
-        <Loader />
-        :
-        cartWithProducts.length >= 1 ?
+      {
+        filteredCart && filteredCart?.length > 0 ?
           <>
             <h2 className="mb-5 text-xl font-bold sm:text-2xl">YOUR SHOPPING CART</h2>
             <Products
-              products={cartWithProducts}
+              products={filteredCart}
               extraClassname={"cart-ord-mobile"}
             />
 
@@ -47,7 +47,7 @@ const Cart = () => {
               </div>
               <div className="w-3/6 h-20 sm:max-w-180 sm:w-full">
                 <ButtonCheckout
-                  cartWithProducts={cartWithProducts}
+                  cartWithProducts={filteredCart}
                 />
               </div>
             </div>
@@ -55,7 +55,7 @@ const Cart = () => {
           :
           <div className="flex flex-col gap-2">
             <h2 className="mb-5 text-xl font-bold sm:text-2xl">YOUR CART IS EMPTY</h2>
-            {status === "authenticated" ?
+            {session?.user ?
               <>
                 <p>When you have added something to your cart, it will appear here. Want to get started?</p>
                 <span><Link href="/">Start</Link></span>
@@ -72,4 +72,4 @@ const Cart = () => {
   );
 }
 
-export default Cart;
+export default CartPage;

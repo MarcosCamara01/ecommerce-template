@@ -23,8 +23,8 @@ export interface EnrichedProducts {
     color: string,
     size: string;
     quantity: number;
-    productId: string;
-    _id: string;
+    productId: Schema.Types.ObjectId;
+    _id: Schema.Types.ObjectId;
     variantId: string;
 }
 
@@ -63,9 +63,8 @@ export interface ProductsDocument {
     _id: string;
 }
 
-export interface CartDocument extends Document {
+export interface FavoritesDocument extends Document {
     userId: string;
-    cart: [ItemDocument];
     favorites: [Schema.Types.ObjectId];
 }
 

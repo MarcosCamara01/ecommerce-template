@@ -1,7 +1,7 @@
-import { ProductButtons } from "@/components/products/ProductsElements";
 import { ProductImages } from "@/components/products/ProductImages";
 import { ProductDocument } from "@/types/types";
 import { isMobileDevice } from "@/libs/responsive";
+import AddToCart from "../cart/AddToCart";
 
 export const SingleProduct = ({ product }: {product: ProductDocument}) => {
     const isMobile = isMobileDevice();
@@ -27,7 +27,7 @@ export const SingleProduct = ({ product }: {product: ProductDocument}) => {
                         <p className="text-sm">{product.description}</p>
                     </div>
 
-                    <ProductButtons
+                    <AddToCart
                         product={product}
                     />
 

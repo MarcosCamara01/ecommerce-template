@@ -1,16 +1,15 @@
 "use client"
 
 import Link from 'next/link';
-import { useSession } from "next-auth/react";
-import { useCart } from '@/hooks/CartContext';
 import { useEffect, useState } from 'react';
 import { HiMiniBars2 } from "react-icons/hi2";
 import { HiMiniXMark } from "react-icons/hi2";
-import { ItemDocument } from '@/types/types';
+import { Session } from 'next-auth';
 
-export const Navbar = ({ isMobile }: { isMobile: boolean }) => {
-  const { data: session, status } = useSession();
-  const { cartItems, cartLoading } = useCart();
+export const Navbar = (
+  { session, isMobile, totalItems }:
+    { session: Session | null, isMobile: boolean, totalItems: number }
+) => {
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
 
   useEffect(() => {
@@ -24,10 +23,6 @@ export const Navbar = ({ isMobile }: { isMobile: boolean }) => {
       document.body.style.overflow = 'auto';
     };
   }, [isHeaderOpen]);
-
-  const totalQuantity = cartItems.reduce((total: number, cartItem: ItemDocument) => {
-    return total + cartItem.quantity;
-  }, 0);
 
   const toggleHeader = () => {
     if (isMobile) {
@@ -46,39 +41,33 @@ export const Navbar = ({ isMobile }: { isMobile: boolean }) => {
   const authLinks = (
     <>
       {
-        status === "loading" ?
-          <div className='h-5 rounded-sm w-14 shine'></div>
-          :
-          status === "authenticated" ? (
-            <li className='flex items-center justify-center'>
-              <Link
-                href="/account/profile"
-                onClick={toggleHeader}
-              >{session.user.name?.split(' ')[0]}
-              </Link>
-            </li>
-          ) : (
-            <li className='flex items-center justify-center'>
-              <Link
-                href="/login"
-                onClick={toggleHeader}
-              >Login
-              </Link>
-            </li>
-          )
+        session?.user ? (
+          <li className='flex items-center justify-center'>
+            <Link
+              href="/account/profile"
+              onClick={toggleHeader}
+            >{session.user.name?.split(' ')[0]}
+            </Link>
+          </li>
+        ) : (
+          <li className='flex items-center justify-center'>
+            <Link
+              href="/login"
+              onClick={toggleHeader}
+            >Login
+            </Link>
+          </li>
+        )
       }
     </>
   );
 
   const cartLink = (
-    <>
-      {
-        cartLoading ?
-          <div className='h-5 rounded-sm w-14 shine'></div>
-          :
-          <li className='flex items-center justify-center'><Link href="/cart">Cart ({totalQuantity})</Link></li>
-      }
-    </>
+    <li className='flex items-center justify-center'>
+      <Link href="/cart">
+        Cart ({totalItems})
+      </Link>
+    </li>
   );
 
   return (
