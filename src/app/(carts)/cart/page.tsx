@@ -22,7 +22,7 @@ const CartPage = async () => {
     
       return totalPrice.toFixed(2);
     };
-    filteredCart = await getItems(session);
+    filteredCart = await getItems(session.user._id);
     totalPrice = calculateTotalPrice(filteredCart);
   }
 

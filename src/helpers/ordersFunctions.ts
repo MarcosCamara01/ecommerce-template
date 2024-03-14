@@ -4,20 +4,26 @@ import axios from "axios";
 import { getProducts } from "./getProducts";
 import { toast } from 'sonner'
 import Stripe from 'stripe';
-import { CartDocument, ItemDocument, OrderDocument, ProductsDocument, VariantsDocument } from "@/types/types";
+import { OrderDocument, ProductsDocument, VariantsDocument } from "@/types/types";
+import { getItems } from "@/app/(carts)/cart/action";
 
 export const saveOrder = async (
     data: Stripe.Checkout.Session,
 ) => {
     const userId = data.metadata?.userId;
+    if (userId == null) {
+        console.error("userId not found.");
+        return null;
+    }
+
+    const cart = await getItems(userId);
+    if (cart == null) {
+        console.error("Products or cart not found.");
+        return null;
+    }
 
     try {
-        const cartResponse = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${userId}`);
-        const cart: CartDocument = cartResponse.data;
-
-        console.log(cart);
-
-        const products = cart.cart.map((item: ItemDocument) => ({
+        const products = cart.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
             size: item.size,

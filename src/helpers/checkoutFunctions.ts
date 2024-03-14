@@ -1,5 +1,4 @@
 import Stripe from "stripe";
-import axios from "axios";
 
 export const fetchCheckoutData = async (sessionId: string): Promise<Stripe.Checkout.Session | undefined> => {
     try {
@@ -8,17 +7,6 @@ export const fetchCheckoutData = async (sessionId: string): Promise<Stripe.Check
         return response;
     } catch (err: any) {
         console.error("Error obtaining data:", err.message);
-    }
-};
-
-export const emptyCart = async (id: string) => {
-    try {
-        await axios.put(`${process.env.NEXT_PUBLIC_APP_URL}/api/cart?userId=${id}`, {
-            cart: [],
-        });
-
-    } catch (error: any) {
-        console.error(error)
     }
 };
 

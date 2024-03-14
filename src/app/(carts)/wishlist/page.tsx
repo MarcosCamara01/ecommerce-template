@@ -39,7 +39,9 @@ const Wishlists = () => {
     return (
         <section className="pt-12">
             {isLoading ?
-                <Loader />
+                <div className='spinner-center'>
+                    <Loader height={25} width={25} />
+                </div>
                 :
                 productsFavorites.length >= 1 ?
                     <>

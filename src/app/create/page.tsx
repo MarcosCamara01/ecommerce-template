@@ -11,11 +11,13 @@ const CreateProduct = () => {
     const router = useRouter();
 
     if (status === "loading") {
-        return <Loader />
+        return <div className='spinner-center'>
+            <Loader height={25} width={25} />
+        </div>
     } else if (status === "authenticated") {
         if (session?.user?.email === "marcospenelascamara@gmail.com") {
             return (
-                <section className='min-h-screen w-full pt-10'>
+                <section className='w-full min-h-screen pt-10'>
                     <h2 className='text-xl font-semibold mb-7'>Create a New Product</h2>
                     <ProductForm />
                 </section>
