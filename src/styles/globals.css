@@ -85,11 +85,6 @@ main {
   align-items: center;
 }
 
-.spinner-center div {
-  margin-right: -37px;
-  margin-top: -37px;
-}
-
 .shine {
   background: linear-gradient(270deg, #111, #333, #333, #111);
   background-size: 400% 100%;

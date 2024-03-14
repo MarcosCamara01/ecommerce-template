@@ -1,5 +1,6 @@
 import { saveOrder } from "@/helpers/ordersFunctions";
-import { emptyCart, fetchCheckoutData, sendEmail } from "@/helpers/checkoutFunctions";
+import { fetchCheckoutData, sendEmail } from "@/helpers/checkoutFunctions";
+import { emptyCart } from "@/app/(carts)/cart/action";
 
 export async function generateMetadata() {
   return {

@@ -20,13 +20,12 @@ export type Cart = {
     }>
 }
 
-export async function getItems(session: Session) {
-    if (!session?.user._id) {
+export async function getItems(userId: string) {
+    if (!userId) {
         console.error(`User Id not found.`);
         return null;
     }
 
-    const userId = session.user._id;
     const cart: Cart | null = await kv.get(`cart-${userId}`);
 
     if (cart == null) {
@@ -188,3 +187,20 @@ export async function delOneItem(
         console.error('Error in delOneItem:', error);
     }
 }
+
+export const emptyCart = async (userId: string) => {
+    try {
+        let cart: Cart | null = await kv.get(`cart-${userId}`);
+
+        if (cart && cart.items) {
+            cart.items = [];
+            await kv.set(`cart-${userId}`, cart);
+            revalidatePath('/cart');
+            console.log('Cart emptied successfully.');
+        } else {
+            console.log('Cart is already empty.');
+        }
+    } catch (error) {
+        console.error('Error emptying cart:', error);
+    }
+};

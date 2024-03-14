@@ -6,6 +6,8 @@ import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { EnrichedProducts, ItemDocument } from '@/types/types';
 import { serverSession } from '@/helpers/serverSession';
 import { addItem, delItem, delOneItem } from '@/app/(carts)/cart/action';
+import { useTransition } from 'react';
+import { Loader } from '../Loader';
 
 export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
     return (
@@ -92,6 +94,8 @@ export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
 };
 
 export const ButtonCheckout = ({ cartWithProducts }: { cartWithProducts: ItemDocument[] }) => {
+    let [isPending, startTransition] = useTransition();
+
     const buyProducts = async () => {
         try {
             const session = await serverSession();
@@ -117,8 +121,14 @@ export const ButtonCheckout = ({ cartWithProducts }: { cartWithProducts: ItemDoc
 
     return (
         <button
-            onClick={buyProducts}
+            onClick={() => {
+                startTransition(() => buyProducts())
+            }}
             className='w-full h-20 transition duration-150 border-l border-solid bg-background-secondary border-border-primary ease hover:bg-color-secondary'
-        >CONTINUE</button>
+        >
+            {isPending
+                ? <Loader height={20} width={20} />
+                : "CONTINUE"}
+        </button>
     );
 };  
