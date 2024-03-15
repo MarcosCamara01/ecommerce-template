@@ -9,7 +9,6 @@ import { ProductDocument } from "@/types/types";
 import { getProducts } from "@/helpers/getProducts";
 import { Loader } from "@/components/Loader";
 
-
 const Wishlists = () => {
     const { userFavorites } = useFavorites();
     const [productsFavorites, setProductsFavorites] = useState<ProductDocument[]>([]);
@@ -32,9 +31,12 @@ const Wishlists = () => {
                 setIsLoading(false);
             }
         };
-
-        fetchWishlistProducts();
-    }, [userFavorites]);
+        if (status === "authenticated") {
+            fetchWishlistProducts();
+        } else if (status === "unauthenticated") {
+            setIsLoading(false);
+        }
+    }, [userFavorites, status]);
 
     return (
         <section className="pt-12">

@@ -13,7 +13,9 @@ export function FavoritesProvider({ children }) {
             try {
                 const favorites = await getFavorites();
 
-                setUserFavorites(favorites[0]);
+                if (favorites !== null) {
+                    setUserFavorites(favorites[0]);
+                }
             } catch (error) {
                 console.error('Error fetching user favorites:', error);
             }
@@ -21,7 +23,7 @@ export function FavoritesProvider({ children }) {
 
         fetchUserFavorites();
     }, []);
-    
+
     return (
         <FavoritesContext.Provider value={{ userFavorites, setUserFavorites }}>
             {children}
