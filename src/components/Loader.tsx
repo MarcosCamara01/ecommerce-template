@@ -4,7 +4,7 @@ import React from 'react';
 
 export const Loader = ({ height, width }: { height: number, width: number }) => {
     return (
-        <div className="grid w-full overflow-x-scroll rounded-lg place-items-center lg:overflow-visible">
+        <div className='spinner-center'>
             <svg className="text-gray-300 animate-spin" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
                 width={width} height={height}>
                 <path

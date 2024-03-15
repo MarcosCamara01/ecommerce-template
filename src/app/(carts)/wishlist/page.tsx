@@ -29,6 +29,8 @@ const Wishlists = () => {
 
                 setProductsFavorites(updatedCart.filter(product => product !== null) as ProductDocument[]);
                 setIsLoading(false);
+            } else {
+                setIsLoading(false);
             }
         };
         if (status === "authenticated") {
@@ -39,11 +41,9 @@ const Wishlists = () => {
     }, [userFavorites, status]);
 
     return (
-        <section className="pt-12">
+        <section className="h-full pt-12">
             {isLoading ?
-                <div className='spinner-center'>
-                    <Loader height={25} width={25} />
-                </div>
+                <Loader height={25} width={25} />
                 :
                 productsFavorites.length >= 1 ?
                     <>
