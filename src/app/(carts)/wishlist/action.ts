@@ -15,7 +15,8 @@ export async function getFavorites() {
         const userId = session?.user._id;
 
         if (!userId) {
-            throw new Error("User ID not found in session.");
+            console.log("User ID not found in session.");
+            return null;
         }
 
         let userFavorites = await Favorites.find({ userId: userId });

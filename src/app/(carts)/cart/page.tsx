@@ -5,21 +5,28 @@ import { getItems } from "./action";
 import { Session, getServerSession } from "next-auth";
 import { authOptions } from "@/libs/auth";
 
+export async function generateMetadata() {
+  return {
+    title: "Cart | Ecommerce Template",
+    description: `Cart at e-commerce template made by Marcos Cámara`,
+  };
+}
+
 const CartPage = async () => {
   const session: Session | null = await getServerSession(authOptions);
   let filteredCart;
   let totalPrice;
 
   if (session) {
-     const calculateTotalPrice = (cart: any) => {
+    const calculateTotalPrice = (cart: any) => {
       let totalPrice = 0;
-    
+
       if (cart) {
         for (const cartItem of cart) {
           totalPrice += cartItem.price * cartItem.quantity;
         }
       }
-    
+
       return totalPrice.toFixed(2);
     };
     filteredCart = await getItems(session.user._id);
