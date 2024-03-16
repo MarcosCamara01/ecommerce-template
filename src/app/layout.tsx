@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
 import Providers from "./Providers";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -14,8 +14,6 @@ import { authOptions } from "@/libs/auth";
 
 import '../styles/globals.css';
 import { getTotalItems } from './(carts)/cart/action';
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Ecommerce Template',
@@ -35,7 +33,7 @@ export default async function RootLayout({
     <html lang="en">
       <Providers>
         <FavoritesProvider>
-          <body className={inter.className}>
+          <body className={GeistSans.className}>
             <Navbar
             session={session}
               isMobile={mobile}

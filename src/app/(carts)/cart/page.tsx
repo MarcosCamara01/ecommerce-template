@@ -44,18 +44,20 @@ const CartPage = async () => {
               extraClassname={"cart-ord-mobile"}
             />
 
-            <div className="fixed bottom-0 right-0 flex items-center justify-end w-full h-20 gap-0 text-sm bg-black border-t border-solid sm:gap-12 border-border-primary">
-              <div className="flex flex-col justify-between w-3/6 gap-2 text-center sm:w-min">
-                <div className="flex gap-2.5 justify-center">
-                  <span>Total:</span>
-                  <span>{totalPrice}€</span>
+            <div className="fixed right-0 flex justify-center w-full text-sm bottom-4">
+              <div className="w-[90%] sm:w-[360px] rounded-xl overflow-hidden flex bg-black border border-solid border-border-primary h-min">
+                <div className="flex flex-col p-2.5 justify-center w-1/2 gap-2 text-center">
+                  <div className="flex gap-2.5 justify-center">
+                    <span>Total:</span>
+                    <span>{totalPrice}€</span>
+                  </div>
+                  <span className="text-xs">+ TAX INCL.</span>
                 </div>
-                <span className="text-xs">+ TAX INCL.</span>
-              </div>
-              <div className="w-3/6 h-20 sm:max-w-180 sm:w-full">
-                <ButtonCheckout
-                  cartWithProducts={filteredCart}
-                />
+                <div className="w-1/2">
+                  <ButtonCheckout
+                    cartWithProducts={filteredCart}
+                  />
+                </div>
               </div>
             </div>
           </>

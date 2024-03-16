@@ -12,7 +12,6 @@ export function FavoritesProvider({ children }) {
         const fetchUserFavorites = async () => {
             try {
                 const favorites = await getFavorites();
-
                 if (favorites !== null) {
                     setUserFavorites(favorites[0]);
                 }
