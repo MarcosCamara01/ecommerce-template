@@ -81,7 +81,7 @@ export const Images = (
   };
 
   return (
-    <div className={!imageLoaded ? 'relative' : ''}>
+    <div className={`overflow-hidden ${!imageLoaded ? 'relative' : ''}`}>
       <Image
         loader={cloudinaryLoader}
         width={width}
@@ -90,7 +90,7 @@ export const Images = (
         alt={name}
         quality={100}
         loading='lazy'
-        className="w-full max-w-img"
+        className="w-full transition-all max-w-img hover:scale-105"
         onLoad={handleImageLoadComplete}
       />
       <div className={!imageLoaded ? 'shine absolute top-0 right-0	w-full	h-full' : ''}></div>

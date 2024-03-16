@@ -46,18 +46,21 @@ export async function addFavorite(productId: Schema.Types.ObjectId) {
 
         let userFavorites = await Favorites.findOne({ userId });
 
-        if (userFavorites.favorites.includes(productId)) {
-            userFavorites.favorites = userFavorites.favorites
-                .filter((favId: Schema.Types.ObjectId) => favId !== productId);
+        if (!userFavorites) {
+            userFavorites = await Favorites.create({ userId, favorites: [productId] });
         } else {
-            userFavorites.favorites.push(productId);
+            if (userFavorites.favorites.includes(productId)) {
+                userFavorites = await Favorites.findOneAndUpdate(
+                    { userId },
+                    { $pull: { favorites: productId } },
+                    { new: true }
+                );
+                console.log(userFavorites);
+            } else {
+                userFavorites.favorites.push(productId);
+                userFavorites = await userFavorites.save();
+            }
         }
-
-        userFavorites = await Favorites.findOneAndUpdate(
-            { userId },
-            { favorites: userFavorites.favorites },
-            { new: true }
-        );
 
         const favoritesJSON = JSON.stringify(userFavorites.favorites);
         return favoritesJSON;

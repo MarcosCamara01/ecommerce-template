@@ -13,10 +13,8 @@ export default function AddToCart({ product }: { product: ProductDocument }) {
     let [isPending, startTransition] = useTransition();
 
     useEffect(() => {
-        if (selectedVariant.length === 0) {
-            setSelectedVariant(product.variants[0])
-        }
-    }, [product, selectedVariant])
+        setSelectedVariant(product.variants[0]);
+    }, []);
 
     return (
         <>
