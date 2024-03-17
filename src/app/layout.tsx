@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import Providers from "./Providers";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
+import { Navbar } from "../components/common/Navbar";
+import { Footer } from "../components/common/Footer";
 import { FavoritesProvider } from '../hooks/FavoritesContext';
 import { VariantProvider } from '../hooks/VariantContext';
 import { Analytics } from '@vercel/analytics/react';
@@ -27,7 +27,7 @@ export default async function RootLayout({
 }) {
   let mobile = isMobileDevice();
   const session: Session | null = await getServerSession(authOptions);
-  const totalItems = await getTotalItems()
+  const totalItems = await getTotalItems(session)
 
   return (
     <html lang="en">
@@ -35,7 +35,7 @@ export default async function RootLayout({
         <FavoritesProvider>
           <body className={GeistSans.className}>
             <Navbar
-            session={session}
+              session={session}
               isMobile={mobile}
               totalItems={totalItems}
             />

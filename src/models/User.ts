@@ -1,32 +1,5 @@
-import { AddressDocument, UserDocument } from "@/types/types";
+import { UserDocument } from "@/types/types";
 import { Schema, model, models } from "mongoose";
-
-const AddressSchema = new Schema<AddressDocument>({
-  city: {
-    type: String,
-    required: true,
-  },
-  country: {
-    type: String,
-    required: true,
-  },
-  line1: {
-    type: String,
-    required: true,
-  },
-  line2: {
-    type: String,
-    required: false,
-  },
-  postal_code: {
-    type: String,
-    required: true,
-  },
-  state: {
-    type: String,
-    required: true,
-  },
-});
 
 const UserSchema = new Schema<UserDocument>({
     email: {
@@ -53,10 +26,6 @@ const UserSchema = new Schema<UserDocument>({
       type: String,
       default: ""
     },
-    address: {
-      type: AddressSchema,
-      default: null 
-    }
   },
   {
     timestamps: true,

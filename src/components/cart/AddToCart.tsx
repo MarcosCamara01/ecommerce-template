@@ -5,7 +5,7 @@ import { ProductDocument, VariantsDocument } from "@/types/types";
 import { useVariant } from "@/hooks/VariantContext";
 import { colorMapping } from "@/helpers/colorMapping";
 import { addItem } from "@/app/(carts)/cart/action";
-import { Loader } from "../Loader";
+import { Loader } from "../common/Loader";
 
 export default function AddToCart({ product }: { product: ProductDocument }) {
     const { selectedVariant, setSelectedVariant } = useVariant();

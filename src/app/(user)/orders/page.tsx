@@ -46,7 +46,7 @@ const UserOrders = async () => {
             {userOrders.length >= 1 ? (
                 userOrders.map((order: EnrichedOrders, index: number) => (
                     <div key={index} className="w-full px-5 transition duration-150 border border-solid rounded py-7 border-border-primary bg-background-secondary h-260 ease hover:bg-color-secondary">
-                        <Link href={`/account/orders/${order._id}`} className='flex flex-col justify-between h-full'>
+                        <Link href={`/orders/${order._id}`} className='flex flex-col justify-between h-full'>
                             <div>
                                 <h4 className='font-semibold'>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
                                 <p className='text-sm'>Order number: {order.orderNumber}</p>
@@ -59,6 +59,7 @@ const UserOrders = async () => {
                                             height={120}
                                             image={product.image}
                                             name={product.name}
+                                            priority={index === 0 ? true : false}
                                         />
                                     </div>
                                 ))}

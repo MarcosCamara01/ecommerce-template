@@ -39,6 +39,7 @@ export const ProductImages = ({ name, isMobile }: { name: string, isMobile: bool
                 name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
                 width={384}
                 height={576}
+                priority={index === 0 ? true : false}
               />
             </SwiperSlide>
           ))}
@@ -55,6 +56,7 @@ export const ProductImages = ({ name, isMobile }: { name: string, isMobile: bool
               name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
               width={850}
               height={1275}
+              priority={true}
             />
           </div>
         ))}
@@ -71,8 +73,8 @@ const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
 };
 
 export const Images = (
-  { image, name, width, height }:
-    { image: [string], name: string, width: number, height: number }
+  { image, name, width, height, priority }:
+    { image: [string], name: string, width: number, height: number, priority: boolean }
 ) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -81,16 +83,15 @@ export const Images = (
   };
 
   return (
-    <div className={`overflow-hidden ${!imageLoaded ? 'relative' : ''}`}>
+    <div className={!imageLoaded ? 'relative' : ''}>
       <Image
         loader={cloudinaryLoader}
         width={width}
         height={height}
         src={image[0]}
         alt={name}
-        quality={100}
-        loading='lazy'
-        className="w-full transition-all max-w-img hover:scale-105"
+        priority={priority}
+        className="w-full max-w-img"
         onLoad={handleImageLoadComplete}
       />
       <div className={!imageLoaded ? 'shine absolute top-0 right-0	w-full	h-full' : ''}></div>
