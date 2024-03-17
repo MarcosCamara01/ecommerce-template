@@ -54,18 +54,28 @@ const Wishlists = () => {
                         />
                     </>
                     :
-                    <div className="flex flex-col gap-2">
-                        <h2 className="mb-5 text-xl font-bold sm:text-2xl">YOUR WISHLIST IS EMPTY</h2>
+                    <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
+                        <h2 className="mb-6 text-4xl font-bold">YOUR WISHLIST IS EMPTY</h2>
                         {
                             status === "authenticated" ?
                                 <>
-                                    <p>When you have added something to the wishlist, it will appear here. Want to get started?</p>
-                                    <span><Link href="/">Start</Link></span>
+                                    <p className="mb-4 text-lg">When you have added something to the wishlist, it will appear here. Want to get started?</p>
+                                    <Link
+                                        className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-[#1F1F1F] hover:border-[#454545]"
+                                        href="/"
+                                    >
+                                        Start
+                                    </Link>
                                 </>
                                 :
                                 <>
-                                    <p>Not registered? You must be in order to save your favorite products.</p>
-                                    <span><Link href="/login">Login</Link></span>
+                                    <p className="mb-4 text-lg">Not registered? You must be in order to save your favorite products.</p>
+                                    <Link
+                                        className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-[#1F1F1F] hover:border-[#454545]"
+                                        href="/login"
+                                    >
+                                        Login
+                                    </Link>
                                 </>
                         }
                     </div>
