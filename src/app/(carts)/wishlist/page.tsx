@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useFavorites } from "@/hooks/FavoritesContext";
 import { ProductDocument } from "@/types/types";
 import { getProducts } from "@/helpers/getProducts";
-import { Loader } from "@/components/Loader";
+import { Loader } from "@/components/common/Loader";
 
 const Wishlists = () => {
     const { userFavorites } = useFavorites();

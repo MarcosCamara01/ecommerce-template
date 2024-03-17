@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ProductCartInfo, DeleteButton } from "../cart/CartElements";
+import { ProductCartInfo } from "../cart/ProductCartInfo";
+import { DeleteButton } from "../cart/DeleteButton";
 import { FavoriteButton } from "./ProductsElements";
 import { Images } from "./ProductImages";
 import { EnrichedProducts } from "@/types/types";
@@ -21,17 +22,18 @@ export const Products = (
               href={`/${product.category}/${product.quantity
                 ? product.productId
                 : product._id}`}
-              className={extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""}
+              className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""}  hover:scale-105 transition-all`}
             >
               <Images
                 image={product.image}
                 name={product.name}
                 width={384}
                 height={576}
+                priority={index === 0 ? true : false}
               />
             </Link>
             <div className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""} 
-            flex justify-between flex-col gap-2.5	p-3.5 bg-background-secondary`}>
+            flex justify-between flex-col gap-2.5	p-3.5 bg-background-secondary z-10`}>
               <div className="flex justify-between w-full">
                 <Link
                   href={`/${product?.category}/${product.quantity

@@ -69,10 +69,8 @@ export async function getItems(userId: string) {
     return filteredCart;
 }
 
-export async function getTotalItems() {
-    const session: Session | null = await getServerSession(authOptions);
-    const userId = session?.user._id;
-    const cart: Cart | null = await kv.get(`cart-${userId}`);
+export async function getTotalItems(session: Session | null) {
+    const cart: Cart | null = await kv.get(`cart-${session?.user._id}`);
     const total: number = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
     return total;
