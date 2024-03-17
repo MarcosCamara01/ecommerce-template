@@ -87,7 +87,7 @@ export const Navbar = (
             ></path>
           </svg>
           {
-            userFavorites.favorites && userFavorites.favorites.length > 0
+            userFavorites?.favorites && userFavorites?.favorites.length > 0
               ? <span
                 className='flex items-center bg-[#0072F5] font-medium text-[#EDEDED] justify-center absolute w-[20px] rounded-full top-[-3px] right-[-3px]'
               >
