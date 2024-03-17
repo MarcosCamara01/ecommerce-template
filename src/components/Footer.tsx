@@ -2,9 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FaLinkedin } from 'react-icons/fa';
-import { FaGithubSquare } from 'react-icons/fa';
-import { SiVercel } from 'react-icons/si';
 
 export const Footer = () => {
   const linkStyles = "text-sm transition duration-150 ease hover:text-white";
