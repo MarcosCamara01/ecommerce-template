@@ -27,7 +27,7 @@ const UserOrders = async () => {
                 const dateB = new Date(b.purchaseDate).getTime();
                 return dateB - dateA;
             });
-            
+
             userOrders = response.orders
         } else {
             console.log("No orders available.");
@@ -39,7 +39,7 @@ const UserOrders = async () => {
     const formatDate = (dateString: string) => {
         const date = dateString ? new Date(dateString) : null;
         return date ? format(date, 'dd LLL yyyy') : 'Date not found';
-    };       
+    };
 
     return (
         <div className="grid items-center justify-between pt-12 grid-cols-auto-fill-250 gap-7">
@@ -68,7 +68,16 @@ const UserOrders = async () => {
                     </div>
                 ))
             ) :
-                <p>No orders available.</p>
+                <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
+                    <h2 className="mb-6 text-4xl font-bold">No orders yet</h2>
+                    <p className="mb-4 text-lg">To create an order add a product to the cart and buy it!</p>
+                    <Link
+                        className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-[#1F1F1F] hover:border-[#454545]"
+                        href="/"
+                    >
+                        Start
+                    </Link>
+                </div>
             }
         </div>
     );
