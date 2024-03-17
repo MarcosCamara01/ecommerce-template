@@ -38,13 +38,13 @@ export function NavbarDesktop() {
                 </NavigationMenuLink>
               </li>
               <ListItem href="/t-shirts" title="T-SHIRTS">
-                Our men's T-shirts offer timeless style in a range of designs, colors, and textures. From classic to contemporary, find the perfect tee for any occasion.
+                Our men&apos;s T-shirts offer timeless style in a range of designs, colors, and textures. From classic to contemporary, find the perfect tee for any occasion.
               </ListItem>
               <ListItem href="/pants" title="PANTS">
-                Explore essential men's pants for all occasions. From classic chinos to modern joggers, find your perfect fit in a variety of styles and colors.
+                Explore essential men&apos;s pants for all occasions. From classic chinos to modern joggers, find your perfect fit in a variety of styles and colors.
               </ListItem>
               <ListItem href="/sweatshirts" title="SWEATSHIRTS">
-                Much like the T-shirt, mens sweatshirts are far more than a basic.
+                Much like the T-shirt, men&apos;s sweatshirts are far more than a basic.
               </ListItem>
             </ul>
           </NavigationMenuContent>
