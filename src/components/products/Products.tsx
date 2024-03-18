@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { ProductCartInfo } from "../cart/ProductCartInfo";
 import { DeleteButton } from "../cart/DeleteButton";
-import { FavoriteButton } from "./ProductsElements";
+import { Wishlist } from "./Wishlist";
 import { Images } from "./ProductImages";
 import { EnrichedProducts } from "@/types/types";
 
-export const Products = (
+export const Products = async(
   { products, extraClassname = "" }:
     { products: any, extraClassname: string }
 ) => {
+  
   return (
     <div className={`grid gap-x-3.5 gap-y-6 sm:gap-y-9 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""}
      ${extraClassname === "cart-ord-mobile" ? "grid-cols-1" : ""} sm:grid-cols-auto-fill-250`}>
@@ -53,7 +54,7 @@ export const Products = (
                     <DeleteButton product={product} />
                   )
                 ) : (
-                  <FavoriteButton product={product} />
+                  <Wishlist product={product} />
                 )}
               </div>
               {

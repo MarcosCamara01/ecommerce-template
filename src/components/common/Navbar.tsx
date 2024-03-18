@@ -1,19 +1,23 @@
 "use client"
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Session } from 'next-auth';
 import { NavbarDesktop } from './NavbarDesktop';
 import { DropdownMenuDemo } from './DropdownMenu';
 import SearchInput from './SearchInput';
-import { useFavorites } from '@/hooks/FavoritesContext';
+
+interface Navbar {
+  session: Session | null,
+  isMobile: boolean,
+  totalItemsCart: number,
+  totalWishlists: number | undefined
+}
 
 export const Navbar = (
-  { session, isMobile, totalItems }:
-    { session: Session | null, isMobile: boolean, totalItems: number }
+  { session, isMobile, totalItemsCart, totalWishlists }: Navbar
 ) => {
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
-  const { userFavorites } = useFavorites();
 
   const toggleHeader = () => {
     if (isMobile) {
@@ -59,7 +63,7 @@ export const Navbar = (
           <span
             className='flex items-center bg-[#0072F5] font-medium text-[#EDEDED] justify-center absolute w-[20px] rounded-full top-[-3px] right-[-3px]'
           >
-            {totalItems}
+            {totalItemsCart}
           </span>
         </Link>
       </li>
@@ -81,7 +85,7 @@ export const Navbar = (
           <span
             className='flex items-center bg-[#0072F5] font-medium text-[#EDEDED] justify-center absolute w-[20px] rounded-full top-[-3px] right-[-3px]'
           >
-            {userFavorites?.favorites?.length || 0}
+            {totalWishlists || 0}
           </span>
         </Link>
       </li>

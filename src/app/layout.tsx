@@ -3,7 +3,6 @@ import { GeistSans } from 'geist/font/sans';
 import Providers from "./Providers";
 import { Navbar } from "../components/common/Navbar";
 import { Footer } from "../components/common/Footer";
-import { FavoritesProvider } from '../hooks/FavoritesContext';
 import { VariantProvider } from '../hooks/VariantContext';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -11,9 +10,10 @@ import { Toaster } from 'sonner';
 import { isMobileDevice } from "@/libs/responsive";
 import { Session, getServerSession } from "next-auth";
 import { authOptions } from "@/libs/auth";
+import { getTotalItems } from './(carts)/cart/action';
+import {getTotalWishlist} from './(carts)/wishlist/action';
 
 import '../styles/globals.css';
-import { getTotalItems } from './(carts)/cart/action';
 
 export const metadata: Metadata = {
   title: 'Ecommerce Template',
@@ -27,17 +27,18 @@ export default async function RootLayout({
 }) {
   let mobile = isMobileDevice();
   const session: Session | null = await getServerSession(authOptions);
-  const totalItems = await getTotalItems(session)
+  const totalItemsCart = await getTotalItems(session);
+  const totalItemsWishlists = await getTotalWishlist(session);
 
   return (
     <html lang="en">
       <Providers>
-        <FavoritesProvider>
           <body className={GeistSans.className}>
             <Navbar
               session={session}
               isMobile={mobile}
-              totalItems={totalItems}
+              totalItemsCart={totalItemsCart}
+              totalWishlists={totalItemsWishlists?.items.length}
             />
             <main>
               <VariantProvider>
@@ -49,7 +50,6 @@ export default async function RootLayout({
             </main>
             <Footer />
           </body>
-        </FavoritesProvider>
       </Providers>
     </html>
   )
