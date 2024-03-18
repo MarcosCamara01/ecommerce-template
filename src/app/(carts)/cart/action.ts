@@ -77,6 +77,7 @@ export async function getTotalItems(session: Session | null) {
 }
 
 export async function addItem(
+    category: string,
     productId: Schema.Types.ObjectId,
     size: string,
     variantId: string,
@@ -130,7 +131,7 @@ export async function addItem(
     }
 
     await kv.set(`cart-${userId}`, myCart);
-    revalidatePath('/cart');
+    revalidatePath(`/${category}/${productId}`);
 }
 
 export async function delItem(

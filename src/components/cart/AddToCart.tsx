@@ -59,6 +59,7 @@ export default function AddToCart(
                     onClick={() => {
                         if (session) {
                             startTransition(() => addItem(
+                                product.category,
                                 product._id,
                                 selectedSize,
                                 selectedVariant.priceId,
