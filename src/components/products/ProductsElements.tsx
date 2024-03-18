@@ -26,7 +26,7 @@ export const FavoriteButton = ({ product }: { product: EnrichedProducts }) => {
             setUserFavorites(favorites);
             setIsFavorite(!isFavorite);
         } else if (status === "unauthenticated") {
-            const warningMessage = 'You cannot save to favourites without logging in.';
+            const warningMessage = 'You must be registered to be able to add a product to the wishlist.';
             console.warn(warningMessage);
             toast.warning(warningMessage);
         }

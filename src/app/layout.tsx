@@ -42,7 +42,7 @@ export default async function RootLayout({
             <main>
               <VariantProvider>
                 {children}
-                <Toaster position="bottom-right" />
+                <Toaster position="top-right" />
                 <Analytics />
                 <SpeedInsights />
               </VariantProvider>
