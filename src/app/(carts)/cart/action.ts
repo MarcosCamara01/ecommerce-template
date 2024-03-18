@@ -8,6 +8,8 @@ import { authOptions } from "@/libs/auth";
 import { Session } from "next-auth";
 import { Product } from "@/models/Products";
 import { VariantsDocument } from "@/types/types";
+import { toast } from "sonner";
+import { connectDB } from "@/libs/mongodb";
 
 export type Cart = {
     userId: string;
@@ -21,6 +23,8 @@ export type Cart = {
 }
 
 export async function getItems(userId: string) {
+    connectDB();
+
     if (!userId) {
         console.error(`User Id not found.`);
         return null;
@@ -28,9 +32,8 @@ export async function getItems(userId: string) {
 
     const cart: Cart | null = await kv.get(`cart-${userId}`);
 
-    if (cart == null) {
-        console.error("Products or cart not found.");
-        return null;
+    if (cart === null) {
+        return undefined;
     }
 
     const updatedCart = [];
@@ -83,6 +86,14 @@ export async function addItem(
     variantId: string,
     price: number
 ) {
+    if (!variantId) {
+        toast.info(`You have to select a color to save the product.`);
+        return;
+    } else if (!size) {
+        toast.info(`You have to select a size to save the product.`);
+        return;
+    }
+    
     const session: Session | null = await getServerSession(authOptions);
 
     if (!session?.user._id) {
