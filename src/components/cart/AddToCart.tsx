@@ -6,8 +6,13 @@ import { useVariant } from "@/hooks/VariantContext";
 import { colorMapping } from "@/helpers/colorMapping";
 import { addItem } from "@/app/(carts)/cart/action";
 import { Loader } from "../common/Loader";
+import { Session } from "next-auth";
+import { toast } from "sonner";
 
-export default function AddToCart({ product }: { product: ProductDocument }) {
+export default function AddToCart(
+    { product, session }: { product: ProductDocument, session: Session | null }
+) {
+
     const { selectedVariant, setSelectedVariant } = useVariant();
     const [selectedSize, setSelectedSize] = useState('');
     let [isPending, startTransition] = useTransition();
@@ -52,12 +57,16 @@ export default function AddToCart({ product }: { product: ProductDocument }) {
                 <button
                     type="submit"
                     onClick={() => {
-                        startTransition(() => addItem(
-                            product._id,
-                            selectedSize,
-                            selectedVariant.priceId,
-                            product.price
-                        ));
+                        if (session) {
+                            startTransition(() => addItem(
+                                product._id,
+                                selectedSize,
+                                selectedVariant.priceId,
+                                product.price
+                            ));
+                        } else {
+                            toast.info("You must be registered to be able to add a product to the cart.");
+                        }
                     }}
                     className='w-full p-2 transition duration-150 text-13 ease hover:bg-color-secondary'
                 >

@@ -2,9 +2,13 @@ import { ProductImages } from "@/components/products/ProductImages";
 import { ProductDocument } from "@/types/types";
 import { isMobileDevice } from "@/libs/responsive";
 import AddToCart from "../cart/AddToCart";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/libs/auth";
+import { Session } from "next-auth";
 
-export const SingleProduct = ({ product }: {product: ProductDocument}) => {
+export const SingleProduct = async ({ product }: { product: ProductDocument }) => {
     const isMobile = isMobileDevice();
+    const session: Session | null = await getServerSession(authOptions);
 
     if (!product) {
         return <div>Producto no encontrado</div>;
@@ -28,6 +32,7 @@ export const SingleProduct = ({ product }: {product: ProductDocument}) => {
                     </div>
 
                     <AddToCart
+                        session={session}
                         product={product}
                     />
 
