@@ -40,7 +40,7 @@ export default async function RootLayout({
               totalItemsCart={totalItemsCart}
               totalWishlists={totalItemsWishlists?.items.length}
             />
-            <main>
+            <main className='pointer-events-auto'>
               <VariantProvider>
                 {children}
                 <Toaster position="top-right" />
