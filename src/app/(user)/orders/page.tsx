@@ -42,31 +42,33 @@ const UserOrders = async () => {
     };
 
     return (
-        <div className="grid items-center justify-between pt-12 grid-cols-auto-fill-250 gap-7">
+        <>
             {userOrders.length >= 1 ? (
-                userOrders.map((order: EnrichedOrders, index: number) => (
-                    <div key={index} className="w-full px-5 transition duration-150 border border-solid rounded py-7 border-border-primary bg-background-secondary h-260 ease hover:bg-color-secondary">
-                        <Link href={`/orders/${order._id}`} className='flex flex-col justify-between h-full'>
-                            <div>
-                                <h4 className='font-semibold'>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
-                                <p className='text-sm'>Order number: {order.orderNumber}</p>
-                            </div>
-                            <div className='flex gap-2.5 overflow-x-auto pb-2.5'>
-                                {order.products.map((product: EnrichedProducts, productIndex: number) => (
-                                    <div key={productIndex} className="block w-20 orders-img">
-                                        <Images
-                                            width={80}
-                                            height={120}
-                                            image={product.image}
-                                            name={product.name}
-                                            priority={index === 0 ? true : false}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </Link>
-                    </div>
-                ))
+                <div className="grid items-center justify-between pt-12 grid-cols-auto-fill-250 gap-7">
+                    {userOrders.map((order: EnrichedOrders, index: number) => (
+                        <div key={index} className="w-full px-5 transition duration-150 border border-solid rounded py-7 border-border-primary bg-background-secondary h-260 ease hover:bg-color-secondary">
+                            <Link href={`/orders/${order._id}`} className='flex flex-col justify-between h-full'>
+                                <div>
+                                    <h4 className='font-semibold'>{`${formatDate(order.purchaseDate)} | ${(order.total_price / 100).toFixed(2)} €`}</h4>
+                                    <p className='text-sm'>Order number: {order.orderNumber}</p>
+                                </div>
+                                <div className='flex gap-2.5 overflow-x-auto pb-2.5'>
+                                    {order.products.map((product: EnrichedProducts, productIndex: number) => (
+                                        <div key={productIndex} className="block w-20 orders-img">
+                                            <Images
+                                                width={80}
+                                                height={120}
+                                                image={product.image}
+                                                name={product.name}
+                                                priority={index === 0 ? true : false}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </Link>
+                        </div>
+                    ))}
+                </div>
             ) :
                 <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
                     <h2 className="mb-6 text-4xl font-bold">No orders yet</h2>
@@ -79,7 +81,7 @@ const UserOrders = async () => {
                     </Link>
                 </div>
             }
-        </div>
+        </>
     );
 }
 
