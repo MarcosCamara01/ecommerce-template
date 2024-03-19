@@ -103,6 +103,10 @@ main {
   height: 3px;
 }
 
+.navbar-mobile {
+  height: calc(100vh - 152px);
+}
+
 @keyframes shine {
   0% {
     background-position: 200% 0;
