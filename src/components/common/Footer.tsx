@@ -8,7 +8,7 @@ export const Footer = () => {
   const liStyles = "text-color-tertiary my-1.5"
 
   return (
-    <footer className='px-6 py-24 border-t border-solid bg-background-secondary border-border-primary'>
+    <footer className='px-6 py-24 border-t border-solid pointer-events-auto bg-background-secondary border-border-primary'>
       <nav className='flex flex-wrap justify-around gap-5 mx-auto max-w-screen-2xl'>
         <div className='flex flex-col items-center justify-center w-full max-w-xs gap-5'>
           <div className='flex gap-3.5'>
