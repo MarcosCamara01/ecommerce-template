@@ -19,10 +19,11 @@ export const Wishlist = async (
     if (favoriteItem) {
         isFavorite = true;
     }
+    const productId = JSON.stringify(product._id);
 
     return <WishlistButton
         session={session}
         isFavorite={isFavorite}
-        productId={product._id}
+        id={productId}
     />
 };

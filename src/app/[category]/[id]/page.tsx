@@ -1,6 +1,7 @@
 import { SingleProduct } from "@/components/products/SingleProduct";
-import { getProducts } from "@/helpers/getProducts"
 import { Products } from "@/components/products/Products";
+import { getProduct, getRandomProducts } from "@/app/actions";
+import { ProductDocument } from "@/types/types";
 
 type Props = {
     params: {
@@ -13,7 +14,7 @@ const capitalizeFirstLetter = (string: string) => {
 }
 
 export async function generateMetadata({ params }: Props) {
-    const product = await getProducts(`?_id=${params.id}`);
+    const product = await getProduct(params.id);
     const capitalizedName = capitalizeFirstLetter(product.name); 
 
     return {
@@ -23,9 +24,8 @@ export async function generateMetadata({ params }: Props) {
 }
 
 const ProductPage = async ({ params }: Props) => {
-    const product = await getProducts(`?_id=${params.id}`);
-
-    const randomProducts = await getProducts(`?random=${params.id}`);
+    const product: ProductDocument = await getProduct(params.id);
+    const randomProducts = await getRandomProducts(params.id);
 
     return (
         <section className="pt-14">

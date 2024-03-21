@@ -10,13 +10,13 @@ import { toast } from 'sonner';
 interface WishlistButton {
     session: Session | null,
     isFavorite: boolean,
-    productId: Schema.Types.ObjectId
+    id: string
 }
 
 const WishlistButton = (
-    { session, isFavorite, productId }: WishlistButton
+    { session, isFavorite, id }: WishlistButton
 ) => {
-
+    const productId: Schema.Types.ObjectId = JSON.parse(id);
     const handleFavorites = async () => {
         if (session?.user._id) {
             if (isFavorite) {
