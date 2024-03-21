@@ -7,11 +7,12 @@ import { authOptions } from "@/libs/auth";
 import { Session } from "next-auth";
 
 export const SingleProduct = async ({ product }: { product: ProductDocument }) => {
+    const productJSON = JSON.stringify(product);
     const isMobile = isMobileDevice();
     const session: Session | null = await getServerSession(authOptions);
 
     if (!product) {
-        return <div>Producto no encontrado</div>;
+        return <div>Produnct nort found</div>;
     }
 
     return (
@@ -33,7 +34,7 @@ export const SingleProduct = async ({ product }: { product: ProductDocument }) =
 
                     <AddToCart
                         session={session}
-                        product={product}
+                        product={productJSON}
                     />
 
                 </div>

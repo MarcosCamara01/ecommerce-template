@@ -1,4 +1,4 @@
-import { Date, Document, Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 
 export interface EnrichedOrders {
     name: string;
@@ -44,6 +44,7 @@ export interface OrderDocument {
     expectedDeliveryDate: Date;
     total_price: number;
     orderNumber: string;
+    _id: Schema.Types.ObjectId;
 }
 
 export interface AddressDocument {
@@ -57,6 +58,7 @@ export interface AddressDocument {
 
 export interface ProductsDocument {
     productId: Schema.Types.ObjectId;
+    image: string;
     color: string;
     size: string;
     quantity: number;

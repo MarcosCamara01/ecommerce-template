@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useEffect, useState, useTransition } from "react";
 import { ProductDocument, VariantsDocument } from "@/types/types";
@@ -10,22 +10,22 @@ import { Session } from "next-auth";
 import { toast } from "sonner";
 
 export default function AddToCart(
-    { product, session }: { product: ProductDocument, session: Session | null }
+    { product, session }: { product: string, session: Session | null }
 ) {
-
+    const productPlainObject: ProductDocument = JSON.parse(product);
     const { selectedVariant, setSelectedVariant } = useVariant();
-    const [selectedSize, setSelectedSize] = useState('');
+    const [selectedSize, setSelectedSize] = useState<string>('');
     let [isPending, startTransition] = useTransition();
 
     useEffect(() => {
-        setSelectedVariant(product.variants[0]);
+        setSelectedVariant(productPlainObject.variants[0]);
     }, []);
 
     return (
         <>
             <div className='p-5'>
                 <div className='grid grid-cols-4 gap-2.5 justify-center'>
-                    {product.sizes.map((size: string, index: number) => (
+                    {productPlainObject.sizes.map((size: string, index: number) => (
                         <button
                             key={index}
                             className={`flex items-center justify-center border border-solid border-border-primary px-1 py-1.5 bg-black rounded 
@@ -37,7 +37,7 @@ export default function AddToCart(
                     ))}
                 </div>
                 <div className="grid grid-cols-auto-fill-32 gap-2.5	mt-5">
-                    {product.variants.map((variant: VariantsDocument, index: number) => (
+                    {productPlainObject.variants.map((variant: VariantsDocument, index: number) => (
                         <button
                             key={index}
                             className={`border border-solid border-border-primary w-8 h-8 flex justify-center relative rounded 
@@ -59,11 +59,11 @@ export default function AddToCart(
                     onClick={() => {
                         if (session) {
                             startTransition(() => addItem(
-                                product.category,
-                                product._id,
+                                productPlainObject.category,
+                                productPlainObject._id,
                                 selectedSize,
                                 selectedVariant.priceId,
-                                product.price
+                                productPlainObject.price
                             ));
                         } else {
                             toast.info("You must be registered to be able to add a product to the cart.");

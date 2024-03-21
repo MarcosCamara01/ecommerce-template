@@ -1,5 +1,5 @@
 import { Products } from "@/components/products/Products";
-import { getProducts } from "@/helpers/getProducts"
+import { getCategoryProducts } from "../actions";
 
 type Props = {
     params: {
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props) {
 
 const CategoryPage = async ({ params }: Props) => {
 
-    let products = await getProducts(`?cat=${params.category}`);
+    const products = await getCategoryProducts(params.category);
 
     return (
         <section className="pt-14">
