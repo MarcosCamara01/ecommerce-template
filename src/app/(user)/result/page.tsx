@@ -1,6 +1,5 @@
-import { saveOrder } from "@/helpers/ordersFunctions";
 import { fetchCheckoutData, sendEmail } from "@/helpers/checkoutFunctions";
-import { emptyCart } from "@/app/(carts)/cart/action";
+import { saveOrder } from "../orders/action";
 
 export async function generateMetadata() {
   return {
@@ -18,7 +17,6 @@ const CheckoutSuccess = async ({
 
   if (response !== undefined && response.metadata) {
     await saveOrder(response);
-    await emptyCart(response.metadata.userId);
     await sendEmail(response);
   }
 

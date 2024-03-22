@@ -2,17 +2,26 @@
 
 import axios from 'axios';
 import { ItemDocument } from '@/types/types';
-import { serverSession } from '@/helpers/serverSession';
 import { useTransition } from 'react';
 import { Loader } from '../common/Loader';
 import { toast } from 'sonner';
+import { Session } from 'next-auth';
 
-export const ButtonCheckout = ({ cartWithProducts }: { cartWithProducts: ItemDocument[] }) => {
+interface ButtonCheckout {
+    cartWithProducts: ItemDocument[];
+    session: Session | null;
+}
+
+export const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckout) => {
     let [isPending, startTransition] = useTransition();
 
     const buyProducts = async () => {
+        if (session === null) {
+            toast.error("User information not found");
+            return;
+        }
+
         try {
-            const session = await serverSession();
             const lineItems = cartWithProducts.map((cartItem: ItemDocument) => ({
                 productId: cartItem.productId,
                 quantity: cartItem.quantity,
@@ -23,7 +32,7 @@ export const ButtonCheckout = ({ cartWithProducts }: { cartWithProducts: ItemDoc
 
             const { data } = await axios.post('/api/stripe/payment', {
                 lineItems,
-                userId: session?.user._id
+                userId: session.user._id
             });
 
             if (data.statusCode === 500) {
