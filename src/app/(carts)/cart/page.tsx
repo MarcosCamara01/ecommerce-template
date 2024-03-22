@@ -54,6 +54,7 @@ const CartPage = async () => {
               </div>
               <div className="w-1/2">
                 <ButtonCheckout
+                  session={session}
                   cartWithProducts={filteredCart}
                 />
               </div>
