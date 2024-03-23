@@ -1,5 +1,7 @@
 import { Products } from "@/components/products/Products";
 import { getCategoryProducts } from "../actions";
+import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
+import { Suspense } from "react";
 
 type Props = {
     params: {
@@ -12,7 +14,7 @@ const capitalizeFirstLetter = (string: string) => {
 }
 
 export async function generateMetadata({ params }: Props) {
-    const capitalizedCategory = capitalizeFirstLetter(params.category); 
+    const capitalizedCategory = capitalizeFirstLetter(params.category);
 
     return {
         title: `${capitalizedCategory} | Ecommerce Template`,
@@ -26,10 +28,12 @@ const CategoryPage = async ({ params }: Props) => {
 
     return (
         <section className="pt-14">
-            <Products
-                products={products}
-                extraClassname=""
-            />
+            <Suspense fallback={<ProductSkeleton extraClassname="" numberProducts={6} />}>
+                <Products
+                    products={products}
+                    extraClassname=""
+                />
+            </Suspense>
         </section>
     );
 };

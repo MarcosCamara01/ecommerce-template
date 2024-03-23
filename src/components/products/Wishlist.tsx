@@ -12,13 +12,16 @@ export const Wishlist = async (
     const session: Session | null = await getServerSession(authOptions);
     let isFavorite: boolean = false;
 
-    const wishlist: Wishlists | undefined = await getTotalWishlist(session);
+    if (session?.user) {
+        const wishlist: Wishlists | undefined = await getTotalWishlist(session);
 
-    const favoriteItem = wishlist?.items.find(wishlistProduct => wishlistProduct.productId.toString() === product._id.toString());
+        const favoriteItem = wishlist?.items.find(wishlistProduct => wishlistProduct.productId.toString() === product._id.toString());
 
-    if (favoriteItem) {
-        isFavorite = true;
+        if (favoriteItem) {
+            isFavorite = true;
+        }
     }
+
     const productId = JSON.stringify(product._id);
 
     return <WishlistButton

@@ -12,7 +12,7 @@ export const Products = async(
   
   return (
     <div className={`grid gap-x-3.5 gap-y-6 sm:gap-y-9 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""}
-     ${extraClassname === "cart-ord-mobile" ? "grid-cols-1" : ""} sm:grid-cols-auto-fill-250`}>
+    ${extraClassname === "cart-ord-mobile" ? "grid-cols-1" : ""} sm:grid-cols-auto-fill-250`}>
       {products.map((product: EnrichedProducts, index: number) => {
         return (
           <div className={`flex justify-between border border-solid border-border-primary rounded-md overflow-hidden 
@@ -28,8 +28,8 @@ export const Products = async(
               <Images
                 image={product.image}
                 name={product.name}
-                width={384}
-                height={576}
+                width={280}
+                height={425}
                 priority={index === 0 ? true : false}
               />
             </Link>
@@ -59,7 +59,7 @@ export const Products = async(
               </div>
               {
                 !product.purchased &&
-                <div>
+                <div className="text-sm">
                   {product?.quantity
                     ? (product.price * product.quantity).toFixed(2)
                     : product.price}€

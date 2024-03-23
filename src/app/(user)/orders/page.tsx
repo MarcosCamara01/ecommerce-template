@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { OrderDocument, OrdersDocument } from '@/types/types';
 import { getUserOrders } from './action';
 import { Images } from '@/components/products/ProductImages';
+import { Suspense } from 'react';
+import { Loader } from '@/components/common/Loader';
 
 export async function generateMetadata() {
     return {
@@ -16,12 +18,15 @@ const UserOrders = async () => {
     const orders: OrdersDocument | undefined | null = await getUserOrders();
 
     return (
-        <>
+        <Suspense
+            fallback={<div className="flex items-center justify-center height-loader">
+                <Loader height={35} width={35} />
+            </div>}>
             {orders?.orders && orders.orders.length >= 1 ? (
                 <div className="grid items-center justify-between pt-12 grid-cols-auto-fill-350 gap-7">
                     {orders.orders.map((order: OrderDocument, index: number) => (
                         <div key={index} className="w-full transition duration-150 border border-solid rounded border-border-primary bg-background-secondary hover:bg-color-secondary">
-                            <Link href={`/orders/${order._id}`} className='flex flex-col justify-between h-full px-5 py-7'>
+                            <Link href={`/orders/${order._id}?items=${order.products.reduce((total, product) => total + product.quantity, 0)}`} className='flex flex-col justify-between h-full px-5 py-7'>
                                 <div>
                                     <h4 className='font-semibold'>{`${format(order.purchaseDate, 'dd LLL yyyy')} | ${(order.total_price / 100).toFixed(2)}€ | Items: ${order.products.reduce((total, product) => total + product.quantity, 0)} `}</h4>
                                     <p className='text-sm'>Order number: {order.orderNumber}</p>
@@ -55,7 +60,7 @@ const UserOrders = async () => {
                     </Link>
                 </div>
             }
-        </>
+        </Suspense>
     );
 }
 
