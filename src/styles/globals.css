@@ -75,10 +75,8 @@ main {
   align-items: center;
 }
 
-.shine {
-  background: linear-gradient(270deg, #111, #333, #333, #111);
-  background-size: 400% 100%;
-  animation: 8s shine ease-in-out infinite;
+.height-loader {
+  height: calc(100vh - 91px)
 }
 
 .swiper-wrapper {

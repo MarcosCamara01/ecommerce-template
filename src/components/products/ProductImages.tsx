@@ -5,6 +5,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
 import Image, { ImageLoader } from 'next/image';
 import { useVariant } from '@/hooks/VariantContext';
+import { Skeleton } from '../ui/skeleton';
 
 import 'swiper/css'
 import "swiper/css/zoom";
@@ -91,10 +92,12 @@ export const Images = (
         src={image[0]}
         alt={name}
         priority={priority}
-        className="w-full max-w-img"
+        className="w-full max-w-img aspect-[2/3]"
         onLoad={handleImageLoadComplete}
       />
-      <div className={!imageLoaded ? 'shine absolute top-0 right-0	w-full	h-full' : ''}></div>
+      <div className={!imageLoaded ? 'absolute top-0 right-0 w-full aspect-[2/3] bg-black' : 'hidden'}>
+        <Skeleton className="w-full aspect-[2/3] rounded-b-none" />
+      </div>
     </div>
   )
 }
