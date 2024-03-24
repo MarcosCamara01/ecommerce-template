@@ -11,7 +11,8 @@ const SearchInput = () => {
             <input
                 placeholder="Search Products..."
                 aria-label="Search"
-                className='w-full h-[40px] px-3 bg-[#0A0A0A] text-sm focus:outline-none' 
+                disabled
+                className='cursor-no-drop w-full h-[40px] px-3 bg-[#0A0A0A] text-sm focus:outline-none' 
                 type="search"
                 name="q"
             />
