@@ -94,6 +94,10 @@ export const Images = (
         priority={priority}
         className="w-full max-w-img aspect-[2/3]"
         onLoad={handleImageLoadComplete}
+        sizes="(max-width: 640px) 100vw,
+          (max-width: 1154px) 33vw,
+          (max-width: 1536px) 25vw,
+          20vw"
       />
       <div className={!imageLoaded ? 'absolute top-0 right-0 w-full aspect-[2/3] bg-black' : 'hidden'}>
         <Skeleton className="w-full aspect-[2/3] rounded-b-none" />
