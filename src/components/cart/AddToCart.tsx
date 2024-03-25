@@ -1,31 +1,29 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { ProductDocument, VariantsDocument } from "@/types/types";
-import { useVariant } from "@/hooks/VariantContext";
 import { colorMapping } from "@/helpers/colorMapping";
 import { addItem } from "@/app/(carts)/cart/action";
 import { Loader } from "../common/Loader";
 import { Session } from "next-auth";
 import { toast } from "sonner";
 
-export default function AddToCart(
-    { product, session }: { product: string, session: Session | null }
-) {
-    const productPlainObject: ProductDocument = JSON.parse(product);
-    const { selectedVariant, setSelectedVariant } = useVariant();
+interface AddToCart {
+    product: ProductDocument;
+    session: Session | null;
+    selectedVariant: VariantsDocument | undefined;
+    setSelectedVariant: (variant: VariantsDocument) => void;
+}
+
+export default function AddToCart({ product, session, selectedVariant, setSelectedVariant }: AddToCart) {
     const [selectedSize, setSelectedSize] = useState<string>('');
     let [isPending, startTransition] = useTransition();
-
-    useEffect(() => {
-        setSelectedVariant(productPlainObject.variants[0]);
-    }, []);
-
+    
     return (
         <>
             <div className='p-5'>
                 <div className='grid grid-cols-4 gap-2.5 justify-center'>
-                    {productPlainObject.sizes.map((size: string, index: number) => (
+                    {product.sizes.map((size: string, index: number) => (
                         <button
                             key={index}
                             className={`flex items-center justify-center border border-solid border-border-primary px-1 py-1.5 bg-black rounded 
@@ -37,17 +35,19 @@ export default function AddToCart(
                     ))}
                 </div>
                 <div className="grid grid-cols-auto-fill-32 gap-2.5	mt-5">
-                    {productPlainObject.variants.map((variant: VariantsDocument, index: number) => (
+                    {product.variants.map((variant: VariantsDocument, index: number) => (
                         <button
                             key={index}
                             className={`border border-solid border-border-primary w-8 h-8 flex justify-center relative rounded 
                             transition duration-150 ease hover:border-border-secondary ${selectedVariant === variant ? 'border-border-secondary' : ''}`}
                             style={{ backgroundColor: colorMapping[variant.color] }}
-                            onClick={() => setSelectedVariant(variant)}
+                            onClick={() => {
+                                setSelectedVariant(variant);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
                             title={`Color ${variant.color}`}
                         >
-                            <span className={selectedVariant === variant ? 'w-2.5 absolute bottom-selected h-px	bg-white' : ''}></span>
-
+                            <span className={selectedVariant === variant ? 'w-2.5 absolute bottom-selected h-px	bg-white' : ''} />
                         </button>
                     ))}
                 </div>
@@ -57,16 +57,20 @@ export default function AddToCart(
                 <button
                     type="submit"
                     onClick={() => {
-                        if (session) {
+                        if (session && selectedVariant !== undefined) {
                             startTransition(() => addItem(
-                                productPlainObject.category,
-                                productPlainObject._id,
+                                product.category,
+                                product._id,
                                 selectedSize,
                                 selectedVariant.priceId,
-                                productPlainObject.price
+                                product.price
                             ));
                         } else {
-                            toast.info("You must be registered to be able to add a product to the cart.");
+                            if (!session) {
+                                toast.info("You must be registered to be able to add a product to the cart.");
+                            } else {
+                                toast.error("Unknown error");
+                            }
                         }
                     }}
                     className='w-full p-2 transition duration-150 text-13 ease hover:bg-color-secondary'

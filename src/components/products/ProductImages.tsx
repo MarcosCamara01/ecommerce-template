@@ -1,7 +1,5 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useVariant } from '@/hooks/VariantContext';
 import { Skeleton } from '../ui/skeleton';
 import {
   Carousel,
@@ -9,22 +7,18 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { Images } from './Images';
+import { VariantsDocument } from '@/types/types';
 
 interface ProductImages {
   name: string;
   isMobile: boolean;
   imageNumber: number;
+  selectedVariant: VariantsDocument | undefined;
 }
 
-export const ProductImages = ({ name, isMobile, imageNumber }: ProductImages) => {
-  const { selectedVariant } = useVariant();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [selectedVariant])
-
+export const ProductImages = ({ name, isMobile, imageNumber, selectedVariant }: ProductImages) => {
   if (!selectedVariant || !selectedVariant.images || isMobile === null) {
-    return <Skeleton className={`w-full min-w-[250px] rounded-b-none ${isMobile ? "aspect-[2/3]" : imageNumber === 2 ? "aspect-[4/3]" : "aspect-[4/6]"}`} />
+    return <Skeleton className={`w-full rounded-b-none ${isMobile ? "aspect-[2/3] min-w-[250px]" : imageNumber === 2 ? "aspect-[4/3] min-w-[560px]" : "aspect-[4/6] min-w-[560px]"}`} />
   }
 
   if (isMobile) {
