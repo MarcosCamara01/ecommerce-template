@@ -27,8 +27,8 @@ export const Products = async (
               <Images
                 image={product.image}
                 name={product.name}
-                width={280}
-                height={425}
+                width={extraClassname === "colums-mobile" ? 116 : 280}
+                height={extraClassname === "colums-mobile" ? 174 : 425}
                 priority={index === 0 ? true : false}
               />
             </Link>
