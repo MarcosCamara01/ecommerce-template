@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { OrderDocument, OrdersDocument } from '@/types/types';
 import { getUserOrders } from './action';
-import { Images } from '@/components/products/ProductImages';
+import { Images } from '@/components/products/Images';
 import { Suspense } from 'react';
 import { Loader } from '@/components/common/Loader';
 

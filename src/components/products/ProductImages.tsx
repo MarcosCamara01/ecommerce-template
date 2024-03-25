@@ -1,17 +1,22 @@
-'use client'
+'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, Scrollbar, Zoom } from 'swiper/modules'
-import Image, { ImageLoader } from 'next/image';
+import React, { useEffect } from 'react';
 import { useVariant } from '@/hooks/VariantContext';
 import { Skeleton } from '../ui/skeleton';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import { Images } from './Images';
 
-import 'swiper/css'
-import "swiper/css/zoom";
-import 'swiper/css/pagination'
+interface ProductImages {
+  name: string;
+  isMobile: boolean;
+  imageNumber: number;
+}
 
-export const ProductImages = ({ name, isMobile }: { name: string, isMobile: boolean }) => {
+export const ProductImages = ({ name, isMobile, imageNumber }: ProductImages) => {
   const { selectedVariant } = useVariant();
 
   useEffect(() => {
@@ -19,32 +24,33 @@ export const ProductImages = ({ name, isMobile }: { name: string, isMobile: bool
   }, [selectedVariant])
 
   if (!selectedVariant || !selectedVariant.images || isMobile === null) {
-    return <div className='w-full rounded h-60vh sm:h-80vh shine'></div>
+    return <Skeleton className={`w-full min-w-[250px] rounded-b-none ${isMobile ? "aspect-[2/3]" : imageNumber === 2 ? "aspect-[4/3]" : "aspect-[4/6]"}`} />
   }
 
   if (isMobile) {
     return (
       <div>
-        <Swiper
-          modules={[Zoom, Pagination, Scrollbar]}
-          scrollbar={{ draggable: true }}
-          pagination={{ clickable: true }}
-          loop={true}
-          zoom={true}
-          className='rounded-md'
+        <Carousel
+          className="w-full min-w-[250px] rounded-md overflow-hidden"
+          opts={{
+            align: "start",
+            loop: true,
+          }}
         >
-          {selectedVariant.images.map((image: string, index: number) => (
-            <SwiperSlide key={index}>
-              <Images
-                image={[image]}
-                name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
-                width={384}
-                height={576}
-                priority={index === 0 ? true : false}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          <CarouselContent>
+            {selectedVariant.images.map((image: string, index: number) => (
+              <CarouselItem key={index} className='pl-0'>
+                <Images
+                  image={[image]}
+                  name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
+                  width={384}
+                  height={576}
+                  priority={index === 0 ? true : false}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel >
       </div>
     )
   } else {
@@ -64,44 +70,4 @@ export const ProductImages = ({ name, isMobile }: { name: string, isMobile: bool
       </div>
     )
   }
-}
-
-const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
-  const params = ['f_auto', 'c_limit', 'w_' + width, 'q_' + (quality || 'auto')];
-  const normalizeSrc = (src: string) => (src[0] === '/' ? src.slice(1) : src);
-
-  return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(',')}/${normalizeSrc(src)}`;
-};
-
-export const Images = (
-  { image, name, width, height, priority }:
-    { image: [string], name: string, width: number, height: number, priority: boolean }
-) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handleImageLoadComplete = () => {
-    setImageLoaded(true);
-  };
-
-  return (
-    <div className={!imageLoaded ? 'relative' : ''}>
-      <Image
-        loader={cloudinaryLoader}
-        width={width}
-        height={height}
-        src={image[0]}
-        alt={name}
-        priority={priority}
-        className="w-full max-w-img aspect-[2/3]"
-        onLoad={handleImageLoadComplete}
-        sizes="(max-width: 640px) 100vw,
-          (max-width: 1154px) 33vw,
-          (max-width: 1536px) 25vw,
-          20vw"
-      />
-      <div className={!imageLoaded ? 'absolute top-0 right-0 w-full aspect-[2/3] bg-black' : 'hidden'}>
-        <Skeleton className="w-full aspect-[2/3] rounded-b-none" />
-      </div>
-    </div>
-  )
 }

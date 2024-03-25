@@ -21,6 +21,7 @@ export const SingleProduct = async ({ product }: { product: ProductDocument }) =
                 <ProductImages
                     name={product.name}
                     isMobile={isMobile}
+                    imageNumber={product.variants[0].images.length}
                 />
             </div>
 

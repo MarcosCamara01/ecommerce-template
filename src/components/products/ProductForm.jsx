@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Images } from './ProductImages';
+import { Images } from './Images';
 
 const ProductForm = () => {
     const [productData, setProductData] = useState({
