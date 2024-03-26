@@ -162,7 +162,7 @@ export const Navbar = (
             {cartLinks}
           </div>
 
-          <div className={`fixed top-0 left-0 h-screen w-full bg-background-secondary py-10 px-3.5 xs:px-6 transition ease duration-200 z-20	 ${isHeaderOpen ? 'translate-x-0' : 'translate-x-hide'}`}>
+          <div className={`fixed top-0 left-0 h-screen w-full bg-background-secondary py-6 px-3.5 xs:px-6 transition ease duration-200 z-20	 ${isHeaderOpen ? 'translate-x-0' : 'translate-x-hide'}`}>
             <ul className='flex justify-between text-sm gap-9'>
               <button onClick={() => {
                 toggleHeader();
@@ -189,7 +189,7 @@ export const Navbar = (
               {authLinks()}
             </ul>
 
-            <div className='flex items-center justify-center navbar-mobile'>
+            <div className='flex items-center justify-center h-full max-h-[90%]'>
               <ul className='flex flex-col justify-between text-sm gap-9'>
                 {linksData.map((link, index) => (
                   <li key={index} className='flex items-center justify-center'>

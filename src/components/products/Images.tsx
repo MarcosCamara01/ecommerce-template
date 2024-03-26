@@ -30,7 +30,7 @@ export const Images = (
         src={image[0]}
         alt={name}
         priority={priority}
-        className="w-full max-w-img aspect-[2/3]"
+        className="w-full max-w-img aspect-[2/3] brightness-90"
         onLoad={handleImageLoadComplete}
         sizes="(max-width: 640px) 100vw,
           (max-width: 1154px) 33vw,

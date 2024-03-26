@@ -22,13 +22,13 @@ export const Products = async (
               href={`/${product.category}/${product.quantity
                 ? product.productId
                 : product._id}`}
-              className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""}  hover:scale-105 transition-all`}
+              className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""} hover:scale-105 transition-all`}
             >
               <Images
                 image={product.image}
                 name={product.name}
-                width={extraClassname === "colums-mobile" ? 116 : 280}
-                height={extraClassname === "colums-mobile" ? 174 : 425}
+                width={280}
+                height={425}
                 priority={index === 0 ? true : false}
               />
             </Link>
