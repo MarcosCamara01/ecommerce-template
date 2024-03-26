@@ -5,10 +5,10 @@ import Link from 'next/link';
 
 export const Footer = () => {
   const linkStyles = "text-sm transition duration-150 ease hover:text-white";
-  const liStyles = "text-color-tertiary my-1.5"
+  const liStyles = "text-[#A1A1A1] my-1.5"
 
   return (
-    <footer className='px-6 py-24 border-t border-solid pointer-events-auto bg-background-secondary border-border-primary'>
+    <footer className='px-6 py-24 border-t border-solid pointer-events-auto bg-[#0A0A0A] border-[#242424]'>
       <nav className='flex flex-wrap justify-around gap-5 mx-auto max-w-screen-2xl'>
         <div className='flex flex-col items-center justify-center w-full max-w-xs gap-5'>
           <div className='flex gap-3.5'>
@@ -33,7 +33,7 @@ export const Footer = () => {
               </svg>
 
             </Link>
-            <span className='flex items-center text-sm text-color-tertiary'>© 2023</span>
+            <span className='flex items-center text-sm text-[#A1A1A1]'>© 2023</span>
           </div>
           <div className='flex gap-3.5'>
             <Link
@@ -86,6 +86,23 @@ export const Footer = () => {
                 </defs>
               </svg>
             </Link>
+            <Link
+              href="https://medium.com/@marcoscamara"
+              target='_blank'
+              title="Medium of Marcos"
+            >
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 640 512"
+                height="24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M180.5,74.262C80.813,74.262,0,155.633,0,256S80.819,437.738,180.5,437.738,361,356.373,361,256,280.191,74.262,180.5,74.262Zm288.25,10.646c-49.845,0-90.245,76.619-90.245,171.095s40.406,171.1,90.251,171.1,90.251-76.619,90.251-171.1H559C559,161.5,518.6,84.908,468.752,84.908Zm139.506,17.821c-17.526,0-31.735,68.628-31.735,153.274s14.2,153.274,31.735,153.274S640,340.631,640,256C640,171.351,625.785,102.729,608.258,102.729Z"></path>
+              </svg>
+            </Link>
           </div>
         </div>
         <div className='w-full max-w-xs'>
@@ -110,6 +127,7 @@ export const Footer = () => {
             <li className={liStyles}><Link href="https://portfoliomarcos.com/" target='_blank' className={linkStyles}>Portfolio</Link></li>
             <li className={liStyles}><Link href="https://www.linkedin.com/in/marcospenelascamara/" target='_blank' className={linkStyles}>LinkedIn</Link></li>
             <li className={liStyles}><Link href="https://github.com/MarcosCamara01" target='_blank' className={linkStyles}>GitHub</Link></li>
+            <li className={liStyles}><Link href="https://medium.com/@marcoscamara" target='_blank' className={linkStyles}>Medium</Link></li>
           </ul>
         </div>
       </nav>

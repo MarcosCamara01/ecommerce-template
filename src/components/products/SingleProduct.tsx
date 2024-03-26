@@ -45,7 +45,7 @@ export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => 
                 <div className='w-full border border-solid rounded border-border-primary bg-background-secondary'>
                     <div className="flex flex-col justify-between gap-3 p-5 border-b border-solid border-border-primary" >
                         <h1 className="text-base font-semibold">{productPlainObject.name}</h1>
-                        <span className="text-base">{productPlainObject.price}€</span>
+                        <span className="text-sm">{productPlainObject.price}€</span>
                         <p className="text-sm">{productPlainObject.description}</p>
                     </div>
 
@@ -59,7 +59,7 @@ export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => 
 
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1">
-                        <AccordionTrigger>COMPOSITION</AccordionTrigger>
+                        <AccordionTrigger className="text-sm">COMPOSITION</AccordionTrigger>
                         <AccordionContent>
                             <p>
                                 We work with monitoring programmes to ensure compliance with our social,
@@ -70,7 +70,7 @@ export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => 
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2">
-                        <AccordionTrigger>CARE</AccordionTrigger>
+                        <AccordionTrigger className="text-sm">CARE</AccordionTrigger>
                         <AccordionContent className="flex flex-col gap-2">
                             <p> Caring for your clothes is caring for the environment.</p>
                             <p>
@@ -81,7 +81,7 @@ export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => 
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3">
-                        <AccordionTrigger>ORIGIN</AccordionTrigger>
+                        <AccordionTrigger className="text-sm">ORIGIN</AccordionTrigger>
                         <AccordionContent className="flex flex-col gap-2">
                             <p>
                                 We work with our suppliers, workers, unions and international organisations
