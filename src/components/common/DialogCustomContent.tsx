@@ -20,7 +20,8 @@ export function DialogCustomContent() {
         if (session && session.user) {
             setUser(session.user as UserDocument);
         }
-    }, [session])
+    }, [session]);
+    
     return (
         <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
