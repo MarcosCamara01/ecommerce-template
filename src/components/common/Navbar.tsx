@@ -200,11 +200,8 @@ export const Navbar = (
                 {
                   session?.user ?
                     <>
-                      <li className='px-4 py-2 w-[110px] mx-auto'>
-                        <SignOutButton />
-                      </li>
                       <li className='flex items-center'>
-                        <Link className="flex items-center w-full h-full px-4 py-2" href="/orders" >
+                        <Link className="flex items-center w-full h-full px-4 py-2" onClick={toggleHeader} href="/orders" >
                           <svg
                             data-testid="geist-icon"
                             height="16"
@@ -223,6 +220,9 @@ export const Navbar = (
                           </svg>
                           <span>View orders</span>
                         </Link>
+                      </li>
+                      <li className='px-4 py-2 w-[110px] mx-auto'>
+                        <SignOutButton />
                       </li>
                     </>
                     : ""
