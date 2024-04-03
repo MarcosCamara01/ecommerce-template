@@ -67,10 +67,6 @@ main {
   width: 80px;
 }
 
-.height-loader {
-  height: calc(100vh - 91px)
-}
-
 .swiper-wrapper {
   max-width: 250px;
 }

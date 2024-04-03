@@ -63,7 +63,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
                             )}
                             <li className={detailsLiStyles}>{order.address.postal_code} {order.address.city}</li>
                             {order.phone && (
-                                <li className={detailsLiStyles}>{order.phone}</li>
+                                <li className={detailsLiStyles}>+{order.phone}</li>
                             )}
                             <li className={detailsLiStyles}>{order.email}</li>
                         </ul>
@@ -117,7 +117,7 @@ const AllOrderSkeleton = ({ items }: { items: number }) => {
                 </div>
                 <div className='pt-10 border-t border-solid border-border-primary'>
                     <h3 className={detailsH3Styles}>Totals</h3>
-                    <div className={bxInfoStyles}><span></span> <span><Skeleton className="h-5 w-[80px]" /></span></div>
+                    <div className={bxInfoStyles}><span><Skeleton className="h-5 w-[50px]" /></span> <span><Skeleton className="h-5 w-[80px]" /></span></div>
                     <div className={bxInfoStyles}><span>Delivery</span> <span>FREE</span></div>
                     <div className={bxInfoStyles}><span>Total Discount</span> <span>0 €</span></div>
                     <div className={bxInfoStyles}><span>Total</span> <span><Skeleton className="h-5 w-[80px]" /></span></div>

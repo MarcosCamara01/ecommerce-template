@@ -12,7 +12,7 @@ interface ButtonCheckout {
     session: Session | null;
 }
 
-export const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckout) => {
+const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckout) => {
     let [isPending, startTransition] = useTransition();
 
     const buyProducts = async () => {
@@ -53,7 +53,7 @@ export const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckout) =>
             onClick={() => {
                 startTransition(() => buyProducts())
             }}
-            className='w-full p-2.5 h-full transition duration-150 border-l border-solid bg-background-secondary border-border-primary ease hover:bg-color-secondary'
+            className='w-full text-sm p-2.5 h-full transition-all hover:bg-color-secondary'
         >
             {isPending
                 ? <Loader height={20} width={20} />
@@ -61,3 +61,5 @@ export const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckout) =>
         </button>
     );
 };  
+
+export default ButtonCheckout;

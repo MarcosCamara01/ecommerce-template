@@ -12,13 +12,12 @@ import { VariantsDocument } from '@/types/types';
 interface ProductImages {
   name: string;
   isMobile: boolean;
-  imageNumber: number;
   selectedVariant: VariantsDocument | undefined;
 }
 
-export const ProductImages = ({ name, isMobile, imageNumber, selectedVariant }: ProductImages) => {
+export const ProductImages = ({ name, isMobile, selectedVariant }: ProductImages) => {
   if (!selectedVariant || !selectedVariant.images || isMobile === null) {
-    return <Skeleton className={`w-full rounded-b-none ${isMobile ? "aspect-[2/3] min-w-[250px]" : imageNumber === 2 ? "aspect-[4/3] min-w-[560px]" : "aspect-[4/6] min-w-[560px]"}`} />
+    return <Skeleton className={`w-full rounded-b-none ${isMobile ? "aspect-[2/3] min-w-[250px]" : "aspect-[4/6] min-w-[560px]"}`} />
   }
 
   if (isMobile) {
