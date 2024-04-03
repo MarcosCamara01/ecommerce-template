@@ -7,16 +7,21 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import {
     Dialog,
     DialogTrigger,
 } from "@/components/ui/dialog";
-
 import Link from "next/link";
-import { SignOutButton } from "../account/SignOutButton";
 import { Session } from "next-auth";
-import { DialogCustomContent } from "./DialogCustomContent";
+import dynamic from 'next/dynamic';
+
+const EditProfile = dynamic(() => import('./EditProfile'), {
+    ssr: false
+});
+
+const SignOutButton = dynamic(() => import('../account/SignOutButton'), {
+    ssr: false
+});
 
 export function DropdownMenuUser({ fastSession }: { fastSession: Session }) {
     return (
@@ -82,7 +87,7 @@ export function DropdownMenuUser({ fastSession }: { fastSession: Session }) {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <DialogCustomContent />
+            <EditProfile />
         </Dialog>
     )
 }

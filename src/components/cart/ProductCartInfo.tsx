@@ -4,7 +4,7 @@ import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { EnrichedProducts } from '@/types/types';
 import { addItem, delOneItem } from '@/app/(carts)/cart/action';
 
-export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
+const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
     const isMobile = useClientMediaQuery('(max-width: 600px)');
 
     const quantityButtons = () => {
@@ -104,3 +104,5 @@ export const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
         );
     }
 };
+
+export default ProductCartInfo;

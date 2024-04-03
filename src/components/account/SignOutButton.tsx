@@ -3,7 +3,7 @@
 import React from 'react';
 import { signOut } from "next-auth/react";
 
-export const SignOutButton = () => {
+const SignOutButton = () => {
     return (
         <button
             className="flex items-center w-full h-full"
@@ -31,3 +31,5 @@ export const SignOutButton = () => {
         </button>
     )
 }
+
+export default SignOutButton;

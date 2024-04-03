@@ -2,7 +2,6 @@
 
 import { ProductImages } from "@/components/products/ProductImages";
 import { ProductDocument, VariantsDocument } from "@/types/types";
-import AddToCart from "../cart/AddToCart";
 import { Session } from "next-auth";
 import { useEffect, useState } from "react";
 import {
@@ -11,6 +10,12 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import dynamic from 'next/dynamic';
+import { ButtonsSkeleton } from "../skeletons/SingleProductSkeleton";
+
+const AddToCart = dynamic(() => import('../cart/AddToCart'), {
+    loading: () => <ButtonsSkeleton />,
+});
 
 interface SingleProduct {
     product: string;

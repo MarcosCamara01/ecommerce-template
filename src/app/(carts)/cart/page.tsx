@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 
 const ButtonCheckout = dynamic(() => import('../../../components/cart/ButtonCheckout'), {
   ssr: false,
+  loading: () => <p className="h-full w-full text-sm flex items-center justify-center">Continue</p>
 });
 
 export async function generateMetadata() {

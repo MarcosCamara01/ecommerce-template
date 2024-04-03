@@ -3,7 +3,7 @@
 import { delItem } from '@/app/(carts)/cart/action';
 import { EnrichedProducts } from '@/types/types';
 
-export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
+const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
     return (
         <button onClick={() => delItem(
             product.productId,
@@ -27,3 +27,5 @@ export const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
         </button>
     );
 };
+
+export default DeleteButton;
