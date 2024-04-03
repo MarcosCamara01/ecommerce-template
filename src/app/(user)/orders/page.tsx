@@ -1,11 +1,11 @@
-"use server"
-
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { OrderDocument, OrdersDocument } from '@/types/types';
 import { getUserOrders } from './action';
 import { Suspense } from 'react';
 import { Loader } from '@/components/common/Loader';
+import { Session, getServerSession } from 'next-auth';
+import { authOptions } from '@/libs/auth';
 
 export async function generateMetadata() {
     return {
@@ -14,23 +14,40 @@ export async function generateMetadata() {
 }
 
 const UserOrders = async () => {
-    const orders: OrdersDocument | undefined | null = await getUserOrders();
+    const session: Session | null = await getServerSession(authOptions);
 
-    return (
-        <Suspense
-            fallback={<div className="flex items-center justify-center height-loader">
-                <Loader height={35} width={35} />
-            </div>}>
-            <Orders orders={orders} />
-        </Suspense>
-    );
+    if (session?.user) {
+        return (
+            <Suspense
+                fallback={<div className="flex items-center justify-center height-loader">
+                    <Loader height={35} width={35} />
+                </div>}>
+                <Orders />
+            </Suspense>
+        );
+    } else {
+        return (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-91px)] gap-2 px-4">
+                <h2 className="mb-6 text-4xl font-bold">NO ORDERS YET</h2>
+                <p className="mb-4 text-lg">To view your orders you must be logged in.</p>
+                <Link
+                    className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-[#1F1F1F] hover:border-[#454545]"
+                    href="/login"
+                >
+                    Login
+                </Link>
+            </div>
+        )
+    }
 }
 
-const Orders = ({ orders }: { orders: OrdersDocument | undefined | null }) => {
+const Orders = async () => {
+    const orders: OrdersDocument | undefined | null = await getUserOrders();
+
     if (orders === undefined || orders === null) {
         return (
-            <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
-                <h2 className="mb-6 text-4xl font-bold">No orders yet</h2>
+            <div className="flex flex-col items-center justify-center w-full h-[80vh] gap-2 px-4">
+                <h2 className="mb-6 text-4xl font-bold">NO ORDERS YET</h2>
                 <p className="mb-4 text-lg">To create an order add a product to the cart and buy it!</p>
                 <Link
                     className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-[#1F1F1F] hover:border-[#454545]"

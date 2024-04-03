@@ -40,11 +40,11 @@ const CartPage = async () => {
       fallback={<div className="flex items-center justify-center height-loader">
         <Loader height={35} width={35} />
       </div>}>
-      <div className="pt-12">
+      <>
         {
           session?.user ?
             filteredCart && filteredCart?.length > 0 ?
-              <>
+              <div className="pt-12">
                 <h2 className="mb-5 text-xl font-bold sm:text-2xl">YOUR SHOPPING CART</h2>
                 <Products
                   products={filteredCart}
@@ -66,9 +66,9 @@ const CartPage = async () => {
                     />
                   </div>
                 </div>
-              </>
+              </div>
               :
-              <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
+              <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-91px)] gap-2 px-4">
                 <h1 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h1>
                 <p className="mb-4 text-lg">When you have added something to your cart, it will appear here. Want to get started?</p>
                 <Link
@@ -80,7 +80,7 @@ const CartPage = async () => {
               </div>
 
             :
-            <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
+            <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-91px)] gap-2 px-4">
               <h1 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h1>
               <p className="mb-4 text-lg">
                 Not registered? You must be in order to save your products in the shopping cart.
@@ -93,7 +93,7 @@ const CartPage = async () => {
               </Link>
             </div>
         }
-      </div>
+      </>
     </Suspense>
   );
 }
