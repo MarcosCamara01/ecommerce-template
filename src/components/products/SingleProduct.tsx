@@ -27,7 +27,7 @@ export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => 
     }, []);
 
     if (!product) {
-        return <div>Produnct nort found</div>;
+        return <div>Produnct not found</div>;
     }
 
     return (
@@ -36,7 +36,6 @@ export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => 
                 <ProductImages
                     name={productPlainObject.name}
                     isMobile={isMobile}
-                    imageNumber={productPlainObject.variants[0].images.length}
                     selectedVariant={selectedVariant}
                 />
             </div>

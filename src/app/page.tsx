@@ -13,8 +13,6 @@ const Home = async () => {
   );
 }
 
-export default Home;
-
 const AllProducts = async () => {
   const products = await getAllProducts();
 
@@ -25,3 +23,5 @@ const AllProducts = async () => {
     />
   )
 }
+
+export default Home;

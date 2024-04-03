@@ -9,11 +9,11 @@ type Props = {
     };
 };
 
-const capitalizeFirstLetter = (string: string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 export async function generateMetadata({ params }: Props) {
+    const capitalizeFirstLetter = (string: string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
     const capitalizedCategory = capitalizeFirstLetter(params.category);
 
     return {
@@ -23,19 +23,26 @@ export async function generateMetadata({ params }: Props) {
 }
 
 const CategoryPage = async ({ params }: Props) => {
-
-    const products = await getCategoryProducts(params.category);
-
     return (
         <section className="pt-14">
             <Suspense fallback={<ProductSkeleton extraClassname="" numberProducts={6} />}>
-                <Products
-                    products={products}
-                    extraClassname=""
+                <CategoryProducts
+                    category={params.category}
                 />
             </Suspense>
         </section>
     );
 };
+
+const CategoryProducts = async ({ category }: { category: string }) => {
+    const products = await getCategoryProducts(category);
+
+    return (
+        <Products
+            products={products}
+            extraClassname=""
+        />
+    )
+}
 
 export default CategoryPage;
