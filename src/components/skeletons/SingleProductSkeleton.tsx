@@ -22,31 +22,39 @@ const SingleProductSkeleton = ({ isMobile }: { isMobile: boolean }) => {
                         </div>
                     </div>
 
-                    <div className='p-5'>
-                        <div className='grid grid-cols-4 gap-2.5 justify-center'>
-                            {Array.from({ length: 4 }).map((_, index) => (
-                                <Skeleton key={index} className="w-full h-[33px]" />
-                            ))}
-                        </div>
-                        <div className="grid grid-cols-auto-fill-32 gap-2.5 mt-5">
-                            {Array.from({ length: 3 }).map((_, index) => (
-                                <Skeleton key={index} className="w-8 h-8 rounded" />
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className='border-t border-solid border-border-primary'>
-                        <button
-                            type="submit"
-                            className='w-full p-2'
-                        >
-                            <Skeleton className="h-5 w-[100px] mx-auto" />
-                        </button>
-                    </div>
+                    <ButtonsSkeleton />
                 </div>
             </div>
         </div>
     );
+}
+
+export const ButtonsSkeleton = () => {
+    return (
+        <>
+            <div className='p-5'>
+                <div className='grid grid-cols-4 gap-2.5 justify-center'>
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <Skeleton key={index} className="w-full h-[33px]" />
+                    ))}
+                </div>
+                <div className="grid grid-cols-auto-fill-32 gap-2.5 mt-5">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                        <Skeleton key={index} className="w-8 h-8 rounded" />
+                    ))}
+                </div>
+            </div>
+
+            <div className='border-t border-solid border-border-primary'>
+                <button
+                    type="submit"
+                    className='w-full p-2'
+                >
+                    <Skeleton className="h-5 w-[100px] mx-auto" />
+                </button>
+            </div>
+        </>
+    )
 }
 
 export default SingleProductSkeleton;

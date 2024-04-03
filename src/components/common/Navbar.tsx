@@ -6,12 +6,19 @@ import { Session } from 'next-auth';
 import { NavbarDesktop } from './NavbarDesktop';
 import { DropdownMenuUser } from './DropdownMenu';
 import SearchInput from './SearchInput';
-import { SignOutButton } from '../account/SignOutButton';
 import {
   Dialog,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogCustomContent } from './DialogCustomContent';
+import dynamic from 'next/dynamic';
+
+const EditProfile = dynamic(() => import('./EditProfile'), {
+  ssr: false
+});
+
+const SignOutButton = dynamic(() => import('../account/SignOutButton'), {
+  ssr: false
+});
 
 interface Navbar {
   session: Session | null,
@@ -65,7 +72,7 @@ export const Navbar = (
                   <span>Edit profile</span>
                 </button>
               </DialogTrigger>
-              <DialogCustomContent />
+              <EditProfile />
             </Dialog>
           </li>
         );

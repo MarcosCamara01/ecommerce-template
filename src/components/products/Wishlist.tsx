@@ -6,7 +6,7 @@ import { authOptions } from '@/libs/auth';
 import React from 'react';
 import WishlistButton from './WishlistButton';
 
-export const Wishlist = async (
+const Wishlist = async (
     { product }: { product: EnrichedProducts }
 ) => {
     const session: Session | null = await getServerSession(authOptions);
@@ -30,3 +30,5 @@ export const Wishlist = async (
         id={productId}
     />
 };
+
+export default Wishlist;

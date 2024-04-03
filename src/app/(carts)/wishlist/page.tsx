@@ -21,7 +21,7 @@ const Wishlists = async () => {
             <Suspense
                 fallback={
                     <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-                        <Loader height={35} width={35} />
+                        <Loader height={30} width={30} />
                     </div>
                 }>
                 <ProductsWishlists session={session} />

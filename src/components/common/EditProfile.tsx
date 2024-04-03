@@ -12,7 +12,7 @@ import { UserDocument } from "@/types/types";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-export function DialogCustomContent() {
+export default function EditProfile() {
     const [user, setUser] = useState<UserDocument>({} as UserDocument);
     const { data: session, update } = useSession();
 
