@@ -26,18 +26,18 @@ const Wishlists = async () => {
             fallback={<div className="flex items-center justify-center height-loader">
                 <Loader height={35} width={35} />
             </div>}>
-            <div className="pt-12">
+            <>
                 {session?.user ?
                     filteredWishlist && filteredWishlist?.length > 0 ?
-                        <>
+                        <div className="pt-12">
                             <h2 className="mb-5 text-xl font-bold sm:text-2xl">YOUR WISHLISTS</h2>
                             <Products
                                 products={filteredWishlist}
                                 extraClassname={"colums-mobile"}
                             />
-                        </>
+                        </div>
                         :
-                        <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
+                        <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-91px)] gap-2 px-4">
                             <h1 className="mb-6 text-4xl font-bold">YOUR WISHLIST IS EMPTY</h1>
                             <p className="mb-4 text-lg">When you have added something to the wishlist, it will appear here. Want to get started?</p>
                             <Link
@@ -48,7 +48,7 @@ const Wishlists = async () => {
                             </Link>
                         </div>
                     :
-                    <div className="flex flex-col items-center justify-center w-full h-[70vh] gap-2 px-4">
+                    <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-91px)] gap-2 px-4">
                         <h1 className="mb-6 text-4xl font-bold">YOUR WISHLIST IS EMPTY</h1>
                         <p className="mb-4 text-lg">Not registered? You must be in order to save your favorite products.</p>
                         <Link
@@ -59,7 +59,7 @@ const Wishlists = async () => {
                         </Link>
                     </div>
                 }
-            </div>
+            </>
         </Suspense>
     );
 }

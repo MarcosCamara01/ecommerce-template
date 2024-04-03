@@ -4,18 +4,24 @@ import { getAllProducts } from "./actions";
 import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
 
 const Home = async () => {
-  const products = await getAllProducts();
-
   return (
     <section className="pt-14">
       <Suspense fallback={<ProductSkeleton extraClassname="" numberProducts={18} />}>
-        <Products
-          products={products}
-          extraClassname=""
-        />
+        <AllProducts />
       </Suspense>
     </section>
   );
 }
 
 export default Home;
+
+const AllProducts = async () => {
+  const products = await getAllProducts();
+
+  return (
+    <Products
+      products={products}
+      extraClassname=""
+    />
+  )
+}

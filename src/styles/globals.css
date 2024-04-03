@@ -67,14 +67,6 @@ main {
   width: 80px;
 }
 
-.spinner-center {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .height-loader {
   height: calc(100vh - 91px)
 }
