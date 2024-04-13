@@ -21,7 +21,7 @@ const capitalizeFirstLetter = (string: string) => {
 }
 
 export async function generateMetadata({ params }: Props) {
-    const product = await getProduct(params.id);
+    const product: ProductDocument = await getProduct(params.id);
     const capitalizedName = capitalizeFirstLetter(product.name);
 
     return {

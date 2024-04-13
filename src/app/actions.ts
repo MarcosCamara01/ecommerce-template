@@ -2,12 +2,13 @@
 
 import { connectDB } from "@/libs/mongodb";
 import { Product } from "@/models/Products";
+import { ProductDocument } from "@/types/types";
 
 connectDB();
 
 export const getAllProducts = async () => {
     try {
-        const products = await Product.find();
+        const products: ProductDocument[] = await Product.find();
         return products;
     } catch (error) {
         console.error('Error getting products:', error);
@@ -16,7 +17,7 @@ export const getAllProducts = async () => {
 
 export const getCategoryProducts = async (category: string) => {
     try {
-        const products = await Product.find({ category });
+        const products: ProductDocument[] = await Product.find({ category });
         return products;
     } catch (error) {
         console.error('Error getting products:', error);
@@ -24,7 +25,7 @@ export const getCategoryProducts = async (category: string) => {
 }
 
 export const getRandomProducts = async (productId: string) => {
-    const shuffleArray = (array: any) => {
+    const shuffleArray = (array: ProductDocument[]) => {
         let shuffled = array.slice();
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -34,10 +35,10 @@ export const getRandomProducts = async (productId: string) => {
     }
 
     try {
-        const allProducts = await Product.find();
+        const allProducts: ProductDocument[] = await Product.find();
         const shuffledProducts = shuffleArray(allProducts);
         const randomProducts = shuffledProducts
-            .filter((product: any) => product._id.toString() !== productId)
+            .filter(product => product._id.toString() !== productId)
             .slice(0, 6);
         return randomProducts;
     } catch (error) {
