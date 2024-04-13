@@ -33,7 +33,7 @@ const Search: React.FC<SearchProps> = async ({ searchParams }) => {
                     />
                     :
                     <h3 className="text-sm text-center">
-                       No products for "{searchParams.q}"
+                        No products found for &quot;{searchParams.q}&quot;
                     </h3>
             }
         </section>
