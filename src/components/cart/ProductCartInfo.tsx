@@ -1,17 +1,16 @@
 "use client"
 
-import { useClientMediaQuery } from '@/hooks/useClientMediaQuery';
 import { EnrichedProducts } from '@/types/types';
 import { addItem, delOneItem } from '@/app/(carts)/cart/action';
 
 const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
-    const isMobile = useClientMediaQuery('(max-width: 600px)');
-
     const quantityButtons = () => {
         if (product.purchased) {
             return (
                 <div>
-                    {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
+                    {product?.quantity
+                        ? (product.price * product.quantity).toFixed(2)
+                        : product.price}€
                 </div>
             )
         } else {
@@ -71,25 +70,22 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
         }
     }
 
-    if (isMobile) {
-        return (
-            <>
-                <div className="flex">
-                    <div className='text-sm pr-2.5 border-r'>
-                        {product.size}
-                    </div>
-                    <div className='text-sm pl-2.5'>
-                        {product.color}
-                    </div>
+    return (
+        <>
+            <div className="flex sm:hidden">
+                <div className='text-sm pr-2.5 border-r'>
+                    {product.size}
                 </div>
-                <div className='flex items-center justify-between'>
-                    {quantityButtons()}
+                <div className='text-sm pl-2.5'>
+                    {product.color}
                 </div>
-            </>
-        );
-    } else {
-        return (
-            <div className='flex items-center justify-between'>
+            </div>
+            <div className='flex items-center justify-between sm:hidden'>
+                {quantityButtons()}
+            </div>
+
+
+            <div className='items-center justify-between hidden sm:flex'>
                 {quantityButtons()}
 
                 <div className="flex">
@@ -101,8 +97,9 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
                     </div>
                 </div>
             </div>
-        );
-    }
+        </>
+    )
+
 };
 
 export default ProductCartInfo;

@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Session } from 'next-auth';
-import { NavbarDesktop } from './NavbarDesktop';
-import { DropdownMenuUser } from './DropdownMenu';
+import { LinksDesktop } from './LinksDesktop';
+import { UserMenu } from './UserMenu';
 import SearchInput from './SearchInput';
 import {
   Dialog,
@@ -74,7 +74,7 @@ export const Navbar = (
           </li>
 
           <li className='items-center justify-center hidden lg:flex'>
-            <DropdownMenuUser
+            <UserMenu
               fastSession={session}
             />
           </li>
@@ -197,7 +197,7 @@ export const Navbar = (
       <ul className='justify-between hidden gap-2 text-sm lg:flex'>
         {authLinks()}
         <li>
-          <NavbarDesktop />
+          <LinksDesktop />
         </li>
       </ul>
 

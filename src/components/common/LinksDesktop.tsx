@@ -13,7 +13,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
 
-export function NavbarDesktop() {
+export function LinksDesktop() {
   return (
     <NavigationMenu>
       <NavigationMenuList>

@@ -11,8 +11,6 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import AddToCart from "../cart/AddToCart";
-
-
 interface SingleProduct {
     product: string;
     session: Session | null
