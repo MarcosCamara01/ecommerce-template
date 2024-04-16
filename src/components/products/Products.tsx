@@ -6,15 +6,15 @@ import { Skeleton } from "../ui/skeleton";
 
 const Wishlist = dynamic(() => import('./Wishlist'), {
   ssr: true,
-  loading: () => <Skeleton className="h-5 w-5" />,
+  loading: () => <Skeleton className="w-5 h-5" />,
 });
 
 const DeleteButton = dynamic(() => import('../cart/DeleteButton'), {
-  loading: () => <Skeleton className="h-5 w-5" />,
+  loading: () => <Skeleton className="w-5 h-5" />,
 });
 
 const ProductCartInfo = dynamic(() => import('../cart/ProductCartInfo'), {
-  loading: () => <Skeleton className="h-8 w-24" />,
+  loading: () => <Skeleton className="w-24 h-8" />,
 });
 
 export const Products = async (
@@ -33,6 +33,10 @@ export const Products = async (
                 width={280}
                 height={425}
                 priority={index === 0 ? true : false}
+                sizes="(max-width: 640px) 100vw,
+                (max-width: 1154px) 33vw,
+                (max-width: 1536px) 25vw,
+                20vw"
               />
             </Link>
             <div className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""} flex justify-between flex-col gap-2.5 p-3.5 bg-background-secondary z-10`}>
