@@ -60,7 +60,9 @@ const AllProducts = async ({ id }: { id: string }) => {
                 session={session}
             />
 
-            <h2 className="mt-24 mb-5 text-xl font-bold sm:text-2xl">YOU MIGHT ALSO LIKE...</h2>
+            <h2 className="mt-24 mb-5 text-xl font-bold sm:text-2xl">
+                YOU MIGHT ALSO LIKE...
+            </h2>
 
             <Products
                 products={randomProducts}
