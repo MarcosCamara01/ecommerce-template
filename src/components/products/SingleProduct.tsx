@@ -10,12 +10,8 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import dynamic from 'next/dynamic';
-import { ButtonsSkeleton } from "../skeletons/SingleProductSkeleton";
+import AddToCart from "../cart/AddToCart";
 
-const AddToCart = dynamic(() => import('../cart/AddToCart'), {
-    loading: () => <ButtonsSkeleton />,
-});
 
 interface SingleProduct {
     product: string;
@@ -24,11 +20,7 @@ interface SingleProduct {
 
 export const SingleProduct = ({ product, session }: SingleProduct) => {
     const productPlainObject: ProductDocument = JSON.parse(product);
-    const [selectedVariant, setSelectedVariant] = useState<VariantsDocument>();
-
-    useEffect(() => {
-        setSelectedVariant(productPlainObject.variants[0]);
-    }, []);
+    const [selectedVariant, setSelectedVariant] = useState<VariantsDocument>(productPlainObject.variants[0]);
 
     if (!product) {
         return <div>Produnct not found</div>;

@@ -18,7 +18,7 @@ interface AddToCart {
 export default function AddToCart({ product, session, selectedVariant, setSelectedVariant }: AddToCart) {
     const [selectedSize, setSelectedSize] = useState<string>('');
     let [isPending, startTransition] = useTransition();
-    
+
     return (
         <>
             <div className='p-5'>
@@ -39,7 +39,7 @@ export default function AddToCart({ product, session, selectedVariant, setSelect
                         <button
                             key={index}
                             className={`border border-solid border-border-primary w-8 h-8 flex justify-center relative rounded 
-                            transition duration-150 ease hover:border-border-secondary ${selectedVariant === variant ? 'border-border-secondary' : ''}`}
+                                transition duration-150 ease hover:border-border-secondary ${selectedVariant?.color === variant.color ? 'border-border-secondary' : ''}`}
                             style={{ backgroundColor: colorMapping[variant.color] }}
                             onClick={() => {
                                 setSelectedVariant(variant);
@@ -47,7 +47,7 @@ export default function AddToCart({ product, session, selectedVariant, setSelect
                             }}
                             title={`Color ${variant.color}`}
                         >
-                            <span className={selectedVariant === variant ? 'w-2.5 absolute bottom-selected h-px	bg-white' : ''} />
+                            <span className={selectedVariant?.color === variant.color ? 'w-2.5 absolute bottom-selected h-px bg-white' : ''} />
                         </button>
                     ))}
                 </div>
