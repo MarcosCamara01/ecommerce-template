@@ -23,7 +23,7 @@ const SignOutButton = dynamic(() => import('../account/SignOutButton'), {
     ssr: false
 });
 
-export function DropdownMenuUser({ fastSession }: { fastSession: Session }) {
+export function UserMenu({ fastSession }: { fastSession: Session }) {
     return (
         <Dialog>
             <DropdownMenu>

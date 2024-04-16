@@ -4,7 +4,7 @@ import { EnrichedProducts } from "@/types/types";
 import dynamic from 'next/dynamic';
 import { Skeleton } from "../ui/skeleton";
 
-const Wishlist = dynamic(() => import('./Wishlist'), {
+const Wishlist = dynamic(() => import('../cart/Wishlist'), {
   ssr: true,
   loading: () => <Skeleton className="w-5 h-5" />,
 });
