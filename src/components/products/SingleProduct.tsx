@@ -19,11 +19,10 @@ const AddToCart = dynamic(() => import('../cart/AddToCart'), {
 
 interface SingleProduct {
     product: string;
-    isMobile: boolean;
     session: Session | null
 }
 
-export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => {
+export const SingleProduct = ({ product, session }: SingleProduct) => {
     const productPlainObject: ProductDocument = JSON.parse(product);
     const [selectedVariant, setSelectedVariant] = useState<VariantsDocument>();
 
@@ -40,7 +39,6 @@ export const SingleProduct = ({ product, isMobile, session }: SingleProduct) => 
             <div className="grow-999 basis-0">
                 <ProductImages
                     name={productPlainObject.name}
-                    isMobile={isMobile}
                     selectedVariant={selectedVariant}
                 />
             </div>
