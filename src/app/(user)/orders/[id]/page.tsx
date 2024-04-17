@@ -25,7 +25,6 @@ const OrderDetails = async ({ params, searchParams
     )
 }
 
-
 const OrderProducts = async ({ id }: { id: string }) => {
     const order = await getOrder(id);
 

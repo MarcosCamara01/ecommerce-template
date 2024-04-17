@@ -14,12 +14,9 @@ import {
 import Link from "next/link";
 import { Session } from "next-auth";
 import dynamic from 'next/dynamic';
+import SignOutButton from "../account/SignOutButton";
 
 const EditProfile = dynamic(() => import('./EditProfile'), {
-    ssr: false
-});
-
-const SignOutButton = dynamic(() => import('../account/SignOutButton'), {
     ssr: false
 });
 
