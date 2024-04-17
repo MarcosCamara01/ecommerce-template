@@ -96,6 +96,7 @@ const Signup = () => {
                             e.preventDefault();
                             setShowPassword(!showPassword)
                         }}
+                        type='button'
                     >
                         {showPassword
                             ? <svg
@@ -139,8 +140,10 @@ const Signup = () => {
                     name="phone"
                 />
 
-                <button className="w-full bg-black border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded
-                    transition-all hover:bg-[#1F1F1F] hover:border-[#454545] text-13">
+                <button
+                    className="w-full bg-black border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-[#1F1F1F] hover:border-[#454545] text-13"
+                    type='submit'
+                >
                     Signup
                 </button>
 
@@ -151,7 +154,9 @@ const Signup = () => {
 
                 <button
                     className="flex text-[#A1A1A1] items-center gap-3 px-4 py-2 text-sm align-middle transition-all bg-black border border-solid rounded border-border-primary ease hover:bg-[#1F1F1F] hover:border-[#454545]"
-                    onClick={() => signIn("google")}>
+                    onClick={() => signIn("google")}
+                    type='button'
+                >
                     <svg
                         data-testid="geist-icon"
                         height="20"
