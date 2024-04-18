@@ -17,10 +17,11 @@ const WishlistButton = (
     { session, productId, wishlistString }: WishlistButton
 ) => {
     const id: Schema.Types.ObjectId = JSON.parse(productId);
-    const wishlist: Wishlists = JSON.parse(wishlistString)
     let isFavorite: boolean = false;
 
-    if (session?.user) {
+    if (session?.user && wishlistString) {
+        const wishlist: Wishlists = JSON.parse(wishlistString)
+
         const favoriteItem = wishlist?.items.find(wishlistProduct => wishlistProduct.productId.toString() === id.toString());
 
         if (favoriteItem) {
