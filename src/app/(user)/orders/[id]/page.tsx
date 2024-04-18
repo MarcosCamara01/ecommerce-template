@@ -4,6 +4,7 @@ import { getOrder } from '../action';
 import { Suspense } from 'react';
 import ProductSkeleton from '@/components/skeletons/ProductSkeleton';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EnrichedProducts } from '@/types/types';
 
 export async function generateMetadata() {
     return {
@@ -34,13 +35,14 @@ const OrderProducts = async ({ id }: { id: string }) => {
 
     if (order) {
         const totalProducts = order.products.reduce((total: number, product: any) => total + product.quantity, 0);
+        const allProducts: EnrichedProducts[] = order.products.filter(Boolean) as EnrichedProducts[];
         const productsText = totalProducts === 1 ? "item" : "items";
 
         return (
             <div className="flex flex-col-reverse flex-wrap justify-between pt-12 sm:flex-row gap-11 sm:gap-8">
                 <div className='grow-999 basis-0'>
                     <Products
-                        products={order.products}
+                        products={allProducts}
                         extraClassname={"cart-ord-mobile"}
                     />
                 </div>

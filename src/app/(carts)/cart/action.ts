@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/libs/auth";
 import { Session } from "next-auth";
 import { Product } from "@/models/Products";
-import { VariantsDocument } from "@/types/types";
+import { EnrichedProducts, VariantsDocument } from "@/types/types";
 import { toast } from "sonner";
 import { connectDB } from "@/libs/mongodb";
 
@@ -27,7 +27,7 @@ export async function getItems(userId: string) {
 
     if (!userId) {
         console.error(`User Id not found.`);
-        return null;
+        return undefined;
     }
 
     const cart: Cart | null = await kv.get(`cart-${userId}`);
@@ -36,7 +36,7 @@ export async function getItems(userId: string) {
         return undefined;
     }
 
-    const updatedCart = [];
+    const updatedCart: EnrichedProducts[] = [];
     for (const cartItem of cart.items) {
         try {
             if (cartItem.productId && cartItem.variantId) {
@@ -49,7 +49,7 @@ export async function getItems(userId: string) {
                     const matchingVariant = matchingProduct.variants.find(
                         (variant: VariantsDocument) => variant.priceId === cartItem.variantId
                     );
-                    const updatedCartItem = {
+                    const updatedCartItem: EnrichedProducts = {
                         ...cartItem,
                         color: matchingVariant.color,
                         category: matchingProduct.category,
