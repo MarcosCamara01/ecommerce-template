@@ -24,13 +24,12 @@ export const Products = async (
     { products: EnrichedProducts[], extraClassname: string }
 ) => {
   let wishlist: Wishlists | undefined = undefined
-  let session: Session | null = null
+  const session: Session | null = await getServerSession(authOptions);
 
   const hasMissingQuantity = products.some((product: EnrichedProducts) => !product.quantity);
 
-  if (hasMissingQuantity) {
+  if (hasMissingQuantity && session?.user) {
     wishlist = await getTotalWishlist();
-    session = await getServerSession(authOptions);
   }
 
   return (
