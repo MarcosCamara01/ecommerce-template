@@ -4,10 +4,10 @@ import { connectDB } from "@/libs/mongodb";
 import { Product } from "@/models/Products";
 import { EnrichedProducts } from "@/types/types";
 
-connectDB();
-
 export const getAllProducts = async () => {
     try {
+        await connectDB();
+
         const products: EnrichedProducts[] = await Product.find();
         return products;
     } catch (error) {
@@ -18,6 +18,8 @@ export const getAllProducts = async () => {
 
 export const getCategoryProducts = async (category: string) => {
     try {
+        await connectDB();
+
         const products: EnrichedProducts[] = await Product.find({ category });
         return products;
     } catch (error) {
@@ -37,6 +39,8 @@ export const getRandomProducts = async (productId: string) => {
     }
 
     try {
+        await connectDB();
+
         const allProducts: EnrichedProducts[] = await Product.find();
         const shuffledProducts = shuffleArray(allProducts);
         const randomProducts = shuffledProducts
@@ -51,6 +55,8 @@ export const getRandomProducts = async (productId: string) => {
 
 export const getProduct = async (_id: string) => {
     try {
+        await connectDB();
+        
         const product = await Product.findOne({ _id });
         return product;
     } catch (error) {
