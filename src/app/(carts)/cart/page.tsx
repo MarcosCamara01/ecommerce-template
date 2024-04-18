@@ -6,10 +6,11 @@ import { authOptions } from "@/libs/auth";
 import { Suspense } from "react";
 import { Loader } from "@/components/common/Loader";
 import dynamic from 'next/dynamic';
+import { EnrichedProducts } from "@/types/types";
 
 const ButtonCheckout = dynamic(() => import('../../../components/cart/ButtonCheckout'), {
   ssr: false,
-  loading: () => <p className="h-full w-full text-sm flex items-center justify-center">Continue</p>
+  loading: () => <p className="flex items-center justify-center w-full h-full text-sm">Continue</p>
 });
 
 export async function generateMetadata() {
@@ -60,7 +61,7 @@ const ProductsCart = async ({ session }: { session: Session }) => {
     return cart.reduce((total: number, cartItem: any) => total + (cartItem.price * cartItem.quantity), 0).toFixed(2);
   };
 
-  const filteredCart = await getItems(session.user._id);
+  const filteredCart: EnrichedProducts[] | undefined = await getItems(session.user._id);
   const totalPrice = calculateTotalPrice(filteredCart);
 
   if (filteredCart && filteredCart?.length > 0) {

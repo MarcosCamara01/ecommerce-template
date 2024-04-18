@@ -5,7 +5,7 @@ import { Orders } from "@/models/Orders";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/libs/auth";
 import { Session } from "next-auth";
-import { OrderDocument, OrdersDocument, ProductsDocument, VariantsDocument } from "@/types/types";
+import { EnrichedProducts, OrderDocument, OrdersDocument, ProductsDocument, VariantsDocument } from "@/types/types";
 import { Product } from "@/models/Products";
 import Stripe from "stripe";
 import { emptyCart, getItems } from "@/app/(carts)/cart/action";

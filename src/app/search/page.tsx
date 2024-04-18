@@ -1,6 +1,6 @@
 import { Products } from "@/components/products/Products";
 import { getAllProducts } from "../actions";
-import { ProductDocument } from "@/types/types";
+import { EnrichedProducts, ProductDocument } from "@/types/types";
 
 interface SearchProps {
     searchParams: { [key: string]: string | undefined };
@@ -15,7 +15,7 @@ const normalizeText = (text: string): string => {
 
 const Search: React.FC<SearchProps> = async ({ searchParams }) => {
     const products = await getAllProducts();
-    let filteredProducts: ProductDocument[] = [];
+    let filteredProducts: EnrichedProducts[] = [];
 
     if (products) {
         filteredProducts = products.filter(product =>
