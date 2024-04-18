@@ -22,7 +22,6 @@
         "axios": "^1.4.0",
         "bcryptjs": "^2.4.3",
         "class-variance-authority": "^0.7.0",
-        "cloudinary": "^1.40.0",
         "clsx": "^2.1.0",
         "date-fns": "^2.30.0",
         "embla-carousel-react": "^8.0.0",
@@ -43,7 +42,6 @@
     "devDependencies": {
         "@types/bcryptjs": "^2.4.3",
         "@types/react": "18.2.21",
-        "@types/ua-parser-js": "^0.7",
         "eslint": "8.47.0",
         "eslint-config-next": "13.4.19",
         "typescript": "5.2.2"
