@@ -3,9 +3,11 @@ import { Images } from "./Images";
 import { EnrichedProducts } from "@/types/types";
 import dynamic from 'next/dynamic';
 import { Skeleton } from "../ui/skeleton";
+import { Wishlists, getTotalWishlist } from "@/app/(carts)/wishlist/action";
+import { Session, getServerSession } from "next-auth";
+import { authOptions } from "@/libs/auth";
 
-const Wishlist = dynamic(() => import('../cart/Wishlist'), {
-  ssr: true,
+const WishlistButton = dynamic(() => import('../cart/WishlistButton'), {
   loading: () => <Skeleton className="w-5 h-5" />,
 });
 
@@ -19,8 +21,18 @@ const ProductCartInfo = dynamic(() => import('../cart/ProductCartInfo'), {
 
 export const Products = async (
   { products, extraClassname = "" }:
-    { products: any, extraClassname: string }
+    { products: EnrichedProducts[], extraClassname: string }
 ) => {
+  let wishlist: Wishlists | undefined = undefined
+  let session: Session | null = null
+
+  const hasMissingQuantity = products.some((product: EnrichedProducts) => !product.quantity);
+
+  if (hasMissingQuantity) {
+    wishlist = await getTotalWishlist();
+    session = await getServerSession(authOptions);
+  }
+
   return (
     <div className={`grid gap-x-3.5 gap-y-6 sm:gap-y-9 ${extraClassname === "colums-mobile" ? "grid-cols-auto-fill-110" : ""} ${extraClassname === "cart-ord-mobile" ? "grid-cols-1" : ""} sm:grid-cols-auto-fill-250`}>
       {products.map((product: EnrichedProducts, index: number) => {
@@ -41,7 +53,12 @@ export const Products = async (
             </Link>
             <div className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""} flex justify-between flex-col gap-2.5 p-3.5 bg-background-secondary z-10`}>
               <div className="flex justify-between w-full">
-                <Link href={`/${product?.category}/${product.quantity ? product.productId : product._id}`} className="w-10/12">
+                <Link
+                  href={`/${product?.category}/${product.quantity
+                    ? product.productId
+                    : product._id}`}
+                  className="w-10/12"
+                >
                   <h2 className="text-sm font-semibold truncate">
                     {product?.name}
                   </h2>
@@ -54,12 +71,18 @@ export const Products = async (
                     <DeleteButton product={product} />
                   )
                 ) : (
-                  <Wishlist product={product} />
+                  <WishlistButton
+                    session={session}
+                    productId={JSON.stringify(product._id)}
+                    wishlistString={JSON.stringify(wishlist)}
+                  />
                 )}
               </div>
               {!product.purchased && (
                 <div className="text-sm">
-                  {product?.quantity ? (product.price * product.quantity).toFixed(2) : product.price}€
+                  {product?.quantity
+                    ? (product.price * product.quantity).toFixed(2)
+                    : product.price}€
                 </div>
               )}
               {product.quantity !== undefined && (

@@ -1,6 +1,6 @@
 "use client"
 
-import { delItem } from '@/app/(carts)/wishlist/action';
+import { Wishlists, delItem } from '@/app/(carts)/wishlist/action';
 import { addItem } from '@/app/(carts)/wishlist/action';
 import { Schema } from 'mongoose';
 import { Session } from 'next-auth';
@@ -9,20 +9,31 @@ import { toast } from 'sonner';
 
 interface WishlistButton {
     session: Session | null,
-    isFavorite: boolean,
-    id: string
+    productId: string,
+    wishlistString: string
 }
 
 const WishlistButton = (
-    { session, isFavorite, id }: WishlistButton
+    { session, productId, wishlistString }: WishlistButton
 ) => {
-    const productId: Schema.Types.ObjectId = JSON.parse(id);
+    const id: Schema.Types.ObjectId = JSON.parse(productId);
+    const wishlist: Wishlists = JSON.parse(wishlistString)
+    let isFavorite: boolean = false;
+
+    if (session?.user) {
+        const favoriteItem = wishlist?.items.find(wishlistProduct => wishlistProduct.productId.toString() === id.toString());
+
+        if (favoriteItem) {
+            isFavorite = true;
+        }
+    }
+
     const handleFavorites = async () => {
         if (session?.user._id) {
             if (isFavorite) {
-                await delItem(productId);
+                await delItem(id);
             } else {
-                await addItem(productId);
+                await addItem(id);
             }
         } else {
             const warningMessage = 'You must be registered to be able to add a product to the wishlist.';

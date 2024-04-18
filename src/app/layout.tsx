@@ -25,7 +25,7 @@ export default async function RootLayout({
 }) {
   const session: Session | null = await getServerSession(authOptions);
   const totalItemsCart = await getTotalItems(session);
-  const totalItemsWishlists = await getTotalWishlist(session);
+  const totalItemsWishlists = await getTotalWishlist();
 
   return (
     <html lang="en">
