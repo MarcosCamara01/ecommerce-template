@@ -99,7 +99,8 @@ export async function getItems(userId: string) {
     return filteredWishlist;
 }
 
-export async function getTotalWishlist(session: Session | null) {
+export async function getTotalWishlist() {
+    const session: Session | null = await getServerSession(authOptions);
     const wishlists: Wishlists | null = await kv.get(`wishlist-${session?.user._id}`);
 
     if (wishlists === null) {
