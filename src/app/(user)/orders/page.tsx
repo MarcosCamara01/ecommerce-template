@@ -63,7 +63,7 @@ const Orders = async () => {
         <div className="grid items-center justify-between pt-12 grid-cols-auto-fill-350 gap-7">
             {orders.orders.map((order: OrderDocument, index: number) => (
                 <div key={index} className="w-full transition duration-150 border border-solid rounded border-border-primary bg-background-secondary hover:bg-color-secondary">
-                    <Link href={`/orders/${order._id}?items=${order.products.reduce((total, product) => total + product.quantity, 0)}`} className='flex flex-col justify-between h-full gap-2 px-4 py-5'>
+                    <Link href={`/orders/${order._id}?items=${order.products.length}`} className='flex flex-col justify-between h-full gap-2 px-4 py-5'>
                         <h4 className='font-semibold'>{`${format(order.purchaseDate, 'dd LLL yyyy')} | ${(order.total_price / 100).toFixed(2)}€ | Items: ${order.products.reduce((total, product) => total + product.quantity, 0)} `}</h4>
                         <p className='text-sm'>Order number: {order.orderNumber}</p>
                     </Link>
