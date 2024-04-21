@@ -57,19 +57,23 @@ export default function AddToCart({ product, session, selectedVariant, setSelect
                 <button
                     type="submit"
                     onClick={() => {
-                        if (session && selectedVariant !== undefined) {
-                            startTransition(() => addItem(
-                                product.category,
-                                product._id,
-                                selectedSize,
-                                selectedVariant.priceId,
-                                product.price
-                            ));
+                        if (session) {
+                            if (!selectedVariant?.priceId) {
+                                toast.info('You have to select a color to save the product.');
+                            } else if (!selectedSize) {
+                                toast.info('You have to select a size to save the product.');
+                            } else {
+                                startTransition(() => addItem(
+                                    product.category,
+                                    product._id,
+                                    selectedSize,
+                                    selectedVariant.priceId,
+                                    product.price
+                                ));
+                            }
                         } else {
                             if (!session) {
                                 toast.info("You must be registered to be able to add a product to the cart.");
-                            } else {
-                                toast.error("Unknown error");
                             }
                         }
                     }}
