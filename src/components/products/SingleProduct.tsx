@@ -3,7 +3,7 @@
 import { ProductImages } from "@/components/products/ProductImages";
 import { ProductDocument, VariantsDocument } from "@/types/types";
 import { Session } from "next-auth";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Accordion,
     AccordionContent,

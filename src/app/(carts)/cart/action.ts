@@ -8,7 +8,6 @@ import { authOptions } from "@/libs/auth";
 import { Session } from "next-auth";
 import { Product } from "@/models/Products";
 import { EnrichedProducts, VariantsDocument } from "@/types/types";
-import { toast } from "sonner";
 import { connectDB } from "@/libs/mongodb";
 
 export type Cart = {
@@ -86,14 +85,6 @@ export async function addItem(
     variantId: string,
     price: number
 ) {
-    if (!variantId) {
-        toast.info(`You have to select a color to save the product.`);
-        return;
-    } else if (!size) {
-        toast.info(`You have to select a size to save the product.`);
-        return;
-    }
-    
     const session: Session | null = await getServerSession(authOptions);
 
     if (!session?.user._id) {
