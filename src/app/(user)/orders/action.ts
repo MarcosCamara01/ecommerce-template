@@ -51,7 +51,7 @@ export const getOrder = async (orderId: string) => {
                     const matchingVariant = matchingProduct.variants.find((variant: VariantsDocument) => variant.color === product.color);
                     if (matchingVariant) {
                         return {
-                            _id: matchingProduct._id,
+                            productId: matchingProduct._id,
                             name: matchingProduct.name,
                             category: matchingProduct.category,
                             image: [matchingVariant.images[0]],
