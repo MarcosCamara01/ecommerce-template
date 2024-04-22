@@ -1,15 +1,16 @@
-import React, { useState, ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const SearchInput = () => {
+    const searchParams = useSearchParams()
     const router = useRouter();
 
-    const [value, setValue] = useState("");
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const searchQuery = e.currentTarget.value;
-        setValue(searchQuery);
-        router.replace(`/search?q=${encodeURIComponent(searchQuery)}`);
+    const handleChange = (term: string) => {
+        if (term) {
+            router.replace(`/search?q=${encodeURIComponent(term)}`);
+        } else {
+            router.replace('/search');
+        }
     };
 
     return (
@@ -21,12 +22,12 @@ const SearchInput = () => {
             </span>
             <input
                 placeholder="Search Products..."
-                value={value}
                 aria-label="Search"
                 className='w-full h-[40px] px-3 bg-[#0A0A0A] text-sm focus:outline-none'
                 type="search"
+                defaultValue={searchParams.get('q')?.toString()}
                 onChange={(e) => {
-                    handleChange(e)
+                    handleChange(e.target.value)
                 }}
             />
         </div>
