@@ -37,7 +37,10 @@ export const Products = async (
       {products.map((product: EnrichedProducts, index: number) => {
         return (
           <div className={`flex justify-between border border-solid border-border-primary rounded-md overflow-hidden ${extraClassname === "cart-ord-mobile" ? "flex-row sm:flex-col" : "flex-col"}`} key={index}>
-            <Link href={`/${product.category}/${product.quantity ? product.productId : product._id}`} className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""} hover:scale-105 transition-all`}>
+            <Link
+              href={`/${product.category}/${product.quantity ? product.productId : product._id}`}
+              className={`${extraClassname === "cart-ord-mobile" ? "w-6/12 sm:w-full" : ""} hover:scale-105 transition-all`}
+            >
               <Images
                 image={product.image}
                 name={product.name}
@@ -65,7 +68,9 @@ export const Products = async (
                 {product.quantity ? (
                   product.purchased ? (
                     product.quantity > 1 &&
-                    <span>{product.quantity}</span>
+                    <span className="text-sm">
+                      {product.quantity}  
+                    </span>
                   ) : (
                     <DeleteButton product={product} />
                   )

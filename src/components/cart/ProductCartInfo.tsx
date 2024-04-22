@@ -7,7 +7,7 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
     const quantityButtons = () => {
         if (product.purchased) {
             return (
-                <div>
+                <div className='text-sm'>
                     {product?.quantity
                         ? (product.price * product.quantity).toFixed(2)
                         : product.price}€
@@ -17,31 +17,20 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
             return (
                 <div className="flex bg-black w-min">
                     <button
-                        className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l border-border-primary '
+                        className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary '
                         onClick={() => delOneItem(
                             product.productId,
                             product.size,
                             product.variantId
                         )}
                     >
-                        <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 15 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M2.25 7.5C2.25 7.22386 2.47386 7 2.75 7H12.25C12.5261 7 12.75 7.22386 12.75 7.5C12.75 7.77614 12.5261 8 12.25 8H2.75C2.47386 8 2.25 7.77614 2.25 7.5Z"
-                                fill="currentColor"
-                                fillRule="evenodd"
-                                clipRule="evenodd"
-                            ></path>
+                        <svg data-test="geist-icon" height="14" strokeLinejoin="round" viewBox="0 0 16 16" width="14" style={{ color: 'currentColor' }}>
+                            <path fillRule="evenodd" clipRule="evenodd" d="M2 7.25H2.75H13.25H14V8.75H13.25H2.75H2V7.25Z" fill="currentColor"></path>
                         </svg>
                     </button>
                     <span className='flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary'>{product?.quantity}</span>
                     <button
-                        className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r border-border-primary'
+                        className='flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-[#A1A1A1] transition-all hover:text-white border-border-primary'
                         onClick={() => addItem(
                             product.category,
                             product.productId,
@@ -50,19 +39,8 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
                             product.price
                         )}
                     >
-                        <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 15 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M8 2.75C8 2.47386 7.77614 2.25 7.5 2.25C7.22386 2.25 7 2.47386 7 2.75V7H2.75C2.47386 7 2.25 7.22386 2.25 7.5C2.25 7.77614 2.47386 8 2.75 8H7V12.25C7 12.5261 7.22386 12.75 7.5 12.75C7.77614 12.75 8 12.5261 8 12.25V8H12.25C12.5261 8 12.75 7.77614 12.75 7.5C12.75 7.22386 12.5261 7 12.25 7H8V2.75Z"
-                                fill="currentColor"
-                                fillRule="evenodd"
-                                clipRule="evenodd"
-                            ></path>
+                        <svg data-test="geist-icon" height="14" strokeLinejoin="round" viewBox="0 0 16 16" width="14" style={{ color: 'currentColor' }}>
+                            <path fillRule="evenodd" clipRule="evenodd" d="M8.75 1.75V1H7.25V1.75V6.75H2.25H1.5V8.25H2.25H7.25V13.25V14H8.75V13.25V8.25H13.75H14.5V6.75H13.75H8.75V1.75Z" fill="currentColor"></path>
                         </svg>
                     </button>
                 </div>
