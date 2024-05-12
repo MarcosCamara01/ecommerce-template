@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export function useClientMediaQuery(query) {
   const [matches, setMatches] = useState(null);
@@ -12,11 +12,11 @@ export function useClientMediaQuery(query) {
       setMatches(e.matches);
     };
 
-    mediaQueryList.addEventListener('change', handleMatchChange);
+    mediaQueryList.addEventListener("change", handleMatchChange);
     setMatches(mediaQueryList.matches);
 
     return () => {
-      mediaQueryList.removeEventListener('change', handleMatchChange);
+      mediaQueryList.removeEventListener("change", handleMatchChange);
     };
   }, [query]);
 

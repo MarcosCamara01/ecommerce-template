@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     if (password.length < 6) {
       return NextResponse.json(
         { message: "Password must be at least 6 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     if (userFound) {
       return NextResponse.json(
         { message: "Email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -46,14 +46,11 @@ export async function POST(request: Request) {
         createdAt: savedUser.createdAt,
         updatedAt: savedUser.updatedAt,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      return NextResponse.json(
-        { message: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: error.message }, { status: 400 });
     } else {
       console.error("Error during signup:", error);
       return NextResponse.error();
@@ -65,22 +62,20 @@ export async function PUT(request: Request) {
   try {
     await connectDB();
 
-    const { userId, name, email, password, phone, address } = await request.json();
+    const { userId, name, email, password, phone, address } =
+      await request.json();
 
     if (password && password.length < 6) {
       return NextResponse.json(
         { message: "Password must be at least 6 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    
+
     const userToUpdate = await User.findById(userId);
 
     if (!userToUpdate) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     if (name) {
@@ -119,14 +114,11 @@ export async function PUT(request: Request) {
           updatedAt: userToUpdate.updatedAt,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      return NextResponse.json(
-        { message: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: error.message }, { status: 400 });
     } else {
       console.error("Error during user update:", error);
       return NextResponse.error();
@@ -143,17 +135,14 @@ export async function DELETE(request: Request) {
     const user = await User.findById(userId);
 
     if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
-    
+
     await user.remove();
 
     return NextResponse.json(
       { message: "User deleted successfully" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error during user/cart item deletion:", error);
