@@ -1,20 +1,36 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react';
-import Image, { ImageLoader } from 'next/image';
-import { Skeleton } from '../ui/skeleton';
+import React, { useState } from "react";
+import Image, { ImageLoader } from "next/image";
+import { Skeleton } from "../ui/skeleton";
 
 const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
-  const params = ['f_auto', 'c_limit', 'w_' + width, 'q_' + (quality || 'auto')];
-  const normalizeSrc = (src: string) => (src[0] === '/' ? src.slice(1) : src);
+  const params = [
+    "f_auto",
+    "c_limit",
+    "w_" + width,
+    "q_" + (quality || "auto"),
+  ];
+  const normalizeSrc = (src: string) => (src[0] === "/" ? src.slice(1) : src);
 
-  return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(',')}/${normalizeSrc(src)}`;
+  return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(",")}/${normalizeSrc(src)}`;
 };
 
-export const Images = (
-  { image, name, width, height, priority, sizes }:
-    { image: [string], name: string, width: number, height: number, priority: boolean, sizes: string }
-) => {
+export const Images = ({
+  image,
+  name,
+  width,
+  height,
+  priority,
+  sizes,
+}: {
+  image: [string];
+  name: string;
+  width: number;
+  height: number;
+  priority: boolean;
+  sizes: string;
+}) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleImageLoadComplete = () => {
@@ -22,7 +38,7 @@ export const Images = (
   };
 
   return (
-    <div className={!imageLoaded ? 'relative' : ''}>
+    <div className={!imageLoaded ? "relative" : ""}>
       <Image
         loader={cloudinaryLoader}
         width={width}
@@ -34,9 +50,15 @@ export const Images = (
         onLoad={handleImageLoadComplete}
         sizes={sizes}
       />
-      <div className={!imageLoaded ? 'absolute top-0 right-0 w-full aspect-[2/3] bg-black' : 'hidden'}>
+      <div
+        className={
+          !imageLoaded
+            ? "absolute top-0 right-0 w-full aspect-[2/3] bg-black"
+            : "hidden"
+        }
+      >
         <Skeleton className="w-full aspect-[2/3] rounded-b-none" />
       </div>
     </div>
-  )
-}
+  );
+};

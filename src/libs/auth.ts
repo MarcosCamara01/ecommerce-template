@@ -5,11 +5,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 
-export const authOptions: NextAuthOptions  = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions  = {
 
         const passwordMatch = await bcrypt.compare(
           credentials!.password,
-          userFound.password
+          userFound.password,
         );
 
         if (!passwordMatch) throw new Error("Invalid Password");
@@ -70,7 +70,7 @@ export const authOptions: NextAuthOptions  = {
           _id: token.id,
           name: token.name,
           phone: token.phone,
-        }
+        },
       };
     },
   },

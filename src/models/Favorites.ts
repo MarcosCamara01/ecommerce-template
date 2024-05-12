@@ -12,4 +12,5 @@ const FavoritesSchema = new Schema<FavoritesDocument>({
   },
 });
 
-export const Favorites = models.Favorites || model("Favorites", FavoritesSchema);
+export const Favorites =
+  models.Favorites || model("Favorites", FavoritesSchema);

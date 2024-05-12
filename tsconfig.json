@@ -22,6 +22,17 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/[category]/page.tsx", "src/app/api/auth/[...nextauth]/route.js", "src/app/api/checkout_sessions/route.ts", "src/app/user/account/profile/page.jsx", "src/app/api/stripe/payment/route.ts", "src/app/Providers.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/app/[category]/page.tsx",
+    "src/app/api/auth/[...nextauth]/route.js",
+    "src/app/api/checkout_sessions/route.ts",
+    "src/app/user/account/profile/page.jsx",
+    "src/app/api/stripe/payment/route.ts",
+    "src/app/Providers.js"
+  ],
   "exclude": ["node_modules"]
 }
