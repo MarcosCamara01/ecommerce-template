@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -17,33 +17,36 @@ const Signup = () => {
     }
   }, [session]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      const formData = new FormData(event.currentTarget);
-      const signupResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/signup`,
-        {
-          email: formData.get("email"),
-          password: formData.get("password"),
-          name: formData.get("name"),
-          phone: formData.get("phone"),
-        },
-      );
+  const handleSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      try {
+        const formData = new FormData(event.currentTarget);
+        const signupResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/signup`,
+          {
+            email: formData.get("email"),
+            password: formData.get("password"),
+            name: formData.get("name"),
+            phone: formData.get("phone"),
+          }
+        );
 
-      await signIn("credentials", {
-        email: signupResponse.data.email,
-        password: formData.get("password"),
-        redirect: false,
-      });
-    } catch (error) {
-      console.log(error);
-      if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data.message;
-        setError(errorMessage);
+        await signIn("credentials", {
+          email: signupResponse.data.email,
+          password: formData.get("password"),
+          redirect: false,
+        });
+      } catch (error) {
+        console.log(error);
+        if (error instanceof AxiosError) {
+          const errorMessage = error.response?.data.message;
+          setError(errorMessage);
+        }
       }
-    }
-  };
+    },
+    []
+  );
 
   return (
     <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">
@@ -100,10 +103,7 @@ const Signup = () => {
           />
           <button
             className="flex items-center text-[#A1A1A1] justify-center w-2/12 transition-all duration-150 border-[#2E2E2E] bg-black border-r border-solid rounded-r border-y ease hover:bg-[#1F1F1F]"
-            onClick={(e) => {
-              e.preventDefault();
-              setShowPassword(!showPassword);
-            }}
+            onClick={() => setShowPassword(!showPassword)}
             type="button"
           >
             {showPassword ? (

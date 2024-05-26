@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,23 +19,26 @@ const Signin = () => {
     }
   }, [session]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const res = await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      redirect: false,
-    });
+  const handleSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const res = await signIn("credentials", {
+        email: formData.get("email"),
+        password: formData.get("password"),
+        redirect: false,
+      });
 
-    if (res?.error) {
-      setError(res.error as string);
-    }
+      if (res?.error) {
+        setError(res.error as string);
+      }
 
-    if (!res?.error) {
-      return router.push("/");
-    }
-  };
+      if (!res?.error) {
+        return router.push("/");
+      }
+    },
+    []
+  );
 
   return (
     <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">

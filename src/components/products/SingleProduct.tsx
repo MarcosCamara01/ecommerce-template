@@ -19,7 +19,7 @@ interface SingleProduct {
 export const SingleProduct = ({ product, session }: SingleProduct) => {
   const productPlainObject: ProductDocument = JSON.parse(product);
   const [selectedVariant, setSelectedVariant] = useState<VariantsDocument>(
-    productPlainObject.variants[0],
+    productPlainObject.variants[0]
   );
 
   if (!product) {
