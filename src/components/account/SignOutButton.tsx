@@ -7,9 +7,7 @@ const SignOutButton = () => {
   return (
     <button
       className="flex items-center w-full h-full"
-      onClick={() => {
-        signOut();
-      }}
+      onClick={() => signOut()}
     >
       <svg
         data-testid="geist-icon"

@@ -1,17 +1,17 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const SearchInput = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const handleChange = (term: string) => {
+  const handleChange = useCallback((term: string) => {
     if (term) {
       router.replace(`/search?q=${encodeURIComponent(term)}`);
     } else {
       router.replace("/search");
     }
-  };
+  }, []);
 
   return (
     <div className="flex w-full border border-[#2E2E2E] rounded-md overflow-hidden">
@@ -38,9 +38,7 @@ const SearchInput = () => {
         className="w-full h-[40px] px-3 bg-[#0A0A0A] text-sm focus:outline-none"
         type="search"
         defaultValue={searchParams.get("q")?.toString()}
-        onChange={(e) => {
-          handleChange(e.target.value);
-        }}
+        onChange={(e) => handleChange(e.target.value)}
       />
     </div>
   );

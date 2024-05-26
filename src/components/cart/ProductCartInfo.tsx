@@ -1,27 +1,42 @@
 "use client";
 
+import { useCallback } from "react";
 import { EnrichedProducts } from "@/types/types";
 import { addItem, delOneItem } from "@/app/(carts)/cart/action";
 
 const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
-  const quantityButtons = () => {
-    if (product.purchased) {
+  const {
+    productId,
+    size,
+    variantId,
+    category,
+    price,
+    quantity,
+    purchased,
+    color,
+  } = product;
+
+  const handleAddItem = useCallback(() => {
+    addItem(category, productId, size, variantId, price);
+  }, [category, productId, size, variantId, price]);
+
+  const handleDelItem = useCallback(() => {
+    delOneItem(productId, size, variantId);
+  }, [productId, size, variantId]);
+
+  const quantityButtons = useCallback(() => {
+    if (purchased) {
       return (
         <div className="text-sm">
-          {product?.quantity
-            ? (product.price * product.quantity).toFixed(2)
-            : product.price}
-          €
+          {quantity ? (price * quantity).toFixed(2) : price}€
         </div>
       );
     } else {
       return (
         <div className="flex bg-black w-min">
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary "
-            onClick={() =>
-              delOneItem(product.productId, product.size, product.variantId)
-            }
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary"
+            onClick={handleDelItem}
           >
             <svg
               data-test="geist-icon"
@@ -40,19 +55,11 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
             </svg>
           </button>
           <span className="flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary">
-            {product?.quantity}
+            {quantity}
           </span>
           <button
             className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-[#A1A1A1] transition-all hover:text-white border-border-primary"
-            onClick={() =>
-              addItem(
-                product.category,
-                product.productId,
-                product.size,
-                product.variantId,
-                product.price,
-              )
-            }
+            onClick={handleAddItem}
           >
             <svg
               data-test="geist-icon"
@@ -73,24 +80,22 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
         </div>
       );
     }
-  };
+  }, [purchased, quantity, price, handleAddItem, handleDelItem]);
 
   return (
     <>
       <div className="flex sm:hidden">
-        <div className="text-sm pr-2.5 border-r">{product.size}</div>
-        <div className="text-sm pl-2.5">{product.color}</div>
+        <div className="text-sm pr-2.5 border-r">{size}</div>
+        <div className="text-sm pl-2.5">{color}</div>
       </div>
       <div className="flex items-center justify-between sm:hidden">
         {quantityButtons()}
       </div>
-
       <div className="items-center justify-between hidden sm:flex">
         {quantityButtons()}
-
         <div className="flex">
-          <div className="text-sm pr-2.5 border-r">{product.size}</div>
-          <div className="text-sm pl-2.5">{product.color}</div>
+          <div className="text-sm pr-2.5 border-r">{size}</div>
+          <div className="text-sm pl-2.5">{color}</div>
         </div>
       </div>
     </>

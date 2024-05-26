@@ -19,7 +19,7 @@ const Search: React.FC<SearchProps> = async ({ searchParams }) => {
 
   if (products) {
     filteredProducts = products.filter((product) =>
-      normalizeText(product.name).includes(normalizeText(searchParams.q || "")),
+      normalizeText(product.name).includes(normalizeText(searchParams.q || ""))
     );
   }
 

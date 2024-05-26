@@ -44,7 +44,7 @@ export const getOrder = async (orderId: string) => {
     const userId = session?.user._id;
     const userOrders: OrdersDocument | null = await Orders.findOne({ userId });
     const orderFound: OrderDocument | undefined = userOrders?.orders.find(
-      (order: OrderDocument) => order._id.toString() === orderId.toString(),
+      (order: OrderDocument) => order._id.toString() === orderId.toString()
     );
 
     if (!orderFound) {
@@ -57,7 +57,7 @@ export const getOrder = async (orderId: string) => {
         const matchingProduct = await Product.findById(product.productId);
         if (matchingProduct) {
           const matchingVariant = matchingProduct.variants.find(
-            (variant: VariantsDocument) => variant.color === product.color,
+            (variant: VariantsDocument) => variant.color === product.color
           );
           if (matchingVariant) {
             return {
@@ -74,11 +74,11 @@ export const getOrder = async (orderId: string) => {
           }
         }
         return null;
-      }),
+      })
     );
 
     const filteredEnrichedProducts = enrichedProducts.filter(
-      (product) => product !== null,
+      (product) => product !== null
     );
 
     const enrichedOrder = {
@@ -145,7 +145,7 @@ export const saveOrder = async (data: Stripe.Checkout.Session) => {
 
     if (userOrders) {
       const orderIdMatch = userOrders.orders.some(
-        (order: OrderDocument) => order.orderId === data.id,
+        (order: OrderDocument) => order.orderId === data.id
       );
       if (!orderIdMatch) {
         userOrders.orders.push(newOrder);

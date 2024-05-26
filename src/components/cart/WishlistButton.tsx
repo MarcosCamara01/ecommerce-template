@@ -1,13 +1,12 @@
 "use client";
 
-import { Wishlists, delItem } from "@/app/(carts)/wishlist/action";
-import { addItem } from "@/app/(carts)/wishlist/action";
+import React, { useMemo, useCallback } from "react";
+import { Wishlists, delItem, addItem } from "@/app/(carts)/wishlist/action";
 import { Schema } from "mongoose";
 import { Session } from "next-auth";
-import React from "react";
 import { toast } from "sonner";
 
-interface WishlistButton {
+interface WishlistButtonProps {
   session: Session | null;
   productId: string;
   wishlistString: string;
@@ -17,25 +16,25 @@ const WishlistButton = ({
   session,
   productId,
   wishlistString,
-}: WishlistButton) => {
-  const id: Schema.Types.ObjectId = JSON.parse(productId);
-  let isFavorite: boolean = false;
+}: WishlistButtonProps) => {
+  const id: Schema.Types.ObjectId = useMemo(
+    () => JSON.parse(productId),
+    [productId]
+  );
 
-  if (session?.user && wishlistString) {
-    const wishlist: Wishlists = JSON.parse(wishlistString);
-
-    const favoriteItem = wishlist?.items.find(
-      (wishlistProduct) =>
-        wishlistProduct.productId.toString() === id.toString(),
-    );
-
-    if (favoriteItem) {
-      isFavorite = true;
+  const isFavorite = useMemo(() => {
+    if (session?.user && wishlistString) {
+      const wishlist: Wishlists = JSON.parse(wishlistString);
+      return wishlist.items.some(
+        (wishlistProduct) =>
+          wishlistProduct.productId.toString() === id.toString()
+      );
     }
-  }
+    return false;
+  }, [session, wishlistString, id]);
 
-  const handleFavorites = async () => {
-    if (session?.user._id) {
+  const handleFavorites = useCallback(async () => {
+    if (session?.user?._id) {
       if (isFavorite) {
         await delItem(id);
       } else {
@@ -47,11 +46,11 @@ const WishlistButton = ({
       console.warn(warningMessage);
       toast.warning(warningMessage);
     }
-  };
+  }, [session, isFavorite, id]);
 
   return (
     <button
-      onClick={() => handleFavorites()}
+      onClick={handleFavorites}
       title={isFavorite ? "Remove from favorites" : "Add to favorites"}
     >
       {isFavorite ? (

@@ -38,10 +38,10 @@ const OrderProducts = async ({ id }: { id: string }) => {
   if (order) {
     const totalProducts = order.products.reduce(
       (total: number, product: any) => total + product.quantity,
-      0,
+      0
     );
     const allProducts: EnrichedProducts[] = order.products.filter(
-      Boolean,
+      Boolean
     ) as EnrichedProducts[];
     const productsText = totalProducts === 1 ? "item" : "items";
 
