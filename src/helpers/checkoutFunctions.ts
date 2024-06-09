@@ -1,11 +1,11 @@
 import Stripe from "stripe";
 
 export const fetchCheckoutData = async (
-  sessionId: string,
+  sessionId: string
 ): Promise<Stripe.Checkout.Session | undefined> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/checkout_sessions?session_id=${sessionId}`,
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/checkout_sessions?session_id=${sessionId}`
     ).then((res) => res.json());
     return response;
   } catch (err: any) {
@@ -28,7 +28,7 @@ async function sendCustomerEmail(data: Stripe.Checkout.Session) {
       {
         method: "POST",
         body: JSON.stringify(emailCustomer),
-      },
+      }
     );
 
     if (!responseCustomer.ok) {
@@ -44,8 +44,8 @@ async function sendCustomerEmail(data: Stripe.Checkout.Session) {
 
 async function sendOwnerEmail(data: Stripe.Checkout.Session) {
   const emailOwner = {
-    name: "Marcos",
-    email: "marcospenelascamara@gmail.com",
+    name: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
+    email: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
     message: `${data?.customer_details?.name} has made a new purchase, his/her email is: ${data?.customer_details?.email}`,
     subject: "A new purchase",
   };
@@ -56,7 +56,7 @@ async function sendOwnerEmail(data: Stripe.Checkout.Session) {
       {
         method: "POST",
         body: JSON.stringify(emailOwner),
-      },
+      }
     );
 
     if (!responseEmailOwner.ok) {
