@@ -13,9 +13,9 @@ const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
   ];
   const normalizeSrc = (src: string) => (src[0] === "/" ? src.slice(1) : src);
 
-  return `https://res.cloudinary.com/dckjqf2cq/image/upload/${params.join(
-    ","
-  )}/${normalizeSrc(src)}`;
+  return `https://res.cloudinary.com/${
+    process.env.CLOUDINARY_CLOUD_NAME
+  }/image/upload/${params.join(",")}/${normalizeSrc(src)}`;
 };
 
 export const Images = ({
