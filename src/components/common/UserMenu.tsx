@@ -9,21 +9,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import Link from "next/link";
-import { Session } from "next-auth";
 import dynamic from "next/dynamic";
 import SignOutButton from "../account/SignOutButton";
+import { useUser } from "@/hooks/useUser";
 
 const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
 });
 
-export function UserMenu({ fastSession }: { fastSession: Session }) {
+export function UserMenu() {
+  const { user } = useUser();
   return (
     <Dialog>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="text-sm px-4 py-2 font-medium transition-all text-[#A1A1A1] hover:text-[#EDEDED]">
-            {fastSession.user.name.split(" ")[0]}
+            {user?.user_metadata.name.split(" ")[0]}
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40">

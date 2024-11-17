@@ -1,10 +1,9 @@
 import { Products } from "@/components/products/Products";
 import Link from "next/link";
 import { getItems } from "./action";
-import { Session, getServerSession } from "next-auth";
-import { authOptions } from "@/libs/auth";
 import { Suspense } from "react";
 import { Loader } from "@/components/common/Loader";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
 export async function generateMetadata() {
   return {
@@ -14,9 +13,9 @@ export async function generateMetadata() {
 }
 
 const Wishlists = async () => {
-  const session: Session | null = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (session?.user) {
+  if (user) {
     return (
       <Suspense
         fallback={
@@ -25,7 +24,7 @@ const Wishlists = async () => {
           </div>
         }
       >
-        <ProductsWishlists session={session} />
+        <ProductsWishlists />
       </Suspense>
     );
   }
@@ -46,8 +45,14 @@ const Wishlists = async () => {
   );
 };
 
-const ProductsWishlists = async ({ session }: { session: Session }) => {
-  const filteredWishlist = await getItems(session.user._id);
+const ProductsWishlists = async () => {
+  const user = await getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const filteredWishlist = await getItems(user.id);
 
   if (filteredWishlist && filteredWishlist?.length > 0) {
     return (

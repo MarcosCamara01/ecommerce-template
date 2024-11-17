@@ -1,13 +1,11 @@
 "use server";
 
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/libs/auth";
-import { Session } from "next-auth";
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
 import { kv } from "@vercel/kv";
 import { revalidatePath } from "next/cache";
 import { Product } from "@/models/Products";
 import { connectDB } from "@/libs/mongodb";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
 export type Wishlists = {
   userId: string;
@@ -17,14 +15,14 @@ export type Wishlists = {
 };
 
 export async function addItem(productId: Schema.Types.ObjectId) {
-  const session: Session | null = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (!session?.user._id) {
+  if (!user?.id) {
     console.error(`User Id not found.`);
     return;
   }
 
-  const userId = session.user._id;
+  const userId = user.id;
   let wishlists: Wishlists | null = await kv.get(`wishlist-${userId}`);
 
   let myWishlists = {} as Wishlists;
@@ -100,9 +98,9 @@ export async function getItems(userId: string) {
 }
 
 export async function getTotalWishlist() {
-  const session: Session | null = await getServerSession(authOptions);
+  const user = await getUser();
   const wishlists: Wishlists | null = await kv.get(
-    `wishlist-${session?.user._id}`,
+    `wishlist-${user?.id}`,
   );
 
   if (wishlists === null) {
@@ -113,8 +111,8 @@ export async function getTotalWishlist() {
 }
 
 export async function delItem(productId: Schema.Types.ObjectId) {
-  const session: Session | null = await getServerSession(authOptions);
-  const userId = session?.user._id;
+  const user = await getUser();
+  const userId = user?.id;
 
   if (!userId) {
     console.error("User not found.");

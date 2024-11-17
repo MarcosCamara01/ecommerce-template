@@ -1,14 +1,12 @@
 import React from "react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/libs/auth";
-import { Session } from "next-auth";
 import { redirect } from "next/navigation";
 import Signin from "@/components/account/Signin";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
 const Login = async () => {
-  const session: Session | null = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (session) {
+  if (user) {
     redirect("/");
   } else {
     return <Signin />;
