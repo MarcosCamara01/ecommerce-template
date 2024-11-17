@@ -9,36 +9,59 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserDocument } from "@/types/types";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { toast } from "sonner";
+import { useUser } from "@/hooks/useUser";
+import { useMutation } from "@tanstack/react-query";
+import LoadingButton from "../ui/loadingButton";
+import { supabase } from "@/libs/supabase";
+
+
 
 export default function EditProfile() {
-  const [user, setUser] = useState<UserDocument>({} as UserDocument);
-  const { data: session, update } = useSession();
+  const { user: currentUser } = useUser();
 
-  useEffect(() => {
-    if (session && session.user) {
-      setUser(session.user as UserDocument);
-    }
-  }, [session]);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+
+  const { mutate: updateProfile, isPending } = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          name: nameRef.current?.value,
+          phone: phoneRef.current?.value,
+        },
+      });
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      toast.success("Perfil actualizado exitosamente");
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
 
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>Edit profile</DialogTitle>
+        <DialogTitle>Editar perfil</DialogTitle>
         <DialogDescription>
-          Make changes to your profile here. Click save when you&apos;re done.
+          Realiza cambios en tu perfil aquí. Haz clic en guardar cuando hayas
+          terminado.
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4 py-4">
         <div className="grid items-center grid-cols-4 gap-4">
           <Label htmlFor="name" className="text-right">
-            Name
+            Nombre
           </Label>
           <Input
             id="name"
-            defaultValue={session?.user.name}
-            onChange={(e) => setUser({ ...user, name: e.target.value })}
+            ref={nameRef}
+            defaultValue={currentUser?.user_metadata?.name || ""}
             className="col-span-3"
           />
         </div>
@@ -48,34 +71,31 @@ export default function EditProfile() {
           </Label>
           <Input
             id="email"
-            defaultValue={session?.user.email}
-            disabled={session?.user.image ? true : false}
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
+            defaultValue={currentUser?.email || ""}
+            disabled={true}
             className="col-span-3"
           />
         </div>
         <div className="grid items-center grid-cols-4 gap-4">
           <Label htmlFor="Phone" className="text-right">
-            Phone
+            Teléfono
           </Label>
           <Input
             id="phone"
-            defaultValue={session?.user.phone}
-            disabled={session?.user.image ? true : false}
-            onChange={(e) => setUser({ ...user, phone: e.target.value })}
+            ref={phoneRef}
+            defaultValue={currentUser?.user_metadata?.phone || ""}
             className="col-span-3"
           />
         </div>
       </div>
       <DialogFooter>
-        <button
-          onClick={() => {
-            update({ ...user });
-          }}
-          className="text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-[#1F1F1F] hover:border-[#454545]"
+        <LoadingButton
+          onClick={() => updateProfile()}
+          loading={isPending}
+          className="text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px]"
         >
-          Save changes
-        </button>
+          Guardar cambios
+        </LoadingButton>
       </DialogFooter>
     </DialogContent>
   );

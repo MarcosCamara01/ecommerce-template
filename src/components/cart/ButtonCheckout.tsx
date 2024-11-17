@@ -5,15 +5,15 @@ import { ItemDocument } from "@/types/types";
 import { useTransition, useCallback, useMemo } from "react";
 import { Loader } from "../common/Loader";
 import { toast } from "sonner";
-import { Session } from "next-auth";
+import { useUser } from "@/hooks/useUser";
 
 interface ButtonCheckoutProps {
   cartWithProducts: ItemDocument[];
-  session: Session | null;
 }
 
-const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckoutProps) => {
+const ButtonCheckout = ({ cartWithProducts }: ButtonCheckoutProps) => {
   let [isPending, startTransition] = useTransition();
+  const { user } = useUser();
 
   const lineItems = useMemo(
     () =>
@@ -28,7 +28,7 @@ const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckoutProps) => {
   );
 
   const buyProducts = useCallback(async () => {
-    if (!session) {
+    if (!user) {
       toast.error("User information not found");
       return;
     }
@@ -36,7 +36,7 @@ const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckoutProps) => {
     try {
       const { data } = await axios.post("/api/stripe/payment", {
         lineItems,
-        userId: session.user._id,
+        userId: user.id,
       });
 
       if (data.statusCode === 500) {
@@ -52,7 +52,7 @@ const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckoutProps) => {
         "An error occurred while processing your request. Please try again."
       );
     }
-  }, [session, lineItems]);
+  }, [user, lineItems]);
 
   return (
     <button
