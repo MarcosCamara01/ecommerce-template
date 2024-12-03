@@ -105,6 +105,7 @@ export interface UserDocument {
   address: AddressDocument;
   image: string;
   _id: string;
+  isAdmin: boolean,
   createdAt: Date;
   updatedAt: Date;
 }
