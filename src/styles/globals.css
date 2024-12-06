@@ -60,7 +60,7 @@ a {
 }
 
 main {
-  padding: 0 48px 102px;
+  padding: 0 0px 102px;
   min-height: calc(100vh - 97px);
 }
 

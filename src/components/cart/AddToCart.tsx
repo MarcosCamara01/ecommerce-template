@@ -21,7 +21,7 @@ export default function AddToCart({
   selectedVariant,
   setSelectedVariant,
 }: AddToCartProps) {
-  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0]);
   const [isPending, startTransition] = useTransition();
 
   const handleAddToCart = useCallback(() => {
@@ -31,7 +31,7 @@ export default function AddToCart({
       );
       return;
     }
-    if (!selectedVariant?.priceId) {
+    if (!selectedVariant?._id) {
       toast.info("You have to select a color to save the product.");
       return;
     }
@@ -44,7 +44,7 @@ export default function AddToCart({
         product.category,
         product._id,
         selectedSize,
-        selectedVariant.priceId,
+        selectedVariant.sku,
         product.price
       );
     });

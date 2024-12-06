@@ -23,6 +23,7 @@ const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckoutProps) => {
         variantId: cartItem.variantId,
         size: cartItem.size,
         color: cartItem.color,
+        stripePriceId: cartItem.stripePriceId,
       })),
     [cartWithProducts]
   );

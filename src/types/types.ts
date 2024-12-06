@@ -26,6 +26,7 @@ export interface EnrichedProducts {
   productId: Schema.Types.ObjectId;
   _id: Schema.Types.ObjectId;
   variantId: string;
+  stripePriceId: string;
 }
 
 export interface OrdersDocument extends Document {
@@ -77,11 +78,12 @@ export interface ItemDocument {
   quantity: number;
   variantId: string;
   price: number;
+  stripePriceId: string;
 }
 
 export interface ProductDocument extends Document {
   name: string;
-  description: string;
+  description: [string];
   price: number;
   category: string;
   sizes: [string];
@@ -93,8 +95,12 @@ export interface ProductDocument extends Document {
 }
 
 export interface VariantsDocument {
-  priceId: string;
+  _id: string;
+  name: string;
+  sku: string;
+  stock: number;
   color: string;
+  stripePriceId: string;
   images: [string];
 }
 export interface UserDocument {

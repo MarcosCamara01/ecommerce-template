@@ -2,7 +2,19 @@ import { ProductDocument, VariantsDocument } from "@/types/types";
 import mongoose, { model, Model, Schema } from "mongoose";
 
 const VariantsSchema = new Schema<VariantsDocument>({
-  priceId: {
+  name: {
+    type: String,
+    required: true,
+  },
+  sku: {
+    type: String,
+    required: true,
+  },
+  stock: {
+    type: Number, 
+    required: true,
+  },
+  stripePriceId: {
     type: String,
     required: true,
   },
@@ -22,7 +34,7 @@ const ProductSchema: Schema = new Schema<ProductDocument>({
     required: true,
   },
   description: {
-    type: String,
+    type: [String],
     required: true,
   },
   price: {

@@ -199,7 +199,7 @@ export const Navbar = ({ session, totalItemsCart, totalWishlists }: Navbar) => {
         </li>
       </ul>
 
-      <SearchInput />
+      {/* <SearchInput /> */}
 
       <ul className="flex gap-2">
         <li className="flex items-center justify-center">

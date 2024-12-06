@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const lineItemsList = await lineItems.map((item: any) => {
       const matchingProduct = products.find(
-        (product) => product.id === item.variantId,
+        (product) => product.id === item.stripePriceId,
       );
 
       if (!matchingProduct) {

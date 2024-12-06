@@ -48,9 +48,9 @@ export async function getItems(userId: string) {
           continue;
         } else {
           const matchingVariant = matchingProduct.variants.find(
-            (variant: VariantsDocument) =>
-              variant.priceId === cartItem.variantId,
-          );
+            (variant: VariantsDocument) => {
+              return variant.sku === cartItem.variantId;
+            });
           const updatedCartItem: EnrichedProducts = {
             ...cartItem,
             color: matchingVariant.color,
@@ -59,6 +59,7 @@ export async function getItems(userId: string) {
             name: matchingProduct.name,
             purchased: false,
             _id: matchingProduct._id.toString(),
+            stripePriceId: matchingVariant.stripePriceId,
           };
 
           updatedCart.push(updatedCartItem);

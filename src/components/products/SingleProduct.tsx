@@ -42,7 +42,23 @@ export const SingleProduct = ({ product, session }: SingleProduct) => {
               {productPlainObject.name}
             </h1>
             <span className="text-sm">{productPlainObject.price}€</span>
-            <p className="text-sm">{productPlainObject.description}</p>
+            <ul className="pl-5 text-sm space-y-2">
+              {productPlainObject.description.map((bullet, index) => {
+                const [label, content] = bullet.split(':');
+                return (
+                  <li key={index} className="list-disc">
+                    {label && content ? (
+                      <>
+                        <strong>{label}:</strong>
+                        {content}
+                      </>
+                    ) : (
+                      bullet
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
           <AddToCart
