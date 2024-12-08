@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import Providers from "./Providers";
-import { Navbar } from "../components/common/Navbar";
+import { Navbar, NavigationAwareHeader } from "../components/common/Navbar";
 import { Footer } from "../components/common/Footer";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -10,8 +10,10 @@ import { Session, getServerSession } from "next-auth";
 import { authOptions } from "@/libs/auth";
 import { getTotalItems } from "./(carts)/cart/action";
 import { getTotalWishlist } from "./(carts)/wishlist/action";
+import { headers } from "next/headers";
 
 import "../styles/globals.css";
+import { AdminNavbar } from "@/components/admin/AdminNavbar";
 
 export const metadata: Metadata = {
   title: "Ecommerce Template",
@@ -31,11 +33,10 @@ export default async function RootLayout({
     <html lang="en">
       <Providers>
         <body className={GeistSans.className}>
-          <Navbar
+          <NavigationAwareHeader
             session={session}
             totalItemsCart={totalItemsCart}
-            totalWishlists={totalItemsWishlists?.items.length}
-          />
+            totalWishlists={totalItemsWishlists?.items.length}/>
           <main className="pointer-events-auto">
             {children}
             <Toaster position="top-right" />

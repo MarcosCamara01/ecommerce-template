@@ -57,7 +57,7 @@ export const getOrder = async (orderId: string) => {
         const matchingProduct = await Product.findById(product.productId);
         if (matchingProduct) {
           const matchingVariant = matchingProduct.variants.find(
-            (variant: VariantsDocument) => variant.color === product.color
+            (variant: VariantsDocument) => variant.sku === product.sku
           );
           if (matchingVariant) {
             return {
@@ -69,6 +69,7 @@ export const getOrder = async (orderId: string) => {
               purchased: true,
               color: product.color,
               size: product.size,
+              sku: product.sku,
               quantity: product.quantity,
             };
           }
@@ -122,6 +123,7 @@ export const saveOrder = async (data: Stripe.Checkout.Session) => {
       size: item.size,
       color: item.color,
       image: item.image,
+      sku: item.variantId,
     }));
 
     const newOrder: any = {
