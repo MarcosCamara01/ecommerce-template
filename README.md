@@ -84,24 +84,25 @@ npx auth secret
 ## 📁 Project Structure
 ```
 src/
-├── components/    
-│   ├── layout/         # Layout components
-│   ├── products/       # Product-related components
-│   ├── cart/          # Shopping cart components
-│   ├── auth/          # Authentication components
-│   └── ui/            # Reusable UI components
-├── pages/            
+├── app/              
 │   ├── api/           # API endpoints
 │   ├── products/      # Product pages
 │   ├── cart/          # Cart pages
 │   ├── checkout/      # Checkout process
 │   ├── admin/         # Admin dashboard
-│   └── auth/          # Authentication pages
+│   ├── auth/          # Authentication pages
+│   └── layout.tsx     # Root layout
+├── components/    
+│   ├── layout/        # Layout components
+│   ├── products/      # Product-related components
+│   ├── cart/          # Shopping cart components
+│   ├── auth/          # Authentication components
+│   └── ui/            # Reusable UI components
 ├── styles/            # CSS and styling
 ├── lib/              
-│   ├── mongodb.js     # Database configuration
-│   ├── auth.js        # Authentication utilities
-│   └── cart.js        # Cart management
+│   ├── mongodb.ts     # Database configuration
+│   ├── auth.ts        # Authentication utilities
+│   └── cart.ts        # Cart management
 ├── models/            # MongoDB models
 └── utils/            # Helper functions
 ```
