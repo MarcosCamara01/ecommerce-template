@@ -27,6 +27,10 @@ const UserSchema = new Schema<UserDocument>(
       type: String,
       default: "",
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,

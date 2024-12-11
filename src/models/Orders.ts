@@ -27,6 +27,10 @@ const ProductsSchema = new Schema<ProductsDocument>({
     type: Number,
     required: false,
   },
+  sku: {
+    type: String,
+    required: true,
+  }
 });
 
 const AddressSchema = new Schema<AddressDocument>({

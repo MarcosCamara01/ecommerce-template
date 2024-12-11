@@ -58,6 +58,7 @@ export const authOptions: NextAuthOptions = {
           ...token,
           id: u.id,
           phone: u.phone,
+          isAdmin: u.isAdmin, // Add this line
         };
       }
       return token;
@@ -70,6 +71,7 @@ export const authOptions: NextAuthOptions = {
           _id: token.id,
           name: token.name,
           phone: token.phone,
+          isAdmin: token.isAdmin, // Add this line
         },
       };
     },

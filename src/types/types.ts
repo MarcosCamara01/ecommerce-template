@@ -1,5 +1,11 @@
 import { Document, Schema } from "mongoose";
 
+export enum ProductState {
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
+  DRAFT = "draft"
+}
+
 export interface EnrichedOrders {
   name: string;
   email: string;
@@ -13,6 +19,30 @@ export interface EnrichedOrders {
   purchaseDate: string;
   _id: string;
 }
+
+export interface ProductFormInput {
+  name: string;
+  description: string[]; // Array of strings for descriptions
+  price: number;
+  category: string;
+  sizes: string[]; // Array of strings for sizes
+  image: string[]; // Array of strings for image URLs
+  variants: VariantFormInput[]; // Array of variants
+  quantity: number;
+  productId: string; // Assuming this is a string for the form
+  purchased: boolean;
+  state: ProductState; // Assuming ProductState is defined elsewhere
+}
+
+export interface VariantFormInput {
+  name: string;
+  sku: string;
+  stock: number;
+  color: string;
+  stripePriceId: string; // Assuming this is needed
+  images: string[]; // Array of image URLs for the variant
+}
+
 
 export interface EnrichedProducts {
   name: string;
@@ -59,6 +89,7 @@ export interface AddressDocument {
 
 export interface ProductsDocument {
   productId: Schema.Types.ObjectId;
+  sku: string;
   image: string;
   color: string;
   size: string;
@@ -80,7 +111,6 @@ export interface ItemDocument {
   price: number;
   stripePriceId: string;
 }
-
 export interface ProductDocument extends Document {
   name: string;
   description: [string];
@@ -92,6 +122,9 @@ export interface ProductDocument extends Document {
   quantity: number;
   productId: Schema.Types.ObjectId;
   purchased: boolean;
+  state: ProductState;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface VariantsDocument {

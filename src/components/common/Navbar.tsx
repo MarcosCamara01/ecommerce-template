@@ -8,6 +8,8 @@ import { UserMenu } from "./UserMenu";
 import SearchInput from "./SearchInput";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import dynamic from "next/dynamic";
+import { AdminNavbar } from "../admin/AdminNavbar";
+import { usePathname } from "next/navigation";
 
 const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
@@ -16,6 +18,28 @@ const EditProfile = dynamic(() => import("./EditProfile"), {
 const SignOutButton = dynamic(() => import("../account/SignOutButton"), {
   ssr: false,
 });
+
+export const NavigationAwareHeader = ({ 
+  session, 
+  totalItemsCart, 
+  totalWishlists 
+}: { 
+  session: Session | null;
+  totalItemsCart: number;
+  totalWishlists: number | undefined;
+}) => {
+  const pathname = usePathname();
+  
+  return pathname.startsWith('/admin') ? (
+    <AdminNavbar session={session} />
+  ) : (
+    <Navbar
+      session={session}
+      totalItemsCart={totalItemsCart}
+      totalWishlists={totalWishlists}
+    />
+  );
+};
 
 interface Navbar {
   session: Session | null;
