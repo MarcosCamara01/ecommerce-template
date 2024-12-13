@@ -2,8 +2,8 @@ import Image from "next/image";
 
 const MainBanner = () => {
   return (
-    <div className="relative w-full" style={{ aspectRatio: "20/10"}}>
-    {/* <div className="relative w-full h-[200px] sm:h-[500px]"> */}
+    <div className="relative w-full" style={{ aspectRatio: "20/10" }}>
+      {/* <div className="relative w-full h-[200px] sm:h-[500px]"> */}
       <Image
         src="/clouds.jpg"
         alt="Clouds background"
@@ -26,4 +26,3 @@ const MainBanner = () => {
 };
 
 export default MainBanner;
-
