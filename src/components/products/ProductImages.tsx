@@ -33,7 +33,7 @@ export const ProductImages = ({ name, images }: ProductImages) => {
                 >
                     <CarouselContent>
                         {images.map((image: string, index: number) => (
-                            <CarouselItem key={index} className="pl-0">
+                            <CarouselItem key={index} className="items-center">
                                 <Images
                                     image={[image]}
                                     name={`${name}: Image ${index + 1}`}

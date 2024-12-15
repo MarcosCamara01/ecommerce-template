@@ -23,7 +23,7 @@ export const SingleProduct = ({ product, session }: SingleProduct) => {
     );
 
     if (!product) {
-        return <div>Produnct not found</div>;
+        return <div>Product not found</div>;
     }
 
     return (
@@ -87,30 +87,29 @@ export const SingleProduct = ({ product, session }: SingleProduct) => {
                         </AccordionTrigger>
                         <AccordionContent>
                             <p>
-                                We work with monitoring programmes to ensure
+                                {/* We work with monitoring programmes to ensure
                                 compliance with our social, environmental and
                                 health and safety standards for our products. To
                                 assess compliance, we have developed a programme
-                                of audits and continuous improvement plans.
+                                of audits and continuous improvement plans. */}
+                                HaloDrive is built from durable, high-quality
+                                materials and designed for seamless phone
+                                connectivity. It is crafted to align with strict
+                                social standards, ensuring ethical and
+                                responsible practices throughout its development
+                                and production processes.
                             </p>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2">
                         <AccordionTrigger className="text-sm">
-                            CARE
+                            SECURITY
                         </AccordionTrigger>
                         <AccordionContent className="flex flex-col gap-2">
                             <p>
-                                {" "}
-                                Caring for your clothes is caring for the
-                                environment.
-                            </p>
-                            <p>
-                                Lower temperature washes and delicate spin
-                                cycles are gentler on garments and help to
-                                protect the colour, shape and structure of the
-                                fabric. Furthermore, they reduce the amount of
-                                energy used in care processes.
+                                HaloDrive ensures your data stays safe with
+                                password-encrypted storage, providing peace of
+                                mind and secure access wherever you go.
                             </p>
                         </AccordionContent>
                     </AccordionItem>
@@ -120,17 +119,19 @@ export const SingleProduct = ({ product, session }: SingleProduct) => {
                         </AccordionTrigger>
                         <AccordionContent className="flex flex-col gap-2">
                             <p>
-                                We work with our suppliers, workers, unions and
-                                international organisations to develop a supply
-                                chain in which human rights are respected and
-                                promoted, contributing to the United Nations
-                                Sustainable Development Goals.
+                                We collaborate closely with our suppliers to
+                                ensure ethical practices and transparency
+                                throughout the production process. By fostering
+                                relationships with workers, unions, and
+                                organizations, we promote human rights and
+                                contribute to the United Nations Sustainable
+                                Development Goals.
                             </p>
                             <p>
-                                Thanks to the collaboration with our suppliers,
-                                we work to know the facilities and processes
-                                used to manufacture our products in order to
-                                understand their traceability.
+                                Understanding the facilities and methods used to
+                                create HaloDrive is essential to maintaining
+                                traceability and upholding our commitment to
+                                responsible sourcing.
                             </p>
                             <p>Made in Portugal</p>
                         </AccordionContent>
