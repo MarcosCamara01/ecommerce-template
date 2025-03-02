@@ -5,27 +5,27 @@ import { ProductDocument, VariantsDocument } from "@/types/types";
 import { colorMapping } from "@/helpers/colorMapping";
 import { addItem } from "@/app/(carts)/cart/action";
 import { Loader } from "../common/Loader";
-import { Session } from "next-auth";
 import { toast } from "sonner";
+import { useUser } from "@/hooks/useUser";
 
 interface AddToCartProps {
   product: ProductDocument;
-  session: Session | null;
   selectedVariant: VariantsDocument | undefined;
   setSelectedVariant: (variant: VariantsDocument) => void;
 }
 
 export default function AddToCart({
   product,
-  session,
   selectedVariant,
   setSelectedVariant,
 }: AddToCartProps) {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [isPending, startTransition] = useTransition();
 
+  const { user } = useUser();
+
   const handleAddToCart = useCallback(() => {
-    if (!session) {
+    if (!user) {
       toast.info(
         "You must be registered to be able to add a product to the cart."
       );
@@ -42,13 +42,13 @@ export default function AddToCart({
     startTransition(() => {
       addItem(
         product.category,
-        product._id,
+        product.id,
         selectedSize,
         selectedVariant.priceId,
         product.price
       );
     });
-  }, [session, selectedVariant, selectedSize, product, startTransition]);
+  }, [user, selectedVariant, selectedSize, product, startTransition]);
 
   return (
     <>

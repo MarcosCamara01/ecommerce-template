@@ -3,12 +3,10 @@
 import { kv } from "@vercel/kv";
 import { revalidatePath } from "next/cache";
 import { Schema } from "mongoose";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/libs/auth";
-import { Session } from "next-auth";
 import { Product } from "@/models/Products";
 import { EnrichedProducts, VariantsDocument } from "@/types/types";
 import { connectDB } from "@/libs/mongodb";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
 export type Cart = {
   userId: string;
@@ -74,8 +72,9 @@ export async function getItems(userId: string) {
   return filteredCart;
 }
 
-export async function getTotalItems(session: Session | null) {
-  const cart: Cart | null = await kv.get(`cart-${session?.user._id}`);
+export async function getTotalItems() {
+  const user = await getUser();
+  const cart: Cart | null = await kv.get(`cart-${user?.id}`);
   const total: number =
     cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
@@ -89,14 +88,14 @@ export async function addItem(
   variantId: string,
   price: number,
 ) {
-  const session: Session | null = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (!session?.user._id) {
+  if (!user?.id) {
     console.error(`User Id not found.`);
     return;
   }
 
-  const userId = session.user._id;
+  const userId = user.id;
   let cart: Cart | null = await kv.get(`cart-${userId}`);
 
   let myCart = {} as Cart;
@@ -149,8 +148,8 @@ export async function delItem(
   size: string,
   variantId: string,
 ) {
-  const session: Session | null = await getServerSession(authOptions);
-  const userId = session?.user._id;
+  const user = await getUser();
+  const userId = user?.id;
   let cart: Cart | null = await kv.get(`cart-${userId}`);
 
   if (cart && cart.items) {
@@ -177,8 +176,8 @@ export async function delOneItem(
   variantId: string,
 ) {
   try {
-    const session: Session | null = await getServerSession(authOptions);
-    const userId = session?.user._id;
+    const user = await getUser();
+    const userId = user?.id;
     let cart: Cart | null = await kv.get(`cart-${userId}`);
 
     if (cart && cart.items) {

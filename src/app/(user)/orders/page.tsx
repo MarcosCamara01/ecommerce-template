@@ -4,8 +4,7 @@ import { OrderDocument, OrdersDocument } from "@/types/types";
 import { getUserOrders } from "./action";
 import { Suspense } from "react";
 import { Loader } from "@/components/common/Loader";
-import { Session, getServerSession } from "next-auth";
-import { authOptions } from "@/libs/auth";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
 export async function generateMetadata() {
   return {
@@ -14,9 +13,9 @@ export async function generateMetadata() {
 }
 
 const UserOrders = async () => {
-  const session: Session | null = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (session?.user) {
+  if (user) {
     return (
       <Suspense
         fallback={
