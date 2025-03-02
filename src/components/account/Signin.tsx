@@ -1,44 +1,56 @@
 "use client";
-
-import { FormEvent, useCallback, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+// FUNCTIONALITY
+import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MdError, MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { FaGoogle } from "react-icons/fa";
+import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/libs/supabase";
-
+// COMPONENTS
+import { PasswordInput } from "./form/PasswordInput";
+// ICONS
+import { MdError } from "react-icons/md";
+import { FaGoogle } from "react-icons/fa";
+import LoadingButton from "../ui/loadingButton";
 
 const Signin = () => {
   const router = useRouter();
 
-  const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const formData = new FormData(event.currentTarget);
-      const email = formData.get("email") as string;
-      const password = formData.get("password") as string;
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const [error, setError] = useState("");
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      if (!emailRef.current?.value || !passwordRef.current?.value) {
+        throw new Error("Please fill in all fields");
+      }
 
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: emailRef.current.value,
+        password: passwordRef.current.value,
       });
 
       if (error) {
-        setError(error.message);
-        return;
+        throw error;
       }
 
+      return data;
+    },
+    onError: (error: any) => {
+      setError(error.message);
+    },
+    onSuccess: (data) => {
       if (data.user) {
         router.push("/");
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  });
 
-  const handleGoogleSignIn = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); 
+  const handleGoogleSignIn = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
     });
@@ -51,9 +63,11 @@ const Signin = () => {
   return (
     <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">
       <form
-        className="p-6 xs:p-10	w-full max-w-350 flex flex-col justify-between items-center gap-2.5	
-                border border-solid border-[#2E2E2E] bg-[#0A0A0A] rounded-md"
-        onSubmit={handleSubmit}
+        className="p-6 xs:p-10	w-full max-w-350 flex flex-col justify-between items-center gap-2.5	border border-solid border-[#2E2E2E] bg-[#0A0A0A] rounded-md"
+        onSubmit={(e) => {
+          e.preventDefault();
+          mutate();
+        }}
       >
         {error && (
           <div className="text-[#FF6166] flex items-center justify-center gap-2">
@@ -73,28 +87,16 @@ const Signin = () => {
           name="email"
         />
 
-        <label className={labelStyles}>Password:</label>
-        <div className="flex w-full">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            className="w-full text-[#A1A1A1] h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded-l bg-black text-13"
-            name="password"
-          />
-          <button
-            className="flex text-[#A1A1A1] items-center justify-center w-2/12 transition duration-150 bg-black border-r border-solid rounded-r border-y border-[#2E2E2E] ease hover:bg-[#1F1F1F]"
-            onClick={() => setShowPassword(!showPassword)}
-            type="button"
-          >
-            {showPassword ? <MdVisibility /> : <MdVisibilityOff />}
-          </button>
-        </div>
-        <button
+        <label className="w-full text-sm">Password:</label>
+        <PasswordInput ref={passwordRef} onChange={() => setError("")} />
+
+        <LoadingButton
+          loading={isPending}
           className="w-full bg-black border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-[#1F1F1F] hover:border-[#454545] text-13"
           type="submit"
         >
-          Sign in
-        </button>
+          {isPending ? "Signing in..." : "Sign in"}
+        </LoadingButton>
 
         <div className="relative flex items-center justify-center w-full h-10">
           <div className="absolute w-full h-px top-2/4 bg-[#2E2E2E]"></div>

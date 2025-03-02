@@ -1,16 +1,17 @@
 "use client";
 
+// FUNCTIONALITY
 import { useRef, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MdError, MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { FaGoogle } from "react-icons/fa";
 import { useMutation } from "@tanstack/react-query";
-import LoadingButton from "../ui/loadingButton";
 import { supabase } from "@/libs/supabase";
-
-
+// COMPONENTS
+import LoadingButton from "../ui/loadingButton";
+import { PasswordInput } from "./form/PasswordInput";
+// ICONS
+import { MdError } from "react-icons/md";
+import { FaGoogle } from "react-icons/fa";
 
 const Signup = () => {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -105,22 +106,7 @@ const Signup = () => {
         />
 
         <label className="w-full text-sm">Password:</label>
-        <div className="flex w-full">
-          <input
-            ref={passwordRef}
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            className="w-full h-8 text-[#A1A1A1] border border-solid border-[#2E2E2E] bg-black py-1 px-2.5 rounded-l text-13"
-            name="password"
-          />
-          <button
-            className="flex items-center text-[#A1A1A1] justify-center w-2/12 transition-all duration-150 border-[#2E2E2E] bg-black border-r border-solid rounded-r border-y ease hover:bg-[#1F1F1F]"
-            onClick={() => setShowPassword(!showPassword)}
-            type="button"
-          >
-            {showPassword ? <MdVisibility /> : <MdVisibilityOff />}
-          </button>
-        </div>
+        <PasswordInput ref={passwordRef} onChange={() => setError("")} />
 
         <label className="w-full text-sm">Phone:</label>
         <input
