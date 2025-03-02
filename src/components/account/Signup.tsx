@@ -20,7 +20,6 @@ const Signup = () => {
   const phoneRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
 
