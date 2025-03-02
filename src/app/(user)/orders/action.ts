@@ -2,9 +2,6 @@
 
 import { connectDB } from "@/libs/mongodb";
 import { Orders } from "@/models/Orders";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/libs/auth";
-import { Session } from "next-auth";
 import {
   EnrichedProducts,
   OrderDocument,
@@ -15,13 +12,14 @@ import {
 import { Product } from "@/models/Products";
 import Stripe from "stripe";
 import { emptyCart, getItems } from "@/app/(carts)/cart/action";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
 connectDB();
 
 export const getUserOrders = async () => {
   try {
-    const session: Session | null = await getServerSession(authOptions);
-    const userId = session?.user._id;
+    const user = await getUser();
+    const userId = user?.id;
     const userOrders: OrdersDocument | null = await Orders.findOne({ userId });
 
     if (userOrders && userOrders.orders && userOrders.orders.length > 0) {
@@ -40,8 +38,8 @@ export const getUserOrders = async () => {
 
 export const getOrder = async (orderId: string) => {
   try {
-    const session: Session | null = await getServerSession(authOptions);
-    const userId = session?.user._id;
+    const user = await getUser();
+    const userId = user?.id;
     const userOrders: OrdersDocument | null = await Orders.findOne({ userId });
     const orderFound: OrderDocument | undefined = userOrders?.orders.find(
       (order: OrderDocument) => order._id.toString() === orderId.toString()

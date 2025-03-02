@@ -6,11 +6,8 @@ import { Footer } from "../components/common/Footer";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
-import { Session, getServerSession } from "next-auth";
-import { authOptions } from "@/libs/auth";
 import { getTotalItems } from "./(carts)/cart/action";
 import { getTotalWishlist } from "./(carts)/wishlist/action";
-
 import "../styles/globals.css";
 
 export const metadata: Metadata = {
@@ -23,8 +20,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session: Session | null = await getServerSession(authOptions);
-  const totalItemsCart = await getTotalItems(session);
+  const totalItemsCart = await getTotalItems();
   const totalItemsWishlists = await getTotalWishlist();
 
   return (
@@ -32,7 +28,6 @@ export default async function RootLayout({
       <Providers>
         <body className={GeistSans.className}>
           <Navbar
-            session={session}
             totalItemsCart={totalItemsCart}
             totalWishlists={totalItemsWishlists?.items.length}
           />

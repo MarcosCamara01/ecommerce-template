@@ -2,7 +2,6 @@
 
 import { ProductImages } from "@/components/products/ProductImages";
 import { ProductDocument, VariantsDocument } from "@/types/types";
-import { Session } from "next-auth";
 import { useState } from "react";
 import {
   Accordion,
@@ -11,16 +10,18 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import AddToCart from "../cart/AddToCart";
+import { useUser } from "@/hooks/useUser";
+
 interface SingleProduct {
   product: string;
-  session: Session | null;
 }
 
-export const SingleProduct = ({ product, session }: SingleProduct) => {
+export const SingleProduct = ({ product }: SingleProduct) => {
   const productPlainObject: ProductDocument = JSON.parse(product);
   const [selectedVariant, setSelectedVariant] = useState<VariantsDocument>(
     productPlainObject.variants[0]
   );
+  const { user } = useUser();
 
   if (!product) {
     return <div>Produnct not found</div>;
@@ -46,7 +47,6 @@ export const SingleProduct = ({ product, session }: SingleProduct) => {
           </div>
 
           <AddToCart
-            session={session}
             product={productPlainObject}
             selectedVariant={selectedVariant}
             setSelectedVariant={setSelectedVariant}

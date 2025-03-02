@@ -1,106 +1,92 @@
 "use client";
 
-/** FUNCTIONALITY */
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-/** COMPONENTS */
-import { PasswordInput } from "./form/PasswordInput";
 import Link from "next/link";
-import { ErrorMessage } from "../ui/errorMessage";
-/** ICONS */
-import { FcGoogle } from "react-icons/fc";
+import { MdError, MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { FaGoogle } from "react-icons/fa";
+import { useMutation } from "@tanstack/react-query";
+import LoadingButton from "../ui/loadingButton";
+import { supabase } from "@/libs/supabase";
+
+
 
 const Signup = () => {
-  const router = useRouter();
-  const { data: session } = useSession();
-
-  const [error, setError] = useState("");
-
-  const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (session?.user) {
-      window.location.reload();
-    }
-  }, [session]);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      setError("");
+  const router = useRouter();
 
-      const name = nameRef.current?.value;
-      const email = emailRef.current?.value;
-      const password = passwordRef.current?.value;
-      const phone = phoneRef.current?.value;
-
-      if (!email || !password || !name) {
-        setError("Please fill in all required fields");
-        return;
+  const {mutate, isPending} = useMutation({
+    mutationFn: async () => {
+      if (!emailRef.current?.value || !passwordRef.current?.value || !nameRef.current?.value) {
+        throw new Error("Please fill in all required fields");
       }
 
-      try {
-        const res = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            password,
-            phone
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Something went wrong");
+      const { data, error } = await supabase.auth.signUp({
+        email: emailRef.current.value,
+        password: passwordRef.current.value,
+        options: {
+          data: {
+            name: nameRef.current.value,
+            phone: phoneRef.current?.value || ""
+          }
         }
+      });
 
-        const signInRes = await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
-        });
-
-        if (signInRes?.error) {
-          setError(signInRes.error);
-          return;
-        }
-
-        if (!signInRes?.error) {
-          return router.push("/");
-        }
-
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
+      if (error) {
+        throw error;
       }
+
+      return data;
     },
-    [router]
-  );
+    onError: (error: any) => {
+      setError(error.message);
+    },
+    onSuccess: (data) => {
+      if (data.user) {
+        router.push("/");
+      }
+    }
+  });
+
+  const handleGoogleSignIn = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      setError(error.message);
+    }
+  };
 
   return (
     <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">
       <form
-        className="p-6 xs:p-10	w-full max-w-350 flex flex-col justify-between items-center gap-2.5	
-                border border-solid border-[#2E2E2E] bg-[#0A0A0A] rounded-md"
-        onSubmit={handleSubmit}
+        onSubmit={(e) => {
+          e.preventDefault();
+          mutate();
+        }}
+        className="p-6 xs:p-10 w-full max-w-350 flex flex-col justify-between items-center gap-2.5 border border-solid border-[#2E2E2E] bg-[#0A0A0A] rounded-md"
       >
-        {error && <ErrorMessage message={error} />}
+        {error && (
+          <div className="text-[#FF6166] flex items-center justify-center gap-2">
+            <MdError />
+            <div className="text-sm">{error}</div>
+          </div>
+        )}
         <h1 className="w-full mb-5 text-2xl font-bold">Signup</h1>
 
         <label className="w-full text-sm">Fullname:</label>
         <input
           ref={nameRef}
-          onChange={() => setError("")}
           type="text"
           required
           placeholder="Fullname"
@@ -111,7 +97,6 @@ const Signup = () => {
         <label className="w-full text-sm">Email:</label>
         <input
           ref={emailRef}
-          onChange={() => setError("")}
           type="email"
           required
           placeholder="Email"
@@ -120,24 +105,39 @@ const Signup = () => {
         />
 
         <label className="w-full text-sm">Password:</label>
-        <PasswordInput ref={passwordRef} onChange={() => setError("")} />
+        <div className="flex w-full">
+          <input
+            ref={passwordRef}
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="w-full h-8 text-[#A1A1A1] border border-solid border-[#2E2E2E] bg-black py-1 px-2.5 rounded-l text-13"
+            name="password"
+          />
+          <button
+            className="flex items-center text-[#A1A1A1] justify-center w-2/12 transition-all duration-150 border-[#2E2E2E] bg-black border-r border-solid rounded-r border-y ease hover:bg-[#1F1F1F]"
+            onClick={() => setShowPassword(!showPassword)}
+            type="button"
+          >
+            {showPassword ? <MdVisibility /> : <MdVisibilityOff />}
+          </button>
+        </div>
 
         <label className="w-full text-sm">Phone:</label>
         <input
           ref={phoneRef}
-          onChange={() => setError("")}
           type="text"
           placeholder="Phone (not required)"
           className="w-full text-[#A1A1A1] h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-black text-13"
           name="phone"
         />
 
-        <button
+        <LoadingButton
           className="w-full bg-black border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-[#1F1F1F] hover:border-[#454545] text-13"
           type="submit"
+          loading={isPending}
         >
-          Signup
-        </button>
+          {isPending ? "Signing up..." : "Signup"}
+        </LoadingButton>
 
         <div className="relative flex items-center justify-center w-full h-10">
           <div className="absolute w-full h-px top-2/4 bg-[#2E2E2E]"></div>
@@ -148,13 +148,11 @@ const Signup = () => {
 
         <button
           className="flex text-[#A1A1A1] items-center gap-3 px-4 py-2 text-sm align-middle transition-all bg-black border border-solid rounded border-[#2E2E2E] ease hover:bg-[#1F1F1F] hover:border-[#454545]"
-          onClick={(e) => {
-            e.preventDefault();
-            signIn("google");
-          }}
+          onClick={handleGoogleSignIn}
           type="button"
         >
-          <FcGoogle size={20} /> Sign in with Google
+          <FaGoogle />
+          Sign in with Google
         </button>
         <Link
           href="/login"

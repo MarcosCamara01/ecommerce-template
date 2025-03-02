@@ -1,17 +1,15 @@
 import { Products } from "@/components/products/Products";
 import Link from "next/link";
 import { getItems } from "./action";
-import { Session, getServerSession } from "next-auth";
-import { authOptions } from "@/libs/auth";
 import { Suspense } from "react";
 import { Loader } from "@/components/common/Loader";
 import dynamic from "next/dynamic";
 import { EnrichedProducts } from "@/types/types";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
 const ButtonCheckout = dynamic(
   () => import("../../../components/cart/ButtonCheckout"),
   {
-    ssr: false,
     loading: () => (
       <p className="flex items-center justify-center w-full h-full text-sm">
         Continue
@@ -28,9 +26,9 @@ export async function generateMetadata() {
 }
 
 const CartPage = async () => {
-  const session: Session | null = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (session?.user) {
+  if (user) {
     return (
       <Suspense
         fallback={
@@ -39,7 +37,7 @@ const CartPage = async () => {
           </div>
         }
       >
-        <ProductsCart session={session} />
+        <ProductsCart />
       </Suspense>
     );
   }
@@ -61,7 +59,8 @@ const CartPage = async () => {
   );
 };
 
-const ProductsCart = async ({ session }: { session: Session }) => {
+const ProductsCart = async () => {
+  const user = await getUser();
   const calculateTotalPrice = (cart: any) => {
     if (!cart || cart.length === 0) {
       return 0;
@@ -76,9 +75,11 @@ const ProductsCart = async ({ session }: { session: Session }) => {
       .toFixed(2);
   };
 
-  const filteredCart: EnrichedProducts[] | undefined = await getItems(
-    session.user._id,
-  );
+  if (!user) {
+    return null;
+  }
+
+  const filteredCart: EnrichedProducts[] | undefined = await getItems(user.id);
   const totalPrice = calculateTotalPrice(filteredCart);
 
   if (filteredCart && filteredCart?.length > 0) {
@@ -98,7 +99,7 @@ const ProductsCart = async ({ session }: { session: Session }) => {
             <span className="text-xs">+ TAX INCL.</span>
           </div>
           <div className="w-1/2 border-l border-solid bg-background-secondary border-border-primary">
-            <ButtonCheckout session={session} cartWithProducts={filteredCart} />
+            <ButtonCheckout cartWithProducts={filteredCart} />
           </div>
         </div>
       </div>
