@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState } from "react";
 import { ProductDocument, VariantsDocument } from "@/types/types";
 import { colorMapping } from "@/helpers/colorMapping";
 import { addItem } from "@/app/(carts)/cart/action";
-import { Loader } from "../common/Loader";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
+import LoadingButton from "../ui/loadingButton";
+import { useMutation } from "@tanstack/react-query";
 
 interface AddToCartProps {
   product: ProductDocument;
@@ -20,35 +21,32 @@ export default function AddToCart({
   setSelectedVariant,
 }: AddToCartProps) {
   const [selectedSize, setSelectedSize] = useState<string>("");
-  const [isPending, startTransition] = useTransition();
-
   const { user } = useUser();
 
-  const handleAddToCart = useCallback(() => {
-    if (!user) {
-      toast.info(
-        "You must be registered to be able to add a product to the cart."
-      );
-      return;
-    }
-    if (!selectedVariant?.priceId) {
-      toast.info("You have to select a color to save the product.");
-      return;
-    }
-    if (!selectedSize) {
-      toast.info("You have to select a size to save the product.");
-      return;
-    }
-    startTransition(() => {
-      addItem(
+  const { mutate: addToCart, isPending } = useMutation({
+    mutationFn: () => {
+      if (!user) {
+        throw new Error("You must be registered to be able to add a product to the cart.");
+      }
+      if (!selectedVariant?.priceId) {
+        throw new Error("You have to select a color to save the product.");
+      }
+      if (!selectedSize) {
+        throw new Error("You have to select a size to save the product.");
+      }
+
+      return addItem(
         product.category,
         product.id,
         selectedSize,
         selectedVariant.priceId,
         product.price
       );
-    });
-  }, [user, selectedVariant, selectedSize, product, startTransition]);
+    },
+    onError: (error) => {
+      toast.info(error.message);
+    }
+  });
 
   return (
     <>
@@ -95,13 +93,14 @@ export default function AddToCart({
       </div>
 
       <div className="border-t border-solid border-border-primary">
-        <button
+        <LoadingButton
           type="submit"
-          onClick={handleAddToCart}
+          loading={isPending}
+          onClick={() => addToCart()}
           className="w-full p-2 transition duration-150 text-13 ease hover:bg-color-secondary"
         >
-          {isPending ? <Loader height={20} width={20} /> : "Add To Cart"}
-        </button>
+          Add To Cart
+        </LoadingButton>
       </div>
     </>
   );

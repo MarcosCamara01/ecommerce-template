@@ -21,7 +21,6 @@ export const SingleProduct = ({ product }: SingleProduct) => {
   const [selectedVariant, setSelectedVariant] = useState<VariantsDocument>(
     productPlainObject.variants[0]
   );
-  const { user } = useUser();
 
   if (!product) {
     return <div>Produnct not found</div>;

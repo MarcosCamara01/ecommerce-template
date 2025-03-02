@@ -17,8 +17,6 @@ import { useMutation } from "@tanstack/react-query";
 import LoadingButton from "../ui/loadingButton";
 import { supabase } from "@/libs/supabase";
 
-
-
 export default function EditProfile() {
   const { user: currentUser } = useUser();
 

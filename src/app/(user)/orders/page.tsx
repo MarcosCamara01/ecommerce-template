@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { OrderDocument, OrdersDocument } from "@/types/types";
 import { getUserOrders } from "./action";
 import { Suspense } from "react";
-import { Loader } from "@/components/common/Loader";
+import { SVGLoadingIcon } from "@/components/ui/loader";
 import { getUser } from "@/libs/supabase/auth/getUser";
 
 export async function generateMetadata() {
@@ -20,7 +20,7 @@ const UserOrders = async () => {
       <Suspense
         fallback={
           <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-            <Loader height={30} width={30} />
+            <SVGLoadingIcon height={30} width={30} />
           </div>
         }
       >

@@ -3,6 +3,9 @@
 import { useCallback } from "react";
 import { EnrichedProducts } from "@/types/types";
 import { addItem, delOneItem } from "@/app/(carts)/cart/action";
+import { useMutation } from "@tanstack/react-query";
+import { IoAdd, IoRemove } from "react-icons/io5";
+import { toast } from "sonner";
 
 const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
   const {
@@ -16,13 +19,19 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
     color,
   } = product;
 
-  const handleAddItem = useCallback(() => {
-    addItem(category, productId, size, variantId, price);
-  }, [category, productId, size, variantId, price]);
+  const { mutate: addToCart, isPending: isAddPending } = useMutation({
+    mutationFn: () => addItem(category, productId, size, variantId, price),
+    onError: (error) => {
+      toast.error("Error adding item to cart");
+    }
+  });
 
-  const handleDelItem = useCallback(() => {
-    delOneItem(productId, size, variantId);
-  }, [productId, size, variantId]);
+  const { mutate: removeFromCart, isPending: isRemovePending } = useMutation({
+    mutationFn: () => delOneItem(productId, size, variantId),
+    onError: (error) => {
+      toast.error("Error removing item from cart");
+    }
+  });
 
   const quantityButtons = useCallback(() => {
     if (purchased) {
@@ -35,52 +44,26 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
       return (
         <div className="flex bg-black w-min">
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary"
-            onClick={handleDelItem}
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={() => removeFromCart()}
+            disabled={isRemovePending}
           >
-            <svg
-              data-test="geist-icon"
-              height="14"
-              strokeLinejoin="round"
-              viewBox="0 0 16 16"
-              width="14"
-              style={{ color: "currentColor" }}
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M2 7.25H2.75H13.25H14V8.75H13.25H2.75H2V7.25Z"
-                fill="currentColor"
-              ></path>
-            </svg>
+            <IoRemove className="w-4 h-4" />
           </button>
           <span className="flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary">
             {quantity}
           </span>
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-[#A1A1A1] transition-all hover:text-white border-border-primary"
-            onClick={handleAddItem}
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-[#A1A1A1] transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={() => addToCart()}
+            disabled={isAddPending}
           >
-            <svg
-              data-test="geist-icon"
-              height="14"
-              strokeLinejoin="round"
-              viewBox="0 0 16 16"
-              width="14"
-              style={{ color: "currentColor" }}
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M8.75 1.75V1H7.25V1.75V6.75H2.25H1.5V8.25H2.25H7.25V13.25V14H8.75V13.25V8.25H13.75H14.5V6.75H13.75H8.75V1.75Z"
-                fill="currentColor"
-              ></path>
-            </svg>
+            <IoAdd className="w-4 h-4" />
           </button>
         </div>
       );
     }
-  }, [purchased, quantity, price, handleAddItem, handleDelItem]);
+  }, [purchased, quantity, price, addToCart, removeFromCart, isAddPending, isRemovePending]);
 
   return (
     <>

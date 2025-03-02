@@ -2,10 +2,10 @@ import { Products } from "@/components/products/Products";
 import Link from "next/link";
 import { getItems } from "./action";
 import { Suspense } from "react";
-import { Loader } from "@/components/common/Loader";
 import dynamic from "next/dynamic";
 import { EnrichedProducts } from "@/types/types";
 import { getUser } from "@/libs/supabase/auth/getUser";
+import { SVGLoadingIcon } from "@/components/ui/loader";
 
 const ButtonCheckout = dynamic(
   () => import("../../../components/cart/ButtonCheckout"),
@@ -33,7 +33,7 @@ const CartPage = async () => {
       <Suspense
         fallback={
           <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-            <Loader height={30} width={30} />
+            <SVGLoadingIcon height={30} width={30} />
           </div>
         }
       >

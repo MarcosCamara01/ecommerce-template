@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo } from "react";
 import { Wishlists, delItem, addItem } from "@/app/(carts)/wishlist/action";
 import { Schema } from "mongoose";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { toast } from "sonner";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
+import { useMutation } from "@tanstack/react-query";
 
 interface WishlistButtonProps {
   productId: string;
@@ -34,27 +35,30 @@ const WishlistButton = ({
     return false;
   }, [wishlistString, id]);
 
-  const handleFavorites = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+  const { mutate: handleFavorites, isPending } = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
 
-    if (session?.user) {
-      if (isFavorite) {
-        await delItem(id);
-      } else {
-        await addItem(id);
+      if (!session?.user) {
+        throw new Error("You must be registered to be able to add a product to the wishlist.");
       }
-    } else {
-      const warningMessage =
-        "You must be registered to be able to add a product to the wishlist.";
-      console.warn(warningMessage);
-      toast.warning(warningMessage);
+
+      if (isFavorite) {
+        return delItem(id);
+      } else {
+        return addItem(id);
+      }
+    },
+    onError: (error) => {
+      toast.warning(error instanceof Error ? error.message : "An error occurred");
     }
-  }, [supabase, isFavorite, id]);
+  });
 
   return (
     <button
-      onClick={handleFavorites}
+      onClick={() => handleFavorites()}
       title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      disabled={isPending}
     >
       {isFavorite ? (
         <MdFavorite size={16} />
