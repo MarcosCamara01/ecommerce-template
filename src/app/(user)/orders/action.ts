@@ -1,165 +1,163 @@
 "use server";
 
-import { connectDB } from "@/libs/mongodb";
-import { Orders } from "@/models/Orders";
-import {
-  EnrichedProducts,
-  OrderDocument,
-  OrdersDocument,
-  ProductsDocument,
-  VariantsDocument,
-} from "@/types/types";
-import { Product } from "@/models/Products";
+import { createSSRClient } from "@/libs/supabase/server";
+import { CartItem, OrderItem } from "@/schemas/ecommerce";
+import { emptyCart } from "@/app/(carts)/cart/action";
 import Stripe from "stripe";
-import { emptyCart, getItems } from "@/app/(carts)/cart/action";
+import { productsWithVariantsQuery } from "@/schemas/ecommerce";
 import { getUser } from "@/libs/supabase/auth/getUser";
-
-connectDB();
 
 export const getUserOrders = async () => {
   try {
     const user = await getUser();
     const userId = user?.id;
-    const userOrders: OrdersDocument | null = await Orders.findOne({ userId });
+    if (!userId) return null;
 
-    if (userOrders && userOrders.orders && userOrders.orders.length > 0) {
-      userOrders.orders.sort((a: OrderDocument, b: OrderDocument) => {
-        const dateA = new Date(a.purchaseDate.toString());
-        const dateB = new Date(b.purchaseDate.toString());
-        return dateB.getTime() - dateA.getTime();
-      });
-    }
+    const supabase = createSSRClient();
 
-    return userOrders;
+    const { data: orders, error } = await supabase
+      .from("order_items")
+      .select(
+        `
+        id, 
+        user_id, 
+        delivery_date, 
+        order_number, 
+        created_at, 
+        updated_at,
+        order_products(
+          id, 
+          order_id, 
+          variant_id, 
+          quantity, 
+          size,
+          products_variants!inner(${productsWithVariantsQuery})
+        )
+      `
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return orders;
   } catch (error) {
-    console.error("Error getting orders:", error);
+    console.error("Error obteniendo órdenes:", error);
+    return null;
   }
 };
 
-export const getOrder = async (orderId: string) => {
+export const getOrder = async (orderId: OrderItem["id"]) => {
   try {
     const user = await getUser();
     const userId = user?.id;
-    const userOrders: OrdersDocument | null = await Orders.findOne({ userId });
-    const orderFound: OrderDocument | undefined = userOrders?.orders.find(
-      (order: OrderDocument) => order._id.toString() === orderId.toString()
-    );
 
-    if (!orderFound) {
+    if (!userId) return null;
+
+    const supabase = createSSRClient();
+
+    const { data: order, error } = await supabase
+      .from("order_items")
+      .select(
+        `
+        id, 
+        user_id, 
+        delivery_date, 
+        order_number, 
+        created_at, 
+        updated_at,
+        order_products(
+          id, 
+          order_id, 
+          variant_id, 
+          quantity, 
+          size,
+          products_variants!inner(${productsWithVariantsQuery})
+        )
+      `
+      )
+      .eq("id", orderId)
+      .eq("user_id", userId)
+      .single();
+
+    if (error) throw error;
+
+    if (!order) {
       console.log("Order not found");
       return null;
     }
 
-    const enrichedProducts = await Promise.all(
-      orderFound.products.map(async (product: ProductsDocument) => {
-        const matchingProduct = await Product.findById(product.productId);
-        if (matchingProduct) {
-          const matchingVariant = matchingProduct.variants.find(
-            (variant: VariantsDocument) => variant.color === product.color
-          );
-          if (matchingVariant) {
-            return {
-              productId: matchingProduct._id,
-              name: matchingProduct.name,
-              category: matchingProduct.category,
-              image: [matchingVariant.images[0]],
-              price: matchingProduct.price,
-              purchased: true,
-              color: product.color,
-              size: product.size,
-              quantity: product.quantity,
-            };
-          }
-        }
-        return null;
-      })
-    );
-
-    const filteredEnrichedProducts = enrichedProducts.filter(
-      (product) => product !== null
-    );
-
-    const enrichedOrder = {
-      name: orderFound.name,
-      email: orderFound.email,
-      phone: orderFound.phone,
-      address: orderFound.address,
-      products: filteredEnrichedProducts,
-      orderId: orderFound.orderId,
-      purchaseDate: orderFound.purchaseDate,
-      expectedDeliveryDate: orderFound.expectedDeliveryDate,
-      total_price: orderFound.total_price,
-      orderNumber: orderFound.orderNumber,
-      _id: orderFound._id,
-    };
-
-    return enrichedOrder;
+    return order;
   } catch (error) {
     console.error("Error getting order:", error);
     return null;
   }
 };
 
-export const saveOrder = async (data: Stripe.Checkout.Session) => {
+export const saveOrder = async (data: Stripe.Checkout.Session, cartItems: CartItem[]) => {
   try {
-    const userId = data.metadata?.userId;
+    const user = await getUser();
+    const userId = user?.id;
+
     if (!userId || !data) {
       console.error("Missing information.");
       return null;
     }
 
-    const cart = await getItems(userId);
-    if (!cart) {
-      console.error("Products or cart not found.");
-      return null;
-    }
+    const supabase = createSSRClient();
 
-    const products = cart.map((item) => ({
-      productId: item.productId,
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + 7); // delivery date
+
+    const { data: orderData, error: orderError } = await supabase
+      .from("order_items")
+      .insert({
+        user_id: userId,
+        delivery_date: deliveryDate.toISOString(),
+        order_number: Math.floor(Math.random() * 1000000), // generate order number
+      })
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    const { error: customerError } = await supabase
+      .from("customer_info")
+      .insert({
+        order_id: orderData.id,
+        name: data.customer_details?.name,
+        email: data.customer_details?.email,
+        phone: data.customer_details?.phone,
+        address: {
+          line1: data.customer_details?.address?.line1,
+          line2: data.customer_details?.address?.line2,
+          city: data.customer_details?.address?.city,
+          state: data.customer_details?.address?.state,
+          postal_code: data.customer_details?.address?.postal_code,
+          country: data.customer_details?.address?.country,
+        },
+        stripe_order_id: data.id,
+        total_price: data.amount_total,
+      });
+
+    if (customerError) throw customerError;
+
+    const orderProducts = cartItems.map((item) => ({
+      order_id: orderData.id,
+      variant_id: item.variant_id,
       quantity: item.quantity,
-      size: item.size,
-      color: item.color,
-      image: item.image,
+      size: item.size
     }));
 
-    const newOrder: any = {
-      name: data.customer_details?.name,
-      email: data.customer_details?.email,
-      phone: data.customer_details?.phone,
-      address: {
-        line1: data.customer_details?.address?.line1,
-        line2: data.customer_details?.address?.line2,
-        city: data.customer_details?.address?.city,
-        state: data.customer_details?.address?.state,
-        postal_code: data.customer_details?.address?.postal_code,
-        country: data.customer_details?.address?.country,
-      },
-      products: products,
-      orderId: data.id,
-      total_price: data.amount_total,
-    };
+    const { error: productsError } = await supabase
+      .from("order_products")
+      .insert(orderProducts);
 
-    const userOrders: OrdersDocument | null = await Orders.findOne({ userId });
-
-    if (userOrders) {
-      const orderIdMatch = userOrders.orders.some(
-        (order: OrderDocument) => order.orderId === data.id
-      );
-      if (!orderIdMatch) {
-        userOrders.orders.push(newOrder);
-        await Orders.findOneAndUpdate({ userId: userId }, userOrders, {
-          new: true,
-        });
-        console.log("Order successfully updated.");
-      } else {
-        console.info("This order has already been saved.");
-      }
-    } else {
-      await Orders.create({ userId, orders: [newOrder] });
-      console.info("New order document created and saved successfully.");
-    }
+    if (productsError) throw productsError;
 
     await emptyCart(userId);
+
+    console.log("Order saved successfully");
   } catch (error) {
     console.error("Error saving the order:", error);
   }

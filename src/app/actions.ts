@@ -1,35 +1,43 @@
 "use server";
 
-import { connectDB } from "@/libs/mongodb";
-import { Product } from "@/models/Products";
-import { EnrichedProducts } from "@/types/types";
+import { createSSRClient } from "@/libs/supabase/server";
+import type { EnrichedProduct } from "@/schemas/ecommerce";
+import { productsWithVariantsQuery } from "@/schemas/ecommerce";
 
-export const getAllProducts = async () => {
+export const getAllProducts = async (): Promise<EnrichedProduct[]> => {
   try {
-    await connectDB();
-
-    const products: EnrichedProducts[] = await Product.find();
-    return products;
+    const supabase = createSSRClient();
+    const { data: products, error } = await supabase
+      .from('products_items')
+      .select(productsWithVariantsQuery);
+      
+    if (error) throw error;
+    return products as EnrichedProduct[];
   } catch (error) {
-    console.error("Error getting products:", error);
-    throw new Error("Failed to fetch category products");
+    console.error("Error obteniendo productos:", error);
+    throw new Error("Error al obtener los productos");
   }
 };
 
-export const getCategoryProducts = async (category: string) => {
+export const getCategoryProducts = async (category: string): Promise<EnrichedProduct[]> => {
   try {
-    await connectDB();
-
-    const products: EnrichedProducts[] = await Product.find({ category });
-    return products;
+    const supabase = createSSRClient();
+    const { data: products, error } = await supabase
+      .from('products_items')
+      .select(productsWithVariantsQuery)
+      .eq('category', category);
+      
+    if (error) throw error;
+    return products as EnrichedProduct[];
   } catch (error) {
-    console.error("Error getting products:", error);
-    throw new Error("Failed to fetch category products");
+    console.error("Error obteniendo productos por categoría:", error);
+    throw new Error("Error al obtener productos por categoría");
   }
 };
 
-export const getRandomProducts = async (productId: string) => {
-  const shuffleArray = (array: EnrichedProducts[]) => {
+export const getRandomProducts = async (productId: number): Promise<EnrichedProduct[]> => {
+  const supabase = createSSRClient();
+  const shuffleArray = (array: any[]) => {
     let shuffled = array.slice();
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -39,27 +47,36 @@ export const getRandomProducts = async (productId: string) => {
   };
 
   try {
-    await connectDB();
-
-    const allProducts: EnrichedProducts[] = await Product.find();
-    const shuffledProducts = shuffleArray(allProducts);
-    const randomProducts = shuffledProducts
-      .filter((product) => product._id.toString() !== productId)
-      .slice(0, 6);
-    return randomProducts;
+    const { data: products, error } = await supabase
+      .from('products_items')
+      .select(productsWithVariantsQuery);
+      
+    if (error) throw error;
+    
+    const filteredProducts = products.filter(product => product.id !== productId);
+    const randomProducts = shuffleArray(filteredProducts).slice(0, 6);
+    
+    return randomProducts as EnrichedProduct[];
   } catch (error) {
-    console.error("Error getting products:", error);
-    throw new Error("Failed to fetch random products");
+    console.error("Error obteniendo productos aleatorios:", error);
+    throw new Error("Error al obtener productos aleatorios");
   }
 };
 
-export const getProduct = async (_id: string) => {
+export const getProduct = async (productId: number): Promise<EnrichedProduct | null> => {
   try {
-    await connectDB();
-
-    const product = await Product.findOne({ _id });
-    return product;
+    const supabase = createSSRClient();
+    
+    const { data: product, error } = await supabase
+      .from('products_items')
+      .select(productsWithVariantsQuery)
+      .eq('id', productId)
+      .single();
+      
+    if (error) throw error;
+    return product as EnrichedProduct;
   } catch (error) {
-    console.error("Error getting product:", error);
+    console.error("Error obteniendo producto específico:", error);
+    return null;
   }
 };
