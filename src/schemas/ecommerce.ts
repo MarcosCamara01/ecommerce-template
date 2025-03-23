@@ -66,12 +66,11 @@ export const CartItems = z.object({
   updated_at: z.string().default(() => new Date().toISOString()),
 });
 
-export const WishlistItems = z.object({
+export const Wishlist = z.object({
   id: z.number(),
-  variants_id: z.array(z.number()),
+  variant_id: z.number(),
   user_id: z.string(),
   created_at: z.string().default(() => new Date().toISOString()),
-  updated_at: z.string().default(() => new Date().toISOString()),
 });
 
 export type Product = z.infer<typeof ProductsItems>;
@@ -79,5 +78,9 @@ export type ProductVariant = z.infer<typeof ProductsVariants>;
 export type OrderItem = z.infer<typeof OrderItems>;
 export type OrderProduct = z.infer<typeof OrderProduct>;
 export type CartItem = z.infer<typeof CartItems>;
-export type WishlistItem = z.infer<typeof WishlistItems>;
+export type WishlistItem = z.infer<typeof Wishlist>;
+export type EnrichedProduct = Product & {
+  variants: ProductVariant[];
+};
 
+export const productsWithVariantsQuery = '*, variants:products_variants(*)';
