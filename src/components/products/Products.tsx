@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Images } from "./Images";
-import { EnrichedProducts } from "@/types/types";
+import { ProductImage } from "./item/Image";
 import dynamic from "next/dynamic";
 import { Skeleton } from "../ui/skeleton";
 import { getTotalWishlist } from "@/app/(carts)/wishlist/action";
 import { cn } from "@/libs/utils";
 import { getUser } from "@/libs/supabase/auth/getUser";
+import type { EnrichedProduct } from "@/schemas/ecommerce";
 
 const WishlistButton = dynamic(() => import("../cart/WishlistButton"), {
   loading: () => <Skeleton className="w-5 h-5" />,
@@ -23,13 +23,9 @@ export const Products = async ({
   products,
   extraClassname = "",
 }: {
-  products: EnrichedProducts[];
+  products: EnrichedProduct[];
   extraClassname: string;
 }) => {
-  const user = await getUser();
-  const hasMissingQuantity = products.some((product) => !product.quantity);
-  const wishlist = hasMissingQuantity && user && (await getTotalWishlist());
-
   return (
     <div
       className={cn(
@@ -42,48 +38,48 @@ export const Products = async ({
       )}
     >
       {products.map((product, index) => {
-        const {
-          _id,
-          category,
-          quantity,
-          productId,
-          image,
-          name,
-          price,
-          purchased,
-        } = product;
-        const productLink = `/${category}/${quantity ? productId : _id}`;
+        const productLink = `/${product.category}/${product.id}`;
 
         return (
-          <div className={cn(
-            "flex justify-between border border-solid border-border-primary rounded-md overflow-hidden",
-            extraClassname === "cart-ord-mobile"
-              ? "flex-row sm:flex-col"
-              : "flex-col",
-          )} key={index}>
-            <Link href={productLink} className={cn(
+          <div
+            className={cn(
+              "flex justify-between border border-solid border-border-primary rounded-md overflow-hidden",
               extraClassname === "cart-ord-mobile"
-              ? "w-6/12 sm:w-full hover:scale-105 transition-all"
-              : "hover:scale-105 transition-all"
-            )}>
-              <Images
-                image={image}
-                name={name}
+                ? "flex-row sm:flex-col"
+                : "flex-col"
+            )}
+            key={index}
+          >
+            <Link
+              href={productLink}
+              className={cn(
+                extraClassname === "cart-ord-mobile"
+                  ? "w-6/12 sm:w-full hover:scale-105 transition-all"
+                  : "hover:scale-105 transition-all"
+              )}
+            >
+              <ProductImage
+                image={product.img}
+                name={product.name}
                 width={280}
                 height={425}
                 priority={index === 0}
                 sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
               />
             </Link>
-            <div className={cn(
-              "flex justify-between flex-col gap-2.5 p-3.5 bg-background-secondary z-10",
-              {
-                "w-6/12 sm:w-full": extraClassname === "cart-ord-mobile"
-              }
-            )}>
+            <div
+              className={cn(
+                "flex justify-between flex-col gap-2.5 p-3.5 bg-background-secondary z-10",
+                {
+                  "w-6/12 sm:w-full": extraClassname === "cart-ord-mobile",
+                }
+              )}
+            >
               <div className="flex justify-between w-full">
                 <Link href={productLink} className="w-10/12">
-                  <h2 className="text-sm font-semibold truncate">{name}</h2>
+                  <h2 className="text-sm font-semibold truncate">
+                    {product.name}
+                  </h2>
                 </Link>
                 {quantity ? (
                   purchased ? (

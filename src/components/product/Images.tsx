@@ -6,12 +6,12 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { Images } from "./Images";
-import { VariantsDocument } from "@/types/types";
+import { ProductImage } from "../products/item/Image";
+import type { ProductVariant } from "@/schemas/ecommerce";
 
 interface ProductImages {
   name: string;
-  selectedVariant: VariantsDocument | undefined;
+  selectedVariant: ProductVariant | undefined;
 }
 
 export const ProductImages = ({ name, selectedVariant }: ProductImages) => {
@@ -32,10 +32,10 @@ export const ProductImages = ({ name, selectedVariant }: ProductImages) => {
           }}
         >
           <CarouselContent>
-            {selectedVariant.images.map((image: string, index: number) => (
+            {selectedVariant.images.map((image, index) => (
               <CarouselItem key={index} className="pl-0">
-                <Images
-                  image={[image]}
+                <ProductImage
+                  image={image}
                   name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
                   width={384}
                   height={576}
@@ -52,13 +52,13 @@ export const ProductImages = ({ name, selectedVariant }: ProductImages) => {
       </div>
 
       <div className="lg:grid hidden grid-cols-2 gap-0.5 min-w-grid-img">
-        {selectedVariant.images.map((image: string, index: number) => (
+        {selectedVariant.images.map((image, index) => (
           <div
             className="inline-block w-full max-w-2xl mx-auto overflow-hidden rounded"
             key={index}
           >
-            <Images
-              image={[image]}
+            <ProductImage
+              image={image}
               name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
               width={850}
               height={1275}
