@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "../../ui/skeleton";
 import { cloudinaryLoader } from "@/helpers/cloudinaryLoader";
 
-export const Images = ({
+export const ProductImage = ({
   image,
   name,
   width,
@@ -13,18 +13,14 @@ export const Images = ({
   priority,
   sizes,
 }: {
-  image: [string];
+  image: string;
   name: string;
   width: number;
   height: number;
-  priority: boolean;
+  priority?: boolean;
   sizes: string;
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handleImageLoadComplete = () => {
-    setImageLoaded(true);
-  };
 
   return (
     <div className={!imageLoaded ? "relative" : ""}>
@@ -32,11 +28,11 @@ export const Images = ({
         loader={cloudinaryLoader}
         width={width}
         height={height}
-        src={image[0]}
+        src={image}
         alt={name}
         priority={priority}
         className="w-full max-w-img aspect-[2/3] brightness-90"
-        onLoad={handleImageLoadComplete}
+        onLoad={() => setImageLoaded(true)}
         sizes={sizes}
       />
       <div

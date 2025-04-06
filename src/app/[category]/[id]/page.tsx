@@ -1,11 +1,10 @@
-import { SingleProduct } from "@/components/products/SingleProduct";
-import { Products } from "@/components/products/Products";
+import { SingleProduct } from "@/components/product";
 import { getProduct, getRandomProducts } from "@/app/actions";
-import { ProductDocument } from "@/types/types";
 import { Suspense } from "react";
 import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
 import SingleProductSkeleton from "@/components/skeletons/SingleProductSkeleton";
-import { getUser } from "@/libs/supabase/auth/getUser";
+import { GridProducts } from "@/components/products/GridProducts";
+import { ProductItem } from "@/components/products/item";
 
 type Props = {
   params: {
@@ -13,21 +12,22 @@ type Props = {
   };
 };
 
-const capitalizeFirstLetter = (string: string) => {
+const capitalizeFirstLetter = (string?: string) => {
+  if (!string) return;
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
 export async function generateMetadata({ params }: Props) {
-  const product: ProductDocument = await getProduct(params.id);
-  const capitalizedName = capitalizeFirstLetter(product.name);
+  const product = await getProduct(Number(params.id));
+  const capitalizedName = capitalizeFirstLetter(product?.name);
 
   return {
-    title: `${capitalizedName} | Ecommerce Template`,
-    description: product.description,
+    title: `${capitalizedName ?? "Loading..."} | Ecommerce Template`,
+    description: product?.description ?? "Loading...",
   };
 }
 
-const ProductPage = async ({ params }: Props) => (
+const ProductPage = ({ params }: Props) => (
   <section className="pt-14">
     <Suspense
       fallback={
@@ -49,9 +49,10 @@ const ProductPage = async ({ params }: Props) => (
 );
 
 const AllProducts = async ({ id }: { id: string }) => {
-  const product: ProductDocument = await getProduct(id);
-  const randomProducts = await getRandomProducts(id);
+  const product = await getProduct(Number(id));
   const productJSON = JSON.stringify(product);
+
+  const randomProducts = await getRandomProducts(Number(id));
 
   return (
     <>
@@ -61,7 +62,11 @@ const AllProducts = async ({ id }: { id: string }) => {
         YOU MIGHT ALSO LIKE...
       </h2>
 
-      <Products products={randomProducts} extraClassname={"colums-mobile"} />
+      <GridProducts className="grid-cols-auto-fill-110">
+        {randomProducts.map((product) => (
+          <ProductItem key={product.id} product={product} />
+        ))}
+      </GridProducts>
     </>
   );
 };

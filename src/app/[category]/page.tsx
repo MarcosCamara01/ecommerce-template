@@ -1,7 +1,8 @@
-import { Products } from "@/components/products/Products";
 import { getCategoryProducts } from "../actions";
 import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
 import { Suspense } from "react";
+import { GridProducts } from "@/components/products/GridProducts";
+import { ProductItem } from "@/components/products/item";
 
 type Props = {
   params: {
@@ -25,9 +26,7 @@ export async function generateMetadata({ params }: Props) {
 const CategoryPage = async ({ params }: Props) => {
   return (
     <section className="pt-14">
-      <Suspense
-        fallback={<ProductSkeleton extraClassname="" numberProducts={6} />}
-      >
+      <Suspense fallback={<ProductSkeleton numberProducts={6} />}>
         <CategoryProducts category={params.category} />
       </Suspense>
     </section>
@@ -37,7 +36,13 @@ const CategoryPage = async ({ params }: Props) => {
 const CategoryProducts = async ({ category }: { category: string }) => {
   const products = await getCategoryProducts(category);
 
-  return <Products products={products} extraClassname="" />;
+  return (
+    <GridProducts>
+      {products.map((product) => (
+        <ProductItem key={product.id} product={product} />
+      ))}
+    </GridProducts>
+  );
 };
 
 export default CategoryPage;
