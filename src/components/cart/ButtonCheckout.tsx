@@ -1,31 +1,18 @@
 "use client";
 
 import axios from "axios";
-import { ItemDocument } from "@/types/types";
-import { useMemo } from "react";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
 import LoadingButton from "../ui/loadingButton";
 import { useMutation } from "@tanstack/react-query";
+import type { EnrichedProduct } from "@/schemas/ecommerce";
 
 interface ButtonCheckoutProps {
-  cartWithProducts: ItemDocument[];
+  cartProducts: EnrichedProduct[];
 }
 
-const ButtonCheckout = ({ cartWithProducts }: ButtonCheckoutProps) => {
+const ButtonCheckout = ({ cartProducts }: ButtonCheckoutProps) => {
   const { user } = useUser();
-
-  const lineItems = useMemo(
-    () =>
-      cartWithProducts.map((cartItem: ItemDocument) => ({
-        productId: cartItem.productId,
-        quantity: cartItem.quantity,
-        variantId: cartItem.variantId,
-        size: cartItem.size,
-        color: cartItem.color,
-      })),
-    [cartWithProducts]
-  );
 
   const { mutate: buyProducts, isPending } = useMutation({
     mutationFn: async () => {
@@ -34,7 +21,7 @@ const ButtonCheckout = ({ cartWithProducts }: ButtonCheckoutProps) => {
       }
 
       const { data } = await axios.post("/api/stripe/payment", {
-        lineItems,
+        lineItems: cartProducts,
         userId: user.id,
       });
 
@@ -46,8 +33,12 @@ const ButtonCheckout = ({ cartWithProducts }: ButtonCheckoutProps) => {
     },
     onError: (error) => {
       console.error(error);
-      toast.error(error instanceof Error ? error.message : "An error occurred while processing your request. Please try again.");
-    }
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while processing your request. Please try again."
+      );
+    },
   });
 
   return (

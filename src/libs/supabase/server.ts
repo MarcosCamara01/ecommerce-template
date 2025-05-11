@@ -1,19 +1,19 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export const createSSRClient = () => {
-  const cookieStore = cookies();
-  
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
+        async getAll() {
+          const cookieStore = await cookies();
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        async setAll(cookiesToSet) {
           try {
+            const cookieStore = await cookies();
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             );
@@ -21,8 +21,10 @@ export const createSSRClient = () => {
             // The call of a Server Component can be ignored
             // if you have middleware that refreshes sessions
           }
-        }
-      }
+        },
+      },
     }
   );
-}; 
+};
+
+export const supabase = createSSRClient();

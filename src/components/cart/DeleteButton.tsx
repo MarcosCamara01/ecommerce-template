@@ -1,19 +1,31 @@
 "use client";
 
+/** ACTIONS */
+import { removeCartItem } from "@/app/(carts)/cart/action";
+/** FUNCTIONALITY */
 import { useMutation } from "@tanstack/react-query";
-import { delItem } from "@/app/(carts)/cart/action";
-import { EnrichedProducts } from "@/types/types";
 import { toast } from "sonner";
+import { useUser } from "@/hooks/useUser";
+/** ICONS */
 import { IoClose } from "react-icons/io5";
+/** TYPES */
+import type { CartItem } from "@/schemas/ecommerce";
 
-const DeleteButton = ({ product }: { product: EnrichedProducts }) => {
-  const { productId, size, variantId } = product;
+const DeleteButton = ({ cartItemId }: { cartItemId: CartItem["id"] }) => {
+  const { user } = useUser();
 
   const { mutate: deleteItem, isPending } = useMutation({
-    mutationFn: () => delItem(productId, size, variantId),
+    mutationFn: () => {
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      return removeCartItem(cartItemId);
+    },
     onError: (error) => {
+      console.error("Error removing item from cart", error);
       toast.error("Error removing item from cart");
-    }
+    },
   });
 
   return (

@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-10-28.acacia",
+  apiVersion: "2025-02-24.acacia",
 });
 
 const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -28,7 +28,7 @@ const webhookHandler = async (req: NextRequest) => {
             message: `Webhook Error: ${errorMessage}`,
           },
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -67,7 +67,7 @@ const webhookHandler = async (req: NextRequest) => {
           message: `Method Not Allowed`,
         },
       },
-      { status: 405 },
+      { status: 405 }
     ).headers.set("Allow", "POST");
   }
 };

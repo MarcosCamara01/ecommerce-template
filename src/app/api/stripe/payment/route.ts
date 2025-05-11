@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-10-28.acacia",
+  apiVersion: "2025-02-24.acacia",
 });
 
 async function loadPrices() {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const lineItemsList = await lineItems.map((item: any) => {
       const matchingProduct = products.find(
-        (product) => product.id === item.variantId,
+        (product) => product.id === item.variantId
       );
 
       if (!matchingProduct) {

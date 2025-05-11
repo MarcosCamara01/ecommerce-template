@@ -9,12 +9,13 @@ export async function generateMetadata() {
   };
 }
 
-const CheckoutSuccess = async ({
-  searchParams,
-}: {
-  searchParams: { [session_id: string]: string };
-}) => {
-  const response = await fetchCheckoutData(searchParams.session_id);
+type Props = {
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+const CheckoutSuccess = async ({ searchParams }: Props) => {
+  const sessionId = searchParams.session_id as string;
+  const response = await fetchCheckoutData(sessionId);
 
   if (response !== undefined && response.metadata) {
     // await saveOrder(response);

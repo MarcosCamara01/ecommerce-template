@@ -1,10 +1,10 @@
-import { Products } from "@/components/products/Products";
 import { format } from "date-fns";
 import { getOrder } from "../action";
 import { Suspense } from "react";
-import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EnrichedProducts } from "@/types/types";
+import { EnrichedProduct, OrderProduct } from "@/schemas/ecommerce";
+import { GridProducts } from "@/components/products/GridProducts";
+import { ProductItem } from "@/components/products/item";
 
 export async function generateMetadata() {
   return {
@@ -12,75 +12,90 @@ export async function generateMetadata() {
   };
 }
 
-const OrderDetails = async ({
-  params,
-  searchParams,
-}: {
+type Props = {
   params: { id: string };
-  searchParams: { items: number };
-}) => {
-  const items = searchParams.items;
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
+const OrderDetails = async ({ params }: Props) => {
   return (
-    <Suspense fallback={<AllOrderSkeleton items={items} />}>
+    <Suspense fallback={<AllOrderSkeleton items={6} />}>
       <OrderProducts id={params.id} />
     </Suspense>
   );
 };
 
 const OrderProducts = async ({ id }: { id: string }) => {
-  const order = await getOrder(id);
+  const order = await getOrder(Number(id));
 
   const detailsH3Styles = "text-lg font-bold mb-5";
   const bxInfoStyles = "w-full flex justify-between mt-3.5 text-sm text-999";
   const detailsLiStyles = "mt-2.5	text-sm	text-999";
 
   if (order) {
-    const totalProducts = order.products.reduce(
-      (total: number, product: any) => total + product.quantity,
+    const totalProducts = order.order_products.reduce(
+      (total: number, product: OrderProduct) => total + product.quantity,
       0
     );
-    const allProducts: EnrichedProducts[] = order.products.filter(
-      Boolean
-    ) as EnrichedProducts[];
+    const allProducts = order.order_products.map((product) => {
+      const variant = product.products_variants as any;
+      return {
+        ...variant,
+        quantity: product.quantity,
+        size: product.size,
+      };
+    }) as EnrichedProduct[];
     const productsText = totalProducts === 1 ? "item" : "items";
 
     return (
       <div className="flex flex-col-reverse flex-wrap justify-between pt-12 sm:flex-row gap-11 sm:gap-8">
         <div className="grow-999 basis-0">
-          <Products products={allProducts} extraClassname={"cart-ord-mobile"} />
+          <GridProducts className="cart-ord-mobile">
+            {allProducts.map((product) => (
+              <ProductItem key={product.id} product={product} />
+            ))}
+          </GridProducts>
         </div>
 
         <div className="h-full grow sm:basis-800 sm:sticky top-8">
           <div className="mb-10">
             <h3 className={detailsH3Styles}>Order Details</h3>
             <div className={bxInfoStyles}>
-              <span>Order Number</span> <span>{order?.orderNumber}</span>
+              <span>Order Number</span> <span>{order.order_number}</span>
             </div>
             <div className={bxInfoStyles}>
               <span>Order Date</span>{" "}
-              <span>{format(order.purchaseDate, "dd LLL yyyy")}</span>
+              <span>{format(new Date(order.created_at), "dd LLL yyyy")}</span>
             </div>
             <div className={bxInfoStyles}>
               <span>Expected Delivery Date</span>{" "}
-              <span>{format(order.expectedDeliveryDate, "dd LLL yyyy")}</span>
+              <span>
+                {format(new Date(order.delivery_date), "dd LLL yyyy")}
+              </span>
             </div>
           </div>
           <div className="pt-10 mb-10 border-t border-solid border-border-primary">
             <h3 className={detailsH3Styles}>Delivery Address</h3>
             <ul>
-              <li className={detailsLiStyles}>{order.name}</li>
-              <li className={detailsLiStyles}>{order.address.line1}</li>
-              {order.address.line2 && (
-                <li className={detailsLiStyles}>{order.address.line2}</li>
+              <li className={detailsLiStyles}>{order.customer_info?.name}</li>
+              <li className={detailsLiStyles}>
+                {order.customer_info?.address?.line1}
+              </li>
+              {order.customer_info?.address?.line2 && (
+                <li className={detailsLiStyles}>
+                  {order.customer_info.address.line2}
+                </li>
               )}
               <li className={detailsLiStyles}>
-                {order.address.postal_code} {order.address.city}
+                {order.customer_info?.address?.postal_code}{" "}
+                {order.customer_info?.address?.city}
               </li>
-              {order.phone && (
-                <li className={detailsLiStyles}>+{order.phone}</li>
+              {order.customer_info?.phone && (
+                <li className={detailsLiStyles}>
+                  +{order.customer_info.phone}
+                </li>
               )}
-              <li className={detailsLiStyles}>{order.email}</li>
+              <li className={detailsLiStyles}>{order.customer_info?.email}</li>
             </ul>
           </div>
           <div className="pt-10 border-t border-solid border-border-primary">
@@ -89,7 +104,9 @@ const OrderProducts = async ({ id }: { id: string }) => {
               <span>
                 {totalProducts} {productsText}
               </span>{" "}
-              <span>{(order.total_price / 100).toFixed(2)} €</span>
+              <span>
+                {(order.customer_info?.total_price / 100).toFixed(2)} €
+              </span>
             </div>
             <div className={bxInfoStyles}>
               <span>Delivery</span> <span>FREE</span>
@@ -99,7 +116,9 @@ const OrderProducts = async ({ id }: { id: string }) => {
             </div>
             <div className={bxInfoStyles}>
               <span>Total</span>{" "}
-              <span>{(order.total_price / 100).toFixed(2)} €</span>
+              <span>
+                {(order.customer_info?.total_price / 100).toFixed(2)} €
+              </span>
             </div>
             <div className={bxInfoStyles}>(VAT included)</div>
           </div>
@@ -119,10 +138,11 @@ const AllOrderSkeleton = ({ items }: { items: number }) => {
   return (
     <div className="flex flex-col-reverse flex-wrap justify-between pt-12 sm:flex-row gap-11 sm:gap-8">
       <div className="grow-999 basis-0">
-        <ProductSkeleton
-          extraClassname={"cart-ord-mobile"}
-          numberProducts={items}
-        />
+        <GridProducts className="cart-ord-mobile">
+          {Array.from({ length: items }).map((_, index) => (
+            <Skeleton key={index} className="h-[300px] w-full" />
+          ))}
+        </GridProducts>
       </div>
 
       <div className="h-full grow sm:basis-800 sm:sticky top-8">

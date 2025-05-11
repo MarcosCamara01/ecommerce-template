@@ -2,10 +2,10 @@
 
 import { createSSRClient } from "@/libs/supabase/server";
 import { CartItem, OrderItem } from "@/schemas/ecommerce";
-import { emptyCart } from "@/app/(carts)/cart/action";
 import Stripe from "stripe";
 import { productsWithVariantsQuery } from "@/schemas/ecommerce";
 import { getUser } from "@/libs/supabase/auth/getUser";
+import { clearCart } from "@/app/(carts)/cart/action";
 
 export const getUserOrders = async () => {
   try {
@@ -31,6 +31,8 @@ export const getUserOrders = async () => {
           variant_id, 
           quantity, 
           size,
+          created_at,
+          updated_at,
           products_variants!inner(${productsWithVariantsQuery})
         )
       `
@@ -40,7 +42,7 @@ export const getUserOrders = async () => {
 
     if (error) throw error;
 
-    return orders;
+    return orders as OrderItem[];
   } catch (error) {
     console.error("Error obteniendo órdenes:", error);
     return null;
@@ -72,7 +74,17 @@ export const getOrder = async (orderId: OrderItem["id"]) => {
           variant_id, 
           quantity, 
           size,
+          created_at,
+          updated_at,
           products_variants!inner(${productsWithVariantsQuery})
+        ),
+        customer_info(
+          name,
+          email,
+          phone,
+          address,
+          stripe_order_id,
+          total_price
         )
       `
       )
@@ -87,14 +99,17 @@ export const getOrder = async (orderId: OrderItem["id"]) => {
       return null;
     }
 
-    return order;
+    return order as unknown as OrderItem;
   } catch (error) {
     console.error("Error getting order:", error);
     return null;
   }
 };
 
-export const saveOrder = async (data: Stripe.Checkout.Session, cartItems: CartItem[]) => {
+export const saveOrder = async (
+  data: Stripe.Checkout.Session,
+  cartItems: CartItem[]
+) => {
   try {
     const user = await getUser();
     const userId = user?.id;
@@ -146,7 +161,7 @@ export const saveOrder = async (data: Stripe.Checkout.Session, cartItems: CartIt
       order_id: orderData.id,
       variant_id: item.variant_id,
       quantity: item.quantity,
-      size: item.size
+      size: item.size,
     }));
 
     const { error: productsError } = await supabase
@@ -155,7 +170,7 @@ export const saveOrder = async (data: Stripe.Checkout.Session, cartItems: CartIt
 
     if (productsError) throw productsError;
 
-    await emptyCart(userId);
+    await clearCart();
 
     console.log("Order saved successfully");
   } catch (error) {

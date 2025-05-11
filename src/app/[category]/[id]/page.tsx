@@ -1,8 +1,8 @@
 import { SingleProduct } from "@/components/product";
 import { getProduct, getRandomProducts } from "@/app/actions";
 import { Suspense } from "react";
-import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
-import SingleProductSkeleton from "@/components/skeletons/SingleProductSkeleton";
+import ProductsSkeleton from "@/components/products/skeleton";
+import { SingleProductSkeleton } from "@/components/product/skeleton";
 import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
 
@@ -36,10 +36,7 @@ const ProductPage = ({ params }: Props) => (
           <h2 className="mt-24 mb-5 text-xl font-bold sm:text-2xl">
             YOU MIGHT ALSO LIKE...
           </h2>
-          <ProductSkeleton
-            extraClassname={"colums-mobile"}
-            numberProducts={6}
-          />
+          <ProductsSkeleton extraClassname={"colums-mobile"} items={6} />
         </div>
       }
     >

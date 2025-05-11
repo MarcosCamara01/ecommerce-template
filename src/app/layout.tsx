@@ -6,8 +6,9 @@ import { Footer } from "../components/common/Footer";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
-import { getTotalItems } from "./(carts)/cart/action";
-import { getTotalWishlist } from "./(carts)/wishlist/action";
+import { getWishlistItems } from "./(carts)/wishlist/action";
+import { getCartItems } from "./(carts)/cart/action";
+
 import "../styles/globals.css";
 
 export const metadata: Metadata = {
@@ -20,16 +21,16 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const totalItemsCart = await getTotalItems();
-  const totalItemsWishlists = await getTotalWishlist();
+  const cartItems = await getCartItems();
+  const wishlistItems = await getWishlistItems();
 
   return (
     <html lang="en">
       <Providers>
         <body className={GeistSans.className}>
           <Navbar
-            totalItemsCart={totalItemsCart}
-            totalWishlists={totalItemsWishlists?.items.length}
+            totalItemsCart={cartItems?.length || 0}
+            totalWishlists={wishlistItems?.length || 0}
           />
           <main className="pointer-events-auto">
             {children}

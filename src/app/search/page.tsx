@@ -1,6 +1,7 @@
-import { Products } from "@/components/products/Products";
 import { getAllProducts } from "../actions";
-import { EnrichedProducts, ProductDocument } from "@/types/types";
+import { GridProducts } from "@/components/products/GridProducts";
+import { ProductItem } from "@/components/products/item";
+import type { EnrichedProduct } from "@/schemas/ecommerce";
 
 interface SearchProps {
   searchParams: { [key: string]: string | undefined };
@@ -13,9 +14,10 @@ const normalizeText = (text: string): string => {
     .toLowerCase();
 };
 
-const Search: React.FC<SearchProps> = async ({ searchParams }) => {
+const Search = async ({ searchParams }: SearchProps) => {
   const products = await getAllProducts();
-  let filteredProducts: EnrichedProducts[] = [];
+
+  let filteredProducts: EnrichedProduct[] = [];
 
   if (products) {
     filteredProducts = products.filter((product) =>
@@ -26,7 +28,11 @@ const Search: React.FC<SearchProps> = async ({ searchParams }) => {
   return (
     <section className="pt-14">
       {filteredProducts.length > 0 ? (
-        <Products products={filteredProducts} extraClassname="" />
+        <GridProducts>
+          {products.map((product) => (
+            <ProductItem key={product.id} product={product} />
+          ))}
+        </GridProducts>
       ) : (
         <h3 className="text-sm text-center">
           No products found for &quot;{searchParams.q}&quot;

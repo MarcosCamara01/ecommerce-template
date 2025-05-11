@@ -1,14 +1,14 @@
 import { getCategoryProducts } from "../actions";
-import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
+import ProductsSkeleton from "@/components/products/skeleton";
 import { Suspense } from "react";
 import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
 
-type Props = {
+interface Props {
   params: {
     category: string;
   };
-};
+}
 
 export async function generateMetadata({ params }: Props) {
   const capitalizeFirstLetter = (string: string) => {
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props) {
 const CategoryPage = async ({ params }: Props) => {
   return (
     <section className="pt-14">
-      <Suspense fallback={<ProductSkeleton numberProducts={6} />}>
+      <Suspense fallback={<ProductsSkeleton items={6} />}>
         <CategoryProducts category={params.category} />
       </Suspense>
     </section>
