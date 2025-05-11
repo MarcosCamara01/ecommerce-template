@@ -14,30 +14,28 @@ import { MdError } from "react-icons/md";
 import { FaGoogle } from "react-icons/fa";
 
 const Signup = () => {
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const nameRef = useRef<HTMLInputElement>(null);
-  const phoneRef = useRef<HTMLInputElement>(null);
-
-  const [error, setError] = useState("");
+  const emailRef = useRef<HTMLInputElement>(null!);
+  const passwordRef = useRef<HTMLInputElement>(null!);
+  const nameRef = useRef<HTMLInputElement>(null!);
+  const phoneRef = useRef<HTMLInputElement>(null!);
 
   const router = useRouter();
 
-  const {mutate, isPending} = useMutation({
+  const {
+    mutate,
+    isPending,
+    error: mutationError,
+  } = useMutation({
     mutationFn: async () => {
-      if (!emailRef.current?.value || !passwordRef.current?.value || !nameRef.current?.value) {
-        throw new Error("Please fill in all required fields");
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email: emailRef.current.value,
         password: passwordRef.current.value,
         options: {
           data: {
             name: nameRef.current.value,
-            phone: phoneRef.current?.value || ""
-          }
-        }
+            phone: phoneRef.current?.value || "",
+          },
+        },
       });
 
       if (error) {
@@ -47,23 +45,25 @@ const Signup = () => {
       return data;
     },
     onError: (error: any) => {
-      setError(error.message);
+      return error.message;
     },
     onSuccess: (data) => {
       if (data.user) {
         router.push("/");
       }
-    }
+    },
   });
 
-  const handleGoogleSignIn = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleGoogleSignIn = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
     });
 
     if (error) {
-      setError(error.message);
+      return error.message;
     }
   };
 
@@ -76,10 +76,10 @@ const Signup = () => {
         }}
         className="p-6 xs:p-10 w-full max-w-350 flex flex-col justify-between items-center gap-2.5 border border-solid border-[#2E2E2E] bg-[#0A0A0A] rounded-md"
       >
-        {error && (
+        {mutationError && (
           <div className="text-[#FF6166] flex items-center justify-center gap-2">
             <MdError />
-            <div className="text-sm">{error}</div>
+            <div className="text-sm">{mutationError}</div>
           </div>
         )}
         <h1 className="w-full mb-5 text-2xl font-bold">Signup</h1>
@@ -105,7 +105,7 @@ const Signup = () => {
         />
 
         <label className="w-full text-sm">Password:</label>
-        <PasswordInput ref={passwordRef} onChange={() => setError("")} />
+        <PasswordInput ref={passwordRef} />
 
         <label className="w-full text-sm">Phone:</label>
         <input

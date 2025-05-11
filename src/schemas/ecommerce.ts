@@ -6,7 +6,7 @@ enum ProductCategory {
   SWEATSHIRT = "sweatshirt",
 }
 
-enum ProductSize {
+export enum ProductSize {
   XS = "xs",
   S = "s",
   M = "m",
@@ -15,7 +15,7 @@ enum ProductSize {
   XXL = "2xl",
 }
 
-export const ProductsItems = z.object({
+export const ProductSchema = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string(),
@@ -26,7 +26,7 @@ export const ProductsItems = z.object({
   updated_at: z.string().default(() => new Date().toISOString()),
 });
 
-export const ProductsVariants = z.object({
+export const ProductVariantSchema = z.object({
   id: z.number(),
   stripe_id: z.string(),
   product_id: z.number(),
@@ -37,16 +37,7 @@ export const ProductsVariants = z.object({
   updated_at: z.string().default(() => new Date().toISOString()),
 });
 
-export const OrderItems = z.object({
-  id: z.number(),
-  user_id: z.string(),
-  delivery_date: z.string(),
-  order_number: z.number(),
-  created_at: z.string().default(() => new Date().toISOString()),
-  updated_at: z.string().default(() => new Date().toISOString()),
-});
-
-export const OrderProduct = z.object({
+export const OrderProductSchema = z.object({
   id: z.number(),
   order_id: z.number(),
   variant_id: z.number(),
@@ -54,9 +45,36 @@ export const OrderProduct = z.object({
   size: z.nativeEnum(ProductSize),
   created_at: z.string().default(() => new Date().toISOString()),
   updated_at: z.string().default(() => new Date().toISOString()),
+  products_variants: z.any(),
 });
 
-export const CartItems = z.object({
+export const CustomerInfoSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  address: z.object({
+    line1: z.string(),
+    line2: z.string().optional(),
+    city: z.string(),
+    postal_code: z.string(),
+    country: z.string(),
+  }),
+  stripe_order_id: z.string(),
+  total_price: z.number(),
+});
+
+export const OrderItemSchema = z.object({
+  id: z.number(),
+  user_id: z.string(),
+  delivery_date: z.string(),
+  order_number: z.number(),
+  created_at: z.string().default(() => new Date().toISOString()),
+  updated_at: z.string().default(() => new Date().toISOString()),
+  order_products: z.array(OrderProductSchema),
+  customer_info: CustomerInfoSchema,
+});
+
+export const CartItemSchema = z.object({
   id: z.number(),
   variant_id: z.number(),
   quantity: z.number(),
@@ -66,21 +84,25 @@ export const CartItems = z.object({
   updated_at: z.string().default(() => new Date().toISOString()),
 });
 
-export const Wishlist = z.object({
+export const WishlistItemSchema = z.object({
   id: z.number(),
-  variant_id: z.number(),
+  product_id: z.number(),
   user_id: z.string(),
   created_at: z.string().default(() => new Date().toISOString()),
 });
 
-export type Product = z.infer<typeof ProductsItems>;
-export type ProductVariant = z.infer<typeof ProductsVariants>;
-export type OrderItem = z.infer<typeof OrderItems>;
-export type OrderProduct = z.infer<typeof OrderProduct>;
-export type CartItem = z.infer<typeof CartItems>;
-export type WishlistItem = z.infer<typeof Wishlist>;
+export type Product = z.infer<typeof ProductSchema>;
+export type ProductVariant = z.infer<typeof ProductVariantSchema>;
+export type OrderItem = z.infer<typeof OrderItemSchema>;
+export type OrderProduct = z.infer<typeof OrderProductSchema>;
+export type CartItem = z.infer<typeof CartItemSchema>;
+export type WishlistItem = z.infer<typeof WishlistItemSchema>;
 export type EnrichedProduct = Product & {
   variants: ProductVariant[];
+  cart_item?: CartItem;
+  wishlist_item?: WishlistItem;
 };
 
-export const productsWithVariantsQuery = '*, variants:products_variants(*)';
+export type CustomerInfo = z.infer<typeof CustomerInfoSchema>;
+
+export const productsWithVariantsQuery = "*, variants:products_variants(*)";

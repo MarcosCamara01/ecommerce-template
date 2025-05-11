@@ -23,7 +23,7 @@ export const ProductImage = ({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
-    <div className={!imageLoaded ? "relative" : ""}>
+    <div className="relative">
       <Image
         loader={cloudinaryLoader}
         width={width}

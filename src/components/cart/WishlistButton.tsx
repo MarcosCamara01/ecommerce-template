@@ -1,57 +1,39 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Wishlists, delItem, addItem } from "@/app/(carts)/wishlist/action";
-import { Schema } from "mongoose";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { toast } from "sonner";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 import { useMutation } from "@tanstack/react-query";
+import { useUser } from "@/hooks/useUser";
+import { toggleWishlistItem } from "@/app/(carts)/wishlist/action";
 
 interface WishlistButtonProps {
-  productId: string;
-  wishlistString: string;
+  productId: number;
+  isFavorite: boolean;
 }
 
-const WishlistButton = ({
-  productId,
-  wishlistString,
-}: WishlistButtonProps) => {
-  const supabase = createClientComponentClient();
+const WishlistButton = ({ productId, isFavorite }: WishlistButtonProps) => {
+  const { user } = useUser();
 
-  const id: Schema.Types.ObjectId = useMemo(
-    () => JSON.parse(productId),
-    [productId]
-  );
-
-  const isFavorite = useMemo(() => {
-    if (wishlistString) {
-      const wishlist: Wishlists = JSON.parse(wishlistString);
-      return wishlist.items.some(
-        (wishlistProduct) =>
-          wishlistProduct.productId.toString() === id.toString()
-      );
-    }
-    return false;
-  }, [wishlistString, id]);
-
-  const { mutate: handleFavorites, isPending } = useMutation({
+  const {
+    mutate: handleFavorites,
+    isPending,
+    isSuccess,
+  } = useMutation({
     mutationFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session?.user) {
-        throw new Error("You must be registered to be able to add a product to the wishlist.");
+      if (!user) {
+        throw new Error(
+          "You must be registered to be able to add a product to the wishlist."
+        );
       }
 
-      if (isFavorite) {
-        return delItem(id);
-      } else {
-        return addItem(id);
-      }
+      await toggleWishlistItem(productId);
     },
     onError: (error) => {
-      toast.warning(error instanceof Error ? error.message : "An error occurred");
-    }
+      console.error("Error toggling wishlist item:", error);
+      toast.warning(
+        error instanceof Error ? error.message : "An error occurred"
+      );
+    },
   });
 
   return (
@@ -59,9 +41,10 @@ const WishlistButton = ({
       onClick={() => handleFavorites()}
       title={isFavorite ? "Remove from favorites" : "Add to favorites"}
       disabled={isPending}
+      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
     >
       {isFavorite ? (
-        <MdFavorite size={16} />
+        <MdFavorite size={16} className="text-red-500" />
       ) : (
         <MdFavoriteBorder size={16} />
       )}

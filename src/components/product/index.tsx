@@ -2,7 +2,7 @@
 
 import { ProductImages } from "@/components/product/Images";
 import { useState } from "react";
-import AddToCart from "../cart/AddToCart";
+import AddToCart from "../cart/addToCart";
 import type { EnrichedProduct, ProductVariant } from "@/schemas/ecommerce";
 import { DefaultInfo } from "./DefaultInfo";
 
@@ -43,7 +43,7 @@ export const SingleProduct = ({ product }: SingleProduct) => {
           <AddToCart
             product={productPlainObject}
             selectedVariant={selectedVariant}
-            setSelectedVariant={setSelectedVariant}
+            onVariantChange={setSelectedVariant}
           />
         </div>
 

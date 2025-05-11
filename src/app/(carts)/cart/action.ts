@@ -1,227 +1,171 @@
 "use server";
 
-import { kv } from "@vercel/kv";
-import { revalidatePath } from "next/cache";
-import { Schema } from "mongoose";
-import { Product } from "@/models/Products";
-import { EnrichedProducts, VariantsDocument } from "@/types/types";
-import { connectDB } from "@/libs/mongodb";
+import { revalidateTag } from "next/cache";
+import { unstable_cache } from "next/cache";
+import { CartItem } from "@/schemas/ecommerce";
+import { supabase } from "@/libs/supabase/server";
 import { getUser } from "@/libs/supabase/auth/getUser";
 
-export type Cart = {
-  userId: string;
-  items: Array<{
-    productId: Schema.Types.ObjectId;
-    size: string;
-    variantId: string;
-    quantity: number;
-    price: number;
-  }>;
-};
+export async function getCartItems() {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
 
-export async function getItems(userId: string) {
-  connectDB();
+    return unstable_cache(
+      async () => {
+        const { data, error } = await supabase
+          .from("cart_items")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("updated_at", { ascending: false });
 
-  if (!userId) {
-    console.error(`User Id not found.`);
-    return undefined;
-  }
+        if (error) throw error;
 
-  const cart: Cart | null = await kv.get(`cart-${userId}`);
-
-  if (cart === null) {
-    return undefined;
-  }
-
-  const updatedCart: EnrichedProducts[] = [];
-  for (const cartItem of cart.items) {
-    try {
-      if (cartItem.productId && cartItem.variantId) {
-        const matchingProduct = await Product.findById(cartItem.productId);
-
-        if (!matchingProduct) {
-          console.error(
-            `Product not found for productId: ${cartItem.productId}`,
-          );
-          continue;
-        } else {
-          const matchingVariant = matchingProduct.variants.find(
-            (variant: VariantsDocument) =>
-              variant.priceId === cartItem.variantId,
-          );
-          const updatedCartItem: EnrichedProducts = {
-            ...cartItem,
-            color: matchingVariant.color,
-            category: matchingProduct.category,
-            image: [matchingVariant.images[0]],
-            name: matchingProduct.name,
-            purchased: false,
-            _id: matchingProduct._id.toString(),
-          };
-
-          updatedCart.push(updatedCartItem);
-        }
+        return data as CartItem[];
+      },
+      [`cart-${user.id}`],
+      {
+        tags: [`cart-${user.id}`],
+        revalidate: 0,
       }
-    } catch (error) {
-      console.error("Error getting product details:", error);
-    }
+    )();
+  } catch (error) {
+    console.error("Error getting cart items:", error);
+    throw error;
   }
+}
 
-  const filteredCart = updatedCart.filter((item) => item !== null);
+export async function addCartItem(
+  item: Omit<
+    CartItem,
+    "quantity" | "user_id" | "id" | "created_at" | "updated_at"
+  >
+) {
+  const user = await getUser();
+  if (!user) throw new Error("User not found");
 
-  return filteredCart;
+  try {
+    const cartItems = await getCartItems();
+
+    const existingItem = cartItems?.find(
+      (cartItem) =>
+        cartItem.variant_id === item.variant_id && cartItem.size === item.size
+    );
+
+    if (existingItem) {
+      return editCartItem({
+        id: existingItem.id,
+        quantity: existingItem.quantity + 1,
+      });
+    }
+
+    const { data: newItem, error: insertError } = await supabase
+      .from("cart_items")
+      .insert({
+        ...item,
+        quantity: 1,
+        user_id: user.id,
+      })
+      .select("*")
+      .single<Required<CartItem>>();
+
+    if (insertError) throw insertError;
+
+    revalidateTag(`cart-${user.id}`);
+    return newItem;
+  } catch (error) {
+    console.error("Error adding cart item:", error);
+    throw error;
+  }
+}
+
+export async function editCartItem(update: Partial<CartItem>) {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
+
+    const { data, error } = await supabase
+      .from("cart_items")
+      .update({
+        ...update,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", update.id)
+      .select("id, user_id")
+      .single<Required<Pick<CartItem, "id" | "user_id">>>();
+
+    if (error) throw error;
+
+    revalidateTag(`cart-${data.user_id}`);
+    return data;
+  } catch (error) {
+    console.error("Error editing cart item:", error);
+    throw error;
+  }
+}
+
+export async function removeCartItem(itemId: CartItem["id"]) {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
+
+    const { error: deleteError } = await supabase
+      .from("cart_items")
+      .delete()
+      .eq("id", itemId);
+
+    if (deleteError) throw deleteError;
+
+    revalidateTag(`cart-${user.id}`);
+  } catch (error) {
+    console.error("Error removing cart item:", error);
+    throw error;
+  }
 }
 
 export async function getTotalItems() {
-  const user = await getUser();
-  const cart: Cart | null = await kv.get(`cart-${user?.id}`);
-  const total: number =
-    cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
-
-  return total;
-}
-
-export async function addItem(
-  category: string,
-  productId: Schema.Types.ObjectId,
-  size: string,
-  variantId: string,
-  price: number,
-) {
-  const user = await getUser();
-
-  if (!user?.id) {
-    console.error(`User Id not found.`);
-    return;
-  }
-
-  const userId = user.id;
-  let cart: Cart | null = await kv.get(`cart-${userId}`);
-
-  let myCart = {} as Cart;
-
-  if (!cart || !cart.items) {
-    myCart = {
-      userId: userId,
-      items: [
-        {
-          productId: productId,
-          size: size,
-          variantId: variantId,
-          quantity: 1,
-          price: price,
-        },
-      ],
-    };
-  } else {
-    let itemFound = false;
-
-    myCart.items = cart.items.map((item) => {
-      if (
-        item.productId === productId &&
-        item.variantId === variantId &&
-        item.size === size
-      ) {
-        itemFound = true;
-        item.quantity += 1;
-      }
-      return item;
-    }) as Cart["items"];
-
-    if (!itemFound) {
-      myCart.items.push({
-        productId: productId,
-        size: size,
-        variantId: variantId,
-        quantity: 1,
-        price: price,
-      });
-    }
-  }
-
-  await kv.set(`cart-${userId}`, myCart);
-  revalidatePath(`/${category}/${productId}`);
-}
-
-export async function delItem(
-  productId: Schema.Types.ObjectId,
-  size: string,
-  variantId: string,
-) {
-  const user = await getUser();
-  const userId = user?.id;
-  let cart: Cart | null = await kv.get(`cart-${userId}`);
-
-  if (cart && cart.items) {
-    const updatedCart = {
-      userId: userId,
-      items: cart.items.filter(
-        (item) =>
-          !(
-            item.productId === productId &&
-            item.variantId === variantId &&
-            item.size === size
-          ),
-      ),
-    };
-
-    await kv.set(`cart-${userId}`, updatedCart);
-    revalidatePath("/cart");
-  }
-}
-
-export async function delOneItem(
-  productId: Schema.Types.ObjectId,
-  size: string,
-  variantId: string,
-) {
   try {
     const user = await getUser();
-    const userId = user?.id;
-    let cart: Cart | null = await kv.get(`cart-${userId}`);
+    if (!user) throw new Error("User not found");
 
-    if (cart && cart.items) {
-      const updatedCart = {
-        userId: userId,
-        items: cart.items
-          .map((item) => {
-            if (
-              item.productId === productId &&
-              item.variantId === variantId &&
-              item.size === size
-            ) {
-              if (item.quantity > 1) {
-                item.quantity -= 1;
-              } else {
-                return null;
-              }
-            }
-            return item;
-          })
-          .filter(Boolean) as Cart["items"],
-      };
+    return unstable_cache(
+      async () => {
+        const { data, error } = await supabase
+          .from("cart_items")
+          .select("quantity")
+          .eq("user_id", user.id);
 
-      await kv.set(`cart-${userId}`, updatedCart);
-      revalidatePath("/cart");
-    }
+        if (error) throw error;
+
+        return data.reduce((sum, item) => sum + item.quantity, 0);
+      },
+      [`cart-total-${user.id}`],
+      {
+        tags: [`cart-${user.id}`],
+        revalidate: 0,
+      }
+    )();
   } catch (error) {
-    console.error("Error in delOneItem:", error);
+    console.error("Error getting total items:", error);
+    throw error;
   }
 }
 
-export const emptyCart = async (userId: string) => {
+export async function clearCart() {
   try {
-    let cart: Cart | null = await kv.get(`cart-${userId}`);
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
 
-    if (cart && cart.items) {
-      cart.items = [];
-      await kv.set(`cart-${userId}`, cart);
-      revalidatePath("/cart");
-      console.log("Cart emptied successfully.");
-    } else {
-      console.log("Cart is already empty.");
-    }
+    const { error: deleteError } = await supabase
+      .from("cart_items")
+      .delete()
+      .eq("user_id", user.id);
+
+    if (deleteError) throw deleteError;
+
+    revalidateTag(`cart-${user.id}`);
   } catch (error) {
-    console.error("Error emptying cart:", error);
+    console.error("Error clearing cart:", error);
+    throw error;
   }
-};
+}

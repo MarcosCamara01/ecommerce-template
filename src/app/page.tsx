@@ -1,16 +1,15 @@
 import { Suspense } from "react";
-import { Products } from "../components/products/Products";
 import { getAllProducts } from "./actions";
-import ProductSkeleton from "@/components/skeletons/ProductSkeleton";
 import { ErrorBoundary } from "react-error-boundary";
+import ProductsSkeleton from "@/components/products/skeleton";
+import { GridProducts } from "@/components/products/GridProducts";
+import { ProductItem } from "@/components/products/item";
 
 const Home = async () => {
   return (
     <section className="pt-14">
       <ErrorBoundary fallback={<ErrorComponent />}>
-        <Suspense
-          fallback={<ProductSkeleton extraClassname="" numberProducts={18} />}
-        >
+        <Suspense fallback={<ProductsSkeleton items={18} />}>
           <AllProducts />
         </Suspense>
       </ErrorBoundary>
@@ -44,7 +43,13 @@ const AllProducts = async () => {
       );
     }
 
-    return <Products products={products} extraClassname="" />;
+    return (
+      <GridProducts>
+        {products.map((product) => (
+          <ProductItem key={product.id} product={product} />
+        ))}
+      </GridProducts>
+    );
   } catch (error) {
     throw new Error("Error loading products");
   }

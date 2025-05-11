@@ -1,133 +1,103 @@
 "use server";
 
-import { Schema } from "mongoose";
-import { kv } from "@vercel/kv";
-import { revalidatePath } from "next/cache";
-import { Product } from "@/models/Products";
-import { connectDB } from "@/libs/mongodb";
+import { revalidateTag } from "next/cache";
+import { unstable_cache } from "next/cache";
+import { supabase } from "@/libs/supabase/server";
+import { WishlistItem } from "@/schemas/ecommerce";
 import { getUser } from "@/libs/supabase/auth/getUser";
 
-export type Wishlists = {
-  userId: string;
-  items: Array<{
-    productId: Schema.Types.ObjectId;
-  }>;
-};
+export async function getWishlistItems() {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
 
-export async function addItem(productId: Schema.Types.ObjectId) {
-  const user = await getUser();
+    return unstable_cache(
+      async () => {
+        const { data, error } = await supabase
+          .from("wishlist")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("updated_at", { ascending: false });
 
-  if (!user?.id) {
-    console.error(`User Id not found.`);
-    return;
-  }
+        if (error) throw error;
 
-  const userId = user.id;
-  let wishlists: Wishlists | null = await kv.get(`wishlist-${userId}`);
-
-  let myWishlists = {} as Wishlists;
-
-  if (!wishlists || !wishlists.items) {
-    myWishlists = {
-      userId: userId,
-      items: [
-        {
-          productId: productId,
-        },
-      ],
-    };
-  } else {
-    let itemFound = false;
-
-    myWishlists.items = wishlists.items.map((item) => {
-      if (item.productId === productId) {
-        itemFound = true;
+        return data as WishlistItem[];
+      },
+      [`wishlist-${user.id}`],
+      {
+        tags: [`wishlist-${user.id}`],
+        revalidate: 0,
       }
-      return item;
-    }) as Wishlists["items"];
+    )();
+  } catch (error) {
+    console.error("Error getting wishlist items:", error);
+    throw error;
+  }
+}
 
-    if (!itemFound) {
-      myWishlists.items.push({
-        productId: productId,
-      });
+export async function toggleWishlistItem(
+  productId: WishlistItem["product_id"]
+) {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
+
+    const wishlistItems = await getWishlistItems();
+
+    const existingItem = wishlistItems?.find(
+      (wishlistItem) => wishlistItem.product_id === productId
+    );
+
+    if (existingItem) {
+      await removeWishlistItem(existingItem.id);
+      return null;
     }
-  }
 
-  await kv.set(`wishlist-${userId}`, myWishlists);
-  revalidatePath("/wishlist");
+    return await addWishlistItem(productId);
+  } catch (error) {
+    console.error("Error toggling wishlist item:", error);
+    throw error;
+  }
 }
 
-export async function getItems(userId: string) {
-  connectDB();
+export async function addWishlistItem(productId: number) {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
 
-  if (!userId) {
-    console.error(`User Id not found.`);
-    return null;
+    const { data: newItem, error: insertError } = await supabase
+      .from("wishlist")
+      .insert({ product_id: productId, user_id: user.id })
+      .select("*")
+      .single<Required<WishlistItem>>();
+
+    if (insertError) throw insertError;
+
+    revalidateTag(`wishlist-${user.id}`);
+    revalidateTag("wishlist-products");
+    return newItem;
+  } catch (error) {
+    console.error("Error adding wishlist item:", error);
+    throw error;
   }
-
-  const wishlist: Wishlists | null = await kv.get(`wishlist-${userId}`);
-
-  if (wishlist === null) {
-    console.error("wishlist not found.");
-    return null;
-  }
-
-  const updatedWishlist = [];
-  for (const wishlistItem of wishlist.items) {
-    try {
-      if (wishlistItem.productId) {
-        const matchingProduct = await Product.findById(wishlistItem.productId);
-
-        if (!matchingProduct) {
-          console.error(
-            `Product not found for productId: ${wishlistItem.productId}`,
-          );
-          continue;
-        } else {
-          updatedWishlist.push(matchingProduct);
-        }
-      }
-    } catch (error) {
-      console.error("Error getting product details:", error);
-    }
-  }
-
-  const filteredWishlist = updatedWishlist.filter((item) => item !== null);
-
-  return filteredWishlist;
 }
 
-export async function getTotalWishlist() {
-  const user = await getUser();
-  const wishlists: Wishlists | null = await kv.get(
-    `wishlist-${user?.id}`,
-  );
+export async function removeWishlistItem(itemId: WishlistItem["id"]) {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("User not found");
 
-  if (wishlists === null) {
-    return undefined;
-  }
+    const { error: deleteError } = await supabase
+      .from("wishlist")
+      .delete()
+      .eq("id", itemId);
 
-  return wishlists;
-}
+    if (deleteError) throw deleteError;
 
-export async function delItem(productId: Schema.Types.ObjectId) {
-  const user = await getUser();
-  const userId = user?.id;
-
-  if (!userId) {
-    console.error("User not found.");
-    return;
-  }
-
-  let wishlists: Wishlists | null = await kv.get(`wishlist-${userId}`);
-
-  if (wishlists && wishlists.items) {
-    const updatedWishlist = {
-      userId: userId,
-      items: wishlists.items.filter((item) => !(item.productId === productId)),
-    };
-
-    await kv.set(`wishlist-${userId}`, updatedWishlist);
-    revalidatePath("/wishlist");
+    revalidateTag(`wishlist-${user.id}`);
+    revalidateTag("wishlist-products");
+  } catch (error) {
+    console.error("Error removing wishlist item:", error);
+    throw error;
   }
 }

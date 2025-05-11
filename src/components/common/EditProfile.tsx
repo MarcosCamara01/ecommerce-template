@@ -5,12 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserDocument } from "@/types/types";
 import { useRef } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
 import { useMutation } from "@tanstack/react-query";
@@ -32,7 +29,6 @@ export default function EditProfile() {
         },
       });
       if (error) throw error;
-      return true;
     },
     onSuccess: () => {
       toast.success("Perfil actualizado exitosamente");

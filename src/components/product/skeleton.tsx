@@ -1,7 +1,7 @@
 import React from "react";
 import { Skeleton } from "../ui/skeleton";
 
-const SingleProductSkeleton = () => (
+export const SingleProductSkeleton = () => (
   <div className="flex flex-wrap justify-between gap-8">
     <div className="grow-999 basis-0">
       <Skeleton className="w-full rounded-b-none aspect-[2/3] min-w-[250px] lg:aspect-[4/6] lg:min-w-[560px]" />
@@ -26,6 +26,7 @@ const SingleProductSkeleton = () => (
     </div>
   </div>
 );
+
 export const ButtonsSkeleton = () => (
   <>
     <div className="p-5">
@@ -48,5 +49,3 @@ export const ButtonsSkeleton = () => (
     </div>
   </>
 );
-
-export default SingleProductSkeleton;

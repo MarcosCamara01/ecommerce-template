@@ -1,33 +1,30 @@
 import React from "react";
 import { Skeleton } from "../ui/skeleton";
 
-const ProductSkeleton = ({
+const ProductsSkeleton = ({
   extraClassname,
-  numberProducts,
+  items,
 }: {
   extraClassname?: string;
-  numberProducts: number;
+  items: number;
 }) => {
-  const productSkeletons = Array.from(
-    { length: numberProducts },
-    (_, index) => (
-      <div
-        key={index}
-        className={`flex justify-between border border-solid border-border-primary rounded-md overflow-hidden 
+  const productSkeletons = Array.from({ length: items }, (_, index) => (
+    <div
+      key={index}
+      className={`flex justify-between border border-solid border-border-primary rounded-md overflow-hidden 
             ${
               extraClassname === "cart-ord-mobile"
                 ? "flex-row sm:flex-col"
                 : "flex-col"
             }`}
-      >
-        <Skeleton className="w-full aspect-[2/3] rounded-b-none" />
-        <div className="flex justify-between flex-col gap-2.5 p-3.5">
-          <Skeleton className="h-5 full" />
-          <Skeleton className="h-5 w-[200px]" />
-        </div>
+    >
+      <Skeleton className="w-full aspect-[2/3] rounded-b-none" />
+      <div className="flex justify-between flex-col gap-2.5 p-3.5">
+        <Skeleton className="h-5 full" />
+        <Skeleton className="h-5 w-[200px]" />
       </div>
-    )
-  );
+    </div>
+  ));
 
   return (
     <div
@@ -43,4 +40,4 @@ const ProductSkeleton = ({
   );
 };
 
-export default ProductSkeleton;
+export default ProductsSkeleton;

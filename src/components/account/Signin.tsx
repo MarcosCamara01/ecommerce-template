@@ -18,9 +18,11 @@ const Signin = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  const [error, setError] = useState("");
-
-  const { mutate, isPending } = useMutation({
+  const {
+    mutate,
+    isPending,
+    error: mutationError,
+  } = useMutation({
     mutationFn: async () => {
       if (!emailRef.current?.value || !passwordRef.current?.value) {
         throw new Error("Please fill in all fields");
@@ -38,7 +40,7 @@ const Signin = () => {
       return data;
     },
     onError: (error: any) => {
-      setError(error.message);
+      return error.message;
     },
     onSuccess: (data) => {
       if (data.user) {
@@ -56,7 +58,7 @@ const Signin = () => {
     });
 
     if (error) {
-      setError(error.message);
+      return error.message;
     }
   };
 
@@ -69,10 +71,10 @@ const Signin = () => {
           mutate();
         }}
       >
-        {error && (
+        {mutationError && (
           <div className="text-[#FF6166] flex items-center justify-center gap-2">
             <MdError />
-            <div className="text-sm">{error}</div>
+            <div className="text-sm">{mutationError}</div>
           </div>
         )}
         <h1 className="w-full mb-5 text-2xl font-bold">Signin</h1>
@@ -80,7 +82,6 @@ const Signin = () => {
         <label className="w-full text-sm">Email:</label>
         <input
           ref={emailRef}
-          onChange={() => setError("")}
           type="email"
           placeholder="Email"
           className="w-full text-[#A1A1A1] h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-black text-13"
@@ -88,7 +89,7 @@ const Signin = () => {
         />
 
         <label className="w-full text-sm">Password:</label>
-        <PasswordInput ref={passwordRef} onChange={() => setError("")} />
+        <PasswordInput ref={passwordRef} />
 
         <LoadingButton
           loading={isPending}

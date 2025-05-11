@@ -3,84 +3,154 @@
 import { createSSRClient } from "@/libs/supabase/server";
 import type { EnrichedProduct } from "@/schemas/ecommerce";
 import { productsWithVariantsQuery } from "@/schemas/ecommerce";
+import { unstable_cache } from "next/cache";
+import { getWishlistItems } from "@/app/(carts)/wishlist/action";
+import { getCartItems } from "@/app/(carts)/cart/action";
+import { getUser } from "@/libs/supabase/auth/getUser";
 
-export const getAllProducts = async (): Promise<EnrichedProduct[]> => {
-  try {
-    const supabase = createSSRClient();
-    const { data: products, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .returns<EnrichedProduct[]>();
+export const getAllProducts = unstable_cache(
+  async (): Promise<EnrichedProduct[]> => {
+    try {
+      const supabase = createSSRClient();
+      const { data: products, error } = await supabase
+        .from("products_items")
+        .select(productsWithVariantsQuery);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    return products;
-  } catch (error) {
-    console.error("Error obteniendo productos:", error);
-    throw new Error("Error al obtener los productos");
-  }
-};
+      const user = await getUser();
+      if (!user) {
+        return products as EnrichedProduct[];
+      }
 
-export const getCategoryProducts = async (
-  category: string
-): Promise<EnrichedProduct[]> => {
-  try {
-    const supabase = createSSRClient();
-    const { data: products, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .eq("category", category)
-      .returns<EnrichedProduct[]>();
+      const wishlistItems = await getWishlistItems();
 
-    if (error) throw error;
+      const enrichedProducts = (products as EnrichedProduct[]).map(
+        (product) => ({
+          ...product,
+          wishlist_item: wishlistItems?.find(
+            (item) => item.product_id === product.id
+          ),
+        })
+      );
 
-    return products;
-  } catch (error) {
-    console.error("Error obteniendo productos por categoría:", error);
-    throw new Error("Error al obtener productos por categoría");
-  }
-};
+      return enrichedProducts;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw new Error("Error fetching products");
+    }
+  },
+  ["all-products"],
+  { revalidate: 3600 }
+);
 
-export const getRandomProducts = async (
-  productId: number
-): Promise<EnrichedProduct[]> => {
-  try {
-    const supabase = createSSRClient();
+export const getCartProducts = unstable_cache(
+  async (): Promise<EnrichedProduct[]> => {
+    try {
+      const user = await getUser();
+      if (!user) return [];
 
-    const { data: randomProducts, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .neq("id", productId)
-      .order("random()")
-      .limit(6)
-      .returns<EnrichedProduct[]>();
+      const allProducts = await getAllProducts();
+      const cartItems = await getCartItems();
 
-    if (error) throw error;
+      if (!cartItems?.length) return [];
 
-    return randomProducts;
-  } catch (error) {
-    console.error("Error obteniendo productos aleatorios:", error);
-    throw new Error("Error al obtener productos aleatorios");
-  }
-};
+      const variantIds = cartItems.map((item) => item.variant_id);
 
-export const getProduct = async (
-  productId: number
-): Promise<EnrichedProduct | null> => {
-  try {
-    const supabase = createSSRClient();
+      const cartProducts = allProducts
+        .filter((product) =>
+          product.variants.some((variant) => variantIds.includes(variant.id))
+        )
+        .map((product) => {
+          const cartItem = cartItems.find((item) =>
+            product.variants.some((variant) => variant.id === item.variant_id)
+          );
+          const variant = product.variants.find(
+            (v) => v.id === cartItem?.variant_id
+          );
 
-    const { data: product, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .eq("id", productId)
-      .returns<EnrichedProduct>();
+          return {
+            ...product,
+            img: variant?.images[0] || product.img,
+            cart_item: cartItem,
+          };
+        });
 
-    if (error) throw error;
+      return cartProducts;
+    } catch (error) {
+      console.error("Error fetching cart products:", error);
+      throw new Error("Error fetching cart products");
+    }
+  },
+  ["cart-products"],
+  { revalidate: 3600 }
+);
 
-    return product;
-  } catch (error) {
-    console.error("Error obteniendo producto específico:", error);
-    throw new Error("Error al obtener el producto específico");
-  }
-};
+export const getCategoryProducts = unstable_cache(
+  async (category: string): Promise<EnrichedProduct[]> => {
+    try {
+      const supabase = createSSRClient();
+      const { data: products, error } = await supabase
+        .from("products_items")
+        .select(productsWithVariantsQuery)
+        .eq("category", category);
+
+      if (error) throw error;
+
+      return products as EnrichedProduct[];
+    } catch (error) {
+      console.error("Error fetching category products:", error);
+      throw new Error("Error fetching category products");
+    }
+  },
+  // cache key + category argument from function
+  ["category-products"],
+  { revalidate: 3600 }
+);
+
+export const getRandomProducts = unstable_cache(
+  async (productId: number): Promise<EnrichedProduct[]> => {
+    try {
+      const supabase = createSSRClient();
+
+      const { data: randomProducts, error } = await supabase
+        .from("products_items")
+        .select(productsWithVariantsQuery)
+        .neq("id", productId)
+        .order("random()")
+        .limit(6);
+
+      if (error) throw error;
+
+      return randomProducts as EnrichedProduct[];
+    } catch (error) {
+      console.error("Error fetching random products:", error);
+      throw new Error("Error fetching random products");
+    }
+  },
+  ["random-products"],
+  { revalidate: 3600 }
+);
+
+export const getProduct = unstable_cache(
+  async (productId: number): Promise<EnrichedProduct | null> => {
+    try {
+      const supabase = createSSRClient();
+
+      const { data, error } = await supabase
+        .from("products_items")
+        .select(productsWithVariantsQuery)
+        .eq("id", productId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return data as EnrichedProduct | null;
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      throw new Error("Error fetching product");
+    }
+  },
+  ["product"],
+  { revalidate: 3600 }
+);
