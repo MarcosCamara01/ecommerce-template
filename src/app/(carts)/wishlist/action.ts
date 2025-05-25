@@ -1,34 +1,25 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { unstable_cache } from "next/cache";
-import { supabase } from "@/libs/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import { WishlistItem } from "@/schemas/ecommerce";
-import { getUser } from "@/libs/supabase/auth/getUser";
+import { getUser } from "@/utils/supabase/auth/getUser";
 
 export async function getWishlistItems() {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
-    return unstable_cache(
-      async () => {
-        const { data, error } = await supabase
-          .from("wishlist")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("updated_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("wishlist")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
 
-        if (error) throw error;
+    if (error) throw error;
 
-        return data as WishlistItem[];
-      },
-      [`wishlist-${user.id}`],
-      {
-        tags: [`wishlist-${user.id}`],
-        revalidate: 0,
-      }
-    )();
+    return data as WishlistItem[];
   } catch (error) {
     console.error("Error getting wishlist items:", error);
     throw error;
@@ -41,6 +32,7 @@ export async function toggleWishlistItem(
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
     const wishlistItems = await getWishlistItems();
 
@@ -64,6 +56,7 @@ export async function addWishlistItem(productId: number) {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
     const { data: newItem, error: insertError } = await supabase
       .from("wishlist")
@@ -86,6 +79,7 @@ export async function removeWishlistItem(itemId: WishlistItem["id"]) {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
     const { error: deleteError } = await supabase
       .from("wishlist")

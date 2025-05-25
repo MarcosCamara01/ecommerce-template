@@ -10,7 +10,7 @@ import {
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import SignOutButton from "../account/SignOutButton";
+import SignOutButton from "../ui/account/SignOutButton";
 import { useUser } from "@/hooks/useUser";
 
 const EditProfile = dynamic(() => import("./EditProfile"), {

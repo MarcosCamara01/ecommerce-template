@@ -6,8 +6,6 @@ import { Footer } from "../components/common/Footer";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
-import { getWishlistItems } from "./(carts)/wishlist/action";
-import { getCartItems } from "./(carts)/cart/action";
 
 import "../styles/globals.css";
 
@@ -21,17 +19,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cartItems = await getCartItems();
-  const wishlistItems = await getWishlistItems();
-
   return (
     <html lang="en">
       <Providers>
         <body className={GeistSans.className}>
-          <Navbar
-            totalItemsCart={cartItems?.length || 0}
-            totalWishlists={wishlistItems?.length || 0}
-          />
+          <Navbar totalItemsCart={0} totalWishlists={0} />
           <main className="pointer-events-auto">
             {children}
             <Toaster position="top-right" />

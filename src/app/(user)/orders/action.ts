@@ -1,10 +1,10 @@
 "use server";
 
-import { createSSRClient } from "@/libs/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import { CartItem, OrderItem } from "@/schemas/ecommerce";
 import Stripe from "stripe";
 import { productsWithVariantsQuery } from "@/schemas/ecommerce";
-import { getUser } from "@/libs/supabase/auth/getUser";
+import { getUser } from "@/utils/supabase/auth/getUser";
 import { clearCart } from "@/app/(carts)/cart/action";
 
 export const getUserOrders = async () => {
@@ -13,7 +13,7 @@ export const getUserOrders = async () => {
     const userId = user?.id;
     if (!userId) return null;
 
-    const supabase = createSSRClient();
+    const supabase = await createClient();
 
     const { data: orders, error } = await supabase
       .from("order_items")
@@ -56,7 +56,7 @@ export const getOrder = async (orderId: OrderItem["id"]) => {
 
     if (!userId) return null;
 
-    const supabase = createSSRClient();
+    const supabase = await createClient();
 
     const { data: order, error } = await supabase
       .from("order_items")
@@ -119,7 +119,7 @@ export const saveOrder = async (
       return null;
     }
 
-    const supabase = createSSRClient();
+    const supabase = await createClient();
 
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + 7); // delivery date

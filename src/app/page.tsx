@@ -51,6 +51,7 @@ const AllProducts = async () => {
       </GridProducts>
     );
   } catch (error) {
+    console.error("Error loading products:", error);
     throw new Error("Error loading products");
   }
 };
