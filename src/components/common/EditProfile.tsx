@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
 import { useMutation } from "@tanstack/react-query";
 import LoadingButton from "../ui/loadingButton";
-import { supabase } from "@/libs/supabase";
+import { createClient } from "@/utils/supabase/client";
 
 export default function EditProfile() {
   const { user: currentUser } = useUser();
@@ -22,6 +22,7 @@ export default function EditProfile() {
 
   const { mutate: updateProfile, isPending } = useMutation({
     mutationFn: async () => {
+      const supabase = createClient();
       const { error } = await supabase.auth.updateUser({
         data: {
           name: nameRef.current?.value,

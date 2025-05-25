@@ -3,7 +3,7 @@ import { ProductItem } from "@/components/products/item";
 import Link from "next/link";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import { getUser } from "@/libs/supabase/auth/getUser";
+import { getUser } from "@/utils/supabase/auth/getUser";
 import { SVGLoadingIcon } from "@/components/ui/loader";
 import { getCartProducts } from "@/app/actions";
 

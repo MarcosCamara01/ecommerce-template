@@ -1,4 +1,8 @@
+"use client";
+
+/** FUNCTIONALITY */
 import { forwardRef, useState, InputHTMLAttributes } from "react";
+/** ICONS */
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export const PasswordInput = forwardRef<

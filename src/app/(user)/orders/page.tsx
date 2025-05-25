@@ -4,7 +4,7 @@ import { OrderItem, OrderProduct } from "@/schemas/ecommerce";
 import { getUserOrders } from "./action";
 import { Suspense } from "react";
 import { SVGLoadingIcon } from "@/components/ui/loader";
-import { getUser } from "@/libs/supabase/auth/getUser";
+import { getUser } from "@/utils/supabase/auth/getUser";
 
 export async function generateMetadata() {
   return {

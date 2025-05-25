@@ -1,34 +1,25 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { unstable_cache } from "next/cache";
 import { CartItem } from "@/schemas/ecommerce";
-import { supabase } from "@/libs/supabase/server";
-import { getUser } from "@/libs/supabase/auth/getUser";
+import { createClient } from "@/utils/supabase/server";
+import { getUser } from "@/utils/supabase/auth/getUser";
 
 export async function getCartItems() {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
-    return unstable_cache(
-      async () => {
-        const { data, error } = await supabase
-          .from("cart_items")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("updated_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("cart_items")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
 
-        if (error) throw error;
+    if (error) throw error;
 
-        return data as CartItem[];
-      },
-      [`cart-${user.id}`],
-      {
-        tags: [`cart-${user.id}`],
-        revalidate: 0,
-      }
-    )();
+    return data as CartItem[];
   } catch (error) {
     console.error("Error getting cart items:", error);
     throw error;
@@ -43,6 +34,7 @@ export async function addCartItem(
 ) {
   const user = await getUser();
   if (!user) throw new Error("User not found");
+  const supabase = await createClient();
 
   try {
     const cartItems = await getCartItems();
@@ -83,6 +75,7 @@ export async function editCartItem(update: Partial<CartItem>) {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("cart_items")
@@ -108,6 +101,7 @@ export async function removeCartItem(itemId: CartItem["id"]) {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
     const { error: deleteError } = await supabase
       .from("cart_items")
@@ -127,24 +121,19 @@ export async function getTotalItems() {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
-    return unstable_cache(
-      async () => {
-        const { data, error } = await supabase
-          .from("cart_items")
-          .select("quantity")
-          .eq("user_id", user.id);
+    const { data, error } = await supabase
+      .from("cart_items")
+      .select("quantity")
+      .eq("user_id", user.id);
 
-        if (error) throw error;
+    if (error) throw error;
 
-        return data.reduce((sum, item) => sum + item.quantity, 0);
-      },
-      [`cart-total-${user.id}`],
-      {
-        tags: [`cart-${user.id}`],
-        revalidate: 0,
-      }
-    )();
+    return data.reduce(
+      (sum: number, item: { quantity: number }) => sum + item.quantity,
+      0
+    );
   } catch (error) {
     console.error("Error getting total items:", error);
     throw error;
@@ -155,6 +144,7 @@ export async function clearCart() {
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+    const supabase = await createClient();
 
     const { error: deleteError } = await supabase
       .from("cart_items")

@@ -8,13 +8,20 @@ import SearchInput from "./SearchInput";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import dynamic from "next/dynamic";
 import { useUser } from "@/hooks/useUser";
-import { FiUser, FiMenu, FiX, FiShoppingCart, FiHeart, FiCreditCard } from "react-icons/fi";
+import {
+  FiUser,
+  FiMenu,
+  FiX,
+  FiShoppingCart,
+  FiHeart,
+  FiCreditCard,
+} from "react-icons/fi";
 
 const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
 });
 
-const SignOutButton = dynamic(() => import("../account/SignOutButton"), {
+const SignOutButton = dynamic(() => import("../ui/account/SignOutButton"), {
   ssr: false,
 });
 
