@@ -1,17 +1,19 @@
 "use client";
 
-import { Skeleton } from "../ui/skeleton";
+/** COMPONENTS */
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { ProductImage } from "../products/item/Image";
-import type { ProductVariant } from "@/schemas/ecommerce";
+import { ProductImage } from "@/components/products/item/Image";
+/** TYPES */
+import type { Product, ProductVariant } from "@/schemas/ecommerce";
 
 interface ProductImages {
-  name: string;
-  selectedVariant: ProductVariant | undefined;
+  name: Product["name"];
+  selectedVariant: ProductVariant;
 }
 
 export const ProductImages = ({ name, selectedVariant }: ProductImages) => {

@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
 import LoadingButton from "../ui/loadingButton";
 import { useMutation } from "@tanstack/react-query";
-import type { EnrichedProduct } from "@/schemas/ecommerce";
+import type { ProductWithVariants } from "@/schemas/ecommerce";
 
 interface ButtonCheckoutProps {
-  cartProducts: EnrichedProduct[];
+  cartProducts: ProductWithVariants[];
 }
 
 const ButtonCheckout = ({ cartProducts }: ButtonCheckoutProps) => {

@@ -1,5 +1,6 @@
 import { fetchCheckoutData, sendEmail } from "@/helpers/checkoutFunctions";
-import { saveOrder } from "../orders/action";
+import { pickFirst } from "@/utils/pickFirst";
+// import { saveOrder } from "../orders/action";
 
 export async function generateMetadata() {
   return {
@@ -10,11 +11,17 @@ export async function generateMetadata() {
 }
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ session_id: string | undefined }>;
 };
 
 const CheckoutSuccess = async ({ searchParams }: Props) => {
-  const sessionId = searchParams.session_id as string;
+  const params = await searchParams;
+  const sessionId = pickFirst(params, "session_id");
+
+  if (!sessionId) {
+    return <div>No session ID found</div>;
+  }
+
   const response = await fetchCheckoutData(sessionId);
 
   if (response !== undefined && response.metadata) {

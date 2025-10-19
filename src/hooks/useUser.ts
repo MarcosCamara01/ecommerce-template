@@ -1,50 +1,49 @@
 "use client";
 
-import { User } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-export const useUser = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const USER_QUERY_KEY = ["user"] as const;
 
-  const supabase = createClient();
+export const useUser = () => {
+  const queryClient = useQueryClient();
+  const supabase = useMemo(() => createClient(), []);
+
+  const query = useQuery({
+    queryKey: USER_QUERY_KEY,
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      return session?.user ?? null;
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
 
   useEffect(() => {
-    const getInitialUser = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session) {
-          setUser(session.user);
-          setError(null);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Error al obtener el usuario:", error);
-        setUser(null);
-        setError(error instanceof Error ? error.message : "Error desconocido");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getInitialUser();
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setError(null);
-      setLoading(false);
+      queryClient.setQueryData(USER_QUERY_KEY, session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase, queryClient]);
 
-  return { user, loading, error };
+  return {
+    user: query.data ?? null,
+    loading: query.isLoading,
+    error: query.error
+      ? query.error instanceof Error
+        ? query.error.message
+        : "Error desconocido"
+      : null,
+    isAuthenticated: !!query.data,
+    refetch: query.refetch,
+  };
 };

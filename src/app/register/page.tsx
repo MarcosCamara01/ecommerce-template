@@ -1,19 +1,14 @@
-/** ACTIONS */
+import { cookies } from "next/headers";
 import { register } from "./actions";
-/** COMPONENTS */
 import { PasswordInput } from "@/components/ui/form/PasswordInput";
 import Link from "next/link";
 import { SubmitButton } from "@/components/ui/form/SubmitButton";
-/** ICONS */
 import { FaGoogle } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 
-interface RegisterPageProps {
-  searchParams: { error?: string };
-}
-
-const Register = async ({ searchParams }: RegisterPageProps) => {
-  const error = searchParams.error;
+const Register = async () => {
+  const cookieStore = await cookies();
+  const error = cookieStore.get("register-error")?.value;
 
   return (
     <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">

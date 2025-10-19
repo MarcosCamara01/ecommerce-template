@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { getOrder } from "../action";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EnrichedProduct, OrderProduct } from "@/schemas/ecommerce";
+import { ProductWithVariants, OrderProduct } from "@/schemas/ecommerce";
 import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
 
@@ -12,15 +12,16 @@ export async function generateMetadata() {
   };
 }
 
-type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+interface Props {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
 const OrderDetails = async ({ params }: Props) => {
+  const { id } = await params;
   return (
     <Suspense fallback={<AllOrderSkeleton items={6} />}>
-      <OrderProducts id={params.id} />
+      <OrderProducts id={id} />
     </Suspense>
   );
 };
@@ -44,7 +45,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
         quantity: product.quantity,
         size: product.size,
       };
-    }) as EnrichedProduct[];
+    }) as ProductWithVariants[];
     const productsText = totalProducts === 1 ? "item" : "items";
 
     return (

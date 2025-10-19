@@ -1,24 +1,19 @@
-/** ACTIONS */
+import { cookies } from "next/headers";
 import { login } from "./actions";
-/** COMPONENTS */
 import { PasswordInput } from "@/components/ui/form/PasswordInput";
 import Link from "next/link";
 import { SubmitButton } from "@/components/ui/form/SubmitButton";
-/** ICONS */
 import { FaGoogle } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 
-interface LoginPageProps {
-  searchParams: Promise<{ error?: string }>;
-}
-
-const Login = async ({ searchParams }: LoginPageProps) => {
-  const { error } = await searchParams;
+const Login = async () => {
+  const cookieStore = await cookies();
+  const error = cookieStore.get("login-error")?.value;
 
   return (
     <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">
       <form
-        className="p-6 xs:p-10	w-full max-w-350 flex flex-col justify-between items-center gap-2.5	border border-solid border-[#2E2E2E] bg-[#0A0A0A] rounded-md"
+        className="p-6 xs:p-10 w-full max-w-350 flex flex-col justify-between items-center gap-2.5 border border-solid border-[#2E2E2E] bg-[#0A0A0A] rounded-md"
         action={login}
       >
         {error && (
@@ -28,7 +23,7 @@ const Login = async ({ searchParams }: LoginPageProps) => {
           </div>
         )}
 
-        <h1 className="w-full mb-5 text-2xl font-bold">Signin</h1>
+        <h1 className="w-full mb-5 text-2xl font-bold">Sign in</h1>
 
         <label className="w-full text-sm">Email:</label>
         <input

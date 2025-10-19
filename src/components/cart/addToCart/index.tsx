@@ -1,74 +1,57 @@
-/** ACTIONS */
-import { addCartItem } from "@/app/(carts)/cart/action";
+"use client";
+
 /** FUNCTIONALITY */
 import { useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useUser } from "@/hooks/useUser";
-import { toast } from "sonner";
+import { useCartMutation } from "@/hooks/cart";
 /** COMPONENTS */
-import LoadingButton from "@/components/ui/loadingButton";
+import { Button } from "@/components/ui/button";
 import { Sizes, type SizesRef } from "./Sizes";
 import { Colors } from "./Colors";
 /** TYPES */
-import type { ProductVariant, EnrichedProduct } from "@/schemas/ecommerce";
+import {
+  ProductWithVariantsSchema,
+  type ProductVariant,
+} from "@/schemas/ecommerce";
 
 interface AddToCartProps {
-  product: EnrichedProduct;
-  selectedVariant: ProductVariant | undefined;
-  onVariantChange: (variant: ProductVariant) => void;
+  productJSON: string;
+  selectedVariant?: ProductVariant;
 }
 
 export default function AddToCart({
-  product,
+  productJSON,
   selectedVariant,
-  onVariantChange,
 }: AddToCartProps) {
+  const { add: addToCart } = useCartMutation();
+
+  const product = ProductWithVariantsSchema.parse(JSON.parse(productJSON));
+
   const sizesRef = useRef<SizesRef>(null!);
-  const { user } = useUser();
-  const queryClient = useQueryClient();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async () => {
-      if (!user?.id) throw new Error("User not found");
-      if (!selectedVariant?.id) throw new Error("No variant selected");
-
-      return await addCartItem({
-        size: sizesRef.current.selectedSize,
-        variant_id: selectedVariant.id,
-      });
-    },
-    onError: (error) => {
-      console.error("Error creating item:", error);
-      toast.error("Error adding item to cart");
-    },
-    onSuccess: (newItem) => {
-      console.log("Item added to cart:", newItem);
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
-
-  if (!selectedVariant) return null;
 
   return (
     <>
       <div className="p-5">
-        <Sizes ref={sizesRef} sizes={selectedVariant.sizes} />
+        <Sizes ref={sizesRef} productSizes={selectedVariant?.sizes ?? []} />
         <Colors
           variants={product.variants}
-          selectedVariantId={selectedVariant.id}
-          onVariantChange={onVariantChange}
+          selectedVariantColor={selectedVariant?.color}
         />
       </div>
 
       <div className="border-t border-solid border-border-primary">
-        <LoadingButton
+        <Button
           type="submit"
-          loading={isPending}
-          onClick={() => mutate()}
+          variant="default"
+          onClick={() =>
+            addToCart({
+              size: sizesRef.current.selectedSize,
+              variant_id: selectedVariant?.id ?? 0,
+            })
+          }
           className="w-full p-2 transition duration-150 text-13 ease hover:bg-color-secondary"
         >
-          Add To Cart
-        </LoadingButton>
+          Add to cart
+        </Button>
       </div>
     </>
   );

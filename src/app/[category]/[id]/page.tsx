@@ -1,71 +1,44 @@
 import { SingleProduct } from "@/components/product";
-import { getProduct, getRandomProducts } from "@/app/actions";
+import { getProduct } from "@/app/actions";
 import { Suspense } from "react";
-import ProductsSkeleton from "@/components/products/skeleton";
 import { SingleProductSkeleton } from "@/components/product/skeleton";
-import { GridProducts } from "@/components/products/GridProducts";
-import { ProductItem } from "@/components/products/item";
+import { pickFirst } from "@/utils/pickFirst";
+import { SuspenseRandomProducts } from "@/components/product/RandomProducts";
+import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
-type Props = {
-  params: {
-    id: string;
-  };
+type PageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ variant: string | undefined }>;
 };
 
-const capitalizeFirstLetter = (string?: string) => {
-  if (!string) return;
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params;
+  const product = await getProduct(Number(id));
 
-export async function generateMetadata({ params }: Props) {
-  const product = await getProduct(Number(params.id));
-  const capitalizedName = capitalizeFirstLetter(product?.name);
+  const title = product?.name
+    ? capitalizeFirstLetter(product?.name) + " |"
+    : undefined;
+  const description = product?.description ?? undefined;
 
   return {
-    title: `${capitalizedName ?? "Loading..."} | Ecommerce Template`,
-    description: product?.description ?? "Loading...",
+    title: `${title} Ecommerce Template`,
+    description: description,
   };
 }
 
-const ProductPage = ({ params }: Props) => (
-  <section className="pt-14">
-    <Suspense
-      fallback={
-        <div>
-          <SingleProductSkeleton />
-          <h2 className="mt-24 mb-5 text-xl font-bold sm:text-2xl">
-            YOU MIGHT ALSO LIKE...
-          </h2>
-          <ProductsSkeleton extraClassname={"colums-mobile"} items={6} />
-        </div>
-      }
-    >
-      <AllProducts id={params.id} />
-    </Suspense>
-  </section>
-);
+export default async function ProductPage({ params, searchParams }: PageProps) {
+  const { id } = await params;
+  const sp = await searchParams;
 
-const AllProducts = async ({ id }: { id: string }) => {
-  const product = await getProduct(Number(id));
-  const productJSON = JSON.stringify(product);
-
-  const randomProducts = await getRandomProducts(Number(id));
+  const selectedVariantColor = pickFirst(sp, "variant");
 
   return (
-    <>
-      <SingleProduct product={productJSON} />
+    <section className="pt-14">
+      <Suspense fallback={<SingleProductSkeleton />}>
+        <SingleProduct id={id} selectedVariantColor={selectedVariantColor} />
+      </Suspense>
 
-      <h2 className="mt-24 mb-5 text-xl font-bold sm:text-2xl">
-        YOU MIGHT ALSO LIKE...
-      </h2>
-
-      <GridProducts className="grid-cols-auto-fill-110">
-        {randomProducts.map((product) => (
-          <ProductItem key={product.id} product={product} />
-        ))}
-      </GridProducts>
-    </>
+      <SuspenseRandomProducts productIdToExclude={Number(id)} />
+    </section>
   );
-};
-
-export default ProductPage;
+}

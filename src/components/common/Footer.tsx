@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { FaTriangleExclamation, FaLinkedin, FaGithub, FaMedium } from "react-icons/fa6";
+import {
+  FaTriangleExclamation,
+  FaLinkedin,
+  FaGithub,
+  FaMedium,
+} from "react-icons/fa6";
 
 export const Footer = () => {
   const linkStyles = "text-sm transition duration-150 ease hover:text-white";
@@ -13,7 +18,7 @@ export const Footer = () => {
         <div className="flex flex-col items-center justify-center w-full max-w-xs gap-5">
           <div className="flex gap-3.5">
             <Link
-              href="https://portfoliomarcos.com/"
+              href="https://marcoscamara.com"
               target="_blank"
               title="Portfolio of Marcos"
             >

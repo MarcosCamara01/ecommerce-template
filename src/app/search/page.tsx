@@ -1,41 +1,36 @@
+/** COMPONENTS */
 import { getAllProducts } from "../actions";
+import { pickFirst } from "@/utils/pickFirst";
+import { searchProducts } from "@/libs/search";
+/** FUNCTIONALITY */
 import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
-import type { EnrichedProduct } from "@/schemas/ecommerce";
 
 interface SearchProps {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ q: string | undefined }>;
 }
 
-const normalizeText = (text: string): string => {
-  return text
-    .replace(/[-_]/g, "")
-    .replace(/[^\w\s]/g, "")
-    .toLowerCase();
-};
-
 const Search = async ({ searchParams }: SearchProps) => {
-  const products = await getAllProducts();
+  const [products, params] = await Promise.all([
+    getAllProducts(),
+    searchParams,
+  ]);
 
-  let filteredProducts: EnrichedProduct[] = [];
+  const q = pickFirst(params, "q");
 
-  if (products) {
-    filteredProducts = products.filter((product) =>
-      normalizeText(product.name).includes(normalizeText(searchParams.q || ""))
-    );
-  }
+  const filteredProducts = searchProducts(products, q);
 
   return (
     <section className="pt-14">
       {filteredProducts.length > 0 ? (
         <GridProducts>
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <ProductItem key={product.id} product={product} />
           ))}
         </GridProducts>
       ) : (
         <h3 className="text-sm text-center">
-          No products found for &quot;{searchParams.q}&quot;
+          No products found for &quot;{q}&quot;
         </h3>
       )}
     </section>

@@ -5,7 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
 });
 
-async function handler(req: NextRequest, res: NextResponse) {
+async function handler(req: NextRequest) {
   const query = new URL(req.url).searchParams;
   const session_id: string = query.get("session_id") as string;
 
