@@ -1,13 +1,17 @@
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import Providers from "./Providers";
-import { Navbar } from "../components/common/Navbar";
+/** COMPONENTS */
+import { Navbar } from "../components/common/navbar";
 import { Footer } from "../components/common/Footer";
+/** PROVIDERS */
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
-
+import QueryProvider from "../providers/query-provider";
+/** STYLES */
 import "../styles/globals.css";
+/** TYPES */
+import type { Metadata } from "next";
+/** FONTS */
+import { GeistSans } from "geist/font/sans";
 
 export const metadata: Metadata = {
   title: "Ecommerce Template",
@@ -21,9 +25,9 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Providers>
+      <QueryProvider>
         <body className={GeistSans.className}>
-          <Navbar totalItemsCart={0} totalWishlists={0} />
+          <Navbar />
           <main className="pointer-events-auto">
             {children}
             <Toaster position="top-right" />
@@ -32,7 +36,7 @@ export default async function RootLayout({
           </main>
           <Footer />
         </body>
-      </Providers>
+      </QueryProvider>
     </html>
   );
 }

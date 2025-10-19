@@ -1,19 +1,24 @@
-import { EnrichedProduct } from "@/schemas/ecommerce";
+/** COMPONENTS */
 import { ProductImage } from "./Image";
 import Link from "next/link";
+/** FUNCTIONALITY */
 import { cn } from "@/libs/utils";
-import DeleteButton from "@/components/cart/DeleteButton";
-import WishlistButton from "@/components/cart/WishlistButton";
-import ProductCartInfo from "@/components/cart/ProductCartInfo";
+import dynamic from "next/dynamic";
+/** TYPES */
+import type { ProductWithVariants } from "@/schemas/ecommerce";
+
+const WishlistButton = dynamic(
+  () => import("@/components/wishlist/WishlistButton")
+);
 
 interface ProductItemProps {
-  product: EnrichedProduct;
+  product: ProductWithVariants;
 }
 
 export const ProductItem = ({ product }: ProductItemProps) => {
-  const productLink = `/${product.category}/${product.id}`;
+  const { name, id, img, price, category, variants } = product;
 
-  const { cart_item, wishlist_item, name, id, img, price } = product;
+  const productLink = `/${category}/${id}?variant=${variants[0].color}`;
 
   return (
     <div className="flex flex-col justify-between border border-solid border-border-primary rounded-md overflow-hidden">
@@ -31,14 +36,10 @@ export const ProductItem = ({ product }: ProductItemProps) => {
           <Link href={productLink} className="w-10/12">
             <h2 className="text-sm font-semibold truncate">{name}</h2>
           </Link>
-          {cart_item ? (
-            <DeleteButton cartItemId={cart_item.id} />
-          ) : (
-            <WishlistButton productId={id} isFavorite={!!wishlist_item} />
-          )}
+
+          <WishlistButton productId={id} />
         </div>
-        {/* <div className="text-sm">{price.toFixed(2)} €</div> */}
-        {cart_item && <ProductCartInfo product={product} />}
+        <div className="text-sm">{price.toFixed(2)} €</div>
       </div>
     </div>
   );

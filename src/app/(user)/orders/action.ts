@@ -5,7 +5,6 @@ import { CartItem, OrderItem } from "@/schemas/ecommerce";
 import Stripe from "stripe";
 import { productsWithVariantsQuery } from "@/schemas/ecommerce";
 import { getUser } from "@/utils/supabase/auth/getUser";
-import { clearCart } from "@/app/(carts)/cart/action";
 
 export const getUserOrders = async () => {
   try {
@@ -170,7 +169,7 @@ export const saveOrder = async (
 
     if (productsError) throw productsError;
 
-    await clearCart();
+    // await clearCart();
 
     console.log("Order saved successfully");
   } catch (error) {

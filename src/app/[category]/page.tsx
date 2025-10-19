@@ -5,9 +5,9 @@ import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
 
 interface Props {
-  params: {
+  params: Promise<{
     category: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -15,7 +15,8 @@ export async function generateMetadata({ params }: Props) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
-  const capitalizedCategory = capitalizeFirstLetter(params.category);
+  const { category } = await params;
+  const capitalizedCategory = capitalizeFirstLetter(category);
 
   return {
     title: `${capitalizedCategory} | Ecommerce Template`,
@@ -24,10 +25,11 @@ export async function generateMetadata({ params }: Props) {
 }
 
 const CategoryPage = async ({ params }: Props) => {
+  const { category } = await params;
   return (
     <section className="pt-14">
       <Suspense fallback={<ProductsSkeleton items={6} />}>
-        <CategoryProducts category={params.category} />
+        <CategoryProducts category={category} />
       </Suspense>
     </section>
   );

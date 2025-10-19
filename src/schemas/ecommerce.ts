@@ -1,18 +1,18 @@
 import { z } from "zod";
 
 enum ProductCategory {
-  T_SHIRT = "t-shirt",
+  T_SHIRT = "t-shirts",
   PANTS = "pants",
   SWEATSHIRT = "sweatshirt",
 }
 
 export enum ProductSize {
-  XS = "xs",
-  S = "s",
-  M = "m",
-  L = "l",
-  XL = "xl",
-  XXL = "2xl",
+  XS = "XS",
+  S = "S",
+  M = "M",
+  L = "L",
+  XL = "XL",
+  XXL = "XXL",
 }
 
 export const ProductSchema = z.object({
@@ -91,18 +91,34 @@ export const WishlistItemSchema = z.object({
   created_at: z.string().default(() => new Date().toISOString()),
 });
 
+export const ProductWithVariantsSchema = z.object({
+  ...ProductSchema.shape,
+  variants: ProductVariantSchema.array(),
+});
+
 export type Product = z.infer<typeof ProductSchema>;
 export type ProductVariant = z.infer<typeof ProductVariantSchema>;
+export type ProductWithVariants = z.infer<typeof ProductWithVariantsSchema>;
 export type OrderItem = z.infer<typeof OrderItemSchema>;
 export type OrderProduct = z.infer<typeof OrderProductSchema>;
 export type CartItem = z.infer<typeof CartItemSchema>;
 export type WishlistItem = z.infer<typeof WishlistItemSchema>;
-export type EnrichedProduct = Product & {
-  variants: ProductVariant[];
-  cart_item?: CartItem;
-  wishlist_item?: WishlistItem;
-};
 
 export type CustomerInfo = z.infer<typeof CustomerInfoSchema>;
+
+export const CreateProductVariantInput = ProductVariantSchema.omit({
+  id: true,
+  product_id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const CreateProductWithVariantsInput = ProductSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).extend({
+  variants: z.array(CreateProductVariantInput),
+});
 
 export const productsWithVariantsQuery = "*, variants:products_variants(*)";

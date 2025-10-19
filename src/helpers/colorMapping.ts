@@ -3,12 +3,13 @@ interface ColorMapping {
 }
 
 export const colorMapping: ColorMapping = {
-  Black: "#000",
-  White: "#fff",
-  Blue: "rgb(67, 77, 88)",
-  "Mid-blue": "rgb(77, 107, 135)",
-  "Dark-brown": "rgb(71, 60, 52)",
-  "Light-blue": "rgb(170, 182, 187)",
-  Grey: "#808080",
-  "Navy-blue": "rgb(10, 8, 21)",
+  black: "#000",
+  white: "#fff",
+  blue: "rgb(67, 77, 88)",
+  "mid-blue": "rgb(77, 107, 135)",
+  "dark-brown": "rgb(71, 60, 52)",
+  "light-blue": "rgb(170, 182, 187)",
+  grey: "#808080",
+  "navy-blue": "rgb(10, 8, 21)",
+  beige: "#F5F2DC",
 };

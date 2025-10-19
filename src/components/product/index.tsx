@@ -1,24 +1,38 @@
-"use client";
-
+/** FUNCTIONALITY */
+import { redirect } from "next/navigation";
+import { getProduct } from "@/app/actions";
+/** COMPONENTS */
 import { ProductImages } from "@/components/product/Images";
-import { useState } from "react";
 import AddToCart from "../cart/addToCart";
-import type { EnrichedProduct, ProductVariant } from "@/schemas/ecommerce";
-import { DefaultInfo } from "./DefaultInfo";
+import { Info } from "./DefaultInfo";
+/** TYPES */
+import type { ProductVariant } from "@/schemas/ecommerce";
 
-interface SingleProduct {
-  product: string;
+interface SingleProductProps {
+  id: string;
+  selectedVariantColor?: ProductVariant["color"];
 }
 
-export const SingleProduct = ({ product }: SingleProduct) => {
-  const productPlainObject: EnrichedProduct = JSON.parse(product);
+export const SingleProduct = async ({
+  id,
+  selectedVariantColor,
+}: SingleProductProps) => {
+  const productPlainObject = await getProduct(Number(id));
 
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(
-    productPlainObject.variants[0]
+  const productJSON = JSON.stringify(productPlainObject);
+
+  if (!productPlainObject) {
+    return <div>Produnct not found</div>;
+  }
+
+  const selectedVariantObject = productPlainObject.variants.find(
+    (v) => v.color === selectedVariantColor
   );
 
-  if (!product) {
-    return <div>Produnct not found</div>;
+  if (!selectedVariantObject) {
+    return redirect(
+      `/${productPlainObject.category}/${id}?variant=${productPlainObject.variants[0].color}`
+    );
   }
 
   return (
@@ -26,7 +40,7 @@ export const SingleProduct = ({ product }: SingleProduct) => {
       <div className="grow-999 basis-0">
         <ProductImages
           name={productPlainObject.name}
-          selectedVariant={selectedVariant}
+          selectedVariant={selectedVariantObject}
         />
       </div>
 
@@ -37,17 +51,18 @@ export const SingleProduct = ({ product }: SingleProduct) => {
               {productPlainObject.name}
             </h1>
             <span className="text-sm">{productPlainObject.price}€</span>
-            <p className="text-sm">{productPlainObject.description}</p>
+            <p className="text-sm line-clamp-5 break-words">
+              {productPlainObject.description}
+            </p>
           </div>
 
           <AddToCart
-            product={productPlainObject}
-            selectedVariant={selectedVariant}
-            onVariantChange={setSelectedVariant}
+            productJSON={productJSON}
+            selectedVariant={selectedVariantObject}
           />
         </div>
 
-        <DefaultInfo />
+        <Info />
       </div>
     </div>
   );

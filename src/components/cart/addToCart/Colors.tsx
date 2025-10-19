@@ -1,47 +1,47 @@
 import { colorMapping } from "@/helpers/colorMapping";
 import { cn } from "@/libs/utils";
-import { type ProductVariant, type EnrichedProduct } from "@/schemas/ecommerce";
+import {
+  type ProductVariant,
+  type ProductWithVariants,
+} from "@/schemas/ecommerce";
+import { redirect, useRouter } from "next/navigation";
 
 interface ColorsProps {
-  variants: EnrichedProduct["variants"];
-  selectedVariantId: ProductVariant["id"];
-  onVariantChange: (variant: ProductVariant) => void;
+  variants: ProductWithVariants["variants"];
+  selectedVariantColor?: ProductVariant["color"];
 }
 
-export const Colors = ({
-  variants,
-  selectedVariantId,
-  onVariantChange,
-}: ColorsProps) => {
+export function Colors({ variants, selectedVariantColor }: ColorsProps) {
+  const router = useRouter();
+
   const handleColorChange = (variant: ProductVariant) => {
-    onVariantChange(variant);
+    router.replace(`?variant=${variant.color}`);
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <div className="grid grid-cols-auto-fill-32 gap-2.5 mt-5">
-      {variants.map((variant) => (
+      {variants.map((v) => (
         <button
           type="button"
-          key={variant.id}
+          key={v.id}
           className={cn(
             "border border-solid border-border-primary w-8 h-8 flex justify-center relative rounded transition duration-150 ease hover:border-border-secondary",
-            {
-              "border-border-secondary": selectedVariantId === variant.id,
-            }
+            { "border-border-secondary": selectedVariantColor === v.color }
           )}
-          style={{ backgroundColor: colorMapping[variant.color] }}
-          onClick={() => handleColorChange(variant)}
-          title={`Color ${variant.color}`}
+          style={{ backgroundColor: colorMapping[v.color.toLowerCase()] }}
+          onClick={() => handleColorChange(v)}
+          title={`Color ${v.color}`}
         >
           <span
             className={cn({
               "w-2.5 absolute bottom-selected h-px bg-white":
-                selectedVariantId === variant.id,
+                selectedVariantColor === v.color,
             })}
           />
         </button>
       ))}
     </div>
   );
-};
+}

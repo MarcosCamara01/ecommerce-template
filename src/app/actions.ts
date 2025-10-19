@@ -1,91 +1,152 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
-import type { EnrichedProduct } from "@/schemas/ecommerce";
-import { productsWithVariantsQuery } from "@/schemas/ecommerce";
-import { getWishlistItems } from "@/app/(carts)/wishlist/action";
+import { createCacheableClient } from "@/utils/supabase/server";
+import {
+  productsWithVariantsQuery,
+  ProductWithVariantsSchema,
+} from "@/schemas/ecommerce";
+import { unstable_cache } from "next/cache";
+import type { ProductWithVariants } from "@/schemas/ecommerce";
 
-export async function getAllProducts(): Promise<EnrichedProduct[]> {
-  try {
-    const supabase = await createClient();
-    const { data: products, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery);
+// Cache time in seconds (1 hour)
+const CACHE_TIME = 3600;
 
-    if (error) throw error;
+export async function getAllProducts(): Promise<ProductWithVariants[]> {
+  const getAllProductsWithCache = unstable_cache(
+    async () => {
+      try {
+        const supabase = createCacheableClient();
 
-    const wishlistItems = await getWishlistItems();
+        const { data: products, error } = await supabase
+          .from("products_items")
+          .select(productsWithVariantsQuery);
 
-    const enrichedProducts = (products as EnrichedProduct[]).map((product) => ({
-      ...product,
-      wishlist_item: wishlistItems?.find(
-        (item) => item.product_id === product.id
-      ),
-    }));
+        if (error) {
+          console.error("Error fetching products:", error);
+          return [];
+        }
 
-    return enrichedProducts;
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    throw new Error("Error fetching products");
-  }
+        return ProductWithVariantsSchema.array().parse(products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        return [];
+      }
+    },
+    ["products-list"],
+    {
+      revalidate: CACHE_TIME,
+      tags: ["products"],
+    }
+  );
+
+  return getAllProductsWithCache();
 }
 
 export async function getCategoryProducts(
   category: string
-): Promise<EnrichedProduct[]> {
-  try {
-    const supabase = await createClient();
-    const { data: products, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .eq("category", category);
+): Promise<ProductWithVariants[]> {
+  const getCategoryProductsWithCache = unstable_cache(
+    async () => {
+      try {
+        const supabase = createCacheableClient();
 
-    if (error) throw error;
+        const { data: products, error } = await supabase
+          .from("products_items")
+          .select(productsWithVariantsQuery)
+          .eq("category", category);
 
-    return products as EnrichedProduct[];
-  } catch (error) {
-    console.error("Error fetching category products:", error);
-    throw new Error("Error fetching category products");
-  }
+        if (error) {
+          console.error("Error fetching category products:", error);
+          return [];
+        }
+
+        return ProductWithVariantsSchema.array().parse(products);
+      } catch (error) {
+        console.error("Error fetching category products:", error);
+        return [];
+      }
+    },
+    ["products-by-category", category],
+    {
+      revalidate: CACHE_TIME,
+      tags: ["products"],
+    }
+  );
+
+  return getCategoryProductsWithCache();
 }
 
 export async function getRandomProducts(
-  productId: number
-): Promise<EnrichedProduct[]> {
-  try {
-    const supabase = await createClient();
-    const { data: randomProducts, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .neq("id", productId)
-      .order("random()")
-      .limit(6);
+  productIdToExclude: number
+): Promise<ProductWithVariants[]> {
+  const getRandomProductsWithCache = unstable_cache(
+    async () => {
+      try {
+        const supabase = createCacheableClient();
 
-    if (error) throw error;
+        const { data: products, error } = await supabase
+          .from("products_items")
+          .select(productsWithVariantsQuery)
+          .neq("id", productIdToExclude)
+          .limit(30);
 
-    return randomProducts as EnrichedProduct[];
-  } catch (error) {
-    console.error("Error fetching random products:", error);
-    throw new Error("Error fetching random products");
-  }
+        if (error) {
+          console.error("Error fetching random products:", error);
+          return [];
+        }
+
+        if (!products || products.length === 0) {
+          return [];
+        }
+
+        const shuffled = products.sort(() => Math.random() - 0.5);
+        return ProductWithVariantsSchema.array().parse(shuffled.slice(0, 6));
+      } catch (error) {
+        console.error("Error fetching random products:", error);
+        return [];
+      }
+    },
+    ["random-products", productIdToExclude.toString()],
+    {
+      revalidate: CACHE_TIME,
+      tags: ["products"],
+    }
+  );
+
+  return getRandomProductsWithCache();
 }
 
 export async function getProduct(
   productId: number
-): Promise<EnrichedProduct | null> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .eq("id", productId)
-      .maybeSingle();
+): Promise<ProductWithVariants | null> {
+  const getProductWithCache = unstable_cache(
+    async () => {
+      try {
+        const supabase = createCacheableClient();
 
-    if (error) throw error;
+        const { data, error } = await supabase
+          .from("products_items")
+          .select(productsWithVariantsQuery)
+          .eq("id", productId)
+          .maybeSingle();
 
-    return data as EnrichedProduct | null;
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    throw new Error("Error fetching product");
-  }
+        if (error) {
+          console.error("Error fetching product:", error);
+          return null;
+        }
+
+        return ProductWithVariantsSchema.parse(data);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        return null;
+      }
+    },
+    ["product-detail", productId.toString()],
+    {
+      revalidate: CACHE_TIME,
+      tags: ["products"],
+    }
+  );
+
+  return getProductWithCache();
 }

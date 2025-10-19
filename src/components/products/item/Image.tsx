@@ -1,10 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+/** FUNCTIONALITY */
+import { useState } from "react";
+/** COMPONENTS */
 import Image from "next/image";
-import { Skeleton } from "../../ui/skeleton";
-import { cloudinaryLoader } from "@/helpers/cloudinaryLoader";
+import { Skeleton } from "@/components/ui/skeleton";
+/** TYPES */
+import type { Product, ProductVariant } from "@/schemas/ecommerce";
 
+interface ProductImageProps {
+  image: ProductVariant["images"][number];
+  name: Product["name"];
+  width: number;
+  height: number;
+  sizes: string;
+  priority?: boolean;
+}
 export const ProductImage = ({
   image,
   name,
@@ -12,20 +23,12 @@ export const ProductImage = ({
   height,
   priority,
   sizes,
-}: {
-  image: string;
-  name: string;
-  width: number;
-  height: number;
-  priority?: boolean;
-  sizes: string;
-}) => {
+}: ProductImageProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div className="relative">
       <Image
-        loader={cloudinaryLoader}
         width={width}
         height={height}
         src={image}

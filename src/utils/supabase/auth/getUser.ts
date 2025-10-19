@@ -5,10 +5,8 @@ export const getUser = async (): Promise<User | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
-  console.log("data", data);
-  console.log("error", error);
-
   if (error || !data.user) {
+    console.error("Error fetching user:", error);
     return null;
   }
 
