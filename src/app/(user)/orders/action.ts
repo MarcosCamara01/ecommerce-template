@@ -1,10 +1,10 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/server";
 import { CartItem, OrderItem } from "@/schemas/ecommerce";
 import Stripe from "stripe";
 import { productsWithVariantsQuery } from "@/schemas/ecommerce";
-import { getUser } from "@/utils/supabase/auth/getUser";
+import { getUser } from "@/libs/auth/server";
 
 export const getUserOrders = async () => {
   try {
@@ -12,7 +12,7 @@ export const getUserOrders = async () => {
     const userId = user?.id;
     if (!userId) return null;
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
 
     const { data: orders, error } = await supabase
       .from("order_items")
@@ -55,7 +55,7 @@ export const getOrder = async (orderId: OrderItem["id"]) => {
 
     if (!userId) return null;
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
 
     const { data: order, error } = await supabase
       .from("order_items")
@@ -94,7 +94,7 @@ export const getOrder = async (orderId: OrderItem["id"]) => {
     if (error) throw error;
 
     if (!order) {
-      console.log("Order not found");
+      console.error("Order not found");
       return null;
     }
 
@@ -118,7 +118,7 @@ export const saveOrder = async (
       return null;
     }
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
 
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + 7); // delivery date
@@ -170,8 +170,6 @@ export const saveOrder = async (
     if (productsError) throw productsError;
 
     // await clearCart();
-
-    console.log("Order saved successfully");
   } catch (error) {
     console.error("Error saving the order:", error);
   }

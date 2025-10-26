@@ -24,7 +24,7 @@ const DeleteButton = ({ cartItemId }: { cartItemId: CartItem["id"] }) => {
       aria-label="Delete item"
       className="transition-all hover:text-white disabled:opacity-50"
     >
-      <IoClose className="w-[18px] h-[18px] text-[#A1A1A1]" />
+      <IoClose className="w-[18px] h-[18px] text-color-secondary" />
     </button>
   );
 };

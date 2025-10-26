@@ -11,11 +11,12 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { WishlistButton } from "./WishlistButton";
-import { CartButton } from "./CartButton";
+import { WishlistLink } from "./WishlistLink";
+import { CartLink } from "./CartLink";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 /** FUNCTIONALITY */
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
 import { useSignOut } from "@/hooks/useSignOut";
@@ -28,7 +29,7 @@ const EditProfile = dynamic(() => import("../EditProfile"), {
 });
 
 export const Navbar = () => {
-  const { user } = useUser();
+  const { data: session, isPending } = useSession();
 
   const editProfileManager = useManager();
   const { mutate: signOut } = useSignOut();
@@ -75,10 +76,39 @@ export const Navbar = () => {
                   ))}
 
                   {/* Separator */}
-                  {user && <Separator className="my-2" />}
+                  {(session?.user || isPending) && (
+                    <Separator className="my-2" />
+                  )}
+
+                  {/* User Links Skeleton */}
+                  {isPending && (
+                    <>
+                      <li>
+                        <div className="flex items-center px-4 py-2">
+                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      </li>
+                      <li>
+                        <div className="flex items-center px-4 py-2">
+                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                          <Skeleton className="h-4 w-20" />
+                        </div>
+                      </li>
+                      <li>
+                        <Separator className="my-2" />
+                      </li>
+                      <li>
+                        <div className="flex items-center px-4 py-2">
+                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
+                      </li>
+                    </>
+                  )}
 
                   {/* User Links */}
-                  {user && (
+                  {session?.user && !isPending && (
                     <>
                       <li>
                         <SheetClose asChild>
@@ -121,7 +151,7 @@ export const Navbar = () => {
                   )}
 
                   {/* Login Link for non-authenticated users */}
-                  {!user && (
+                  {!session?.user && !isPending && (
                     <li>
                       <SheetClose asChild>
                         <Link
@@ -141,7 +171,11 @@ export const Navbar = () => {
 
         {/* Desktop Navigation */}
         <ul className="justify-between hidden gap-2 text-sm lg:flex">
-          {user ? (
+          {isPending ? (
+            <li className="items-center justify-center hidden lg:flex">
+              <Skeleton className="w-24 h-9 rounded-md" />
+            </li>
+          ) : session?.user ? (
             <li className="items-center justify-center hidden lg:flex">
               <UserMenu manager={editProfileManager} />
             </li>
@@ -149,7 +183,7 @@ export const Navbar = () => {
             <li className="flex items-center justify-center">
               <Link
                 href="/login"
-                className="text-sm px-4 py-2 transition-all lg:text-border-secondary hover:text-white font-medium"
+                className="w-24 h-9 text-sm flex items-center justify-center text-color-secondary transition-all hover:text-white font-medium"
               >
                 Login
               </Link>
@@ -166,10 +200,10 @@ export const Navbar = () => {
         {/* Cart and Wishlist Buttons */}
         <ul className="flex gap-2">
           <li className="flex items-center justify-center">
-            <CartButton />
+            <CartLink />
           </li>
           <li className="flex items-center justify-center">
-            <WishlistButton />
+            <WishlistLink />
           </li>
         </ul>
       </header>

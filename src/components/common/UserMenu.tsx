@@ -13,7 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 /** FUNCTIONALITY */
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 import { useSignOut } from "@/hooks/useSignOut";
 /** TYPES */
 import type { Manager } from "@/hooks/useManager";
@@ -22,15 +22,18 @@ import { FiUser, FiShoppingBag } from "react-icons/fi";
 import { RiLogoutBoxLine } from "react-icons/ri";
 
 export function UserMenu({ manager }: { manager: Manager }) {
-  const { user, loading } = useUser();
+  const { data: session, isPending } = useSession();
   const { mutate: signOut } = useSignOut();
-  const userName = user?.user_metadata?.name?.split(" ")[0] || "Usuario";
+  const userName = session?.user?.name?.split(" ")[0] || "Usuario";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="text-sm px-4 py-2 font-medium transition-colors text-[#A1A1A1] hover:text-[#EDEDED]">
-          {loading ? <Skeleton className="w-24 h-9 rounded-md" /> : userName}
+        <button
+          title={userName}
+          className="w-24 h-9 text-sm px-4 py-2 font-medium transition-colors text-color-secondary hover:text-color-tertiary line-clamp-1 break-all overflow-hidden"
+        >
+          {isPending ? <Skeleton className="w-24 h-9 rounded-md" /> : "Account"}
         </button>
       </DropdownMenuTrigger>
 

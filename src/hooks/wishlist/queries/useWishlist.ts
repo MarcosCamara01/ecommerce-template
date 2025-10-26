@@ -1,16 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { WISHLIST_QUERY_KEYS } from "../keys";
 import { WishlistItemSchema, type WishlistItem } from "@/schemas/ecommerce";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 
 type WishlistResponse = { items: WishlistItem[] };
 
 export const useWishlist = () => {
-  const { user } = useUser();
+  const { data: session } = useSession();
 
   const query = useQuery({
-    enabled: !!user?.id,
-    queryKey: WISHLIST_QUERY_KEYS.wishlistList(user?.id!),
+    enabled: !!session?.user?.id,
+    queryKey: WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
     queryFn: async () => {
       const response = await fetch("/api/user/wishlist", {
         method: "GET",

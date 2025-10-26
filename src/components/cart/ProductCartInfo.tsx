@@ -1,8 +1,11 @@
 "use client";
 
-import { toast } from "sonner";
-import { IoAdd, IoRemove } from "react-icons/io5";
+/** FUNCTIONALITY */
+import { useThrottleFn } from "ahooks";
 import { useCartMutation } from "@/hooks/cart";
+/** ICONS */
+import { IoAdd, IoRemove } from "react-icons/io5";
+/** TYPES */
 import type { ProductVariant, CartItem } from "@/schemas/ecommerce";
 
 interface ProductCartInfoProps {
@@ -20,19 +23,20 @@ export const ProductCartInfo = ({
 }: ProductCartInfoProps) => {
   const { update: editQuantity, remove: removeFromCart } = useCartMutation();
 
-  const handleIncrease = async () => {
-    try {
+  const { run: throttledIncrease } = useThrottleFn(
+    () => {
       editQuantity({
         itemId: cartItemId,
         quantity: quantity + 1,
       });
-    } catch (error) {
-      toast.error("Error adding item to cart");
+    },
+    {
+      wait: 300,
     }
-  };
+  );
 
-  const handleDecrease = async () => {
-    try {
+  const { run: throttledDecrease } = useThrottleFn(
+    () => {
       if (quantity > 1) {
         editQuantity({
           itemId: cartItemId,
@@ -41,10 +45,11 @@ export const ProductCartInfo = ({
       } else {
         removeFromCart({ itemId: cartItemId });
       }
-    } catch (error) {
-      toast.error("Error removing item from cart");
+    },
+    {
+      wait: 300,
     }
-  };
+  );
 
   return (
     <>
@@ -55,8 +60,8 @@ export const ProductCartInfo = ({
       <div className="flex items-center justify-between sm:hidden">
         <div className="flex bg-black w-min">
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary disabled:opacity-50"
-            onClick={handleDecrease}
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledDecrease}
             disabled={false}
             aria-label="Decrease quantity"
           >
@@ -69,8 +74,8 @@ export const ProductCartInfo = ({
             {quantity}
           </span>
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-[#A1A1A1] transition-all hover:text-white border-border-primary disabled:opacity-50"
-            onClick={handleIncrease}
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledIncrease}
             disabled={false}
             aria-label="Increase quantity"
           >
@@ -81,8 +86,8 @@ export const ProductCartInfo = ({
       <div className="items-center justify-between hidden sm:flex">
         <div className="flex bg-black w-min">
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary disabled:opacity-50"
-            onClick={handleDecrease}
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledDecrease}
             disabled={false}
             aria-label="Decrease quantity"
           >
@@ -95,8 +100,8 @@ export const ProductCartInfo = ({
             {quantity}
           </span>
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-[#A1A1A1] transition-all hover:text-white border-border-primary disabled:opacity-50"
-            onClick={handleIncrease}
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledIncrease}
             disabled={false}
             aria-label="Increase quantity"
           >

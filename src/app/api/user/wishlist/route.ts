@@ -1,7 +1,6 @@
-// app/api/user/wishlist/route.ts
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { getUser } from "@/utils/supabase/auth/getUser";
+import { createServiceClient } from "@/utils/supabase/server";
+import { getUser } from "@/libs/auth/server";
 
 type WishlistItem = {
   id: number;
@@ -13,7 +12,7 @@ type WishlistItem = {
 export async function GET() {
   const user = await getUser();
   if (!user) return NextResponse.json({ items: [] });
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("wishlist")
     .select("*")
@@ -31,7 +30,7 @@ export async function POST(req: Request) {
   if (typeof productId !== "number") {
     return NextResponse.json({ error: "invalid productId" }, { status: 400 });
   }
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   // Si ya existe, devolverlo tal cual para idempotencia
   const { data: existing } = await supabase
@@ -63,7 +62,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "missing identifier" }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   let q = supabase.from("wishlist").delete().eq("user_id", user.id);
   if (itemId) q = q.eq("id", itemId);
   if (productId) q = q.eq("product_id", productId);

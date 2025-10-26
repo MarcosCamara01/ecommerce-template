@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { getUser } from "@/utils/supabase/auth/getUser";
+import { createServiceClient } from "@/utils/supabase/server";
+import { getUser } from "@/libs/auth/server";
 import { CartItem, ProductSize } from "@/schemas/ecommerce";
 
 export async function GET() {
@@ -8,7 +8,7 @@ export async function GET() {
     const user = await getUser();
     if (!user) return NextResponse.json({ items: [] });
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
     const { data, error } = await supabase
       .from("cart_items")
       .select("*")
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       quantity?: number;
     };
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
 
     // check if the item already exists with the same variant and size
     const { data: existing } = await supabase
@@ -112,7 +112,7 @@ export async function PATCH(req: Request) {
       quantity: number;
     };
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
     const { data, error } = await supabase
       .from("cart_items")
       .update({
@@ -146,7 +146,7 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const itemId = searchParams.get("itemId");
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
     let query = supabase.from("cart_items").delete().eq("user_id", user.id);
 
     if (itemId) {

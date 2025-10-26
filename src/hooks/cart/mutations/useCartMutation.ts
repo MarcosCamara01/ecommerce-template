@@ -4,14 +4,14 @@ import {
   type CartItem,
   type ProductSize,
 } from "@/schemas/ecommerce";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 import { toast } from "sonner";
 import { CART_QUERY_KEYS } from "../keys";
 
 type CartResponse = { items: CartItem[] };
 
 export const useCartMutation = () => {
-  const { user } = useUser();
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
 
   const add = useMutation({
@@ -42,19 +42,19 @@ export const useCartMutation = () => {
       size: ProductSize;
       quantity?: number;
     }) => {
-      if (!user?.id) {
-        toast.info("Please login first to add items to cart");
+      if (!session?.user?.id) {
+        toast.info("Login first to add to cart");
         throw new Error("Unauthorized");
       }
 
       const { variant_id, size, quantity = 1 } = params;
 
       await queryClient.cancelQueries({
-        queryKey: CART_QUERY_KEYS.cartList(user.id),
+        queryKey: CART_QUERY_KEYS.cartList(session.user.id),
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id)
+        CART_QUERY_KEYS.cartList(session.user.id)
       );
 
       const tempItem = CartItemSchema.parse({
@@ -66,7 +66,7 @@ export const useCartMutation = () => {
       });
 
       queryClient.setQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id),
+        CART_QUERY_KEYS.cartList(session.user.id),
         (old = { items: [] }) => {
           const idx = old.items.findIndex(
             (i) => i.variant_id === variant_id && i.size === size
@@ -93,7 +93,7 @@ export const useCartMutation = () => {
       };
 
       queryClient.setQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user?.id!),
+        CART_QUERY_KEYS.cartList(session?.user?.id!),
         (old = { items: [] }) => {
           const filtered = old.items.filter((i) => i.id !== tempItem.id);
           const idx = filtered.findIndex(
@@ -115,7 +115,7 @@ export const useCartMutation = () => {
 
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
-          CART_QUERY_KEYS.cartList(user?.id!),
+          CART_QUERY_KEYS.cartList(session?.user?.id!),
           previousData
         );
       }
@@ -145,22 +145,22 @@ export const useCartMutation = () => {
       return CartItemSchema.parse(item);
     },
     onMutate: async (params: { itemId: number; quantity: number }) => {
-      if (!user?.id) {
+      if (!session?.user?.id) {
         throw new Error("Unauthorized");
       }
 
       const { itemId, quantity } = params;
 
       await queryClient.cancelQueries({
-        queryKey: CART_QUERY_KEYS.cartList(user.id),
+        queryKey: CART_QUERY_KEYS.cartList(session.user.id),
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id)
+        CART_QUERY_KEYS.cartList(session.user.id)
       );
 
       queryClient.setQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id),
+        CART_QUERY_KEYS.cartList(session.user.id),
         (current = { items: [] }) => {
           const next = [...current.items];
           const idx = next.findIndex((i) => i.id === itemId);
@@ -179,7 +179,7 @@ export const useCartMutation = () => {
     },
     onSuccess: (data, _, context) => {
       queryClient.setQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user?.id!),
+        CART_QUERY_KEYS.cartList(session?.user?.id!),
         (current = { items: [] }) => {
           const next = [...current.items];
           const idx = next.findIndex((i) => i.id === data.id);
@@ -193,7 +193,7 @@ export const useCartMutation = () => {
 
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
-          CART_QUERY_KEYS.cartList(user?.id!),
+          CART_QUERY_KEYS.cartList(session?.user?.id!),
           previousData
         );
       }
@@ -223,22 +223,22 @@ export const useCartMutation = () => {
       return true;
     },
     onMutate: async (params: { itemId: number }) => {
-      if (!user?.id) {
+      if (!session?.user?.id) {
         throw new Error("Unauthorized");
       }
 
       const { itemId } = params;
 
       await queryClient.cancelQueries({
-        queryKey: CART_QUERY_KEYS.cartList(user.id),
+        queryKey: CART_QUERY_KEYS.cartList(session.user.id),
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id)
+        CART_QUERY_KEYS.cartList(session.user.id)
       );
 
       queryClient.setQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id),
+        CART_QUERY_KEYS.cartList(session.user.id),
         (current = { items: [] }) => ({
           items: current.items.filter((i) => i.id !== itemId),
         })
@@ -251,7 +251,7 @@ export const useCartMutation = () => {
 
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
-          CART_QUERY_KEYS.cartList(user?.id!),
+          CART_QUERY_KEYS.cartList(session?.user?.id!),
           previousData
         );
       }
@@ -276,20 +276,20 @@ export const useCartMutation = () => {
       return true;
     },
     onMutate: async () => {
-      if (!user?.id) {
+      if (!session?.user?.id) {
         throw new Error("Unauthorized");
       }
 
       await queryClient.cancelQueries({
-        queryKey: CART_QUERY_KEYS.cartList(user.id),
+        queryKey: CART_QUERY_KEYS.cartList(session.user.id),
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id)
+        CART_QUERY_KEYS.cartList(session.user.id)
       );
 
       queryClient.setQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(user.id),
+        CART_QUERY_KEYS.cartList(session.user.id),
         { items: [] }
       );
 
@@ -300,7 +300,7 @@ export const useCartMutation = () => {
 
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
-          CART_QUERY_KEYS.cartList(user?.id!),
+          CART_QUERY_KEYS.cartList(session?.user?.id!),
           previousData
         );
       }

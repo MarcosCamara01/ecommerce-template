@@ -2,6 +2,7 @@
 
 /** FUNCTIONALITY */
 import { useWishlist } from "@/hooks/wishlist";
+import { useThrottleFn } from "ahooks";
 /** ICONS */
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 /** COMPONENTS */
@@ -22,13 +23,18 @@ const WishlistButton = ({ productId }: WishlistButtonProps) => {
 
   const isFavorite = isInWishlist(productId);
 
-  const handleToggle = () => {
-    if (isFavorite) {
-      removeFromWishlist({ productId });
-    } else {
-      addToWishlist(productId);
+  const { run: throttledToggle } = useThrottleFn(
+    () => {
+      if (isFavorite) {
+        removeFromWishlist({ productId });
+      } else {
+        addToWishlist(productId);
+      }
+    },
+    {
+      wait: 300,
     }
-  };
+  );
 
   if (isLoading) {
     return (
@@ -40,8 +46,9 @@ const WishlistButton = ({ productId }: WishlistButtonProps) => {
 
   return (
     <Button
-      onClick={handleToggle}
+      onClick={throttledToggle}
       title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      className="text-color-tertiary hover:bg-background-tertiary"
       variant="ghost"
       size="xs"
     >

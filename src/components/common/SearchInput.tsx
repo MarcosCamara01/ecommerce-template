@@ -38,7 +38,7 @@ function SearchInputContent() {
       <input
         placeholder="Search Products..."
         aria-label="Search"
-        className="w-full h-[40px] px-3 bg-[#0A0A0A] text-sm focus:outline-none"
+        className="w-full h-[40px] px-3 bg-background-secondary text-color-secondary text-sm focus:outline-none"
         type="search"
         defaultValue={searchParams.get("q")?.toString()}
         onChange={(e) => handleChange(e.target.value)}
@@ -72,7 +72,7 @@ const SearchInput = () => {
           <input
             placeholder="Search Products..."
             aria-label="Search"
-            className="w-full h-[40px] px-3 bg-[#0A0A0A] text-sm focus:outline-none"
+            className="w-full h-[40px] px-3 bg-background-secondary text-sm focus:outline-none"
             type="search"
             disabled
           />
