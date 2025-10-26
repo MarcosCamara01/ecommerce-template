@@ -5,7 +5,7 @@
 -- Create wishlist table
 CREATE TABLE IF NOT EXISTS wishlist (
   id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES public.user(id) ON DELETE CASCADE,
   product_id BIGINT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -40,17 +40,17 @@ ALTER TABLE wishlist ENABLE ROW LEVEL SECURITY;
 -- Policy: Users can only view their own wishlist items
 CREATE POLICY "Users can view their own wishlist items"
   ON wishlist FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id);
 
 -- Policy: Users can only insert items into their own wishlist
 CREATE POLICY "Users can insert their own wishlist items"
   ON wishlist FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid()::text = user_id);
 
 -- Policy: Users can only delete their own wishlist items
 CREATE POLICY "Users can delete their own wishlist items"
   ON wishlist FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id);
 
 -- ========================================
 -- TRIGGER to automatically update updated_at

@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { WishlistItemSchema, type WishlistItem } from "@/schemas/ecommerce";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 import { toast } from "sonner";
 import { WISHLIST_QUERY_KEYS } from "../keys";
 
 type WishlistResponse = { items: WishlistItem[] };
 
 export const useWishlistMutation = () => {
-  const { user } = useUser();
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
 
   const add = useMutation({
@@ -31,17 +31,17 @@ export const useWishlistMutation = () => {
       return WishlistItemSchema.parse(item);
     },
     onMutate: async (productId: number) => {
-      if (!user?.id) {
+      if (!session?.user?.id) {
         toast.info("Login first to add to wishlist");
         throw new Error("Unauthorized");
       }
 
       await queryClient.cancelQueries({
-        queryKey: WISHLIST_QUERY_KEYS.wishlistList(user.id),
+        queryKey: WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
       });
 
       const previousData = queryClient.getQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(user.id)
+        WISHLIST_QUERY_KEYS.wishlistList(session.user.id)
       );
 
       const tempItem: WishlistItem = {
@@ -52,7 +52,7 @@ export const useWishlistMutation = () => {
       };
 
       queryClient.setQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(user.id),
+        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
         (old = { items: [] }) => {
           if (old.items.some((w) => w.product_id === productId)) {
             return old;
@@ -70,7 +70,7 @@ export const useWishlistMutation = () => {
       };
 
       queryClient.setQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(user?.id!),
+        WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
         (old = { items: [] }) => ({
           items: old.items
             .filter((i) => i.id !== tempItem.id)
@@ -86,7 +86,7 @@ export const useWishlistMutation = () => {
       };
       if (previousData) {
         queryClient.setQueryData<WishlistResponse>(
-          WISHLIST_QUERY_KEYS.wishlistList(user?.id!),
+          WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
           previousData
         );
       }
@@ -115,20 +115,20 @@ export const useWishlistMutation = () => {
       return true;
     },
     onMutate: async (params: { itemId?: number; productId?: number }) => {
-      if (!user?.id) {
+      if (!session?.user?.id) {
         throw new Error("Unauthorized");
       }
 
       await queryClient.cancelQueries({
-        queryKey: WISHLIST_QUERY_KEYS.wishlistList(user.id),
+        queryKey: WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
       });
 
       const previousData = queryClient.getQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(user.id)
+        WISHLIST_QUERY_KEYS.wishlistList(session.user.id)
       );
 
       queryClient.setQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(user.id),
+        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
         (current = { items: [] }) => ({
           items: current.items.filter((i) =>
             params.itemId
@@ -145,7 +145,7 @@ export const useWishlistMutation = () => {
 
       if (previousData) {
         queryClient.setQueryData<WishlistResponse>(
-          WISHLIST_QUERY_KEYS.wishlistList(user?.id!),
+          WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
           previousData
         );
       }

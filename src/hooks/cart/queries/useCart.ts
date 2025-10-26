@@ -1,16 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { CART_QUERY_KEYS } from "../keys";
 import { CartItemSchema, type CartItem } from "@/schemas/ecommerce";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 
 type CartResponse = { items: CartItem[] };
 
 export const useCart = () => {
-  const { user } = useUser();
+  const { data: session } = useSession();
 
   const query = useQuery({
-    enabled: !!user?.id,
-    queryKey: CART_QUERY_KEYS.cartList(user?.id!),
+    enabled: !!session?.user?.id,
+    queryKey: CART_QUERY_KEYS.cartList(session?.user?.id!),
     queryFn: async () => {
       const response = await fetch("/api/user/cart", {
         method: "GET",

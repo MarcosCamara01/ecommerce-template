@@ -59,18 +59,6 @@ export async function createProduct(
   let productId: Product["id"] | null = null;
 
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return { success: false, message: "User not authenticated" };
-
-    console.log(formData.get("name"));
-    console.log(formData.get("description"));
-    console.log(formData.get("price"));
-    console.log(formData.get("category"));
-    console.log(formData.get("mainImage"));
-    console.log(formData.get("variants"));
-
     const { data: product, error: productError } = await supabase
       .from("products_items")
       .insert({

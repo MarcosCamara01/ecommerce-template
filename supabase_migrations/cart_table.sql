@@ -16,7 +16,7 @@ END $$;
 -- Create cart_items table
 CREATE TABLE IF NOT EXISTS cart_items (
   id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES public.user(id) ON DELETE CASCADE,
   variant_id BIGINT NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
   size sizes NOT NULL,
@@ -53,23 +53,23 @@ ALTER TABLE cart_items ENABLE ROW LEVEL SECURITY;
 -- Policy: Users can only view their own cart items
 CREATE POLICY "Users can view their own cart items"
   ON cart_items FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id);
 
 -- Policy: Users can only insert items into their own cart
 CREATE POLICY "Users can insert their own cart items"
   ON cart_items FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid()::text = user_id);
 
 -- Policy: Users can only update their own cart items
 CREATE POLICY "Users can update their own cart items"
   ON cart_items FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id)
+  WITH CHECK (auth.uid()::text = user_id);
 
 -- Policy: Users can only delete their own cart items
 CREATE POLICY "Users can delete their own cart items"
   ON cart_items FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id);
 
 -- ========================================
 -- TRIGGER to automatically update updated_at

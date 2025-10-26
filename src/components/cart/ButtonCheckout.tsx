@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { toast } from "sonner";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 import LoadingButton from "../ui/loadingButton";
 import { useMutation } from "@tanstack/react-query";
 import type { ProductWithVariants } from "@/schemas/ecommerce";
@@ -12,17 +12,17 @@ interface ButtonCheckoutProps {
 }
 
 const ButtonCheckout = ({ cartProducts }: ButtonCheckoutProps) => {
-  const { user } = useUser();
+  const { data: session } = useSession();
 
   const { mutate: buyProducts, isPending } = useMutation({
     mutationFn: async () => {
-      if (!user) {
+      if (!session?.user) {
         throw new Error("User information not found");
       }
 
       const { data } = await axios.post("/api/stripe/payment", {
         lineItems: cartProducts,
-        userId: user.id,
+        userId: session.user.id,
       });
 
       if (data.statusCode === 500) {
@@ -44,7 +44,7 @@ const ButtonCheckout = ({ cartProducts }: ButtonCheckoutProps) => {
   return (
     <LoadingButton
       onClick={() => buyProducts()}
-      className="w-full text-sm p-2.5 h-full transition-all hover:bg-color-secondary"
+      className="w-full rounded-none bg-background-secondary p-2.5 h-full transition-all hover:bg-background-tertiary"
       loading={isPending}
     >
       Continue

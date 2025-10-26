@@ -45,13 +45,13 @@ export const SingleProduct = async ({
       </div>
 
       <div className="sticky flex flex-col items-center justify-center w-full h-full gap-5 grow basis-600 top-8">
-        <div className="w-full border border-solid rounded border-border-primary bg-background-secondary">
+        <div className="w-full border border-solid overflow-hidden rounded border-border-primary bg-background-secondary">
           <div className="flex flex-col justify-between gap-3 p-5 border-b border-solid border-border-primary">
             <h1 className="text-base font-semibold">
               {productPlainObject.name}
             </h1>
             <span className="text-sm">{productPlainObject.price}€</span>
-            <p className="text-sm line-clamp-5 break-words">
+            <p className="text-sm line-clamp-5 break-all">
               {productPlainObject.description}
             </p>
           </div>

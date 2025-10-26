@@ -30,7 +30,7 @@ export default async function RootLayout({
           <Navbar />
           <main className="pointer-events-auto">
             {children}
-            <Toaster position="top-right" />
+            <Toaster position="bottom-right" />
             <Analytics />
             <SpeedInsights />
           </main>

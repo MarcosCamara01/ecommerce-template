@@ -5,7 +5,7 @@
 -- Create orders table
 CREATE TABLE IF NOT EXISTS orders (
   id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES public.user(id) ON DELETE CASCADE,
   delivery_date TIMESTAMPTZ NOT NULL,
   order_number BIGINT NOT NULL UNIQUE,
   customer_info JSONB NOT NULL,
@@ -42,23 +42,23 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 -- Policy: Users can only view their own orders
 CREATE POLICY "Users can view their own orders"
   ON orders FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id);
 
 -- Policy: Users can only insert their own orders
 CREATE POLICY "Users can insert their own orders"
   ON orders FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid()::text = user_id);
 
 -- Policy: Users can only update their own orders
 CREATE POLICY "Users can update their own orders"
   ON orders FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id)
+  WITH CHECK (auth.uid()::text = user_id);
 
 -- Policy: Users can only delete their own orders
 CREATE POLICY "Users can delete their own orders"
   ON orders FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = user_id);
 
 -- ========================================
 -- TRIGGER to automatically update updated_at

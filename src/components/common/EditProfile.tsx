@@ -11,33 +11,43 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loadingButton";
 /** FUNCTIONALITY */
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "@/libs/auth/client";
 import { useMutation } from "@tanstack/react-query";
-import { createClient } from "@/utils/supabase/client";
+import { authClient } from "@/libs/auth/client";
 import { useRef } from "react";
 import { toast } from "sonner";
 /** TYPES */
 import type { Manager } from "@/hooks/useManager";
 
 export default function EditProfile({ manager }: { manager: Manager }) {
-  const { user: currentUser } = useUser();
+  const { data: session } = useSession();
 
   const nameRef = useRef<HTMLInputElement>(null!);
   const phoneRef = useRef<HTMLInputElement>(null!);
 
   const { mutate: updateProfile, isPending } = useMutation({
     mutationFn: async () => {
-      const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          name: nameRef.current.value,
-          phone: phoneRef.current.value,
+      const response = await fetch("/api/auth/update-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          name: nameRef.current.value,
+        }),
       });
-      if (error) throw error;
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Error updating profile");
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       toast.success("Profile updated successfully");
+      // Refrescar la página para actualizar los datos del usuario
+      window.location.reload();
     },
     onError: (error: any) => {
       toast.error(
@@ -63,7 +73,7 @@ export default function EditProfile({ manager }: { manager: Manager }) {
             <Input
               id="name"
               ref={nameRef}
-              defaultValue={currentUser?.user_metadata?.name || ""}
+              defaultValue={session?.user?.name || ""}
               className="col-span-3"
             />
           </div>
@@ -73,7 +83,7 @@ export default function EditProfile({ manager }: { manager: Manager }) {
             </Label>
             <Input
               id="email"
-              defaultValue={currentUser?.email || ""}
+              defaultValue={session?.user?.email || ""}
               disabled={true}
               className="col-span-3"
             />
@@ -85,7 +95,9 @@ export default function EditProfile({ manager }: { manager: Manager }) {
             <Input
               id="phone"
               ref={phoneRef}
-              defaultValue={currentUser?.user_metadata?.phone || ""}
+              defaultValue=""
+              placeholder="No disponible con Better Auth"
+              disabled={true}
               className="col-span-3"
             />
           </div>

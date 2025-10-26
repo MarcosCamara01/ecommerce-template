@@ -2,6 +2,7 @@
 
 /** FUNCTIONALITY */
 import { useRef } from "react";
+import { useThrottleFn } from "ahooks";
 import { useCartMutation } from "@/hooks/cart";
 /** COMPONENTS */
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,17 @@ export default function AddToCart({
 
   const sizesRef = useRef<SizesRef>(null!);
 
+  const { run: throttledAddToCart } = useThrottleFn(
+    () =>
+      addToCart({
+        size: sizesRef.current.selectedSize,
+        variant_id: selectedVariant?.id ?? 0,
+      }),
+    {
+      wait: 300,
+    }
+  );
+
   return (
     <>
       <div className="p-5">
@@ -42,13 +54,8 @@ export default function AddToCart({
         <Button
           type="submit"
           variant="default"
-          onClick={() =>
-            addToCart({
-              size: sizesRef.current.selectedSize,
-              variant_id: selectedVariant?.id ?? 0,
-            })
-          }
-          className="w-full p-2 transition duration-150 text-13 ease hover:bg-color-secondary"
+          onClick={() => throttledAddToCart()}
+          className="w-full rounded-none bg-background-secondary p-2 transition duration-150 text-13 ease hover:bg-background-tertiary"
         >
           Add to cart
         </Button>
