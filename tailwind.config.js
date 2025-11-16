@@ -49,6 +49,7 @@ module.exports = {
         999: "#999",
         "border-primary": "#242424",
         "border-secondary": "#7F7F7F",
+        "background-primary": "#000",
         "background-secondary": "#0a0a0a",
         "background-tertiary": "#1F1F1F",
         "background-alert": "rgba(0, 0, 0, 0.9)",

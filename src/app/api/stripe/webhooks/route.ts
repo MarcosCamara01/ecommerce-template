@@ -1,5 +1,7 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { processCompletedOrder } from "@/services/stripe";
+import { sendEmail } from "@/helpers/sendEmails";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-09-30.clover",
@@ -18,9 +20,8 @@ const webhookHandler = async (req: NextRequest) => {
       event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      // On error, log and return the error message.
-      if (err! instanceof Error) console.log(err);
-      console.log(`❌ Error message: ${errorMessage}`);
+      if (err! instanceof Error) console.error(err);
+      console.error(`❌ Error message: ${errorMessage}`);
 
       return NextResponse.json(
         {
@@ -32,33 +33,42 @@ const webhookHandler = async (req: NextRequest) => {
       );
     }
 
-    // Successfully constructed event.
-    console.log("✅ Success:", event.id);
-
-    // getting to the data we want from the event
-    const payment = event.data.object as Stripe.PaymentIntent;
-    const paymentId = payment.id;
-
     switch (event.type) {
+      case "checkout.session.completed":
+        const session = event.data.object as Stripe.Checkout.Session;
+        console.info(`Checkout session completed: ${session.id}`);
+
+        try {
+          const orderDetails = await processCompletedOrder(session);
+          await sendEmail(session, orderDetails);
+        } catch (error) {
+          console.error("Error saving order from webhook:", error);
+          return NextResponse.json({
+            received: true,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+        break;
+
       case "payment_intent.succeeded":
-        console.log("Successful purchase", paymentId);
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.info(`Payment succeeded: ${paymentIntent.id}`);
         break;
 
       case "charge.succeeded":
         const charge = event.data.object as Stripe.Charge;
-        console.log(`💵 Charge id: ${charge.id}`);
+        console.info(`Charge succeeded: ${charge.id}`);
         break;
 
       case "payment_intent.canceled":
-        console.log("The purchase has not been completed");
+        console.error("Payment was canceled");
         break;
 
       default:
-        console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
+        console.warn(`Unhandled event type: ${event.type}`);
         break;
     }
 
-    // Return a response to acknowledge receipt of the event.
     return NextResponse.json({ received: true });
   } catch {
     return NextResponse.json(

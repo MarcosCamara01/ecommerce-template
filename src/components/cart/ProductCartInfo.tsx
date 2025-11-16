@@ -58,7 +58,7 @@ export const ProductCartInfo = ({
         <div className="text-sm pl-2.5">{color}</div>
       </div>
       <div className="flex items-center justify-between sm:hidden">
-        <div className="flex bg-black w-min">
+        <div className="flex bg-background-primary w-min">
           <button
             className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
             onClick={throttledDecrease}
@@ -84,7 +84,7 @@ export const ProductCartInfo = ({
         </div>
       </div>
       <div className="items-center justify-between hidden sm:flex">
-        <div className="flex bg-black w-min">
+        <div className="flex bg-background-primary w-min">
           <button
             className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
             onClick={throttledDecrease}

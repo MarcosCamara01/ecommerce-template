@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
   variant_id BIGINT NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
   size sizes NOT NULL,
+  stripe_id TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   
@@ -100,6 +101,7 @@ COMMENT ON COLUMN cart_items.user_id IS 'User ID who owns the item (references a
 COMMENT ON COLUMN cart_items.variant_id IS 'Product variant ID';
 COMMENT ON COLUMN cart_items.quantity IS 'Quantity of items (must be greater than 0)';
 COMMENT ON COLUMN cart_items.size IS 'Product size (using sizes enum type)';
+COMMENT ON COLUMN cart_items.stripe_id IS 'Stripe price ID associated with the variant';
 COMMENT ON COLUMN cart_items.created_at IS 'Item creation date and time';
 COMMENT ON COLUMN cart_items.updated_at IS 'Last update date and time (automatically updated)';
 

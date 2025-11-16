@@ -1,10 +1,12 @@
+/** FUNCTIONALITY */
 import { colorMapping } from "@/helpers/colorMapping";
+import { useRouter } from "next/navigation";
 import { cn } from "@/libs/utils";
+/** TYPES */
 import {
   type ProductVariant,
   type ProductWithVariants,
 } from "@/schemas/ecommerce";
-import { redirect, useRouter } from "next/navigation";
 
 interface ColorsProps {
   variants: ProductWithVariants["variants"];

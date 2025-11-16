@@ -41,7 +41,7 @@ export const ProductImage = ({
       <div
         className={
           !imageLoaded
-            ? "absolute top-0 right-0 w-full aspect-[2/3] bg-black"
+            ? "absolute top-0 right-0 w-full aspect-[2/3] bg-background-primary"
             : "hidden"
         }
       >

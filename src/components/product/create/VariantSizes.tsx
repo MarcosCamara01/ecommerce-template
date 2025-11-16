@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { ProductSize } from "@/schemas/ecommerce";
+import { ProductSizeEnum, type ProductSize } from "@/schemas/ecommerce";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MdCheckCircle } from "react-icons/md";
@@ -31,7 +31,7 @@ export const VariantSizes = forwardRef<VariantSizesRef>((_props, ref) => {
     <div className="space-y-3">
       <Label>Sizes</Label>
       <div className="flex flex-wrap gap-2">
-        {Object.values(ProductSize).map((size) => {
+        {ProductSizeEnum.options.map((size) => {
           const isSelected = sizes.includes(size);
           return (
             <Button

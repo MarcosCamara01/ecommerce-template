@@ -23,7 +23,7 @@ export default function EditProfile({ manager }: { manager: Manager }) {
   const { data: session } = useSession();
 
   const nameRef = useRef<HTMLInputElement>(null!);
-  const phoneRef = useRef<HTMLInputElement>(null!);
+  // const phoneRef = useRef<HTMLInputElement>(null!);
 
   const { mutate: updateProfile, isPending } = useMutation({
     mutationFn: async () => {
@@ -65,30 +65,37 @@ export default function EditProfile({ manager }: { manager: Manager }) {
             Make changes to your profile here. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid items-center grid-cols-4 gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              ref={nameRef}
-              defaultValue={session?.user?.name || ""}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid items-center grid-cols-4 gap-4">
-            <Label htmlFor="Email" className="text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              defaultValue={session?.user?.email || ""}
-              disabled={true}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid items-center grid-cols-4 gap-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            updateProfile();
+          }}
+        >
+          <div className="grid gap-4 py-4">
+            <div className="grid items-center grid-cols-4 gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                ref={nameRef}
+                defaultValue={session?.user?.name || ""}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid items-center grid-cols-4 gap-4">
+              <Label htmlFor="Email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                defaultValue={session?.user?.email || ""}
+                disabled={true}
+                className="col-span-3"
+              />
+            </div>
+            {/* <div className="grid items-center grid-cols-4 gap-4">
             <Label htmlFor="Phone" className="text-right">
               Phone
             </Label>
@@ -100,17 +107,18 @@ export default function EditProfile({ manager }: { manager: Manager }) {
               disabled={true}
               className="col-span-3"
             />
+          </div> */}
           </div>
-        </div>
-        <DialogFooter>
-          <LoadingButton
-            onClick={() => updateProfile()}
-            loading={isPending}
-            className="text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px]"
-          >
-            Save changes
-          </LoadingButton>
-        </DialogFooter>
+          <DialogFooter>
+            <LoadingButton
+              type="submit"
+              loading={isPending}
+              className="text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px]"
+            >
+              Save changes
+            </LoadingButton>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

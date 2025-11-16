@@ -52,7 +52,7 @@ const Register = () => {
           ref={nameRef}
           required
           placeholder="Fullname"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-black text-13"
+          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
           name="name"
           disabled={isLoading}
         />
@@ -63,7 +63,7 @@ const Register = () => {
           ref={emailRef}
           required
           placeholder="Email"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-black text-13"
+          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
           name="email"
           disabled={isLoading}
         />
@@ -80,7 +80,7 @@ const Register = () => {
         <input
           type="text"
           placeholder="Phone (not required)"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-black text-13"
+          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
           name="phone"
           disabled={isLoading}
         /> */}
@@ -104,7 +104,7 @@ const Register = () => {
           type="button"
           onClick={() => signInWithGoogle.mutate()}
           disabled={signInWithGoogle.isPending}
-          className="w-full bg-black border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
+          className="w-full bg-background-primary border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
         >
           <FaGoogle />
           Sign in with Google

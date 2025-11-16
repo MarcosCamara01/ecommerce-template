@@ -1,35 +1,27 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { CartItemSchema } from "@/schemas/ecommerce";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-09-30.clover",
 });
 
-async function loadPrices() {
-  const prices = await stripe.prices.list();
-  return prices.data;
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const { lineItems, userId } = await request.json();
+    const { cartItems, userId } = await request.json();
 
-    if (!lineItems || !userId) throw Error("Missing data");
+    if (!cartItems || !userId) throw Error("Missing data");
 
-    const products = await loadPrices();
+    const cartItemsList = CartItemSchema.array().parse(cartItems);
 
-    const lineItemsList = await lineItems.map((item: any) => {
-      const matchingProduct = products.find(
-        (product) => product.id === item.variantId
-      );
-
-      if (!matchingProduct) {
-        throw new Error(`Product not found for variantId: ${item.variantId}`);
+    const lineItemsList = cartItemsList.map((item) => {
+      if (!item.stripe_id) {
+        throw new Error("Missing stripeId in line item");
       }
 
       return {
-        price: matchingProduct.id,
-        quantity: item.quantity,
+        price: item.stripe_id,
+        quantity: item.quantity || 1,
       };
     });
 
@@ -50,6 +42,7 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         userId: userId,
+        cartItems: JSON.stringify(cartItemsList),
       },
     });
 
