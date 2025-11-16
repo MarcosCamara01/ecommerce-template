@@ -38,10 +38,12 @@ export async function POST(req: Request) {
     const {
       variant_id,
       size,
+      stripe_id,
       quantity = 1,
     } = body as {
       variant_id: number;
       size: ProductSize;
+      stripe_id: string;
       quantity?: number;
     };
 
@@ -80,6 +82,7 @@ export async function POST(req: Request) {
           variant_id,
           size,
           quantity,
+          stripe_id,
           user_id: user.id,
         })
         .select("*")

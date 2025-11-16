@@ -8,7 +8,7 @@ export function SubmitButton({ text }: { text: string }) {
 
   return (
     <LoadingButton
-      className="w-full bg-black border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
+      className="w-full bg-background-primary border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
       type="submit"
       loading={pending}
     >

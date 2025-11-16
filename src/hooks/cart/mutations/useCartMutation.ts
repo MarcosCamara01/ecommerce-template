@@ -18,14 +18,15 @@ export const useCartMutation = () => {
     mutationFn: async (params: {
       variant_id: number;
       size: ProductSize;
+      stripe_id: string;
       quantity?: number;
     }) => {
-      const { variant_id, size, quantity = 1 } = params;
+      const { variant_id, size, stripe_id, quantity = 1 } = params;
 
       const response = await fetch("/api/user/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variant_id, size, quantity }),
+        body: JSON.stringify({ variant_id, size, stripe_id, quantity }),
       });
 
       if (!response.ok) {
@@ -40,6 +41,7 @@ export const useCartMutation = () => {
     onMutate: async (params: {
       variant_id: number;
       size: ProductSize;
+      stripe_id: string;
       quantity?: number;
     }) => {
       if (!session?.user?.id) {
@@ -47,7 +49,7 @@ export const useCartMutation = () => {
         throw new Error("Unauthorized");
       }
 
-      const { variant_id, size, quantity = 1 } = params;
+      const { variant_id, size, stripe_id, quantity = 1 } = params;
 
       await queryClient.cancelQueries({
         queryKey: CART_QUERY_KEYS.cartList(session.user.id),
@@ -63,6 +65,9 @@ export const useCartMutation = () => {
         variant_id,
         size,
         quantity,
+        stripe_id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       });
 
       queryClient.setQueryData<CartResponse>(

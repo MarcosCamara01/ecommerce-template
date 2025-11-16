@@ -63,7 +63,7 @@ export const CartProducts = ({
           ))}
         </GridProducts>
 
-        <div className="fixed left-[50%] translate-x-[-50%] bottom-4 w-[90%] z-10 sm:w-[360px] rounded-xl overflow-hidden flex bg-black border border-solid border-border-primary h-min">
+        <div className="fixed left-[50%] translate-x-[-50%] bottom-4 w-[90%] z-10 sm:w-[360px] rounded-xl overflow-hidden flex bg-background-primary border border-solid border-border-primary h-min">
           <div className="flex flex-col p-2.5 justify-center w-1/2 gap-2 text-center">
             <div className="flex gap-2.5 justify-center text-sm">
               <span>Total:</span>
@@ -72,9 +72,7 @@ export const CartProducts = ({
             <span className="text-xs">+ TAX INCL.</span>
           </div>
           <div className="w-1/2 border-l border-solid bg-background-secondary border-border-primary">
-            <ButtonCheckout
-              cartProducts={cartProductsWithInfo.map(({ product }) => product)}
-            />
+            <ButtonCheckout cartItems={items} />
           </div>
         </div>
       </div>

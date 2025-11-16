@@ -1,17 +1,19 @@
 "use client";
 
-import axios from "axios";
+/** FUNCTIONALITY */
 import { toast } from "sonner";
 import { useSession } from "@/libs/auth/client";
-import LoadingButton from "../ui/loadingButton";
 import { useMutation } from "@tanstack/react-query";
-import type { ProductWithVariants } from "@/schemas/ecommerce";
+/** COMPONENTS */
+import LoadingButton from "../ui/loadingButton";
+/** TYPES */
+import type { CartItem } from "@/schemas/ecommerce";
 
 interface ButtonCheckoutProps {
-  cartProducts: ProductWithVariants[];
+  cartItems: CartItem[];
 }
 
-const ButtonCheckout = ({ cartProducts }: ButtonCheckoutProps) => {
+const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
   const { data: session } = useSession();
 
   const { mutate: buyProducts, isPending } = useMutation({
@@ -20,15 +22,19 @@ const ButtonCheckout = ({ cartProducts }: ButtonCheckoutProps) => {
         throw new Error("User information not found");
       }
 
-      const { data } = await axios.post("/api/stripe/payment", {
-        lineItems: cartProducts,
-        userId: session.user.id,
+      const response = await fetch("/api/stripe/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItems, userId: session.user.id }),
       });
 
-      if (data.statusCode === 500) {
-        throw new Error(data.message);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || "Error adding to cart";
+        throw new Error(errorMessage);
       }
 
+      const data = await response.json();
       window.location.href = data.session.url;
     },
     onError: (error) => {

@@ -50,7 +50,7 @@ const Login = () => {
           type="email"
           ref={emailRef}
           placeholder="Email"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-black text-13"
+          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
           name="email"
           required
           disabled={isLoading}
@@ -66,7 +66,7 @@ const Login = () => {
 
         <LoadingButton
           type="submit"
-          className="w-full bg-black border border-solid border-[#2E2E2E] py-0 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
+          className="w-full bg-background-primary border border-solid border-[#2E2E2E] py-0 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
           loading={isLoading}
         >
           {isLoading ? "Signing in..." : "Sign in"}
@@ -83,7 +83,7 @@ const Login = () => {
           type="button"
           onClick={() => signInWithGoogle.mutate()}
           disabled={signInWithGoogle.isPending}
-          className="flex text-color-secondary items-center gap-3 px-4 py-2 text-sm align-middle transition-all bg-black border border-solid rounded border-[#2E2E2E] ease hover:bg-background-tertiary hover:border-[#454545] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex text-color-secondary items-center gap-3 px-4 py-2 text-sm align-middle transition-all bg-background-primary border border-solid rounded border-[#2E2E2E] ease hover:bg-background-tertiary hover:border-[#454545] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaGoogle />
           Sign in with Google

@@ -30,11 +30,15 @@ export default function AddToCart({
   const sizesRef = useRef<SizesRef>(null!);
 
   const { run: throttledAddToCart } = useThrottleFn(
-    () =>
+    () => {
+      if (!selectedVariant) return;
+
       addToCart({
         size: sizesRef.current.selectedSize,
-        variant_id: selectedVariant?.id ?? 0,
-      }),
+        variant_id: selectedVariant.id,
+        stripe_id: selectedVariant.stripe_id,
+      });
+    },
     {
       wait: 300,
     }
@@ -54,6 +58,7 @@ export default function AddToCart({
         <Button
           type="submit"
           variant="default"
+          disabled={!selectedVariant}
           onClick={() => throttledAddToCart()}
           className="w-full rounded-none bg-background-secondary p-2 transition duration-150 text-13 ease hover:bg-background-tertiary"
         >
