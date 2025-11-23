@@ -7,7 +7,7 @@ import Link from "next/link";
 /** FUNCTIONALITY */
 import { useWishlist } from "@/hooks/wishlist";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas/ecommerce";
+import type { ProductWithVariants } from "@/schemas";
 
 export const WishlistProducts = ({
   allProducts,

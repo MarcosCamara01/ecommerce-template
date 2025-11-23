@@ -4,14 +4,19 @@ export async function middleware(request: NextRequest) {
   // Check for session cookie (better-auth uses 'better-auth.session_token' by default)
   const sessionToken = request.cookies.get("better-auth.session_token");
 
-  const protectedRoutes = ["/orders", "/create"];
+  const protectedRoutes = [
+    "/(user)/orders",
+    "/admin",
+    "/(user)/cart",
+    "/(user)/wishlist",
+  ];
   const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
 
   if (isProtectedRoute && !sessionToken) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/(auth)/login";
     return NextResponse.redirect(url);
   }
 

@@ -4,8 +4,8 @@ import {
   ProductSchema,
   ProductVariantSchema,
   ProductWithVariants,
-} from "@/schemas/ecommerce";
-import { createClient } from "@/utils/supabase/client";
+} from "@/schemas";
+import { createClient } from "@/lib/db";
 
 type CreateProductResponse = {
   success: boolean;
@@ -17,7 +17,7 @@ type CreateProductResponse = {
 const BUCKET = "product-images";
 
 const uploadImage = async (file: File, path: string) => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const ext = file.name.split(".").pop();
   const name = `${Date.now()}-${Math.random()
@@ -38,7 +38,7 @@ const uploadImage = async (file: File, path: string) => {
 };
 
 const cleanupProduct = async (productId: Product["id"]) => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   await supabase.from("products_items").delete().eq("id", productId);
 
@@ -55,7 +55,7 @@ const cleanupProduct = async (productId: Product["id"]) => {
 export async function createProduct(
   formData: FormData
 ): Promise<CreateProductResponse> {
-  const supabase = createClient();
+  const supabase = await createClient();
   let productId: Product["id"] | null = null;
 
   try {

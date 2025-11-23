@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
-import { processCompletedOrder } from "@/services/stripe";
-import { sendEmail } from "@/helpers/sendEmails";
+import { processCompletedOrder } from "@/lib/stripe";
+import { sendEmail } from "@/lib/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-09-30.clover",
@@ -83,3 +83,4 @@ const webhookHandler = async (req: NextRequest) => {
 };
 
 export { webhookHandler as POST };
+

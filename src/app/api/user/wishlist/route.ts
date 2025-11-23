@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/utils/supabase/server";
-import { getUser } from "@/libs/auth/server";
+import { createServiceClient } from "@/lib/db";
+import { getUser } from "@/lib/auth/server";
 
 type WishlistItem = {
   id: number;
@@ -71,3 +71,4 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
+

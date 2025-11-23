@@ -2,10 +2,10 @@
 import { ProductImage } from "./Image";
 import Link from "next/link";
 /** FUNCTIONALITY */
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas/ecommerce";
+import type { ProductWithVariants } from "@/schemas";
 
 const WishlistButton = dynamic(
   () => import("@/components/wishlist/WishlistButton")

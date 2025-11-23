@@ -1,10 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  CartItemSchema,
-  type CartItem,
-  type ProductSize,
-} from "@/schemas/ecommerce";
-import { useSession } from "@/libs/auth/client";
+import { CartItemSchema, type CartItem, type ProductSize } from "@/schemas";
+import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { CART_QUERY_KEYS } from "../keys";
 

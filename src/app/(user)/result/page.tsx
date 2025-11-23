@@ -1,4 +1,4 @@
-import { fetchCheckoutData } from "@/helpers/fetchCheckoutData";
+import { fetchCheckoutData } from "@/lib/stripe";
 import { pickFirst } from "@/utils/pickFirst";
 import {
   HiOutlineCheckCircle,
@@ -209,3 +209,4 @@ const CheckoutSuccess = async ({ searchParams }: Props) => {
 };
 
 export default CheckoutSuccess;
+

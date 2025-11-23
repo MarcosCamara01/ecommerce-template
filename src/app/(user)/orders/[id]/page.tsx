@@ -1,8 +1,5 @@
-/** ACTIONS */
 import { getOrder } from "../action";
-/** TYPES */
-import type { ProductWithVariants } from "@/schemas/ecommerce";
-/** COMPONENTS */
+import type { ProductWithVariants } from "@/schemas";
 import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
 import { OrderSummary, OrderSummarySkeleton } from "@/components/orders";

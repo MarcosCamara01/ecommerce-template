@@ -3,7 +3,7 @@ import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { cva } from "class-variance-authority";
 import { LuChevronDown } from "react-icons/lu";
 
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,
@@ -127,3 +127,4 @@ export {
   NavigationMenuIndicator,
   NavigationMenuViewport,
 };
+

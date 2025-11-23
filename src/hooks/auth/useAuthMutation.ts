@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
-import { authClient } from "@/libs/auth/client";
+import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export const useAuthMutation = () => {
   const router = useRouter();
@@ -28,6 +29,10 @@ export const useAuthMutation = () => {
     onSuccess: () => {
       router.push("/");
       router.refresh();
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Error signing in");
     },
   });
 
@@ -58,6 +63,10 @@ export const useAuthMutation = () => {
       router.push("/");
       router.refresh();
     },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Error signing up");
+    },
   });
 
   const signInWithGoogle = useMutation({
@@ -67,11 +76,34 @@ export const useAuthMutation = () => {
         callbackURL: "/",
       });
     },
+    onSuccess: () => {
+      router.push("/");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Error signing in with Google");
+    },
+  });
+
+  const signOut = useMutation({
+    mutationFn: async () => {
+      await authClient.signOut();
+    },
+    onSuccess: () => {
+      router.push("/");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Error signing out");
+    },
   });
 
   return {
     signIn,
     signUp,
     signInWithGoogle,
+    signOut,
   };
 };

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import { ProductImage } from "@/components/products/item/Image";
 /** TYPES */
-import type { Product, ProductVariant } from "@/schemas/ecommerce";
+import type { Product, ProductVariant } from "@/schemas";
 
 interface ProductImages {
   name: Product["name"];

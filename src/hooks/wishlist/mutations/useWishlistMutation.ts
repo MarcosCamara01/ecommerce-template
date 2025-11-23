@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { WishlistItemSchema, type WishlistItem } from "@/schemas/ecommerce";
-import { useSession } from "@/libs/auth/client";
+import { WishlistItemSchema, type WishlistItem } from "@/schemas";
+import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { WISHLIST_QUERY_KEYS } from "../keys";
 

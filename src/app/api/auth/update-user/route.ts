@@ -20,7 +20,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
-    // Better Auth API para actualizar el usuario
     const updatedUser = await auth.api.updateUser({
       headers: headersList,
       body: {

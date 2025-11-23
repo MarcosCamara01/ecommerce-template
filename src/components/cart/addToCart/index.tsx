@@ -9,10 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sizes, type SizesRef } from "./Sizes";
 import { Colors } from "./Colors";
 /** TYPES */
-import {
-  ProductWithVariantsSchema,
-  type ProductVariant,
-} from "@/schemas/ecommerce";
+import { ProductWithVariantsSchema, type ProductVariant } from "@/schemas";
 
 interface AddToCartProps {
   productJSON: string;

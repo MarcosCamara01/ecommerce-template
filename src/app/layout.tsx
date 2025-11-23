@@ -1,17 +1,15 @@
-/** COMPONENTS */
-import { Navbar } from "../components/common/navbar";
-import { Footer } from "../components/common/Footer";
-/** PROVIDERS */
+import type { Metadata } from "next";
+import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
-import QueryProvider from "../providers/query-provider";
-/** STYLES */
-import "../styles/globals.css";
-/** TYPES */
-import type { Metadata } from "next";
-/** FONTS */
-import { GeistSans } from "geist/font/sans";
+
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import { Providers } from "@/providers";
+import "@/styles/globals.css";
+import "@/styles/colors.css";
+import "@/styles/animations.css";
 
 export const metadata: Metadata = {
   title: "Ecommerce Template",
@@ -25,8 +23,8 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en">
-      <QueryProvider>
-        <body className={GeistSans.className}>
+      <body className={GeistSans.className}>
+        <Providers>
           <Navbar />
           <main className="pointer-events-auto">
             {children}
@@ -35,8 +33,8 @@ export default async function RootLayout({
             <SpeedInsights />
           </main>
           <Footer />
-        </body>
-      </QueryProvider>
+        </Providers>
+      </body>
     </html>
   );
 }

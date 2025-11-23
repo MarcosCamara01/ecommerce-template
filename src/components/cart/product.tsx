@@ -4,11 +4,7 @@ import Link from "next/link";
 import DeleteButton from "./DeleteButton";
 import { ProductCartInfo } from "./ProductCartInfo";
 /** TYPES */
-import type {
-  CartItem,
-  ProductVariant,
-  ProductWithVariants,
-} from "@/schemas/ecommerce";
+import type { CartItem, ProductVariant, ProductWithVariants } from "@/schemas";
 
 interface CartProductProps {
   product: ProductWithVariants;
