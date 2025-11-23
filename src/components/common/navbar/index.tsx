@@ -16,10 +16,10 @@ import { CartLink } from "./CartLink";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 /** FUNCTIONALITY */
-import { useSession } from "@/libs/auth/client";
+import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
-import { useSignOut } from "@/hooks/useSignOut";
+import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 /** ICONS */
 import { FiUser, FiMenu, FiCreditCard } from "react-icons/fi";
 import { RiLogoutBoxLine } from "react-icons/ri";
@@ -32,7 +32,7 @@ export const Navbar = () => {
   const { data: session, isPending } = useSession();
 
   const editProfileManager = useManager();
-  const { mutate: signOut } = useSignOut();
+  const { signOut } = useAuthMutation();
 
   const linksData = [
     { path: "/t-shirts", name: "T-SHIRTS" },
@@ -140,7 +140,7 @@ export const Navbar = () => {
 
                       <li>
                         <button
-                          onClick={() => signOut()}
+                          onClick={() => signOut.mutate()}
                           className="flex gap-2 items-center w-full px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
                         >
                           <RiLogoutBoxLine size={16} />

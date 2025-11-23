@@ -8,7 +8,7 @@ import ButtonCheckout from "./ButtonCheckout";
 import { GridProducts } from "../products/GridProducts";
 import { CartProduct } from "./product";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas/ecommerce";
+import type { ProductWithVariants } from "@/schemas";
 
 export const CartProducts = ({
   allProducts,

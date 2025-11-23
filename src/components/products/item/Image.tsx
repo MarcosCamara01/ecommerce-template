@@ -6,7 +6,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 /** TYPES */
-import type { Product, ProductVariant } from "@/schemas/ecommerce";
+import type { Product, ProductVariant } from "@/schemas";
 
 interface ProductImageProps {
   image: ProductVariant["images"][number];

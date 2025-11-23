@@ -1,7 +1,7 @@
 /** TYPES */
-import type { OrderWithDetails } from "@/schemas/ecommerce";
+import type { OrderWithDetails } from "@/schemas";
 /** UTILS */
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 /** ICONS */
 import {

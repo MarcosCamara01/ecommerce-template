@@ -1,4 +1,4 @@
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 
 export const GridProducts = ({
   children,
@@ -18,3 +18,4 @@ export const GridProducts = ({
     </div>
   );
 };
+

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { CART_QUERY_KEYS } from "../keys";
-import { CartItemSchema, type CartItem } from "@/schemas/ecommerce";
-import { useSession } from "@/libs/auth/client";
+import { CartItemSchema, type CartItem } from "@/schemas";
+import { useSession } from "@/lib/auth/client";
 
 type CartResponse = { items: CartItem[] };
 

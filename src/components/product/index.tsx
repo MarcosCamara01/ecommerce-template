@@ -6,7 +6,7 @@ import { ProductImages } from "@/components/product/Images";
 import AddToCart from "../cart/addToCart";
 import { Info } from "./DefaultInfo";
 /** TYPES */
-import type { ProductVariant } from "@/schemas/ecommerce";
+import type { ProductVariant } from "@/schemas";
 
 interface SingleProductProps {
   id: string;

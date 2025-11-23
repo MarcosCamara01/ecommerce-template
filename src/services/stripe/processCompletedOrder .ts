@@ -1,7 +1,7 @@
 import Stripe from "stripe";
-import { createServiceClient } from "@/utils/supabase/server";
-import { CartItemSchema } from "@/schemas/ecommerce";
-import type { OrderDetails } from "@/helpers/sendEmails";
+import { createServiceClient } from "@/lib/db";
+import { CartItemSchema } from "@/schemas";
+import type { OrderDetails } from "@/lib/email";
 import {
   createOrderItem,
   saveCustomerInfo,

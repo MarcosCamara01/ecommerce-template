@@ -1,20 +1,20 @@
 "use server";
 
-import { createServiceClient } from "@/utils/supabase/server";
+import { createServiceClient } from "@/lib/db";
 import Stripe from "stripe";
-import { getUser } from "@/libs/auth/server";
+import { getUser } from "@/lib/auth/server";
 import {
   CustomerInfoSchema,
   OrderItemSchema,
   OrderProductSchema,
   OrderWithDetailsSchema,
-} from "@/schemas/ecommerce";
+} from "@/schemas";
 import type {
   CartItem,
   OrderItem,
   CustomerInfo,
   OrderProduct,
-} from "@/schemas/ecommerce";
+} from "@/schemas";
 
 const ORDER_SELECT_QUERY = `
   id, 

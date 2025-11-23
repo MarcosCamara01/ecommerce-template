@@ -2,9 +2,9 @@
 import Link from "next/link";
 /** UTILS */
 import { format } from "date-fns";
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 /** TYPES */
-import type { OrderWithDetails } from "@/schemas/ecommerce";
+import type { OrderWithDetails } from "@/schemas";
 /** ICONS */
 import {
   HiOutlineShoppingBag,

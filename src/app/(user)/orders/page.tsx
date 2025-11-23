@@ -1,12 +1,9 @@
-/** ACTIONS */
 import { getUserOrders } from "./action";
-import { getUser } from "@/libs/auth/server";
-/** COMPONENTS */
+import { getUser } from "@/lib/auth/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SVGLoadingIcon } from "@/components/ui/loader";
 import { OrderCard } from "@/components/orders";
-/** ICONS */
 import { HiOutlineCube } from "react-icons/hi";
 
 export async function generateMetadata() {

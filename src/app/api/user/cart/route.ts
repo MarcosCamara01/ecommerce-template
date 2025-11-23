@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/utils/supabase/server";
-import { getUser } from "@/libs/auth/server";
-import { CartItem, ProductSize } from "@/schemas/ecommerce";
+import { createServiceClient } from "@/lib/db";
+import { CartItem, ProductSize } from "@/schemas";
+import { getUser } from "@/lib/auth/server";
 
 export async function GET() {
   try {

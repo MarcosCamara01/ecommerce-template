@@ -6,7 +6,7 @@ import useEmblaCarousel, {
 } from "embla-carousel-react";
 import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
 
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -260,3 +260,4 @@ export {
   CarouselPrevious,
   CarouselNext,
 };
+

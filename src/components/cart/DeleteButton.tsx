@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { IoClose } from "react-icons/io5";
-import type { CartItem } from "@/schemas/ecommerce";
+import type { CartItem } from "@/schemas";
 import { useCartMutation } from "@/hooks/cart";
 
 const DeleteButton = ({ cartItemId }: { cartItemId: CartItem["id"] }) => {

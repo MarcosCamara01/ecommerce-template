@@ -8,7 +8,7 @@ import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 /** COMPONENTS */
 import { Skeleton } from "@/components/ui/skeleton";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas/ecommerce";
+import type { ProductWithVariants } from "@/schemas";
 import { Button } from "../ui/button";
 import { useWishlistMutation } from "@/hooks/wishlist/mutations/useWishlistMutation";
 

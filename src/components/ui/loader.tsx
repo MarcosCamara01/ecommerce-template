@@ -1,4 +1,4 @@
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
 export const SVGLoadingIcon = forwardRef<
@@ -31,3 +31,4 @@ export const SVGLoadingIcon = forwardRef<
 });
 
 SVGLoadingIcon.displayName = "SVGLoadingIcon";
+

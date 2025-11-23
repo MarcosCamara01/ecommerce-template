@@ -1,12 +1,12 @@
 /** FUNCTIONALITY */
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { useImperativeHandle, useState, forwardRef, Ref } from "react";
 /** TYPES */
 import {
   type ProductVariant,
   ProductSizeEnum,
   type ProductSize,
-} from "@/schemas/ecommerce";
+} from "@/schemas";
 
 export type SizesRef = {
   selectedSize: ProductSize;

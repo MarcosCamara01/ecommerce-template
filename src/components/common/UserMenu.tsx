@@ -13,8 +13,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 /** FUNCTIONALITY */
-import { useSession } from "@/libs/auth/client";
-import { useSignOut } from "@/hooks/useSignOut";
+import { useSession } from "@/lib/auth/client";
+import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 /** TYPES */
 import type { Manager } from "@/hooks/useManager";
 /** ICONS */
@@ -23,7 +23,7 @@ import { RiLogoutBoxLine } from "react-icons/ri";
 
 export function UserMenu({ manager }: { manager: Manager }) {
   const { data: session, isPending } = useSession();
-  const { mutate: signOut } = useSignOut();
+  const { signOut } = useAuthMutation();
   const userName = session?.user?.name?.split(" ")[0] || "Usuario";
 
   return (
@@ -66,7 +66,7 @@ export function UserMenu({ manager }: { manager: Manager }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <button
-            onClick={() => signOut()}
+            onClick={() => signOut.mutate()}
             className="flex items-center gap-2 w-full cursor-pointer"
           >
             <RiLogoutBoxLine size={16} />

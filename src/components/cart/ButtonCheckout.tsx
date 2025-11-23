@@ -2,12 +2,12 @@
 
 /** FUNCTIONALITY */
 import { toast } from "sonner";
-import { useSession } from "@/libs/auth/client";
+import { useSession } from "@/lib/auth/client";
 import { useMutation } from "@tanstack/react-query";
 /** COMPONENTS */
 import LoadingButton from "../ui/loadingButton";
 /** TYPES */
-import type { CartItem } from "@/schemas/ecommerce";
+import type { CartItem } from "@/schemas";
 
 interface ButtonCheckoutProps {
   cartItems: CartItem[];

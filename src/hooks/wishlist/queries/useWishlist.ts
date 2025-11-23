@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { WISHLIST_QUERY_KEYS } from "../keys";
-import { WishlistItemSchema, type WishlistItem } from "@/schemas/ecommerce";
-import { useSession } from "@/libs/auth/client";
+import { WishlistItemSchema, type WishlistItem } from "@/schemas";
+import { useSession } from "@/lib/auth/client";
 
 type WishlistResponse = { items: WishlistItem[] };
 

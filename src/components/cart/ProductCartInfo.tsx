@@ -6,7 +6,7 @@ import { useCartMutation } from "@/hooks/cart";
 /** ICONS */
 import { IoAdd, IoRemove } from "react-icons/io5";
 /** TYPES */
-import type { ProductVariant, CartItem } from "@/schemas/ecommerce";
+import type { ProductVariant, CartItem } from "@/schemas";
 
 interface ProductCartInfoProps {
   cartItemId: CartItem["id"];

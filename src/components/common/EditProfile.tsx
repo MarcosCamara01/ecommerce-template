@@ -11,9 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loadingButton";
 /** FUNCTIONALITY */
-import { useSession } from "@/libs/auth/client";
+import { useSession } from "@/lib/auth/client";
 import { useMutation } from "@tanstack/react-query";
-import { authClient } from "@/libs/auth/client";
 import { useRef } from "react";
 import { toast } from "sonner";
 /** TYPES */
