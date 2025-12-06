@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/db";
-import { CartItem, ProductSize } from "@/schemas";
+import { and, desc, eq } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { cartItems } from "@/lib/db/schema";
+import { ProductSize } from "@/schemas";
 import { getUser } from "@/lib/auth/server";
 
 export async function GET() {
@@ -8,17 +10,20 @@ export async function GET() {
     const user = await getUser();
     if (!user) return NextResponse.json({ items: [] });
 
-    const supabase = createServiceClient();
-    const { data, error } = await supabase
-      .from("cart_items")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
+    const db = await getDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: "Database not configured" },
+        { status: 500 }
+      );
+    }
 
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    const items = await db.query.cartItems.findMany({
+      where: eq(cartItems.user_id, user.id),
+      orderBy: [desc(cartItems.updated_at)],
+    });
 
-    return NextResponse.json({ items: data });
+    return NextResponse.json({ items });
   } catch (error) {
     console.error("Error getting cart items:", error);
     return NextResponse.json(
@@ -47,50 +52,52 @@ export async function POST(req: Request) {
       quantity?: number;
     };
 
-    const supabase = createServiceClient();
+    const db = await getDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: "Database not configured" },
+        { status: 500 }
+      );
+    }
 
-    // check if the item already exists with the same variant and size
-    const { data: existing } = await supabase
-      .from("cart_items")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("variant_id", variant_id)
-      .eq("size", size)
-      .maybeSingle<CartItem>();
+    const existing = await db.query.cartItems.findFirst({
+      where: and(
+        eq(cartItems.user_id, user.id),
+        eq(cartItems.variant_id, variant_id),
+        eq(cartItems.size, size)
+      ),
+    });
 
+    const timestamp = new Date().toISOString();
     let result;
-    if (existing) {
-      // update quantity if it exists
-      const { data, error } = await supabase
-        .from("cart_items")
-        .update({
-          quantity: existing.quantity + quantity,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existing.id)
-        .select("*")
-        .single<CartItem>();
 
-      if (error)
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      result = data;
+    if (existing) {
+      const [updated] = await db
+        .update(cartItems)
+        .set({
+          quantity: existing.quantity + quantity,
+          updated_at: timestamp,
+        })
+        .where(
+          and(eq(cartItems.id, existing.id), eq(cartItems.user_id, user.id))
+        )
+        .returning();
+
+      result = updated;
     } else {
-      // insert new item if it doesn't exist
-      const { data, error } = await supabase
-        .from("cart_items")
-        .insert({
+      const [inserted] = await db
+        .insert(cartItems)
+        .values({
           variant_id,
           size,
           quantity,
           stripe_id,
           user_id: user.id,
+          updated_at: timestamp,
         })
-        .select("*")
-        .single<CartItem>();
+        .returning();
 
-      if (error)
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      result = data;
+      result = inserted;
     }
 
     return NextResponse.json({ item: result });
@@ -115,22 +122,28 @@ export async function PATCH(req: Request) {
       quantity: number;
     };
 
-    const supabase = createServiceClient();
-    const { data, error } = await supabase
-      .from("cart_items")
-      .update({
+    const db = await getDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: "Database not configured" },
+        { status: 500 }
+      );
+    }
+
+    const [updated] = await db
+      .update(cartItems)
+      .set({
         quantity,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .select("*")
-      .single<CartItem>();
+      .where(and(eq(cartItems.id, id), eq(cartItems.user_id, user.id)))
+      .returning();
 
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!updated) {
+      return NextResponse.json({ error: "Item not found" }, { status: 404 });
+    }
 
-    return NextResponse.json({ item: data });
+    return NextResponse.json({ item: updated });
   } catch (error) {
     console.error("Error updating cart item:", error);
     return NextResponse.json(
@@ -149,18 +162,19 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const itemId = searchParams.get("itemId");
 
-    const supabase = createServiceClient();
-    let query = supabase.from("cart_items").delete().eq("user_id", user.id);
-
-    if (itemId) {
-      // delete a specific item
-      query = query.eq("id", Number(itemId));
+    const db = await getDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: "Database not configured" },
+        { status: 500 }
+      );
     }
 
-    const { error } = await query;
+    const where = itemId
+      ? and(eq(cartItems.id, Number(itemId)), eq(cartItems.user_id, user.id))
+      : eq(cartItems.user_id, user.id);
 
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    await db.delete(cartItems).where(where);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,19 +1,29 @@
+"use server";
+
 // Products API service
 
-import { createCacheableClient } from "@/lib/db";
-import type { Product, ProductWithVariants } from "@/schemas";
-
-const PRODUCTS_QUERY = `*, variants:products_variants(*)`;
+import { eq } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { productsItems } from "@/lib/db/schema";
+import {
+  ProductCategoryEnum,
+  ProductSchema,
+  ProductWithVariantsSchema,
+  type Product,
+  type ProductWithVariants,
+} from "@/schemas";
 
 export async function getAllProducts(): Promise<ProductWithVariants[]> {
   try {
-    const supabase = createCacheableClient();
-    const { data, error } = await supabase
-      .from("products_items")
-      .select(PRODUCTS_QUERY);
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database not configured");
+    }
+    const products = await db.query.productsItems.findMany({
+      with: { variants: true },
+    });
 
-    if (error) throw error;
-    return data || [];
+    return ProductWithVariantsSchema.array().parse(products);
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
@@ -24,15 +34,16 @@ export async function getProductById(
   id: number
 ): Promise<ProductWithVariants | null> {
   try {
-    const supabase = createCacheableClient();
-    const { data, error } = await supabase
-      .from("products_items")
-      .select(PRODUCTS_QUERY)
-      .eq("id", id)
-      .single();
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database not configured");
+    }
+    const product = await db.query.productsItems.findFirst({
+      where: eq(productsItems.id, id),
+      with: { variants: true },
+    });
 
-    if (error) throw error;
-    return data;
+    return product ? ProductWithVariantsSchema.parse(product) : null;
   } catch (error) {
     console.error("Error fetching product:", error);
     return null;
@@ -43,14 +54,17 @@ export async function getProductsByCategory(
   category: string
 ): Promise<ProductWithVariants[]> {
   try {
-    const supabase = createCacheableClient();
-    const { data, error } = await supabase
-      .from("products_items")
-      .select(PRODUCTS_QUERY)
-      .eq("category", category);
+    const parsedCategory = ProductCategoryEnum.parse(category);
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database not configured");
+    }
+    const products = await db.query.productsItems.findMany({
+      where: eq(productsItems.category, parsedCategory),
+      with: { variants: true },
+    });
 
-    if (error) throw error;
-    return data || [];
+    return ProductWithVariantsSchema.array().parse(products);
   } catch (error) {
     console.error("Error fetching products by category:", error);
     return [];
@@ -61,15 +75,16 @@ export async function createProduct(
   product: Omit<Product, "id" | "created_at" | "updated_at">
 ): Promise<Product | null> {
   try {
-    const supabase = await createCacheableClient();
-    const { data, error } = await supabase
-      .from("products_items")
-      .insert([product])
-      .select()
-      .single();
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database not configured");
+    }
+    const [created] = await db
+      .insert(productsItems)
+      .values(product)
+      .returning();
 
-    if (error) throw error;
-    return data;
+    return created ? ProductSchema.parse(created) : null;
   } catch (error) {
     console.error("Error creating product:", error);
     return null;

@@ -1,28 +1,28 @@
 "use server";
 
-import { createCacheableClient } from "@/lib/db";
+import { cacheLife } from "next/cache";
+import { getDb } from "@/lib/db";
+import { productsItems } from "@/lib/db/schema";
 import {
-  productsWithVariantsQuery,
+  ProductCategoryEnum,
   ProductWithVariantsSchema,
   type ProductWithVariants,
 } from "@/schemas";
-import { cacheLife } from "next/cache";
+import { eq, ne } from "drizzle-orm";
 
 export async function getAllProducts(): Promise<ProductWithVariants[]> {
   "use cache";
   cacheLife("hours");
 
   try {
-    const supabase = createCacheableClient();
-
-    const { data: products, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery);
-
-    if (error) {
-      console.error("Error fetching products:", error);
+    const db = await getDb();
+    if (!db) {
+      console.error("Database not configured, returning empty products list");
       return [];
     }
+    const products = await db.query.productsItems.findMany({
+      with: { variants: true },
+    });
 
     return ProductWithVariantsSchema.array().parse(products);
   } catch (error) {
@@ -38,17 +38,16 @@ export async function getCategoryProducts(
   cacheLife("hours");
 
   try {
-    const supabase = createCacheableClient();
-
-    const { data: products, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .eq("category", category);
-
-    if (error) {
-      console.error("Error fetching category products:", error);
+    const parsedCategory = ProductCategoryEnum.parse(category);
+    const db = await getDb();
+    if (!db) {
+      console.error("Database not configured, returning empty category products");
       return [];
     }
+    const products = await db.query.productsItems.findMany({
+      where: eq(productsItems.category, parsedCategory),
+      with: { variants: true },
+    });
 
     return ProductWithVariantsSchema.array().parse(products);
   } catch (error) {
@@ -64,20 +63,21 @@ export async function getProduct(
   cacheLife("hours");
 
   try {
-    const supabase = createCacheableClient();
+    const db = await getDb();
+    if (!db) {
+      console.error("Database not configured, returning null product");
+      return null;
+    }
+    const product = await db.query.productsItems.findFirst({
+      where: eq(productsItems.id, productId),
+      with: { variants: true },
+    });
 
-    const { data, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .eq("id", productId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error fetching product:", error);
+    if (!product) {
       return null;
     }
 
-    return ProductWithVariantsSchema.parse(data);
+    return ProductWithVariantsSchema.parse(product);
   } catch (error) {
     console.error("Error fetching product:", error);
     return null;
@@ -88,20 +88,18 @@ export async function getRandomProducts(
   productIdToExclude: number
 ): Promise<ProductWithVariants[]> {
   try {
-    const supabase = createCacheableClient();
-
-    const { data: products, error } = await supabase
-      .from("products_items")
-      .select(productsWithVariantsQuery)
-      .neq("id", productIdToExclude)
-      .limit(30);
-
-    if (error) {
-      console.error("Error fetching random products:", error);
+    const db = await getDb();
+    if (!db) {
+      console.error("Database not configured, returning empty random products");
       return [];
     }
+    const products = await db.query.productsItems.findMany({
+      where: ne(productsItems.id, productIdToExclude),
+      with: { variants: true },
+      limit: 30,
+    });
 
-    if (!products || products.length === 0) {
+    if (!products.length) {
       return [];
     }
 
