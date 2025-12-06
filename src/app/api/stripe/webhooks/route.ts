@@ -2,15 +2,16 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { processCompletedOrder } from "@/lib/stripe";
 import { sendEmail } from "@/lib/email";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover",
-});
-
-const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
+import { getStripe } from "@/lib/stripe/client";
 
 const webhookHandler = async (req: NextRequest) => {
   try {
+    const stripe = await getStripe();
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      throw new Error("Missing STRIPE_WEBHOOK_SECRET environment variable");
+    }
+
     const buf = await req.text();
     const sig = req.headers.get("stripe-signature")!;
 

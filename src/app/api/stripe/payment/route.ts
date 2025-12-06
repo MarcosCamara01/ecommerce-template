@@ -1,13 +1,11 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { CartItemSchema } from "@/schemas";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover",
-});
+import { getStripe } from "@/lib/stripe/client";
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = await getStripe();
     const { cartItems, userId } = await request.json();
 
     if (!cartItems || !userId) throw Error("Missing data");

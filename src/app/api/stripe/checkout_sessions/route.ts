@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-
+import { getStripe } from "@/lib/stripe/client";
 import Stripe from "stripe";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover",
-});
 
 async function handler(req: NextRequest) {
   const query = new URL(req.url).searchParams;
   const session_id: string = query.get("session_id") as string;
 
   try {
+    const stripe = await getStripe();
     if (!session_id.startsWith("cs_")) {
       throw Error("Incorrect CheckoutSession ID.");
     }

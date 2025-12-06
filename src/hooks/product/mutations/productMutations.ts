@@ -5,7 +5,7 @@ import {
   ProductVariantSchema,
   ProductWithVariants,
 } from "@/schemas";
-import { createClient } from "@/lib/db";
+import { createClient } from "@/lib/db/supabase/client";
 
 type CreateProductResponse = {
   success: boolean;

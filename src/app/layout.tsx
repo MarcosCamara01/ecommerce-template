@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -24,16 +25,18 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={GeistSans.className}>
-        <Providers>
-          <Navbar />
-          <main className="pointer-events-auto">
-            {children}
-            <Toaster position="bottom-right" />
-            <Analytics />
-            <SpeedInsights />
-          </main>
-          <Footer />
-        </Providers>
+        <Suspense fallback={null}>
+          <Providers>
+            <Navbar />
+            <main className="pointer-events-auto">
+              {children}
+              <Toaster position="bottom-right" />
+              <Analytics />
+              <SpeedInsights />
+            </main>
+            <Footer />
+          </Providers>
+        </Suspense>
       </body>
     </html>
   );

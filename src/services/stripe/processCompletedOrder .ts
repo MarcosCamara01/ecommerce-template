@@ -1,5 +1,9 @@
+"use server";
+
 import Stripe from "stripe";
-import { createServiceClient } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { cartItems } from "@/lib/db/schema";
 import { CartItemSchema } from "@/schemas";
 import type { OrderDetails } from "@/lib/email";
 import {
@@ -7,10 +11,7 @@ import {
   saveCustomerInfo,
   saveOrderProducts,
 } from "@/app/(user)/orders/action";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover",
-});
+import { getStripe } from "@/lib/stripe/client";
 
 /**
  * Get line items from Stripe checkout session
@@ -18,6 +19,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 async function getLineItemsFromSession(
   sessionId: string
 ): Promise<Stripe.LineItem[]> {
+  const stripe = await getStripe();
   const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, {
     expand: ["data.price.product"],
   });
@@ -34,13 +36,13 @@ async function getLineItemsFromSession(
  * Clear user's cart after successful order
  */
 async function clearUserCart(userId: string) {
-  const supabase = createServiceClient();
-  const { error } = await supabase
-    .from("cart_items")
-    .delete()
-    .eq("user_id", userId);
-
-  if (error) {
+  try {
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database not configured");
+    }
+    await db.delete(cartItems).where(eq(cartItems.user_id, userId));
+  } catch (error) {
     console.error("Error clearing cart:", error);
   }
 }

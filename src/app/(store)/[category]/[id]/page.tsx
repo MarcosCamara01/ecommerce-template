@@ -1,5 +1,4 @@
 import { SingleProduct } from "@/components/product";
-import { getProduct } from "@/app/actions";
 import { Suspense } from "react";
 import { SingleProductSkeleton } from "@/components/product/skeleton";
 import { pickFirst } from "@/utils/pickFirst";
@@ -13,16 +12,9 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
-  const product = await getProduct(Number(id));
-
-  const title = product?.name
-    ? capitalizeFirstLetter(product?.name) + " |"
-    : undefined;
-  const description = product?.description ?? undefined;
-
   return {
-    title: `${title} Ecommerce Template`,
-    description: description,
+    title: `${capitalizeFirstLetter(id)} | Ecommerce Template`,
+    description: "Product details",
   };
 }
 

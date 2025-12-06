@@ -1,5 +1,7 @@
 const nextConfig = {
-  cacheComponents: true,
+  experimental: {
+    cacheComponents: true,
+  },
   images: {
     remotePatterns: [
       {
@@ -10,11 +12,18 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
-      {
-        protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_SUPABASE_URL?.replace("https://", ""),
-        pathname: "/storage/v1/object/public/**",
-      },
+      ...(process.env.NEXT_PUBLIC_SUPABASE_URL
+        ? [
+            {
+              protocol: "https",
+              hostname: process.env.NEXT_PUBLIC_SUPABASE_URL.replace(
+                "https://",
+                ""
+              ),
+              pathname: "/storage/v1/object/public/**",
+            },
+          ]
+        : []),
     ],
   },
 };

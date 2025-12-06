@@ -1,7 +1,9 @@
 "use server";
 
-import { createServiceClient } from "@/lib/db";
 import Stripe from "stripe";
+import { and, desc, eq } from "drizzle-orm";
+import { getDb } from "@/lib/db";
+import { customerInfo, orderItems, orderProducts } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth/server";
 import {
   CustomerInfoSchema,
@@ -16,56 +18,6 @@ import type {
   OrderProduct,
 } from "@/schemas";
 
-const ORDER_SELECT_QUERY = `
-  id, 
-  user_id, 
-  delivery_date, 
-  order_number, 
-  created_at, 
-  updated_at,
-  order_products(
-    id, 
-    order_id, 
-    variant_id, 
-    quantity, 
-    size,
-    created_at,
-    updated_at,
-    products_variants!inner(
-      id,
-      stripe_id,
-      product_id,
-      color,
-      sizes,
-      images,
-      created_at,
-      updated_at,
-      products_items!inner(
-        id,
-        name,
-        description,
-        price,
-        category,
-        img,
-        created_at,
-        updated_at
-      )
-    )
-  ),
-  customer_info(
-    id,
-    order_id,
-    name,
-    email,
-    phone,
-    address,
-    stripe_order_id,
-    total_price,
-    created_at,
-    updated_at
-  )
-`;
-
 export const getUserOrders = async () => {
   try {
     const user = await getUser();
@@ -76,24 +28,27 @@ export const getUserOrders = async () => {
       return null;
     }
 
-    const supabase = createServiceClient();
-
-    const { data: orders, error } = await supabase
-      .from("order_items")
-      .select(ORDER_SELECT_QUERY)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Supabase error fetching orders:", error);
+    const db = await getDb();
+    if (!db) {
+      console.error("Database not configured, returning null orders");
       return null;
     }
+    const orders = await db.query.orderItems.findMany({
+      where: eq(orderItems.user_id, userId),
+      orderBy: [desc(orderItems.created_at)],
+      with: {
+        order_products: {
+          with: {
+            products_variants: {
+              with: { products_items: true },
+            },
+          },
+        },
+        customer_info: true,
+      },
+    });
 
-    const transformedOrders = OrderWithDetailsSchema.array().parse(
-      orders || []
-    );
-
-    return transformedOrders;
+    return OrderWithDetailsSchema.array().parse(orders || []);
   } catch (error) {
     console.error("Unexpected error fetching orders:", error);
     if (error instanceof Error) {
@@ -113,23 +68,30 @@ export const getOrder = async (orderId: OrderItem["id"]) => {
       return null;
     }
 
-    const supabase = createServiceClient();
+    const db = await getDb();
+    if (!db) {
+      console.error("Database not configured when fetching order");
+      return null;
+    }
+    const order = await db.query.orderItems.findFirst({
+      where: and(eq(orderItems.id, orderId), eq(orderItems.user_id, userId)),
+      with: {
+        order_products: {
+          with: {
+            products_variants: {
+              with: { products_items: true },
+            },
+          },
+        },
+        customer_info: true,
+      },
+    });
 
-    const { data: order, error } = await supabase
-      .from("order_items")
-      .select(ORDER_SELECT_QUERY)
-      .eq("id", orderId)
-      .eq("user_id", userId)
-      .single();
-
-    if (error) {
-      console.error("Supabase error fetching order:", error);
+    if (!order) {
       return null;
     }
 
-    const transformedOrder = OrderWithDetailsSchema.parse(order);
-
-    return transformedOrder;
+    return OrderWithDetailsSchema.parse(order);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Error fetching order:", errorMessage);
@@ -144,8 +106,6 @@ export async function createOrderItem(
   userId: string,
   orderNumber: number
 ): Promise<OrderItem> {
-  const supabase = createServiceClient();
-
   const deliveryDate = new Date();
   deliveryDate.setDate(deliveryDate.getDate() + 7);
 
@@ -159,18 +119,17 @@ export async function createOrderItem(
     order_number: orderNumber,
   });
 
-  const { data, error } = await supabase
-    .from("order_items")
-    .insert(orderItemToSave)
-    .select()
-    .single();
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not configured");
+  }
+  const [order] = await db.insert(orderItems).values(orderItemToSave).returning();
 
-  if (error) {
-    console.error("Error creating order:", error);
-    throw new Error(`Error creating order: ${error.message}`);
+  if (!order) {
+    throw new Error("Error creating order: no record returned");
   }
 
-  return OrderItemSchema.parse(data);
+  return OrderItemSchema.parse(order);
 }
 
 /**
@@ -180,8 +139,6 @@ export async function saveCustomerInfo(
   orderId: number,
   session: Stripe.Checkout.Session
 ): Promise<CustomerInfo> {
-  const supabase = createServiceClient();
-
   const customerInfoToSave = CustomerInfoSchema.omit({
     id: true,
     created_at: true,
@@ -203,20 +160,17 @@ export async function saveCustomerInfo(
     total_price: session.amount_total || 0,
   });
 
-  const { data, error } = await supabase
-    .from("customer_info")
-    .insert(customerInfoToSave)
-    .select()
-    .single();
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not configured");
+  }
+  const [saved] = await db.insert(customerInfo).values(customerInfoToSave).returning();
 
-  if (error) {
-    console.error("Error saving customer info:", error);
-    throw new Error(`Error saving customer info: ${error.message}`);
+  if (!saved) {
+    throw new Error("Error saving customer info: no record returned");
   }
 
-  const customerInfo = CustomerInfoSchema.parse(data);
-
-  return customerInfo;
+  return CustomerInfoSchema.parse(saved);
 }
 
 /**
@@ -260,18 +214,14 @@ export async function saveOrderProducts(
     .array()
     .parse(orderProductsData);
 
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("order_products")
-    .insert(validatedOrderProducts)
-    .select();
-
-  const orderProducts = OrderProductSchema.array().parse(data);
-
-  if (error) {
-    console.error("Error saving order products:", error);
-    throw new Error(`Error saving order products: ${error.message}`);
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not configured");
   }
+  const saved = await db
+    .insert(orderProducts)
+    .values(validatedOrderProducts)
+    .returning();
 
-  return orderProducts;
+  return OrderProductSchema.array().parse(saved);
 }
