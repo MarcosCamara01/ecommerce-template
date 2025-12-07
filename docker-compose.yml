@@ -3,7 +3,6 @@
 services:
   dev-db:
     image: mongo:latest
-    container_name: ecommerce-mongo-dev
     ports:
       - "27017:27017"
     environment:
