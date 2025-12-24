@@ -56,6 +56,7 @@ export {
   customerInfo,
   orderProducts,
   AddressSchema,
+  InsertAddressSchema,
   selectOrderItemSchema,
   insertOrderItemSchema,
   selectCustomerInfoSchema,
