@@ -1,22 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Check for session cookie (better-auth uses 'better-auth.session_token' by default)
   const sessionToken = request.cookies.get("better-auth.session_token");
 
-  const protectedRoutes = [
-    "/(user)/orders",
-    "/admin",
-    "/(user)/cart",
-    "/(user)/wishlist",
-  ];
+  const protectedRoutes = ["/orders", "/admin"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
 
   if (isProtectedRoute && !sessionToken) {
     const url = request.nextUrl.clone();
-    url.pathname = "/(auth)/login";
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
