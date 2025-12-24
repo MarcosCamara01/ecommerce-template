@@ -1,16 +1,16 @@
-import Stripe from "stripe";
-import { cartRepository } from "@/lib/db/drizzle/repositories";
+import { stripe, Stripe } from "@/lib/stripe";
+import {
+  cartRepository,
+  ordersRepository,
+} from "@/lib/db/drizzle/repositories";
 import { CartItemSchema } from "@/schemas";
+import { stripeLogger } from "@/lib/stripe/logger";
 import type { OrderDetails } from "@/lib/email";
 import {
   createOrderItem,
   saveCustomerInfo,
   saveOrderProducts,
 } from "@/app/(user)/orders/action";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover" as any,
-});
 
 export { stripe };
 
@@ -23,7 +23,7 @@ export async function fetchCheckoutData(
     ).then((res) => res.json());
     return response;
   } catch (err) {
-    console.error("Error obtaining checkout data:", err);
+    stripeLogger.error("Error obtaining checkout data", err);
     return undefined;
   }
 }
@@ -36,7 +36,6 @@ async function getLineItemsFromSession(
   });
 
   if (!lineItems.data || lineItems.data.length === 0) {
-    console.error("No line items found in session");
     return [];
   }
 
@@ -47,17 +46,42 @@ async function clearUserCart(userId: string) {
   try {
     await cartRepository.clearByUserId(userId);
   } catch (error) {
-    console.error("Error clearing cart:", error);
+    stripeLogger.error("Error clearing cart", error);
   }
 }
 
 /**
- * Processes a completed Stripe checkout session.
- * Creates order, saves customer info and products, then clears the cart.
+ * Processes a completed checkout session with idempotency check.
  */
 export async function processCompletedOrder(
   session: Stripe.Checkout.Session
 ): Promise<OrderDetails> {
+  const existingOrder = await ordersRepository.findByStripeSessionId(
+    session.id
+  );
+  if (existingOrder) {
+    return {
+      order: {
+        id: existingOrder.id,
+        userId: existingOrder.userId,
+        orderNumber: existingOrder.orderNumber,
+        deliveryDate: existingOrder.deliveryDate,
+        createdAt: existingOrder.createdAt,
+        updatedAt: existingOrder.updatedAt,
+      },
+      customerInfo: existingOrder.customerInfo,
+      products: existingOrder.orderProducts.map((op) => ({
+        id: op.id,
+        orderId: op.orderId,
+        variantId: op.variantId,
+        quantity: op.quantity,
+        size: op.size,
+        createdAt: op.createdAt,
+        updatedAt: op.updatedAt,
+      })),
+    };
+  }
+
   const userId = session.metadata?.userId;
   const cartItems = CartItemSchema.array().parse(
     JSON.parse(session.metadata?.cartItems || "[]")
@@ -77,7 +101,7 @@ export async function processCompletedOrder(
     throw new Error("No line items from Stripe");
   }
 
-  const orderNumber = Math.floor(Math.random() * 1000000);
+  const orderNumber = await ordersRepository.getNextOrderNumber();
 
   const orderData = await createOrderItem(userId, orderNumber);
   const savedCustomerInfo = await saveCustomerInfo(orderData.id, session);

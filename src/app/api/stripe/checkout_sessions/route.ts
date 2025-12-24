@@ -1,27 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
 
-import Stripe from "stripe";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover",
-});
-
-async function handler(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const query = new URL(req.url).searchParams;
-  const session_id: string = query.get("session_id") as string;
+  const sessionId = query.get("session_id");
 
   try {
-    if (!session_id.startsWith("cs_")) {
-      throw Error("Incorrect CheckoutSession ID.");
+    if (!sessionId || !sessionId.startsWith("cs_")) {
+      throw Error("Invalid CheckoutSession ID");
     }
-    const checkout_session: Stripe.Checkout.Session =
-      await stripe.checkout.sessions.retrieve(session_id, {
-        expand: ["payment_intent"],
-      });
 
-    return NextResponse.json(checkout_session);
-  } catch (err: any) {
-    return NextResponse.json({ statusCode: 500, message: err.message });
+    const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["payment_intent"],
+    });
+
+    return NextResponse.json(checkoutSession);
+  } catch (err) {
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        message: err instanceof Error ? err.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
-
-export { handler as GET };

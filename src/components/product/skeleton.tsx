@@ -5,7 +5,7 @@ export const SingleProductSkeleton = () => (
     <div className="flex flex-col lg:flex-row lg:gap-6 xl:gap-8">
       <div className="w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%]">
         {/* Mobile */}
-        <div className="lg:hidden px-2 xs:px-4 sm:px-6 md:px-8">
+        <div className="lg:hidden">
           <Skeleton className="w-full aspect-[2/3] rounded-lg" />
         </div>
         {/* Desktop */}

@@ -25,7 +25,7 @@ export const ProductImages = ({ name, selectedVariant }: ProductImages) => {
   return (
     <>
       {/* Mobile */}
-      <div className="lg:hidden px-2 xs:px-4 sm:px-6 md:px-8">
+      <div className="lg:hidden">
         <Carousel
           className="w-full overflow-hidden rounded-lg"
           opts={{
