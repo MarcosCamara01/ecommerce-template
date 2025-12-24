@@ -83,4 +83,3 @@ const webhookHandler = async (req: NextRequest) => {
 };
 
 export { webhookHandler as POST };
-

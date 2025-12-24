@@ -23,10 +23,27 @@ import {
 } from "./products";
 
 export const AddressSchema = z.object({
+  line1: z.string(),
+  line2: z.string().nullable().optional(),
+  city: z.string(),
+  state: z.string().nullable().optional(),
+  postal_code: z.string(),
+  country: z.string(),
+});
+
+export const InsertAddressSchema = z.object({
   line1: z.string().min(1, "Address line 1 is required"),
-  line2: z.string().optional(),
+  line2: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => val ?? undefined),
   city: z.string().min(1, "City is required"),
-  state: z.string().optional(),
+  state: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => val ?? undefined),
   postal_code: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
 });
@@ -48,7 +65,9 @@ export const orderItems = pgTable(
       columns: [table.userId],
       foreignColumns: [users.id],
       name: "order_items_user_id_fkey",
-    }).onDelete("cascade").onUpdate("cascade"),
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
     index("idx_order_items_user_id").on(table.userId),
     index("idx_order_items_order_number").on(table.orderNumber),
     index("idx_order_items_created_at").on(table.createdAt),
@@ -83,7 +102,9 @@ export const customerInfo = pgTable(
       columns: [table.orderId],
       foreignColumns: [orderItems.id],
       name: "customer_info_order_id_fkey",
-    }).onDelete("cascade").onUpdate("cascade"),
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
     index("idx_customer_info_order_id").on(table.orderId),
     index("idx_customer_info_stripe_order_id").on(table.stripeOrderId),
     index("idx_customer_info_email").on(table.email),
@@ -113,12 +134,16 @@ export const orderProducts = pgTable(
       columns: [table.orderId],
       foreignColumns: [orderItems.id],
       name: "order_products_order_id_fkey",
-    }).onDelete("cascade").onUpdate("cascade"),
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
     foreignKey({
       columns: [table.variantId],
       foreignColumns: [productsVariants.id],
       name: "order_products_variant_id_fkey",
-    }).onDelete("restrict").onUpdate("cascade"),
+    })
+      .onDelete("restrict")
+      .onUpdate("cascade"),
     index("idx_order_products_order_id").on(table.orderId),
     index("idx_order_products_variant_id").on(table.variantId),
     check("order_quantity_positive", sql`quantity > 0`),
@@ -156,7 +181,7 @@ export const selectCustomerInfoSchema = createSelectSchema(customerInfo, {
 export const insertCustomerInfoSchema = createInsertSchema(customerInfo, {
   email: z.string().email("Invalid email address"),
   name: z.string().min(1, "Name is required"),
-  address: AddressSchema,
+  address: InsertAddressSchema,
   totalPrice: z.number().int().positive("Total price must be greater than 0"),
 }).omit({
   id: true,
@@ -198,5 +223,7 @@ export type CustomerInfo = z.infer<typeof selectCustomerInfoSchema>;
 export type InsertCustomerInfo = z.infer<typeof insertCustomerInfoSchema>;
 export type OrderProduct = z.infer<typeof selectOrderProductSchema>;
 export type InsertOrderProduct = z.infer<typeof insertOrderProductSchema>;
-export type OrderProductWithDetails = z.infer<typeof orderProductWithDetailsSchema>;
+export type OrderProductWithDetails = z.infer<
+  typeof orderProductWithDetailsSchema
+>;
 export type OrderWithDetails = z.infer<typeof orderWithDetailsSchema>;

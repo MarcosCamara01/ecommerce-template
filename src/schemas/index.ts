@@ -69,6 +69,7 @@ export {
   orderProductsRelations,
   // Zod Schemas
   AddressSchema,
+  InsertAddressSchema,
   selectOrderItemSchema as OrderItemSchema,
   insertOrderItemSchema as InsertOrderItemSchema,
   selectCustomerInfoSchema as CustomerInfoSchema,
