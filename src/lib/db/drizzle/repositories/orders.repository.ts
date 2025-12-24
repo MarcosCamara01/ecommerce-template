@@ -16,6 +16,29 @@ import type {
 } from "@/schemas";
 
 export const ordersRepository = {
+  /**
+   * Check if an order already exists by Stripe session ID (idempotency check)
+   */
+  async existsByStripeSessionId(stripeSessionId: string): Promise<boolean> {
+    const existing = await db.query.customerInfo.findFirst({
+      where: eq(customerInfo.stripeOrderId, stripeSessionId),
+    });
+    return !!existing;
+  },
+
+  /**
+   * Find order by Stripe session ID
+   */
+  async findByStripeSessionId(stripeSessionId: string): Promise<OrderWithDetails | null> {
+    const customer = await db.query.customerInfo.findFirst({
+      where: eq(customerInfo.stripeOrderId, stripeSessionId),
+    });
+
+    if (!customer) return null;
+
+    return this.findById(customer.orderId);
+  },
+
   async findByUserId(userId: string): Promise<OrderWithDetails[]> {
     const orders = await db.query.orderItems.findMany({
       where: eq(orderItems.userId, userId),

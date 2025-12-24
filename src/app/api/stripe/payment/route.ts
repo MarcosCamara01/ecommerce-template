@@ -1,16 +1,15 @@
-import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
+import { stripeLogger } from "@/lib/stripe/logger";
 import { CartItemSchema } from "@/schemas";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover",
-});
 
 export async function POST(request: NextRequest) {
   try {
     const { cartItems, userId } = await request.json();
 
-    if (!cartItems || !userId) throw Error("Missing data");
+    if (!cartItems || !userId) {
+      throw Error("Missing data");
+    }
 
     const cartItemsList = CartItemSchema.array().parse(cartItems);
 
@@ -47,8 +46,14 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ session: session }, { status: 200 });
-  } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ statusCode: 500, message: error.message });
+  } catch (error) {
+    stripeLogger.error("Failed to create checkout session", error);
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
