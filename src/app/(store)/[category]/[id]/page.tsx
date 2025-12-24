@@ -33,7 +33,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const selectedVariantColor = pickFirst(sp, "variant");
 
   return (
-    <section className="pt-14">
+    <section className="pt-8 lg:pt-14">
       <Suspense fallback={<SingleProductSkeleton />}>
         <SingleProduct id={id} selectedVariantColor={selectedVariantColor} />
       </Suspense>
