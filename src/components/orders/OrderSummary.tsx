@@ -18,16 +18,16 @@ interface OrderSummaryProps {
 }
 
 export function OrderSummary({ order }: OrderSummaryProps) {
-  const totalItems = order.order_products.reduce(
-    (total, product) => total + product.quantity,
+  const totalItems = order.orderProducts.reduce(
+    (total: number, product: { quantity: number }) => total + product.quantity,
     0
   );
 
-  const rawPrice = order.customer_info?.total_price || 0;
+  const rawPrice = order.customerInfo?.totalPrice || 0;
   const totalPrice = rawPrice > 0 ? (rawPrice / 100).toFixed(2) : "0.00";
 
-  const deliveryDate = new Date(order.delivery_date);
-  const orderDate = new Date(order.created_at);
+  const deliveryDate = new Date(order.deliveryDate);
+  const orderDate = new Date(order.createdAt);
   const isUpcoming = deliveryDate > new Date();
 
   return (
@@ -78,7 +78,7 @@ export function OrderSummary({ order }: OrderSummaryProps) {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Order Number</span>
-            <span className="font-medium">{order.order_number}</span>
+            <span className="font-medium">{order.orderNumber}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Order Date</span>
@@ -102,33 +102,33 @@ export function OrderSummary({ order }: OrderSummaryProps) {
           Delivery Address
         </h3>
         <div className="space-y-2 text-sm">
-          <p className="font-medium">{order.customer_info?.name}</p>
+          <p className="font-medium">{order.customerInfo?.name}</p>
           <p className="text-muted-foreground">
-            {order.customer_info?.address?.line1}
+            {order.customerInfo?.address?.line1}
           </p>
-          {order.customer_info?.address?.line2 && (
+          {order.customerInfo?.address?.line2 && (
             <p className="text-muted-foreground">
-              {order.customer_info.address.line2}
+              {order.customerInfo.address.line2}
             </p>
           )}
           <p className="text-muted-foreground">
-            {order.customer_info?.address?.postal_code}{" "}
-            {order.customer_info?.address?.city}
+            {order.customerInfo?.address?.postal_code}{" "}
+            {order.customerInfo?.address?.city}
           </p>
           <p className="text-muted-foreground">
-            {order.customer_info?.address?.country}
+            {order.customerInfo?.address?.country}
           </p>
 
           <div className="pt-3 mt-3 space-y-2 border-t border-border-primary">
-            {order.customer_info?.phone && (
+            {order.customerInfo?.phone && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <HiOutlinePhone className="w-4 h-4" />
-                <span>{order.customer_info.phone}</span>
+                <span>{order.customerInfo.phone}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-muted-foreground">
               <HiOutlineMail className="w-4 h-4" />
-              <span>{order.customer_info?.email}</span>
+              <span>{order.customerInfo?.email}</span>
             </div>
           </div>
         </div>

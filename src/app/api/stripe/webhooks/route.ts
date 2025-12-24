@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
-import { processCompletedOrder } from "@/lib/stripe";
+import { processCompletedOrder } from "@/services/stripe.service";
 import { sendEmail } from "@/lib/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

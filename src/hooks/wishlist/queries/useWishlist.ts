@@ -34,7 +34,7 @@ export const useWishlist = () => {
   });
 
   const items = query.data?.items ?? [];
-  const ids = new Set(items.map((i) => i.product_id));
+  const ids = new Set(items.map((i) => i.productId));
   const isInWishlist = (productId: number) => ids.has(productId);
 
   return {

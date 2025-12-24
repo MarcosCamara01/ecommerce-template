@@ -1,72 +1,23 @@
 "use server";
 
-import { createServiceClient } from "@/lib/db";
+import { ordersRepository } from "@/lib/db/drizzle/repositories";
 import Stripe from "stripe";
 import { getUser } from "@/lib/auth/server";
 import {
-  CustomerInfoSchema,
-  OrderItemSchema,
-  OrderProductSchema,
   OrderWithDetailsSchema,
+  InsertOrderItemSchema,
+  InsertCustomerInfoSchema,
+  InsertOrderProductSchema,
 } from "@/schemas";
 import type {
   CartItem,
   OrderItem,
   CustomerInfo,
   OrderProduct,
+  OrderWithDetails,
 } from "@/schemas";
 
-const ORDER_SELECT_QUERY = `
-  id, 
-  user_id, 
-  delivery_date, 
-  order_number, 
-  created_at, 
-  updated_at,
-  order_products(
-    id, 
-    order_id, 
-    variant_id, 
-    quantity, 
-    size,
-    created_at,
-    updated_at,
-    products_variants!inner(
-      id,
-      stripe_id,
-      product_id,
-      color,
-      sizes,
-      images,
-      created_at,
-      updated_at,
-      products_items!inner(
-        id,
-        name,
-        description,
-        price,
-        category,
-        img,
-        created_at,
-        updated_at
-      )
-    )
-  ),
-  customer_info(
-    id,
-    order_id,
-    name,
-    email,
-    phone,
-    address,
-    stripe_order_id,
-    total_price,
-    created_at,
-    updated_at
-  )
-`;
-
-export const getUserOrders = async () => {
+export const getUserOrders = async (): Promise<OrderWithDetails[] | null> => {
   try {
     const user = await getUser();
     const userId = user?.id;
@@ -76,24 +27,8 @@ export const getUserOrders = async () => {
       return null;
     }
 
-    const supabase = createServiceClient();
-
-    const { data: orders, error } = await supabase
-      .from("order_items")
-      .select(ORDER_SELECT_QUERY)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Supabase error fetching orders:", error);
-      return null;
-    }
-
-    const transformedOrders = OrderWithDetailsSchema.array().parse(
-      orders || []
-    );
-
-    return transformedOrders;
+    const orders = await ordersRepository.findByUserId(userId);
+    return OrderWithDetailsSchema.array().parse(orders);
   } catch (error) {
     console.error("Unexpected error fetching orders:", error);
     if (error instanceof Error) {
@@ -103,7 +38,9 @@ export const getUserOrders = async () => {
   }
 };
 
-export const getOrder = async (orderId: OrderItem["id"]) => {
+export const getOrder = async (
+  orderId: OrderItem["id"]
+): Promise<OrderWithDetails | null> => {
   try {
     const user = await getUser();
     const userId = user?.id;
@@ -113,25 +50,16 @@ export const getOrder = async (orderId: OrderItem["id"]) => {
       return null;
     }
 
-    const supabase = createServiceClient();
+    const order = await ordersRepository.findById(orderId);
 
-    const { data: order, error } = await supabase
-      .from("order_items")
-      .select(ORDER_SELECT_QUERY)
-      .eq("id", orderId)
-      .eq("user_id", userId)
-      .single();
-
-    if (error) {
-      console.error("Supabase error fetching order:", error);
+    if (!order || order.userId !== userId) {
       return null;
     }
 
-    const transformedOrder = OrderWithDetailsSchema.parse(order);
-
-    return transformedOrder;
+    return OrderWithDetailsSchema.parse(order);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage =
+      error instanceof Error ? error.message : String(error);
     console.error("Error fetching order:", errorMessage);
     return null;
   }
@@ -144,33 +72,22 @@ export async function createOrderItem(
   userId: string,
   orderNumber: number
 ): Promise<OrderItem> {
-  const supabase = createServiceClient();
-
   const deliveryDate = new Date();
   deliveryDate.setDate(deliveryDate.getDate() + 7);
 
-  const orderItemToSave = OrderItemSchema.omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
-  }).parse({
-    user_id: userId,
-    delivery_date: deliveryDate.toISOString(),
-    order_number: orderNumber,
+  const orderItemToSave = InsertOrderItemSchema.parse({
+    userId,
+    deliveryDate,
+    orderNumber,
   });
 
-  const { data, error } = await supabase
-    .from("order_items")
-    .insert(orderItemToSave)
-    .select()
-    .single();
+  const order = await ordersRepository.create(orderItemToSave);
 
-  if (error) {
-    console.error("Error creating order:", error);
-    throw new Error(`Error creating order: ${error.message}`);
+  if (!order) {
+    throw new Error("Error creating order");
   }
 
-  return OrderItemSchema.parse(data);
+  return order;
 }
 
 /**
@@ -179,44 +96,45 @@ export async function createOrderItem(
 export async function saveCustomerInfo(
   orderId: number,
   session: Stripe.Checkout.Session
-): Promise<CustomerInfo> {
-  const supabase = createServiceClient();
-
-  const customerInfoToSave = CustomerInfoSchema.omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
-  }).parse({
-    order_id: orderId,
+): Promise<CustomerInfo | null> {
+  const customerInfoToSave = InsertCustomerInfoSchema.parse({
+    orderId,
     name: session.customer_details?.name || "Unknown",
     email: session.customer_details?.email || "unknown@email.com",
-    phone: session.customer_details?.phone,
+    phone: session.customer_details?.phone || undefined,
     address: {
-      line1: session.customer_details?.address?.line1,
+      line1: session.customer_details?.address?.line1 || "",
       line2: session.customer_details?.address?.line2,
-      city: session.customer_details?.address?.city,
+      city: session.customer_details?.address?.city || "",
       state: session.customer_details?.address?.state,
-      postal_code: session.customer_details?.address?.postal_code,
-      country: session.customer_details?.address?.country,
+      postal_code: session.customer_details?.address?.postal_code || "",
+      country: session.customer_details?.address?.country || "",
     },
-    stripe_order_id: session.id,
-    total_price: session.amount_total || 0,
+    stripeOrderId: session.id,
+    totalPrice: session.amount_total || 0,
   });
 
-  const { data, error } = await supabase
-    .from("customer_info")
-    .insert(customerInfoToSave)
-    .select()
-    .single();
+  const customerInfo = await ordersRepository.addCustomerInfo(
+    orderId,
+    customerInfoToSave
+  );
 
-  if (error) {
-    console.error("Error saving customer info:", error);
-    throw new Error(`Error saving customer info: ${error.message}`);
+  if (!customerInfo) {
+    throw new Error("Error saving customer info");
   }
 
-  const customerInfo = CustomerInfoSchema.parse(data);
-
-  return customerInfo;
+  return {
+    id: customerInfo.id,
+    orderId: customerInfo.orderId,
+    name: customerInfo.name,
+    email: customerInfo.email,
+    phone: customerInfo.phone,
+    address: customerInfo.address,
+    stripeOrderId: customerInfo.stripeOrderId,
+    totalPrice: customerInfo.totalPrice,
+    createdAt: customerInfo.createdAt?.toISOString() ?? new Date().toISOString(),
+    updatedAt: customerInfo.updatedAt?.toISOString() ?? new Date().toISOString(),
+  };
 }
 
 /**
@@ -231,7 +149,7 @@ export async function saveOrderProducts(
   const orderProductsData = lineItems
     .map((lineItem) => {
       const cartItem = cartItems.find(
-        (item) => item.stripe_id === lineItem.price?.id
+        (item) => item.stripeId === lineItem.price?.id
       );
 
       if (!cartItem) {
@@ -239,12 +157,12 @@ export async function saveOrderProducts(
         return null;
       }
 
-      return {
-        order_id: orderId,
-        variant_id: cartItem.variant_id,
+      return InsertOrderProductSchema.parse({
+        orderId,
+        variantId: cartItem.variantId,
         quantity: lineItem.quantity || 1,
         size: cartItem.size,
-      };
+      });
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
@@ -252,26 +170,18 @@ export async function saveOrderProducts(
     throw new Error("No valid order products to save");
   }
 
-  const validatedOrderProducts = OrderProductSchema.omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
-  })
-    .array()
-    .parse(orderProductsData);
+  const savedProducts = await ordersRepository.addProducts(
+    orderId,
+    orderProductsData
+  );
 
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("order_products")
-    .insert(validatedOrderProducts)
-    .select();
-
-  const orderProducts = OrderProductSchema.array().parse(data);
-
-  if (error) {
-    console.error("Error saving order products:", error);
-    throw new Error(`Error saving order products: ${error.message}`);
-  }
-
-  return orderProducts;
+  return savedProducts.map((p) => ({
+    id: p.id,
+    orderId: p.orderId,
+    variantId: p.variantId,
+    quantity: p.quantity,
+    size: p.size as "XS" | "S" | "M" | "L" | "XL" | "XXL",
+    createdAt: p.createdAt?.toISOString() ?? new Date().toISOString(),
+    updatedAt: p.updatedAt?.toISOString() ?? new Date().toISOString(),
+  }));
 }

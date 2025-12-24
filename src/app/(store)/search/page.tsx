@@ -1,6 +1,5 @@
 import { getAllProducts } from "@/app/actions";
-import { pickFirst } from "@/utils/pickFirst";
-import { searchProducts } from "@/services/search";
+import { pickFirst, searchProducts } from "@/utils";
 import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
 

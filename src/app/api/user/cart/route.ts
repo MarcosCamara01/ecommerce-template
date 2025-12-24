@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/db";
-import { CartItem, ProductSize } from "@/schemas";
+import { cartRepository } from "@/lib/db/drizzle/repositories";
+import { ProductSize } from "@/schemas";
 import { getUser } from "@/lib/auth/server";
 
 export async function GET() {
@@ -8,17 +8,8 @@ export async function GET() {
     const user = await getUser();
     if (!user) return NextResponse.json({ items: [] });
 
-    const supabase = createServiceClient();
-    const { data, error } = await supabase
-      .from("cart_items")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
-
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
-
-    return NextResponse.json({ items: data });
+    const items = await cartRepository.findByUserId(user.id);
+    return NextResponse.json({ items });
   } catch (error) {
     console.error("Error getting cart items:", error);
     return NextResponse.json(
@@ -36,62 +27,24 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const {
-      variant_id,
+      variantId,
       size,
-      stripe_id,
+      stripeId,
       quantity = 1,
     } = body as {
-      variant_id: number;
+      variantId: number;
       size: ProductSize;
-      stripe_id: string;
+      stripeId: string;
       quantity?: number;
     };
 
-    const supabase = createServiceClient();
-
-    // check if the item already exists with the same variant and size
-    const { data: existing } = await supabase
-      .from("cart_items")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("variant_id", variant_id)
-      .eq("size", size)
-      .maybeSingle<CartItem>();
-
-    let result;
-    if (existing) {
-      // update quantity if it exists
-      const { data, error } = await supabase
-        .from("cart_items")
-        .update({
-          quantity: existing.quantity + quantity,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existing.id)
-        .select("*")
-        .single<CartItem>();
-
-      if (error)
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      result = data;
-    } else {
-      // insert new item if it doesn't exist
-      const { data, error } = await supabase
-        .from("cart_items")
-        .insert({
-          variant_id,
-          size,
-          quantity,
-          stripe_id,
-          user_id: user.id,
-        })
-        .select("*")
-        .single<CartItem>();
-
-      if (error)
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      result = data;
-    }
+    const result = await cartRepository.upsert({
+      userId: user.id,
+      variantId,
+      size,
+      stripeId,
+      quantity,
+    });
 
     return NextResponse.json({ item: result });
   } catch (error) {
@@ -115,22 +68,8 @@ export async function PATCH(req: Request) {
       quantity: number;
     };
 
-    const supabase = createServiceClient();
-    const { data, error } = await supabase
-      .from("cart_items")
-      .update({
-        quantity,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .select("*")
-      .single<CartItem>();
-
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
-
-    return NextResponse.json({ item: data });
+    const result = await cartRepository.updateQuantity(user.id, id, quantity);
+    return NextResponse.json({ item: result });
   } catch (error) {
     console.error("Error updating cart item:", error);
     return NextResponse.json(
@@ -149,18 +88,13 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const itemId = searchParams.get("itemId");
 
-    const supabase = createServiceClient();
-    let query = supabase.from("cart_items").delete().eq("user_id", user.id);
-
     if (itemId) {
-      // delete a specific item
-      query = query.eq("id", Number(itemId));
+      // Delete a specific item
+      await cartRepository.delete(user.id, Number(itemId));
+    } else {
+      // Clear all cart items for user
+      await cartRepository.clearByUserId(user.id);
     }
-
-    const { error } = await query;
-
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
 
     return NextResponse.json({ success: true });
   } catch (error) {

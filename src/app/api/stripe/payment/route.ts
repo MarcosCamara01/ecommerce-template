@@ -15,12 +15,12 @@ export async function POST(request: NextRequest) {
     const cartItemsList = CartItemSchema.array().parse(cartItems);
 
     const lineItemsList = cartItemsList.map((item) => {
-      if (!item.stripe_id) {
+      if (!item.stripeId) {
         throw new Error("Missing stripeId in line item");
       }
 
       return {
-        price: item.stripe_id,
+        price: item.stripeId,
         quantity: item.quantity || 1,
       };
     });

@@ -1,5 +1,4 @@
 const nextConfig = {
-  cacheComponents: true,
   images: {
     remotePatterns: [
       {

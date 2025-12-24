@@ -1,4 +1,4 @@
-// Business logic types
+// Business logic types (view models)
 
 export interface Order {
   id: number;
@@ -25,10 +25,10 @@ export interface CustomerDetails {
   name: string;
   email: string;
   phone?: string;
-  address: Address;
+  address: DomainAddress;
 }
 
-export interface Address {
+export interface DomainAddress {
   line1?: string;
   line2?: string;
   city?: string;
@@ -56,20 +56,19 @@ export interface CartLineItem {
   color: string;
 }
 
-export interface Product {
+export interface DomainProduct {
   id: number;
   name: string;
   description: string;
   price: number;
   category: string;
   image: string;
-  variants: ProductVariant[];
+  variants: DomainProductVariant[];
 }
 
-export interface ProductVariant {
+export interface DomainProductVariant {
   id: number;
   color: string;
   sizes: string[];
   images: string[];
 }
-
