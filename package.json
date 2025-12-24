@@ -63,6 +63,7 @@
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^3.0.0",
+    "@types/nodemailer": "^7.0.4",
     "@types/pg": "^8.15.5",
     "@types/react": "19.2.2",
     "@types/react-dom": "^19.2.2",
