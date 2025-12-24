@@ -64,6 +64,11 @@ main {
   min-height: calc(100vh - 97px);
 }
 
+/* Safe area for mobile devices with notch/home indicator */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
 .orders-img div {
   border-radius: 3px;
   overflow: hidden;

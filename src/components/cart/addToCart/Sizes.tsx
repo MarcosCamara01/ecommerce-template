@@ -12,11 +12,13 @@ export type SizesRef = {
   selectedSize: ProductSize;
 };
 
+interface SizesProps {
+  productSizes: ProductVariant["sizes"];
+  compact?: boolean;
+}
+
 export const Sizes = forwardRef(
-  (
-    { productSizes }: { productSizes: ProductVariant["sizes"] },
-    ref: Ref<SizesRef>
-  ) => {
+  ({ productSizes, compact = false }: SizesProps, ref: Ref<SizesRef>) => {
     const availableSizes = new Set(productSizes);
 
     const [selectedSize, setSelectedSize] = useState<ProductSize>(
@@ -34,7 +36,12 @@ export const Sizes = forwardRef(
     };
 
     return (
-      <div className="grid grid-cols-4 gap-2.5 justify-center">
+      <div
+        className={cn("grid gap-2", {
+          "grid-cols-4 gap-2.5 justify-center": !compact,
+          "grid-cols-6 sm:grid-cols-8 gap-1.5": compact,
+        })}
+      >
         {ProductSizeEnum.options.map((size) => {
           const isAvailable = availableSizes.has(size);
           return (
@@ -43,9 +50,11 @@ export const Sizes = forwardRef(
               type="button"
               disabled={!isAvailable}
               className={cn(
-                "flex items-center justify-center border border-solid border-border-primary disabled:opacity-50 disabled:cursor-not-allowed px-1 py-1.5 bg-background-primary rounded  transition-colors hover:border-border-secondary text-xs",
+                "flex items-center justify-center border border-solid border-border-primary disabled:opacity-50 disabled:cursor-not-allowed bg-background-primary rounded transition-colors hover:border-border-secondary",
                 {
                   "bg-white text-black": selectedSize === size && isAvailable,
+                  "px-1 py-1.5 text-xs": !compact,
+                  "px-2 py-1 text-[10px]": compact,
                 }
               )}
               onClick={() => handleSizeClick(size)}

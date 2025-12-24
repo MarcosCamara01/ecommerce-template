@@ -14,16 +14,16 @@ import { ProductWithVariantsSchema, type ProductVariant } from "@/schemas";
 interface AddToCartProps {
   productJSON: string;
   selectedVariant?: ProductVariant;
+  isMobileBar?: boolean;
 }
 
 export default function AddToCart({
   productJSON,
   selectedVariant,
+  isMobileBar = false,
 }: AddToCartProps) {
   const { add: addToCart } = useCartMutation();
-
   const product = ProductWithVariantsSchema.parse(JSON.parse(productJSON));
-
   const sizesRef = useRef<SizesRef>(null!);
 
   const { run: throttledAddToCart } = useThrottleFn(
@@ -36,10 +36,41 @@ export default function AddToCart({
         stripeId: selectedVariant.stripeId,
       });
     },
-    {
-      wait: 300,
-    }
+    { wait: 300 }
   );
+
+  if (isMobileBar) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <Sizes
+              ref={sizesRef}
+              productSizes={selectedVariant?.sizes ?? []}
+              compact
+            />
+          </div>
+          <div className="flex-shrink-0">
+            <Colors
+              variants={product.variants}
+              selectedVariantColor={selectedVariant?.color}
+              compact
+            />
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          variant="default"
+          disabled={!selectedVariant}
+          onClick={() => throttledAddToCart()}
+          className="w-full py-3 text-sm font-medium bg-white text-black hover:bg-gray-100 transition-colors rounded-md"
+        >
+          Add to cart
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <>

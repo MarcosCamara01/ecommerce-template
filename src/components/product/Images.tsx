@@ -6,6 +6,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselDots,
 } from "@/components/ui/carousel";
 import { ProductImage } from "@/components/products/item/Image";
 /** TYPES */
@@ -18,56 +19,55 @@ interface ProductImages {
 
 export const ProductImages = ({ name, selectedVariant }: ProductImages) => {
   if (!selectedVariant || !selectedVariant.images) {
-    return (
-      <Skeleton className="w-full rounded-b-none aspect-[2/3] min-w-[250px] lg:aspect-[4/6] lg:min-w-[560px]" />
-    );
+    return <Skeleton className="w-full rounded-b-none aspect-[2/3]" />;
   }
 
   return (
     <>
-      <div className="flex lg:hidden">
+      {/* Mobile */}
+      <div className="lg:hidden px-2 xs:px-4 sm:px-6 md:px-8">
         <Carousel
-          className="w-full min-w-[250px] rounded-md overflow-hidden"
+          className="w-full overflow-hidden rounded-lg"
           opts={{
             align: "start",
             loop: true,
           }}
         >
-          <CarouselContent>
+          <CarouselContent className="-ml-0">
             {selectedVariant.images.map((image, index) => (
               <CarouselItem key={index} className="pl-0">
-                <ProductImage
-                  image={image}
-                  name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
-                  width={384}
-                  height={576}
-                  priority={index === 0 ? true : false}
-                  sizes="(max-width: 994px) 100vw,
-                  (max-width: 1304px) 50vw,
-                  (max-width: 1500px) 25vw,
-                  33vw"
-                />
+                <div className="relative w-full">
+                  <ProductImage
+                    image={image}
+                    name={`${name} ${selectedVariant.color} - Image ${
+                      index + 1
+                    }`}
+                    width={800}
+                    height={1200}
+                    priority={index === 0}
+                    sizes="100vw"
+                  />
+                </div>
               </CarouselItem>
             ))}
           </CarouselContent>
+          <CarouselDots className="absolute bottom-4 left-0 right-0" />
         </Carousel>
       </div>
 
-      <div className="lg:grid hidden grid-cols-2 gap-0.5 min-w-grid-img">
+      {/* Desktop */}
+      <div className="hidden lg:grid grid-cols-2 gap-1">
         {selectedVariant.images.map((image, index) => (
-          <div
-            className="inline-block w-full max-w-2xl mx-auto overflow-hidden rounded"
-            key={index}
-          >
+          <div className="relative w-full overflow-hidden" key={index}>
             <ProductImage
               image={image}
               name={`${name} ${selectedVariant.color} - Image ${index + 1}`}
               width={850}
               height={1275}
-              priority={true}
-              sizes="(max-width: 1024px) 100vw,
-              (max-width: 1300px) 50vw,
-              (max-width: 1536px) 33vw"
+              priority={index < 2}
+              sizes="(max-width: 1280px) 30vw,
+                     (max-width: 1536px) 25vw,
+                     20vw"
             />
           </div>
         ))}
