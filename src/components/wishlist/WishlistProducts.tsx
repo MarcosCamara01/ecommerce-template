@@ -19,7 +19,7 @@ export const WishlistProducts = ({
   if (wishlistProducts && wishlistProducts.length > 0) {
     const products = allProducts.filter((product) =>
       wishlistProducts.some(
-        (wishlistProduct) => wishlistProduct.product_id === product.id
+        (wishlistProduct) => wishlistProduct.productId === product.id
       )
     );
 

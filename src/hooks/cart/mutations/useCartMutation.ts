@@ -12,17 +12,17 @@ export const useCartMutation = () => {
 
   const add = useMutation({
     mutationFn: async (params: {
-      variant_id: number;
+      variantId: number;
       size: ProductSize;
-      stripe_id: string;
+      stripeId: string;
       quantity?: number;
     }) => {
-      const { variant_id, size, stripe_id, quantity = 1 } = params;
+      const { variantId, size, stripeId, quantity = 1 } = params;
 
       const response = await fetch("/api/user/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variant_id, size, stripe_id, quantity }),
+        body: JSON.stringify({ variantId, size, stripeId, quantity }),
       });
 
       if (!response.ok) {
@@ -35,9 +35,9 @@ export const useCartMutation = () => {
       return CartItemSchema.parse(item);
     },
     onMutate: async (params: {
-      variant_id: number;
+      variantId: number;
       size: ProductSize;
-      stripe_id: string;
+      stripeId: string;
       quantity?: number;
     }) => {
       if (!session?.user?.id) {
@@ -45,7 +45,7 @@ export const useCartMutation = () => {
         throw new Error("Unauthorized");
       }
 
-      const { variant_id, size, stripe_id, quantity = 1 } = params;
+      const { variantId, size, stripeId, quantity = 1 } = params;
 
       await queryClient.cancelQueries({
         queryKey: CART_QUERY_KEYS.cartList(session.user.id),
@@ -57,27 +57,27 @@ export const useCartMutation = () => {
 
       const tempItem = CartItemSchema.parse({
         id: -Math.floor(Math.random() * 1e9),
-        user_id: "temp",
-        variant_id,
+        userId: "temp",
+        variantId,
         size,
         quantity,
-        stripe_id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        stripeId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       queryClient.setQueryData<CartResponse>(
         CART_QUERY_KEYS.cartList(session.user.id),
         (old = { items: [] }) => {
           const idx = old.items.findIndex(
-            (i) => i.variant_id === variant_id && i.size === size
+            (i) => i.variantId === variantId && i.size === size
           );
           if (idx >= 0) {
             const next = [...old.items];
             next[idx] = {
               ...next[idx],
               quantity: next[idx].quantity + quantity,
-              updated_at: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
             };
             return { items: next };
           }
@@ -98,7 +98,7 @@ export const useCartMutation = () => {
         (old = { items: [] }) => {
           const filtered = old.items.filter((i) => i.id !== tempItem.id);
           const idx = filtered.findIndex(
-            (i) => i.variant_id === data.variant_id && i.size === data.size
+            (i) => i.variantId === data.variantId && i.size === data.size
           );
           if (idx >= 0) {
             filtered[idx] = data;
@@ -169,7 +169,7 @@ export const useCartMutation = () => {
             next[idx] = {
               ...next[idx],
               quantity,
-              updated_at: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
             };
           }
           return { items: next };

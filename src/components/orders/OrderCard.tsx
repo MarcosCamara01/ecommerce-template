@@ -17,16 +17,16 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ order }: OrderCardProps) {
-  const totalItems = order.order_products.reduce(
-    (total, product) => total + product.quantity,
+  const totalItems = order.orderProducts.reduce(
+    (total: number, product: { quantity: number }) => total + product.quantity,
     0
   );
 
-  const rawPrice = order.customer_info?.total_price || 0;
+  const rawPrice = order.customerInfo?.totalPrice || 0;
   const totalPrice = rawPrice > 0 ? (rawPrice / 100).toFixed(2) : "0.00";
 
-  const deliveryDate = new Date(order.delivery_date);
-  const orderDate = new Date(order.created_at);
+  const deliveryDate = new Date(order.deliveryDate);
+  const orderDate = new Date(order.createdAt);
   const isUpcoming = deliveryDate > new Date();
 
   return (
@@ -43,7 +43,7 @@ export function OrderCard({ order }: OrderCardProps) {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Order #{order.order_number}
+                Order #{order.orderNumber}
               </p>
               <p className="text-xs text-muted-foreground">
                 {format(orderDate, "dd MMM yyyy 'at' HH:mm")}

@@ -21,12 +21,12 @@ export const CartProducts = ({
     const cartProductsWithInfo = items
       .map((cartItem) => {
         const product = allProducts.find((p) =>
-          p.variants.some((variant) => variant.id === cartItem.variant_id)
+          p.variants.some((variant) => variant.id === cartItem.variantId)
         );
         if (!product) return null;
 
         const variant = product.variants.find(
-          (v) => v.id === cartItem.variant_id
+          (v) => v.id === cartItem.variantId
         );
         if (!variant) return null;
 

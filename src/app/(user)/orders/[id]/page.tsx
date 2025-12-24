@@ -1,5 +1,5 @@
 import { getOrder } from "../action";
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants, OrderProductWithDetails } from "@/schemas";
 import { GridProducts } from "@/components/products/GridProducts";
 import { ProductItem } from "@/components/products/item";
 import { OrderSummary, OrderSummarySkeleton } from "@/components/orders";
@@ -50,22 +50,22 @@ const OrderProducts = async ({ id }: { id: string }) => {
     );
   }
 
-  const allProducts: ProductWithVariants[] = order.order_products.map(
-    (orderProduct) => {
-      const variant = orderProduct.products_variants;
-      const product = variant.products_items;
+  const allProducts: ProductWithVariants[] = order.orderProducts.map(
+    (orderProduct: OrderProductWithDetails) => {
+      const variant = orderProduct.variant;
+      const product = variant.product;
       return {
         ...product,
         variants: [
           {
             id: variant.id,
-            stripe_id: variant.stripe_id,
-            product_id: variant.product_id,
+            stripeId: variant.stripeId,
+            productId: variant.productId,
             color: variant.color,
             sizes: variant.sizes,
             images: variant.images,
-            created_at: variant.created_at,
-            updated_at: variant.updated_at,
+            createdAt: variant.createdAt,
+            updatedAt: variant.updatedAt,
           },
         ],
       };

@@ -4,7 +4,7 @@ import { getAllProducts } from "@/app/actions";
 
 type OrderDetails = {
   order: OrderItem;
-  customer_info: CustomerInfo;
+  customerInfo: CustomerInfo;
   products: OrderProduct[];
 };
 
@@ -12,12 +12,12 @@ type OrderDetails = {
  * Format order details for email
  */
 async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
-  const { order, customer_info, products } = orderDetails;
+  const { order, customerInfo, products } = orderDetails;
 
   const allProducts = await getAllProducts();
 
-  const totalPrice = (customer_info.total_price / 100).toFixed(2);
-  const deliveryDate = new Date(order.delivery_date).toLocaleDateString(
+  const totalPrice = (customerInfo.totalPrice / 100).toFixed(2);
+  const deliveryDate = new Date(order.deliveryDate).toLocaleDateString(
     "en-US",
     {
       year: "numeric",
@@ -29,9 +29,9 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
   let productsHtml = products
     .map((item) => {
       const product = allProducts.find((p) =>
-        p.variants.some((v) => v.id === item.variant_id)
+        p.variants.some((v) => v.id === item.variantId)
       );
-      const variant = product?.variants.find((v) => v.id === item.variant_id);
+      const variant = product?.variants.find((v) => v.id === item.variantId);
 
       if (!variant || !product) {
         return null;
@@ -59,7 +59,7 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
     })
     .join("");
 
-  const address = customer_info.address;
+  const address = customerInfo.address;
   const fullAddress = [
     address.line1,
     address.line2,
@@ -73,14 +73,14 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Thank you for your purchase!</h2>
-      <p>Hello <strong>${customer_info.name}</strong>,</p>
+      <p>Hello <strong>${customerInfo.name}</strong>,</p>
       <p>Your order has been confirmed and will be delivered approximately on <strong>${deliveryDate}</strong>.</p>
       
       <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
         <h3 style="margin-top: 0; color: #333;">Order Details</h3>
-        <p><strong>Order Number:</strong> #${order.order_number}</p>
+        <p><strong>Order Number:</strong> #${order.orderNumber}</p>
         <p><strong>Order Date:</strong> ${new Date(
-          order.created_at
+          order.createdAt
         ).toLocaleDateString("en-US")}</p>
       </div>
 
@@ -113,8 +113,8 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
         <h3 style="margin-top: 0; color: #333;">Delivery Address</h3>
         <p>${fullAddress}</p>
         ${
-          customer_info.phone
-            ? `<p><strong>Phone:</strong> ${customer_info.phone}</p>`
+          customerInfo.phone
+            ? `<p><strong>Phone:</strong> ${customerInfo.phone}</p>`
             : ""
         }
       </div>
@@ -163,8 +163,8 @@ async function sendOwnerEmail(
   data: Stripe.Checkout.Session,
   orderDetails: OrderDetails
 ) {
-  const customerInfo = orderDetails.customer_info;
-  const totalPrice = (customerInfo.total_price / 100).toFixed(2);
+  const customerInfo = orderDetails.customerInfo;
+  const totalPrice = (customerInfo.totalPrice / 100).toFixed(2);
   const productsCount = orderDetails.products.reduce(
     (sum, item) => sum + item.quantity,
     0
@@ -175,9 +175,9 @@ async function sendOwnerEmail(
   const productsDetails = orderDetails.products
     .map((item) => {
       const product = allProducts.find((p) =>
-        p.variants.some((v) => v.id === item.variant_id)
+        p.variants.some((v) => v.id === item.variantId)
       );
-      const variant = product?.variants.find((v) => v.id === item.variant_id);
+      const variant = product?.variants.find((v) => v.id === item.variantId);
 
       if (!variant || !product) {
         return null;
@@ -192,7 +192,7 @@ async function sendOwnerEmail(
       <h2>New Order Received!</h2>
       <p><strong>Customer:</strong> ${data?.customer_details?.name}</p>
       <p><strong>Email:</strong> ${data?.customer_details?.email}</p>
-      <p><strong>Order Number:</strong> #${orderDetails.order.order_number}</p>
+      <p><strong>Order Number:</strong> #${orderDetails.order.orderNumber}</p>
       <p><strong>Total:</strong> ${totalPrice}€</p>
       <p><strong>Number of Products:</strong> ${productsCount}</p>
       
@@ -217,7 +217,7 @@ async function sendOwnerEmail(
     name: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
     email: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
     message: message,
-    subject: `New Order #${orderDetails.order.order_number}`,
+    subject: `New Order #${orderDetails.order.orderNumber}`,
   };
 
   try {

@@ -1,74 +1,83 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/db";
+import { wishlistRepository } from "@/lib/db/drizzle/repositories";
 import { getUser } from "@/lib/auth/server";
 
-type WishlistItem = {
-  id: number;
-  user_id: string;
-  product_id: number;
-  updated_at: string;
-};
-
 export async function GET() {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ items: [] });
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from("wishlist")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("updated_at", { ascending: false });
-  if (error) return NextResponse.json({ items: [] }, { status: 200 });
-  return NextResponse.json({ items: (data ?? []) as WishlistItem[] });
+  try {
+    const user = await getUser();
+    if (!user) return NextResponse.json({ items: [] });
+
+    const items = await wishlistRepository.findByUserId(user.id);
+    return NextResponse.json({ items });
+  } catch (error) {
+    console.error("Error getting wishlist items:", error);
+    return NextResponse.json({ items: [] }, { status: 200 });
+  }
 }
 
 export async function POST(req: Request) {
-  const user = await getUser();
-  if (!user)
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  const { productId } = await req.json();
-  if (typeof productId !== "number") {
-    return NextResponse.json({ error: "invalid productId" }, { status: 400 });
+  try {
+    const user = await getUser();
+    if (!user)
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+    const { productId } = await req.json();
+    if (typeof productId !== "number") {
+      return NextResponse.json({ error: "invalid productId" }, { status: 400 });
+    }
+
+    // Check if already exists for idempotency
+    const exists = await wishlistRepository.exists(user.id, productId);
+    if (exists) {
+      const items = await wishlistRepository.findByUserId(user.id);
+      const existingItem = items.find((i) => i.productId === productId);
+      return NextResponse.json({ item: existingItem });
+    }
+
+    const item = await wishlistRepository.create({
+      userId: user.id,
+      productId,
+    });
+
+    return NextResponse.json({ item });
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-  const supabase = createServiceClient();
-
-  // Si ya existe, devolverlo tal cual para idempotencia
-  const { data: existing } = await supabase
-    .from("wishlist")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("product_id", productId)
-    .maybeSingle<WishlistItem>();
-  if (existing) return NextResponse.json({ item: existing });
-
-  const { data, error } = await supabase
-    .from("wishlist")
-    .insert({ user_id: user.id, product_id: productId })
-    .select("*")
-    .single<WishlistItem>();
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ item: data });
 }
 
 export async function DELETE(req: Request) {
-  const user = await getUser();
-  if (!user)
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  const { searchParams } = new URL(req.url);
-  const itemId = Number(searchParams.get("itemId"));
-  const productId = Number(searchParams.get("productId"));
-  if (!itemId && !productId) {
-    return NextResponse.json({ error: "missing identifier" }, { status: 400 });
+  try {
+    const user = await getUser();
+    if (!user)
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const itemId = Number(searchParams.get("itemId"));
+    const productId = Number(searchParams.get("productId"));
+
+    if (!itemId && !productId) {
+      return NextResponse.json(
+        { error: "missing identifier" },
+        { status: 400 }
+      );
+    }
+
+    if (itemId) {
+      await wishlistRepository.delete(user.id, itemId);
+    } else if (productId) {
+      await wishlistRepository.deleteByUserAndProduct(user.id, productId);
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Error deleting from wishlist:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-
-  const supabase = createServiceClient();
-  let q = supabase.from("wishlist").delete().eq("user_id", user.id);
-  if (itemId) q = q.eq("id", itemId);
-  if (productId) q = q.eq("product_id", productId);
-  const { error } = await q;
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
 }
-

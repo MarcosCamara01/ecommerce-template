@@ -11,12 +11,12 @@ export function transformCartItemToOrderProduct(
 ): OrderProduct {
   return {
     id: Math.random(),
-    order_id: orderId,
-    variant_id: cartItem.variant_id,
+    orderId: orderId,
+    variantId: cartItem.variantId,
     quantity: cartItem.quantity,
     size: cartItem.size,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 }
 
@@ -48,7 +48,7 @@ export function calculateCartTotal(
   products: Map<number, Product>
 ): number {
   return items.reduce((total, item) => {
-    const product = products.get(item.variant_id);
+    const product = products.get(item.variantId);
     if (!product) return total;
     return total + product.price * item.quantity;
   }, 0);

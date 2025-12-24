@@ -46,15 +46,16 @@ export const useWishlistMutation = () => {
 
       const tempItem: WishlistItem = {
         id: -Math.floor(Math.random() * 1e9),
-        user_id: "temp",
-        product_id: productId,
-        created_at: new Date().toISOString(),
+        userId: "temp",
+        productId: productId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       queryClient.setQueryData<WishlistResponse>(
         WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
         (old = { items: [] }) => {
-          if (old.items.some((w) => w.product_id === productId)) {
+          if (old.items.some((w) => w.productId === productId)) {
             return old;
           }
           return { items: [tempItem, ...old.items] };
@@ -74,7 +75,7 @@ export const useWishlistMutation = () => {
         (old = { items: [] }) => ({
           items: old.items
             .filter((i) => i.id !== tempItem.id)
-            .filter((i) => i.product_id !== data.product_id)
+            .filter((i) => i.productId !== data.productId)
             .concat(data),
         })
       );
@@ -133,7 +134,7 @@ export const useWishlistMutation = () => {
           items: current.items.filter((i) =>
             params.itemId
               ? i.id !== params.itemId
-              : i.product_id !== params.productId
+              : i.productId !== params.productId
           ),
         })
       );

@@ -1,4 +1,4 @@
-import { fetchCheckoutData } from "@/lib/stripe";
+import { fetchCheckoutData } from "@/services/stripe.service";
 import { pickFirst } from "@/utils/pickFirst";
 import {
   HiOutlineCheckCircle,

@@ -32,8 +32,8 @@ export default function AddToCart({
 
       addToCart({
         size: sizesRef.current.selectedSize,
-        variant_id: selectedVariant.id,
-        stripe_id: selectedVariant.stripe_id,
+        variantId: selectedVariant.id,
+        stripeId: selectedVariant.stripeId,
       });
     },
     {

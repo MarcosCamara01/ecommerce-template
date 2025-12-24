@@ -49,4 +49,3 @@ const WishlistPage = async () => {
 };
 
 export default WishlistPage;
-
