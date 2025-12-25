@@ -10,6 +10,7 @@ import {
   SheetContent,
   SheetTrigger,
   SheetClose,
+  SheetTitle,
 } from "@/components/ui/sheet";
 import { WishlistLink } from "./WishlistLink";
 import { CartLink } from "./CartLink";
@@ -55,7 +56,7 @@ export const Navbar = () => {
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="px-6 py-4 border-b border-border-primary">
-                <h2 className="text-lg font-semibold">Menu</h2>
+                <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
               </div>
 
               {/* Navigation Links */}
