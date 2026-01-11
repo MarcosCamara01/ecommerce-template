@@ -1,5 +1,3 @@
-"use client";
-
 /** COMPONENTS */
 import { Skeleton } from "@/components/ui/skeleton";
 import {
