@@ -4,9 +4,9 @@
 import { useCart } from "@/hooks/cart";
 /** COMPONENTS */
 import Link from "next/link";
-import ButtonCheckout from "./ButtonCheckout";
+import { ButtonCheckout } from "./ButtonCheckout";
 import { GridProducts } from "../products/GridProducts";
-import { CartProduct } from "./product";
+import { CartProduct } from "./CartProduct";
 /** TYPES */
 import type { ProductWithVariants } from "@/schemas";
 

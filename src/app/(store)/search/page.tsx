@@ -1,7 +1,6 @@
 import { getAllProducts } from "@/app/actions";
 import { pickFirst, searchProducts } from "@/utils";
-import { GridProducts } from "@/components/products/GridProducts";
-import { ProductItem } from "@/components/products/item";
+import { GridProducts, ProductItem } from "@/components/products";
 
 interface SearchProps {
   searchParams: Promise<{ q: string | undefined }>;

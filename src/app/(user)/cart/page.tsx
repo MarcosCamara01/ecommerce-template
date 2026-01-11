@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { getUser } from "@/lib/auth/server";
 import { SVGLoadingIcon } from "@/components/ui/loader";
 import { getAllProducts } from "@/app/actions";
-import { CartProducts } from "@/components/cart/CartProducts";
+import { CartProducts } from "@/components/cart";
 
 export async function generateMetadata() {
   return {

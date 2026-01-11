@@ -7,9 +7,9 @@ import { useThrottleFn } from "ahooks";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 /** COMPONENTS */
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 /** TYPES */
 import type { ProductWithVariants } from "@/schemas";
-import { Button } from "../ui/button";
 import { useWishlistMutation } from "@/hooks/wishlist/mutations/useWishlistMutation";
 
 interface WishlistButtonProps {

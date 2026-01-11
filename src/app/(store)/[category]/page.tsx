@@ -1,8 +1,11 @@
 import { getCategoryProducts } from "@/app/actions";
-import ProductsSkeleton from "@/components/products/skeleton";
+import {
+  ProductsSkeleton,
+  GridProducts,
+  ProductItem,
+} from "@/components/products";
+import { type ProductCategory, ProductCategoryZod } from "@/schemas";
 import { Suspense } from "react";
-import { GridProducts } from "@/components/products/GridProducts";
-import { ProductItem } from "@/components/products/item";
 
 interface Props {
   params: Promise<{
@@ -29,13 +32,17 @@ const CategoryPage = async ({ params }: Props) => {
   return (
     <section className="pt-14">
       <Suspense fallback={<ProductsSkeleton items={6} />}>
-        <CategoryProducts category={category} />
+        <CategoryProducts category={ProductCategoryZod.parse(category)} />
       </Suspense>
     </section>
   );
 };
 
-const CategoryProducts = async ({ category }: { category: string }) => {
+const CategoryProducts = async ({
+  category,
+}: {
+  category: ProductCategory;
+}) => {
   const products = await getCategoryProducts(category);
 
   return (

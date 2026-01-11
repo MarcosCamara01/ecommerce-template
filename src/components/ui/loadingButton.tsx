@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 import { ButtonProps, Button } from "@/components/ui/button";
 import { SVGLoadingIcon } from "./loader";
 

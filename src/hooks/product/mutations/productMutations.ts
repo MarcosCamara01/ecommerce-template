@@ -1,11 +1,4 @@
-import {
-  CreateProductWithVariantsInput,
-  Product,
-  ProductSchema,
-  ProductVariantSchema,
-  ProductWithVariants,
-} from "@/schemas";
-import { createClient } from "@/lib/db";
+import { ProductWithVariants } from "@/schemas";
 
 type CreateProductResponse = {
   success: boolean;
@@ -14,154 +7,44 @@ type CreateProductResponse = {
   data?: ProductWithVariants;
 };
 
-const BUCKET = "product-images";
-
-const uploadImage = async (file: File, path: string) => {
-  const supabase = await createClient();
-
-  const ext = file.name.split(".").pop();
-  const name = `${Date.now()}-${Math.random()
-    .toString(36)
-    .substring(2)}.${ext}`;
-  const fullPath = `${path}/${name}`;
-
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(fullPath, file, { cacheControl: "3600", upsert: false });
-
-  if (error) return null;
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from(BUCKET).getPublicUrl(fullPath);
-  return publicUrl;
-};
-
-const cleanupProduct = async (productId: Product["id"]) => {
-  const supabase = await createClient();
-
-  await supabase.from("products_items").delete().eq("id", productId);
-
-  const { data: files } = await supabase.storage
-    .from(BUCKET)
-    .list(`products/${productId}`, { limit: 100 });
-
-  if (files?.length) {
-    const paths = files.map((f: any) => `products/${productId}/${f.name}`);
-    await supabase.storage.from(BUCKET).remove(paths);
-  }
-};
-
 export async function createProduct(
   formData: FormData
 ): Promise<CreateProductResponse> {
-  const supabase = await createClient();
-  let productId: Product["id"] | null = null;
-
   try {
-    const { data: product, error: productError } = await supabase
-      .from("products_items")
-      .insert({
-        name: formData.get("name") as string,
-        description: formData.get("description") as string,
-        price: Number(formData.get("price")),
-        category: formData.get("category") as string,
-        img: "",
-      })
-      .select()
-      .single();
-
-    if (productError)
-      return { success: false, message: "Error creating product" };
-
-    productId = ProductSchema.parse(product).id;
-
-    const mainImageFile = formData.get("mainImage") as File;
-    const mainImageUrl = await uploadImage(
-      mainImageFile,
-      `products/${productId}`
-    );
-
-    if (!mainImageUrl) {
-      await cleanupProduct(productId);
-      return { success: false, message: "Error uploading main image" };
-    }
-
-    await supabase
-      .from("products_items")
-      .update({ img: mainImageUrl })
-      .eq("id", productId);
-
-    const variantsData = JSON.parse(formData.get("variants") as string);
-
-    const variants = await Promise.all(
-      variantsData.map(async (v: any, idx: number) => {
-        const images: string[] = [];
-        const colorPath = v.color
-          .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, "");
-
-        for (let i = 0; i < (v.imageCount || 0); i++) {
-          const file = formData.get(`variant_${idx}_image_${i}`) as File;
-          if (file) {
-            const url = await uploadImage(
-              file,
-              `products/${productId}/variants/${colorPath}`
-            );
-            if (url) images.push(url);
-          }
-        }
-
-        return {
-          color: v.color,
-          stripe_id: v.stripe_id,
-          sizes: v.sizes,
-          images,
-        };
-      })
-    );
-
-    const validation = CreateProductWithVariantsInput.safeParse({
-      name: formData.get("name"),
-      description: formData.get("description"),
-      price: Number(formData.get("price")),
-      category: formData.get("category"),
-      img: mainImageUrl,
-      variants,
+    const response = await fetch("/api/admin/products", {
+      method: "POST",
+      body: formData,
     });
 
-    if (!validation.success) {
-      await cleanupProduct(productId);
+    const result = await response.json();
+
+    if (!response.ok) {
       return {
         success: false,
-        message: "Validation error",
-        errors: validation.error.flatten().fieldErrors,
+        message: result.error || "Error creating product",
       };
-    }
-
-    const { data: variantsResult, error: variantsError } = await supabase
-      .from("products_variants")
-      .insert(variants.map((v) => ({ product_id: productId, ...v })))
-      .select();
-
-    if (variantsError) {
-      await cleanupProduct(productId);
-      return { success: false, message: "Error creating variants" };
     }
 
     return {
       success: true,
-      message: "Product created successfully",
-      data: {
-        ...product,
-        img: mainImageUrl,
-        variants: ProductVariantSchema.array().parse(variantsResult),
-      },
+      message: result.message || "Product created successfully",
+      data: result.data,
     };
   } catch (error) {
     console.error("Unexpected error:", error);
-    if (productId) await cleanupProduct(productId);
     return { success: false, message: "Unexpected error creating product" };
+  }
+}
+
+export async function deleteProduct(productId: number): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/admin/products?id=${productId}`, {
+      method: "DELETE",
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    return false;
   }
 }

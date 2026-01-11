@@ -1,7 +1,6 @@
 import { getOrder } from "../action";
 import type { ProductWithVariants, OrderProductWithDetails } from "@/schemas";
-import { GridProducts } from "@/components/products/GridProducts";
-import { ProductItem } from "@/components/products/item";
+import { GridProducts, ProductItem } from "@/components/products";
 import { OrderSummary, OrderSummarySkeleton } from "@/components/orders";
 import { HiArrowLeft } from "react-icons/hi";
 import Link from "next/link";
