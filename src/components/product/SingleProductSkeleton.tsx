@@ -9,7 +9,7 @@ export const SingleProductSkeleton = () => (
           <Skeleton className="w-full aspect-[2/3] rounded-lg" />
         </div>
         {/* Desktop */}
-        <div className="hidden lg:grid grid-cols-2 gap-1">
+        <div className="hidden lg:grid grid-cols-2 gap-1 rounded overflow-hidden">
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} className="w-full aspect-[2/3]" />
           ))}
