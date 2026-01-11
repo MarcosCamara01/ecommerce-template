@@ -17,7 +17,10 @@ interface ProductImagesProps {
   selectedVariant: ProductVariant;
 }
 
-export const ProductImages = ({ name, selectedVariant }: ProductImagesProps) => {
+export const ProductImages = ({
+  name,
+  selectedVariant,
+}: ProductImagesProps) => {
   if (!selectedVariant || !selectedVariant.images) {
     return <Skeleton className="w-full rounded-b-none aspect-[2/3]" />;
   }
@@ -56,7 +59,7 @@ export const ProductImages = ({ name, selectedVariant }: ProductImagesProps) => 
       </div>
 
       {/* Desktop */}
-      <div className="hidden lg:grid grid-cols-2 gap-1">
+      <div className="hidden lg:grid grid-cols-2 gap-1 rounded overflow-hidden">
         {selectedVariant.images.map((image, index) => (
           <div className="relative w-full overflow-hidden" key={index}>
             <ProductImage
