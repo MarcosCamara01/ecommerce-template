@@ -2,7 +2,11 @@
 
 import { unstable_cache } from "next/cache";
 import { productsRepository } from "@/lib/db/drizzle/repositories";
-import { ProductWithVariantsSchema, type ProductWithVariants } from "@/schemas";
+import {
+  type ProductCategory,
+  ProductWithVariantsSchema,
+  type ProductWithVariants,
+} from "@/schemas";
 
 // Cache for 1 hour, revalidate on demand
 const CACHE_REVALIDATE = 3600;
@@ -22,10 +26,10 @@ export const getAllProducts = unstable_cache(
 );
 
 export const getCategoryProducts = unstable_cache(
-  async (category: string): Promise<ProductWithVariants[]> => {
+  async (category: ProductCategory): Promise<ProductWithVariants[]> => {
     try {
       const products = await productsRepository.findByCategory(
-        category as "t-shirts" | "pants" | "sweatshirt"
+        category as ProductCategory
       );
       return ProductWithVariantsSchema.array().parse(products);
     } catch (error) {

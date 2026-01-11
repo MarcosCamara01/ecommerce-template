@@ -5,7 +5,7 @@ import { IoClose } from "react-icons/io5";
 import type { CartItem } from "@/schemas";
 import { useCartMutation } from "@/hooks/cart";
 
-const DeleteButton = ({ cartItemId }: { cartItemId: CartItem["id"] }) => {
+export const DeleteButton = ({ cartItemId }: { cartItemId: CartItem["id"] }) => {
   const { remove: removeFromCart } = useCartMutation();
 
   const handleDelete = async () => {
@@ -28,5 +28,3 @@ const DeleteButton = ({ cartItemId }: { cartItemId: CartItem["id"] }) => {
     </button>
   );
 };
-
-export default DeleteButton;

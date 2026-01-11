@@ -2,7 +2,7 @@
 
 /** COMPONENTS */
 import { GridProducts } from "../products/GridProducts";
-import { ProductItem } from "../products/item";
+import { ProductItem } from "../products/ProductItem";
 import Link from "next/link";
 /** FUNCTIONALITY */
 import { useWishlist } from "@/hooks/wishlist";

@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import { getAllProducts } from "./actions";
 import { ErrorBoundary } from "react-error-boundary";
-import ProductsSkeleton from "@/components/products/skeleton";
-import { GridProducts } from "@/components/products/GridProducts";
-import { ProductItem } from "@/components/products/item";
+import {
+  ProductsSkeleton,
+  GridProducts,
+  ProductItem,
+} from "@/components/products";
 
 const Home = async () => {
   return (

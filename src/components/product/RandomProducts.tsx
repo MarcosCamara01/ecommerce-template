@@ -1,7 +1,7 @@
 import { getRandomProducts } from "@/app/actions";
 import { GridProducts } from "../products/GridProducts";
-import { ProductItem } from "../products/item";
-import ProductsSkeleton from "../products/skeleton";
+import { ProductItem } from "../products/ProductItem";
+import { ProductsSkeleton } from "../products/ProductsSkeleton";
 import { Suspense } from "react";
 
 export const RandomProducts = async ({

@@ -21,12 +21,12 @@ import { anonRole } from "drizzle-orm/supabase";
 export const productCategoryEnum = pgEnum("product_category", [
   "t-shirts",
   "pants",
-  "sweatshirt",
+  "sweatshirts",
 ]);
 
 export const sizesEnum = pgEnum("sizes", ["XS", "S", "M", "L", "XL", "XXL"]);
 
-export const ProductCategoryZod = z.enum(["t-shirts", "pants", "sweatshirt"]);
+export const ProductCategoryZod = z.enum(["t-shirts", "pants", "sweatshirts"]);
 export const ProductSizeZod = z.enum(["XS", "S", "M", "L", "XL", "XXL"]);
 
 // Tables
@@ -144,6 +144,8 @@ export type ProductVariant = z.infer<typeof selectVariantSchema>;
 export type InsertProductVariant = z.infer<typeof insertVariantSchema>;
 export type ProductWithVariants = z.infer<typeof productWithVariantsSchema>;
 export type VariantWithProduct = z.infer<typeof variantWithProductSchema>;
-export type CreateProductWithVariants = z.infer<typeof createProductWithVariantsSchema>;
+export type CreateProductWithVariants = z.infer<
+  typeof createProductWithVariantsSchema
+>;
 export type ProductCategory = z.infer<typeof ProductCategoryZod>;
 export type ProductSize = z.infer<typeof ProductSizeZod>;

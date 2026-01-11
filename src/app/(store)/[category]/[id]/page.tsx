@@ -1,9 +1,11 @@
-import { SingleProduct } from "@/components/product";
+import {
+  SingleProduct,
+  SingleProductSkeleton,
+  SuspenseRandomProducts,
+} from "@/components/product";
 import { getProduct } from "@/app/actions";
 import { Suspense } from "react";
-import { SingleProductSkeleton } from "@/components/product/skeleton";
 import { pickFirst } from "@/utils/pickFirst";
-import { SuspenseRandomProducts } from "@/components/product/RandomProducts";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
 type PageProps = {

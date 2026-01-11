@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getUser } from "@/lib/auth/server";
 import { SVGLoadingIcon } from "@/components/ui/loader";
-import { WishlistProducts } from "@/components/wishlist/WishlistProducts";
+import { WishlistProducts } from "@/components/wishlist";
 import { getAllProducts } from "@/app/actions";
 
 export async function generateMetadata() {

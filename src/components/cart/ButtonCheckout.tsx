@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useSession } from "@/lib/auth/client";
 import { useMutation } from "@tanstack/react-query";
 /** COMPONENTS */
-import LoadingButton from "../ui/loadingButton";
+import LoadingButton from "@/components/ui/loadingButton";
 /** TYPES */
 import type { CartItem } from "@/schemas";
 
@@ -13,7 +13,7 @@ interface ButtonCheckoutProps {
   cartItems: CartItem[];
 }
 
-const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
+export const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
   const { data: session } = useSession();
 
   const { mutate: buyProducts, isPending } = useMutation({
@@ -57,5 +57,3 @@ const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
     </LoadingButton>
   );
 };
-
-export default ButtonCheckout;
