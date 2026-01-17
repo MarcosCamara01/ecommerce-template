@@ -15,43 +15,6 @@ export const Footer = () => {
   return (
     <footer className="px-6 py-24 border-t border-solid pointer-events-auto bg-background-secondary border-[#242424]">
       <nav className="flex flex-wrap justify-around gap-5 mx-auto max-w-screen-2xl">
-        <div className="flex flex-col items-center justify-center w-full max-w-xs gap-5">
-          <div className="flex gap-3.5">
-            <Link
-              href="https://marcoscamara.com"
-              target="_blank"
-              title="Portfolio of Marcos"
-            >
-              <FaTriangleExclamation size={24} />
-            </Link>
-            <span className="flex items-center text-sm text-color-secondary">
-              © 2023
-            </span>
-          </div>
-          <div className="flex gap-3.5">
-            <Link
-              href="https://www.linkedin.com/in/marcospenelascamara/"
-              target="_blank"
-              title="LindedIn of Marcos"
-            >
-              <FaLinkedin size={24} />
-            </Link>
-            <Link
-              href="https://github.com/MarcosCamara01"
-              target="_blank"
-              title="GitHub of Marcos"
-            >
-              <FaGithub size={24} />
-            </Link>
-            <Link
-              href="https://medium.com/@marcoscamara"
-              target="_blank"
-              title="Medium of Marcos"
-            >
-              <FaMedium size={24} />
-            </Link>
-          </div>
-        </div>
         <div className="w-full max-w-xs">
           <h2 className="my-3 text-sm font-medium">Products</h2>
           <ul className="grid grid-cols-2">
@@ -106,7 +69,7 @@ export const Footer = () => {
           <ul className="grid grid-cols-2">
             <li className={liStyles}>
               <Link
-                href="https://portfoliomarcos.com/"
+                href="https://marcoscamara.com"
                 target="_blank"
                 className={linkStyles}
               >
