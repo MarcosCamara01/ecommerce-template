@@ -41,12 +41,12 @@ export function LinksDesktop() {
                 designs, colors, and textures. From classic to contemporary,
                 find the perfect tee for any occasion.
               </ListItem>
-              <ListItem href="/pants" title="PANTS">
+              <ListItem href="/pants" title="TROUSERS | PANTS">
                 Explore essential men&apos;s pants for all occasions. From
                 classic chinos to modern joggers, find your perfect fit in a
                 variety of styles and colors.
               </ListItem>
-              <ListItem href="/sweatshirts" title="SWEATSHIRTS">
+              <ListItem href="/sweatshirts" title="SWEATERS | JERSEYS">
                 Much like the T-shirt, men&apos;s sweatshirts are far more than
                 a basic.
               </ListItem>
