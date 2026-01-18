@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cache } from "next/cache";
+import { unstable_cache, revalidateTag } from "next/cache";
 import { productsRepository } from "@/lib/db/drizzle/repositories";
 import {
   type ProductCategory,
@@ -41,20 +41,22 @@ export const getCategoryProducts = unstable_cache(
   { revalidate: CACHE_REVALIDATE, tags: ["products"] }
 );
 
-export const getProduct = unstable_cache(
-  async (productId: number): Promise<ProductWithVariants | null> => {
-    try {
-      const product = await productsRepository.findById(productId);
-      if (!product) return null;
-      return ProductWithVariantsSchema.parse(product);
-    } catch (error) {
-      console.error("Error fetching product:", error);
-      return null;
-    }
-  },
-  ["single-product"],
-  { revalidate: CACHE_REVALIDATE, tags: ["products"] }
-);
+export async function getProduct(productId: number): Promise<ProductWithVariants | null> {
+  return unstable_cache(
+    async (): Promise<ProductWithVariants | null> => {
+      try {
+        const product = await productsRepository.findById(productId);
+        if (!product) return null;
+        return ProductWithVariantsSchema.parse(product);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        return null;
+      }
+    },
+    [`product-${productId}`],
+    { revalidate: CACHE_REVALIDATE, tags: ["products", `product-${productId}`] }
+  )();
+}
 
 export async function getRandomProducts(
   productIdToExclude: number
@@ -67,5 +69,19 @@ export async function getRandomProducts(
   } catch (error) {
     console.error("Error fetching random products:", error);
     return [];
+  }
+}
+
+/**
+ * Revalidates all product caches
+ * Call this after creating, updating, or deleting products
+ */
+export async function revalidateProducts(productId?: number): Promise<void> {
+  // Always revalidate the general products tag
+  revalidateTag("products", "max");
+  
+  // If a specific product ID is provided, also revalidate that specific product
+  if (productId) {
+    revalidateTag(`product-${productId}`, "max");
   }
 }

@@ -1,6 +1,6 @@
 import { ProductWithVariants } from "@/schemas";
 
-type CreateProductResponse = {
+type ProductResponse = {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
@@ -9,7 +9,7 @@ type CreateProductResponse = {
 
 export async function createProduct(
   formData: FormData
-): Promise<CreateProductResponse> {
+): Promise<ProductResponse> {
   try {
     const response = await fetch("/api/admin/products", {
       method: "POST",
@@ -33,6 +33,35 @@ export async function createProduct(
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, message: "Unexpected error creating product" };
+  }
+}
+
+export async function updateProduct(
+  formData: FormData
+): Promise<ProductResponse> {
+  try {
+    const response = await fetch("/api/admin/products", {
+      method: "PUT",
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.error || "Error updating product",
+      };
+    }
+
+    return {
+      success: true,
+      message: result.message || "Product updated successfully",
+      data: result.data,
+    };
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return { success: false, message: "Unexpected error updating product" };
   }
 }
 

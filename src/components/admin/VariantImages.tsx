@@ -9,20 +9,33 @@ import { cn } from "@/lib/utils";
 
 export type VariantImagesRef = {
   images: File[];
+  existingImages: string[];
+  removedExistingImages: string[];
   reset: () => void;
 };
 
-export const VariantImages = forwardRef<VariantImagesRef>((_, ref) => {
+interface VariantImagesProps {
+  initialImages?: string[];
+}
+
+export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
+  ({ initialImages }, ref) => {
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>(initialImages || []);
+  const [removedExistingImages, setRemovedExistingImages] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useImperativeHandle(ref, () => ({
     images,
+    existingImages,
+    removedExistingImages,
     reset: () => {
       setImages([]);
       setPreviews([]);
+      setExistingImages(initialImages || []);
+      setRemovedExistingImages([]);
       if (inputRef.current) inputRef.current.value = "";
     },
   }));
@@ -52,6 +65,12 @@ export const VariantImages = forwardRef<VariantImagesRef>((_, ref) => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleRemoveExisting = (index: number) => {
+    const imageToRemove = existingImages[index];
+    setRemovedExistingImages((prev) => [...prev, imageToRemove]);
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -69,13 +88,47 @@ export const VariantImages = forwardRef<VariantImagesRef>((_, ref) => {
     processFiles(files);
   };
 
+  const totalImages = existingImages.length + previews.length;
+
   return (
     <div className="space-y-3 pb-2">
-      {/* Image Grid */}
+      {/* Image Grid - Existing Images */}
+      {existingImages.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
+          {existingImages.map((imageUrl, index) => (
+            <div key={`existing-${index}`} className="relative group">
+              <Image
+                src={imageUrl}
+                alt={`Existing ${index + 1}`}
+                width={100}
+                height={150}
+                className="rounded-lg object-cover aspect-[2/3] w-full shadow-sm"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
+                onClick={() => handleRemoveExisting(index)}
+              >
+                <FiX className="h-3 w-3" />
+              </Button>
+              <Badge
+                variant="outline"
+                className="absolute bottom-1 left-1 text-[10px] px-1.5 py-0 bg-green-500/20 border-green-500 text-green-400"
+              >
+                {index + 1}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Image Grid - New Images */}
       {previews.length > 0 && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
           {previews.map((preview, index) => (
-            <div key={index} className="relative group">
+            <div key={`new-${index}`} className="relative group">
               <Image
                 src={preview}
                 alt={`Preview ${index + 1}`}
@@ -87,7 +140,7 @@ export const VariantImages = forwardRef<VariantImagesRef>((_, ref) => {
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
                 onClick={() => handleRemove(index)}
               >
                 <FiX className="h-3 w-3" />
@@ -96,7 +149,7 @@ export const VariantImages = forwardRef<VariantImagesRef>((_, ref) => {
                 variant="secondary"
                 className="absolute bottom-1 left-1 text-[10px] px-1.5 py-0"
               >
-                {index + 1}
+                +{index + 1}
               </Badge>
             </div>
           ))}
@@ -140,13 +193,16 @@ export const VariantImages = forwardRef<VariantImagesRef>((_, ref) => {
       </div>
 
       {/* Image Count */}
-      {images.length > 0 && (
+      {totalImages > 0 && (
         <p className="text-xs text-color-tertiary">
-          {images.length} image{images.length !== 1 ? "s" : ""} selected
+          {totalImages} image{totalImages !== 1 ? "s" : ""} total
+          {existingImages.length > 0 && ` (${existingImages.length} existing)`}
+          {images.length > 0 && ` (${images.length} new)`}
         </p>
       )}
     </div>
   );
-});
+  }
+);
 
 VariantImages.displayName = "VariantImages";

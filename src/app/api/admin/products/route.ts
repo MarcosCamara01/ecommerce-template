@@ -44,6 +44,17 @@ async function uploadImage(file: File, path: string): Promise<string | null> {
   return publicUrl;
 }
 
+async function deleteImageByUrl(imageUrl: string) {
+  const supabase = createServiceClient();
+
+  // Extract path from URL
+  const urlParts = imageUrl.split(`/storage/v1/object/public/${BUCKET}/`);
+  if (urlParts.length < 2) return;
+
+  const path = urlParts[1];
+  await supabase.storage.from(BUCKET).remove([path]);
+}
+
 async function cleanupProductImages(productId: number) {
   const supabase = createServiceClient();
 
@@ -167,6 +178,130 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error creating product:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const user = await verifyAdmin(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const formData = await request.formData();
+
+    const id = Number(formData.get("id"));
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = Number(formData.get("price"));
+    const category = formData.get("category") as string;
+    const mainImageFile = formData.get("mainImage") as File | null;
+    const existingMainImage = formData.get("existingMainImage") as string | null;
+    const variantsData = JSON.parse(formData.get("variants") as string);
+
+    if (!id || !name || !description || !price || !category) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Check if product exists
+    const existingProduct = await productsRepository.findById(id);
+    if (!existingProduct) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    // Handle main image
+    let mainImageUrl = existingMainImage || existingProduct.img;
+    
+    if (mainImageFile && mainImageFile.size > 0) {
+      // Delete old main image if exists
+      if (existingProduct.img) {
+        await deleteImageByUrl(existingProduct.img);
+      }
+      
+      const uploadedUrl = await uploadImage(mainImageFile, `products/${id}`);
+      if (uploadedUrl) {
+        mainImageUrl = uploadedUrl;
+      }
+    }
+
+    // Handle removed variant images
+    for (const v of variantsData) {
+      if (v.removedImages && v.removedImages.length > 0) {
+        for (const imageUrl of v.removedImages) {
+          await deleteImageByUrl(imageUrl);
+        }
+      }
+    }
+
+    // Process variants with new images
+    const variants = await Promise.all(
+      variantsData.map(async (v: any, idx: number) => {
+        const existingImages: string[] = v.existingImages || [];
+        const newImages: string[] = [];
+        const colorPath = v.color
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "");
+
+        // Upload new images
+        for (let i = 0; i < (v.imageCount || 0); i++) {
+          const file = formData.get(`variant_${idx}_image_${i}`) as File;
+          if (file && file.size > 0) {
+            const url = await uploadImage(
+              file,
+              `products/${id}/variants/${colorPath}`
+            );
+            if (url) newImages.push(url);
+          }
+        }
+
+        return {
+          id: v.id,
+          stripeId: v.stripe_id,
+          color: v.color,
+          sizes: v.sizes,
+          images: [...existingImages, ...newImages],
+        };
+      })
+    );
+
+    // Update product with variants
+    const updatedProduct = await productsRepository.updateWithVariants(
+      id,
+      {
+        name,
+        description,
+        price,
+        category: category as any,
+        img: mainImageUrl,
+      },
+      variants
+    );
+
+    if (!updatedProduct) {
+      return NextResponse.json(
+        { error: "Error updating product" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Product updated successfully",
+      data: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Error updating product:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -3,43 +3,104 @@
 import { Button } from "@/components/ui/button";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { FiPlus } from "react-icons/fi";
-import { VariantForm, type VariantFormRef } from "./VariantForm";
+import { VariantForm, type VariantFormRef, type VariantInitialData } from "./VariantForm";
 import type { ProductSize } from "@/schemas";
 
 export type VariantsSectionRef = {
   getVariants: () => Array<{
+    id?: number;
     color: string;
     stripe_id: string;
     sizes: ProductSize[];
     imageCount: number;
+    existingImages: string[];
+    removedImages: string[];
   }>;
   getImages: () => Record<string, File[]>;
   reset: () => void;
 };
 
-export const VariantsSection = forwardRef<VariantsSectionRef>((_, ref) => {
-  const [variantIds, setVariantIds] = useState<number[]>([0]);
+interface VariantsSectionProps {
+  initialVariants?: VariantInitialData[];
+}
+
+interface VariantState {
+  key: number;
+  data: VariantInitialData;
+}
+
+export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionProps>(
+  ({ initialVariants }, ref) => {
+  
+  const createInitialState = (): VariantState[] => {
+    if (initialVariants?.length) {
+      return initialVariants.map((v, i) => ({
+        key: i,
+        data: v,
+      }));
+    }
+    return [{ key: 0, data: { color: "", stripeId: "", sizes: [], images: [] } }];
+  };
+
+  const [variants, setVariants] = useState<VariantState[]>(createInitialState);
   const variantRefs = useRef<Map<number, VariantFormRef>>(new Map());
-  const nextId = useRef(1);
+  const nextKey = useRef(initialVariants?.length || 1);
+
+  // Capture current state from refs before reordering
+  const captureCurrentState = () => {
+    const newVariants = variants.map((variant) => {
+      const variantRef = variantRefs.current.get(variant.key);
+      if (variantRef) {
+        const currentData = variantRef.getData();
+        return {
+          ...variant,
+          data: {
+            id: currentData.id,
+            color: currentData.color,
+            stripeId: currentData.stripe_id,
+            sizes: currentData.sizes,
+            images: currentData.existingImages,
+          },
+        };
+      }
+      return variant;
+    });
+    return newVariants;
+  };
+
+  const moveVariant = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= variants.length) return;
+    
+    // Capture current state before reordering
+    const currentState = captureCurrentState();
+    
+    // Swap positions
+    const newVariants = [...currentState];
+    [newVariants[index], newVariants[newIndex]] = [newVariants[newIndex], newVariants[index]];
+    setVariants(newVariants);
+  };
 
   useImperativeHandle(ref, () => ({
     getVariants: () => {
-      return variantIds.map((id) => {
-        const variantRef = variantRefs.current.get(id);
+      return variants.map((variant) => {
+        const variantRef = variantRefs.current.get(variant.key);
         return (
           variantRef?.getData() || {
             color: "",
             stripe_id: "",
             sizes: [],
             imageCount: 0,
+            existingImages: [],
+            removedImages: [],
           }
         );
       });
     },
     getImages: () => {
       const images: Record<string, File[]> = {};
-      variantIds.forEach((id, index) => {
-        const variantRef = variantRefs.current.get(id);
+      variants.forEach((variant, index) => {
+        const variantRef = variantRefs.current.get(variant.key);
         if (variantRef) {
           images[`variant_${index}`] = variantRef.getImages();
         }
@@ -47,34 +108,40 @@ export const VariantsSection = forwardRef<VariantsSectionRef>((_, ref) => {
       return images;
     },
     reset: () => {
-      variantRefs.current.forEach((ref) => ref.reset());
-      setVariantIds([0]);
-      nextId.current = 1;
+      variantRefs.current.forEach((r) => r.reset());
+      setVariants(createInitialState());
+      nextKey.current = initialVariants?.length || 1;
     },
   }));
 
   const addVariant = () => {
-    setVariantIds((prev) => [...prev, nextId.current++]);
+    setVariants((prev) => [
+      ...prev,
+      { key: nextKey.current++, data: { color: "", stripeId: "", sizes: [], images: [] } },
+    ]);
   };
 
-  const removeVariant = (id: number) => {
-    if (variantIds.length > 1) {
-      setVariantIds((prev) => prev.filter((v) => v !== id));
-      variantRefs.current.delete(id);
+  const removeVariant = (key: number) => {
+    if (variants.length > 1) {
+      setVariants((prev) => prev.filter((v) => v.key !== key));
+      variantRefs.current.delete(key);
     }
   };
 
   return (
     <div className="space-y-4">
-      {variantIds.map((id, index) => (
+      {variants.map((variant, index) => (
         <VariantForm
-          key={id}
+          key={variant.key}
           index={index}
           ref={(el) => {
-            if (el) variantRefs.current.set(id, el);
+            if (el) variantRefs.current.set(variant.key, el);
           }}
-          onRemove={() => removeVariant(id)}
-          canRemove={variantIds.length > 1}
+          onRemove={() => removeVariant(variant.key)}
+          canRemove={variants.length > 1}
+          initialData={variant.data}
+          onMoveUp={index > 0 ? () => moveVariant(index, "up") : undefined}
+          onMoveDown={index < variants.length - 1 ? () => moveVariant(index, "down") : undefined}
         />
       ))}
 
@@ -89,6 +156,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef>((_, ref) => {
       </Button>
     </div>
   );
-});
+  }
+);
 
 VariantsSection.displayName = "VariantsSection";
