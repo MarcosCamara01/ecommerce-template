@@ -1,15 +1,8 @@
-import { ProductWithVariants } from "@/schemas";
-
-type ProductResponse = {
-  success: boolean;
-  message: string;
-  errors?: Record<string, string[]>;
-  data?: ProductWithVariants;
-};
+import type { ProductApiResponse } from "@/types/admin";
 
 export async function createProduct(
   formData: FormData
-): Promise<ProductResponse> {
+): Promise<ProductApiResponse> {
   try {
     const response = await fetch("/api/admin/products", {
       method: "POST",
@@ -38,7 +31,7 @@ export async function createProduct(
 
 export async function updateProduct(
   formData: FormData
-): Promise<ProductResponse> {
+): Promise<ProductApiResponse> {
   try {
     const response = await fetch("/api/admin/products", {
       method: "PUT",

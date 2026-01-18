@@ -6,8 +6,12 @@ import {
   createStripeProductForVariant,
   updateStripeProduct,
 } from "@/services/stripe.service";
+import type { ProductCategory, InsertProductVariant } from "@/schemas";
+import type { VariantApiData } from "@/types/admin";
 
 const BUCKET = "product-images";
+
+type ProcessedVariant = Omit<InsertProductVariant, "productId"> & { id?: number };
 
 async function verifyAdmin(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -82,9 +86,9 @@ export async function POST(request: NextRequest) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const price = Number(formData.get("price"));
-    const category = formData.get("category") as string;
+    const category = formData.get("category") as ProductCategory;
     const mainImageFile = formData.get("mainImage") as File;
-    const variantsData = JSON.parse(formData.get("variants") as string);
+    const variantsData = JSON.parse(formData.get("variants") as string) as VariantApiData[];
 
     if (!name || !description || !price || !category || !mainImageFile) {
       return NextResponse.json(
@@ -97,7 +101,7 @@ export async function POST(request: NextRequest) {
       name,
       description,
       price,
-      category: category as any,
+      category,
       img: "",
     });
 
@@ -124,15 +128,15 @@ export async function POST(request: NextRequest) {
 
     await productsRepository.update(product.id, { img: mainImageUrl });
 
-    const variants = await Promise.all(
-      variantsData.map(async (v: any, idx: number) => {
+    const variants: ProcessedVariant[] = await Promise.all(
+      variantsData.map(async (variant, idx) => {
         const images: string[] = [];
-        const colorPath = v.color
+        const colorPath = variant.color
           .toLowerCase()
           .replace(/\s+/g, "-")
           .replace(/[^a-z0-9-]/g, "");
 
-        for (let i = 0; i < (v.imageCount || 0); i++) {
+        for (let i = 0; i < (variant.imageCount || 0); i++) {
           const file = formData.get(`variant_${idx}_image_${i}`) as File;
           if (file) {
             const url = await uploadImage(
@@ -143,11 +147,11 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        let stripeId = v.stripe_id;
+        let stripeId = variant.stripe_id;
         if (!stripeId || stripeId.trim() === "") {
           const stripeResult = await createStripeProductForVariant({
             productName: name,
-            variantColor: v.color,
+            variantColor: variant.color,
             description,
             price,
             images,
@@ -161,8 +165,8 @@ export async function POST(request: NextRequest) {
 
         return {
           stripeId,
-          color: v.color,
-          sizes: v.sizes,
+          color: variant.color,
+          sizes: variant.sizes,
           images,
         };
       })
@@ -175,7 +179,7 @@ export async function POST(request: NextRequest) {
         name,
         description,
         price,
-        category: category as any,
+        category,
         img: mainImageUrl,
       },
       variants
@@ -216,10 +220,10 @@ export async function PUT(request: NextRequest) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const price = Number(formData.get("price"));
-    const category = formData.get("category") as string;
+    const category = formData.get("category") as ProductCategory;
     const mainImageFile = formData.get("mainImage") as File | null;
     const existingMainImage = formData.get("existingMainImage") as string | null;
-    const variantsData = JSON.parse(formData.get("variants") as string);
+    const variantsData = JSON.parse(formData.get("variants") as string) as VariantApiData[];
 
     if (!id || !name || !description || !price || !category) {
       return NextResponse.json(
@@ -249,24 +253,24 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    for (const v of variantsData) {
-      if (v.removedImages && v.removedImages.length > 0) {
-        for (const imageUrl of v.removedImages) {
+    for (const variant of variantsData) {
+      if (variant.removedImages?.length) {
+        for (const imageUrl of variant.removedImages) {
           await deleteImageByUrl(imageUrl);
         }
       }
     }
 
-    const variants = await Promise.all(
-      variantsData.map(async (v: any, idx: number) => {
-        const existingImages: string[] = v.existingImages || [];
+    const variants: ProcessedVariant[] = await Promise.all(
+      variantsData.map(async (variant, idx) => {
+        const existingImages: string[] = variant.existingImages || [];
         const newImages: string[] = [];
-        const colorPath = v.color
+        const colorPath = variant.color
           .toLowerCase()
           .replace(/\s+/g, "-")
           .replace(/[^a-z0-9-]/g, "");
 
-        for (let i = 0; i < (v.imageCount || 0); i++) {
+        for (let i = 0; i < (variant.imageCount || 0); i++) {
           const file = formData.get(`variant_${idx}_image_${i}`) as File;
           if (file && file.size > 0) {
             const url = await uploadImage(
@@ -278,12 +282,12 @@ export async function PUT(request: NextRequest) {
         }
 
         const allImages = [...existingImages, ...newImages];
-        let stripeId = v.stripe_id;
+        let stripeId = variant.stripe_id;
 
-        if (v.id && stripeId) {
+        if (variant.id && stripeId) {
           const updatedStripe = await updateStripeProduct(stripeId, {
             productName: name,
-            variantColor: v.color,
+            variantColor: variant.color,
             description,
             price,
             images: allImages,
@@ -298,7 +302,7 @@ export async function PUT(request: NextRequest) {
         } else if (!stripeId || stripeId.trim() === "") {
           const stripeResult = await createStripeProductForVariant({
             productName: name,
-            variantColor: v.color,
+            variantColor: variant.color,
             description,
             price,
             images: allImages,
@@ -311,10 +315,10 @@ export async function PUT(request: NextRequest) {
         }
 
         return {
-          id: v.id,
+          id: variant.id,
           stripeId,
-          color: v.color,
-          sizes: v.sizes,
+          color: variant.color,
+          sizes: variant.sizes,
           images: allImages,
         };
       })
@@ -326,7 +330,7 @@ export async function PUT(request: NextRequest) {
         name,
         description,
         price,
-        category: category as any,
+        category,
         img: mainImageUrl,
       },
       variants

@@ -1,6 +1,7 @@
 export * from "./api";
 export * from "./domain";
 export * from "./components";
+export * from "./admin";
 
 // Re-export database types with explicit names to avoid conflicts
 export type {

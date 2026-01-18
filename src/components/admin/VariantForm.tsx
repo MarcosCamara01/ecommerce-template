@@ -21,26 +21,10 @@ import { forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import { FiTrash2, FiHelpCircle, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { VariantSizes, type VariantSizesRef } from "./VariantSizes";
 import { VariantImages, type VariantImagesRef } from "./VariantImages";
-import type { ProductSize } from "@/schemas";
-
-export interface VariantInitialData {
-  id?: number;
-  color: string;
-  stripeId: string;
-  sizes: ProductSize[];
-  images: string[];
-}
+import type { VariantFormData, VariantSubmitData } from "@/types/admin";
 
 export type VariantFormRef = {
-  getData: () => {
-    id?: number;
-    color: string;
-    stripe_id: string;
-    sizes: ProductSize[];
-    imageCount: number;
-    existingImages: string[];
-    removedImages: string[];
-  };
+  getData: () => VariantSubmitData;
   getImages: () => File[];
   reset: () => void;
 };
@@ -49,7 +33,7 @@ interface VariantFormProps {
   index: number;
   onRemove: () => void;
   canRemove?: boolean;
-  initialData?: VariantInitialData;
+  initialData?: VariantFormData;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
 }
