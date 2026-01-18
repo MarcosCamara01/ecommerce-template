@@ -1,10 +1,10 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { forwardRef, useImperativeHandle, useState, useRef } from "react";
-import { FiUpload, FiX } from "react-icons/fi";
+import { FiUpload, FiX, FiImage } from "react-icons/fi";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export type MainImageRef = {
   file: File | null;
@@ -19,6 +19,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
   ({ errors }, ref) => {
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useImperativeHandle(ref, () => ({
@@ -32,6 +33,10 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFile = e.target.files?.[0];
+      processFile(selectedFile);
+    };
+
+    const processFile = (selectedFile?: File) => {
       if (selectedFile) {
         setFile(selectedFile);
         const reader = new FileReader();
@@ -46,35 +51,83 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
       if (inputRef.current) inputRef.current.value = "";
     };
 
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const droppedFile = e.dataTransfer.files?.[0];
+      if (droppedFile?.type.startsWith("image/")) {
+        processFile(droppedFile);
+      }
+    };
+
     return (
-      <div className="space-y-2">
-        <Label>Main Image</Label>
-        <div className="border-2 border-dashed border-border-primary rounded-lg p-6">
+      <div className="space-y-3">
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={cn(
+            "relative border-2 border-dashed rounded-xl transition-all duration-200",
+            isDragging 
+              ? "border-white bg-white/5 scale-[1.02]" 
+              : "border-border-secondary hover:border-color-tertiary",
+            errors?.img && "border-red-500"
+          )}
+        >
           {preview ? (
-            <div className="relative w-full max-w-[200px] mx-auto">
-              <Image
-                src={preview}
-                alt="Preview"
-                width={200}
-                height={300}
-                className="rounded-lg object-cover aspect-[2/3]"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute -top-2 -right-2 h-6 w-6"
-                onClick={handleRemove}
-              >
-                <FiX className="h-4 w-4" />
-              </Button>
+            <div className="p-6">
+              <div className="relative w-full max-w-[240px] mx-auto group">
+                <Image
+                  src={preview}
+                  alt="Preview"
+                  width={240}
+                  height={360}
+                  className="rounded-lg object-cover aspect-[2/3] shadow-md"
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleRemove}
+                    className="shadow-lg"
+                  >
+                    <FiX className="h-4 w-4 mr-2" />
+                    Remove
+                  </Button>
+                </div>
+              </div>
+              <p className="text-center text-sm text-color-tertiary mt-4">
+                {file?.name}
+              </p>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center cursor-pointer py-8">
-              <FiUpload className="h-10 w-10 text-color-tertiary mb-2" />
-              <span className="text-sm text-color-tertiary">
-                Click to upload main image
-              </span>
+            <label className="flex flex-col items-center justify-center cursor-pointer py-12 px-6">
+              <div className="p-4 rounded-full bg-bg-tertiary mb-4">
+                <FiImage className="h-8 w-8 text-color-tertiary" />
+              </div>
+              <p className="text-sm font-medium text-color-secondary mb-1">
+                Drag and drop your image here
+              </p>
+              <p className="text-xs text-color-tertiary mb-4">
+                or click to browse
+              </p>
+              <Button type="button" variant="outline" size="sm" asChild>
+                <span>
+                  <FiUpload className="h-4 w-4 mr-2" />
+                  Choose File
+                </span>
+              </Button>
               <input
                 ref={inputRef}
                 type="file"
@@ -86,7 +139,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
           )}
         </div>
         {errors?.img && (
-          <p className="text-sm text-red-500">{errors.img[0]}</p>
+          <p className="text-sm text-red-400 font-medium">{errors.img[0]}</p>
         )}
       </div>
     );
