@@ -179,14 +179,15 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
               <div className="flex items-center gap-1">
                 <Label htmlFor={`stripe-${index}`} className="text-sm font-medium text-color-secondary">
                   Stripe Price ID
+                  <span className="ml-1 text-xs text-color-tertiary font-normal">(optional)</span>
                 </Label>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <FiHelpCircle className="h-3.5 w-3.5 text-color-tertiary cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-[200px]">
-                      <p>The price ID from your Stripe dashboard (e.g., price_1234...)</p>
+                    <TooltipContent className="max-w-[250px]">
+                      <p>Leave empty to auto-generate a Stripe product and price. Or enter an existing price ID from your Stripe dashboard (e.g., price_1234...)</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -194,7 +195,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
               <Input
                 id={`stripe-${index}`}
                 ref={stripeIdRef}
-                placeholder="price_xxx..."
+                placeholder="Auto-generated if empty"
                 className="h-10 font-mono text-sm"
               />
             </div>

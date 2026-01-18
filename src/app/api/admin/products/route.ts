@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/utils/auth";
 import { productsRepository } from "@/lib/db/drizzle/repositories";
 import { createServiceClient } from "@/lib/db/supabase/server";
+import {
+  createStripeProductForVariant,
+  updateStripeProduct,
+} from "@/services/stripe.service";
 
 const BUCKET = "product-images";
 
@@ -46,8 +50,6 @@ async function uploadImage(file: File, path: string): Promise<string | null> {
 
 async function deleteImageByUrl(imageUrl: string) {
   const supabase = createServiceClient();
-
-  // Extract path from URL
   const urlParts = imageUrl.split(`/storage/v1/object/public/${BUCKET}/`);
   if (urlParts.length < 2) return;
 
@@ -141,8 +143,24 @@ export async function POST(request: NextRequest) {
           }
         }
 
+        let stripeId = v.stripe_id;
+        if (!stripeId || stripeId.trim() === "") {
+          const stripeResult = await createStripeProductForVariant({
+            productName: name,
+            variantColor: v.color,
+            description,
+            price,
+            images,
+            metadata: {
+              product_id: product.id.toString(),
+              category,
+            },
+          });
+          stripeId = stripeResult.priceId;
+        }
+
         return {
-          stripeId: v.stripe_id,
+          stripeId,
           color: v.color,
           sizes: v.sizes,
           images,
@@ -210,7 +228,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Check if product exists
     const existingProduct = await productsRepository.findById(id);
     if (!existingProduct) {
       return NextResponse.json(
@@ -219,11 +236,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Handle main image
     let mainImageUrl = existingMainImage || existingProduct.img;
-    
+
     if (mainImageFile && mainImageFile.size > 0) {
-      // Delete old main image if exists
       if (existingProduct.img) {
         await deleteImageByUrl(existingProduct.img);
       }
@@ -234,7 +249,6 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Handle removed variant images
     for (const v of variantsData) {
       if (v.removedImages && v.removedImages.length > 0) {
         for (const imageUrl of v.removedImages) {
@@ -243,7 +257,6 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Process variants with new images
     const variants = await Promise.all(
       variantsData.map(async (v: any, idx: number) => {
         const existingImages: string[] = v.existingImages || [];
@@ -253,7 +266,6 @@ export async function PUT(request: NextRequest) {
           .replace(/\s+/g, "-")
           .replace(/[^a-z0-9-]/g, "");
 
-        // Upload new images
         for (let i = 0; i < (v.imageCount || 0); i++) {
           const file = formData.get(`variant_${idx}_image_${i}`) as File;
           if (file && file.size > 0) {
@@ -265,17 +277,49 @@ export async function PUT(request: NextRequest) {
           }
         }
 
+        const allImages = [...existingImages, ...newImages];
+        let stripeId = v.stripe_id;
+
+        if (v.id && stripeId) {
+          const updatedStripe = await updateStripeProduct(stripeId, {
+            productName: name,
+            variantColor: v.color,
+            description,
+            price,
+            images: allImages,
+            metadata: {
+              product_id: id.toString(),
+              category,
+            },
+          });
+          if (updatedStripe) {
+            stripeId = updatedStripe.priceId;
+          }
+        } else if (!stripeId || stripeId.trim() === "") {
+          const stripeResult = await createStripeProductForVariant({
+            productName: name,
+            variantColor: v.color,
+            description,
+            price,
+            images: allImages,
+            metadata: {
+              product_id: id.toString(),
+              category,
+            },
+          });
+          stripeId = stripeResult.priceId;
+        }
+
         return {
           id: v.id,
-          stripeId: v.stripe_id,
+          stripeId,
           color: v.color,
           sizes: v.sizes,
-          images: [...existingImages, ...newImages],
+          images: allImages,
         };
       })
     );
 
-    // Update product with variants
     const updatedProduct = await productsRepository.updateWithVariants(
       id,
       {
