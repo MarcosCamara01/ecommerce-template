@@ -8,17 +8,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
-import { BasicInfo, type BasicInfoRef, type BasicInfoInitialData } from "./BasicInfo";
+import { BasicInfo, type BasicInfoRef } from "./BasicInfo";
 import { MainImage, type MainImageRef } from "./MainImage";
 import { VariantsSection, type VariantsSectionRef } from "./VariantsSection";
-import type { VariantInitialData } from "./VariantForm";
-import type { ProductWithVariants, ProductSize } from "@/schemas";
+import type { ProductWithVariants } from "@/schemas";
+import type { ProductFormData } from "@/types/admin";
 
-export interface ProductFormData {
-  id?: number;
-  basicInfo: BasicInfoInitialData;
-  mainImageUrl?: string;
-  variants: VariantInitialData[];
+export type { ProductFormData };
+
+interface FormState {
+  success: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
 }
 
 interface ProductFormProps {
@@ -29,10 +30,10 @@ interface ProductFormProps {
 
 export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) {
   const { createAsync, updateAsync, isPending, isUpdatePending } = useProductMutation();
-  const [state, setState] = useState({
+  const [state, setState] = useState<FormState>({
     success: false,
     message: "",
-    errors: undefined as Record<string, string[]> | undefined,
+    errors: undefined,
   });
 
   const basicInfoRef = useRef<BasicInfoRef>(null!);

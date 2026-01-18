@@ -3,30 +3,22 @@
 import { Button } from "@/components/ui/button";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { FiPlus } from "react-icons/fi";
-import { VariantForm, type VariantFormRef, type VariantInitialData } from "./VariantForm";
-import type { ProductSize } from "@/schemas";
+import { VariantForm, type VariantFormRef } from "./VariantForm";
+import type { VariantFormData, VariantSubmitData } from "@/types/admin";
 
 export type VariantsSectionRef = {
-  getVariants: () => Array<{
-    id?: number;
-    color: string;
-    stripe_id: string;
-    sizes: ProductSize[];
-    imageCount: number;
-    existingImages: string[];
-    removedImages: string[];
-  }>;
+  getVariants: () => VariantSubmitData[];
   getImages: () => Record<string, File[]>;
   reset: () => void;
 };
 
 interface VariantsSectionProps {
-  initialVariants?: VariantInitialData[];
+  initialVariants?: VariantFormData[];
 }
 
 interface VariantState {
   key: number;
-  data: VariantInitialData;
+  data: VariantFormData;
 }
 
 export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionProps>(

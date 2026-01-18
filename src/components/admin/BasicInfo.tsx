@@ -12,12 +12,19 @@ import {
 } from "@/components/ui/select";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { cn } from "@/lib/utils";
+import type { ProductCategory } from "@/schemas";
+
+const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
+  { value: "t-shirts", label: "T-Shirts" },
+  { value: "pants", label: "Pants" },
+  { value: "sweatshirts", label: "Sweatshirts" },
+];
 
 export type BasicInfoRef = {
   name: string;
   description: string;
   price: string;
-  category: string;
+  category: ProductCategory | "";
   reset: () => void;
 };
 
@@ -25,7 +32,7 @@ export interface BasicInfoInitialData {
   name?: string;
   description?: string;
   price?: number;
-  category?: string;
+  category?: ProductCategory;
 }
 
 interface BasicInfoProps {
@@ -38,7 +45,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
     const [name, setName] = useState(initialData?.name || "");
     const [description, setDescription] = useState(initialData?.description || "");
     const [price, setPrice] = useState(initialData?.price?.toString() || "");
-    const [category, setCategory] = useState(initialData?.category || "");
+    const [category, setCategory] = useState<ProductCategory | "">(initialData?.category || "");
 
     useImperativeHandle(ref, () => ({
       name,
@@ -130,7 +137,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             <Label htmlFor="category" className="text-sm font-medium text-color-secondary">
               Category <span className="text-red-400">*</span>
             </Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category} onValueChange={(v) => setCategory(v as ProductCategory)}>
               <SelectTrigger 
                 id="category"
                 className={cn(
@@ -141,9 +148,11 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="t-shirts">T-Shirts</SelectItem>
-                <SelectItem value="pants">Pants</SelectItem>
-                <SelectItem value="sweatshirts">Sweatshirts</SelectItem>
+                {PRODUCT_CATEGORIES.map(({ value, label }) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {errors?.category && (
