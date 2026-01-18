@@ -1,10 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { ProductSizeEnum, type ProductSize } from "@/schemas";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export type VariantSizesRef = {
   sizes: ProductSize[];
@@ -26,25 +25,40 @@ export const VariantSizes = forwardRef<VariantSizesRef>((_, ref) => {
   };
 
   return (
-    <div className="space-y-2">
-      <Label>Available Sizes</Label>
+    <div className="space-y-3 pb-2">
       <div className="flex flex-wrap gap-2">
-        {ProductSizeEnum.options.map((size) => (
-          <Button
-            key={size}
-            type="button"
-            variant={selectedSizes.includes(size) ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSize(size)}
-            className={cn(
-              "min-w-[40px]",
-              selectedSizes.includes(size) && "bg-white text-black"
-            )}
-          >
-            {size}
-          </Button>
-        ))}
+        {ProductSizeEnum.options.map((size) => {
+          const isSelected = selectedSizes.includes(size);
+          return (
+            <button
+              key={size}
+              type="button"
+              onClick={() => toggleSize(size)}
+              className={cn(
+                "min-w-[48px] h-10 px-3 text-sm font-medium rounded-md border-2 transition-all duration-200",
+                "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary focus:ring-white/30",
+                isSelected
+                  ? "border-white bg-white text-black shadow-sm"
+                  : "border-border-secondary text-color-secondary hover:border-color-tertiary hover:bg-bg-tertiary"
+              )}
+            >
+              {size}
+            </button>
+          );
+        })}
       </div>
+      {selectedSizes.length > 0 && (
+        <div className="flex items-center gap-2 pt-2">
+          <span className="text-xs text-color-tertiary">Selected:</span>
+          <div className="flex flex-wrap gap-1">
+            {selectedSizes.map((size) => (
+              <Badge key={size} variant="secondary" className="text-xs">
+                {size}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 });

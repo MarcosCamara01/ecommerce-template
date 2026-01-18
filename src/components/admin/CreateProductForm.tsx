@@ -4,7 +4,10 @@ import { useState, useRef } from "react";
 import { useProductMutation } from "@/hooks/product/mutations/useProductMutation";
 import { Button } from "@/components/ui/button";
 import LoadingButton from "@/components/ui/loadingButton";
-import { FiCheck, FiX } from "react-icons/fi";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
 import { BasicInfo, type BasicInfoRef } from "./BasicInfo";
 import { MainImage, type MainImageRef } from "./MainImage";
 import { VariantsSection, type VariantsSectionRef } from "./VariantsSection";
@@ -66,61 +69,115 @@ export function CreateProductForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-8 space-y-8">
-      <div className="space-y-2 border-b border-border-primary pb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Create Product</h1>
-        <p className="text-sm text-color-tertiary">
-          Add a new product with variants and images
+    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 md:p-8 space-y-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-color-primary">Create Product</h1>
+        <p className="text-color-tertiary">
+          Add a new product with variants and images to your store
         </p>
       </div>
 
+      <Separator />
+
+      {/* Alert Message */}
       {state.message && (
-        <div
-          className={`p-4 rounded-lg text-sm font-medium flex items-start gap-3 ${
-            state.success
-              ? "bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100"
-              : "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100"
-          }`}
-        >
+        <Alert variant={state.success ? "success" : "destructive"}>
           {state.success ? (
-            <FiCheck className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <FiCheck className="h-4 w-4" />
           ) : (
-            <FiX className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <FiX className="h-4 w-4" />
           )}
-          <span>{state.message}</span>
-        </div>
+          <AlertTitle>{state.success ? "Success" : "Error"}</AlertTitle>
+          <AlertDescription>{state.message}</AlertDescription>
+        </Alert>
       )}
 
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Basic Information</h2>
+      {/* Basic Information Card */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-white/10">
+              <FiPackage className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Basic Information</CardTitle>
+              <CardDescription>
+                Product name, description, price and category
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
           <BasicInfo ref={basicInfoRef} errors={state.errors} />
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Product Image</h2>
+      {/* Main Image Card */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-white/10">
+              <FiImage className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Main Image</CardTitle>
+              <CardDescription>
+                Primary product image displayed in listings
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
           <MainImage ref={mainImageRef} errors={state.errors} />
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Product Variants</h2>
+      {/* Variants Card */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-white/10">
+              <FiLayers className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Product Variants</CardTitle>
+              <CardDescription>
+                Add color variations with sizes and images
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
           <VariantsSection ref={variantsSectionRef} />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex gap-3 pt-6 border-t border-border-primary">
-        <Button
-          type="reset"
-          onClick={handleReset}
-          variant="outline"
-          className="flex-1"
-        >
-          Clear
-        </Button>
-        <LoadingButton loading={isPending} className="flex-1" variant="outline">
-          Create Product
-        </LoadingButton>
-      </div>
+      {/* Action Buttons */}
+      <Card className="border-dashed">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              type="reset"
+              onClick={handleReset}
+              variant="outline"
+              className="flex-1"
+              size="lg"
+            >
+              <FiX className="mr-2 h-4 w-4" />
+              Clear Form
+            </Button>
+            <LoadingButton 
+              loading={isPending} 
+              className="flex-1 bg-white text-black hover:bg-white/90" 
+              size="lg"
+            >
+              <FiCheck className="mr-2 h-4 w-4" />
+              Create Product
+            </LoadingButton>
+          </div>
+        </CardContent>
+      </Card>
     </form>
   );
 }

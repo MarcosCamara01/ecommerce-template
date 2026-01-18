@@ -74,6 +74,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef>((_, ref) => {
             if (el) variantRefs.current.set(id, el);
           }}
           onRemove={() => removeVariant(id)}
+          canRemove={variantIds.length > 1}
         />
       ))}
 
@@ -81,10 +82,10 @@ export const VariantsSection = forwardRef<VariantsSectionRef>((_, ref) => {
         type="button"
         variant="outline"
         onClick={addVariant}
-        className="w-full"
+        className="w-full h-12 border-dashed border-2 border-border-secondary hover:border-white hover:bg-white/5 transition-colors text-color-secondary hover:text-white"
       >
         <FiPlus className="mr-2 h-4 w-4" />
-        Add Variant
+        Add Another Variant
       </Button>
     </div>
   );
