@@ -5,6 +5,7 @@ import { getProduct } from "@/app/actions";
 import { ProductImages } from "./ProductImages";
 import { AddToCart } from "../cart/AddToCart";
 import { ProductInfo } from "./ProductInfo";
+import { EditProductButton } from "./EditProductButton";
 /** TYPES */
 import type { ProductVariant } from "@/schemas";
 
@@ -50,9 +51,12 @@ export const SingleProduct = async ({
           <div className="sticky top-20 flex flex-col gap-5">
             <div className="w-full border border-solid overflow-hidden rounded border-border-primary bg-background-secondary">
               <div className="flex flex-col justify-between gap-3 p-5 border-b border-solid border-border-primary">
-                <h1 className="text-lg font-semibold">
-                  {productPlainObject.name}
-                </h1>
+                <div className="flex items-start justify-between gap-2">
+                  <h1 className="text-lg font-semibold">
+                    {productPlainObject.name}
+                  </h1>
+                  <EditProductButton productId={productPlainObject.id} />
+                </div>
                 <span className="text-base font-medium">
                   {productPlainObject.price}€
                 </span>

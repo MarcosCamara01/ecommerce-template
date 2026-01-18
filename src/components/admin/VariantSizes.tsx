@@ -8,14 +8,21 @@ import { Badge } from "@/components/ui/badge";
 export type VariantSizesRef = {
   sizes: ProductSize[];
   reset: () => void;
+  setSizes: (sizes: ProductSize[]) => void;
 };
 
-export const VariantSizes = forwardRef<VariantSizesRef>((_, ref) => {
-  const [selectedSizes, setSelectedSizes] = useState<ProductSize[]>([]);
+interface VariantSizesProps {
+  initialSizes?: ProductSize[];
+}
+
+export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
+  ({ initialSizes }, ref) => {
+  const [selectedSizes, setSelectedSizes] = useState<ProductSize[]>(initialSizes || []);
 
   useImperativeHandle(ref, () => ({
     sizes: selectedSizes,
-    reset: () => setSelectedSizes([]),
+    reset: () => setSelectedSizes(initialSizes || []),
+    setSizes: (sizes: ProductSize[]) => setSelectedSizes(sizes),
   }));
 
   const toggleSize = (size: ProductSize) => {
@@ -61,6 +68,7 @@ export const VariantSizes = forwardRef<VariantSizesRef>((_, ref) => {
       )}
     </div>
   );
-});
+  }
+);
 
 VariantSizes.displayName = "VariantSizes";

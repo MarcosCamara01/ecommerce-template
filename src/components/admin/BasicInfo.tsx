@@ -21,16 +21,24 @@ export type BasicInfoRef = {
   reset: () => void;
 };
 
+export interface BasicInfoInitialData {
+  name?: string;
+  description?: string;
+  price?: number;
+  category?: string;
+}
+
 interface BasicInfoProps {
   errors?: Record<string, string[]>;
+  initialData?: BasicInfoInitialData;
 }
 
 export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
-  ({ errors }, ref) => {
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [price, setPrice] = useState("");
-    const [category, setCategory] = useState("");
+  ({ errors, initialData }, ref) => {
+    const [name, setName] = useState(initialData?.name || "");
+    const [description, setDescription] = useState(initialData?.description || "");
+    const [price, setPrice] = useState(initialData?.price?.toString() || "");
+    const [category, setCategory] = useState(initialData?.category || "");
 
     useImperativeHandle(ref, () => ({
       name,

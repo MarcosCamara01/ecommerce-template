@@ -8,25 +8,32 @@ import { cn } from "@/lib/utils";
 
 export type MainImageRef = {
   file: File | null;
+  hasNewImage: boolean;
+  existingUrl: string | null;
   reset: () => void;
 };
 
 interface MainImageProps {
   errors?: Record<string, string[]>;
+  initialImageUrl?: string;
 }
 
 export const MainImage = forwardRef<MainImageRef, MainImageProps>(
-  ({ errors }, ref) => {
+  ({ errors, initialImageUrl }, ref) => {
     const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<string | null>(null);
+    const [preview, setPreview] = useState<string | null>(initialImageUrl || null);
+    const [hasNewImage, setHasNewImage] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useImperativeHandle(ref, () => ({
       file,
+      hasNewImage,
+      existingUrl: !hasNewImage && preview ? preview : null,
       reset: () => {
         setFile(null);
-        setPreview(null);
+        setPreview(initialImageUrl || null);
+        setHasNewImage(false);
         if (inputRef.current) inputRef.current.value = "";
       },
     }));
@@ -39,6 +46,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
     const processFile = (selectedFile?: File) => {
       if (selectedFile) {
         setFile(selectedFile);
+        setHasNewImage(true);
         const reader = new FileReader();
         reader.onloadend = () => setPreview(reader.result as string);
         reader.readAsDataURL(selectedFile);
@@ -48,6 +56,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
     const handleRemove = () => {
       setFile(null);
       setPreview(null);
+      setHasNewImage(false);
       if (inputRef.current) inputRef.current.value = "";
     };
 

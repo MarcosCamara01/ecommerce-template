@@ -109,6 +109,102 @@ export const productsRepository = {
     return result ? transformProductBase(result) : null;
   },
 
+  async updateWithVariants(
+    id: number,
+    product: Partial<InsertProduct>,
+    variants: Array<{
+      id?: number;
+      stripeId: string;
+      color: string;
+      sizes: string[];
+      images: string[];
+    }>
+  ): Promise<ProductWithVariants | null> {
+    return await db.transaction(async (tx) => {
+      // Update product
+      const updateData: Record<string, unknown> = {};
+      if (product.name !== undefined) updateData.name = product.name;
+      if (product.description !== undefined) updateData.description = product.description;
+      if (product.price !== undefined) updateData.price = String(product.price);
+      if (product.category !== undefined) updateData.category = product.category;
+      if (product.img !== undefined) updateData.img = product.img;
+
+      const [updatedProduct] = await tx
+        .update(productsItems)
+        .set(updateData)
+        .where(eq(productsItems.id, id))
+        .returning();
+
+      if (!updatedProduct) return null;
+
+      // Get existing variant IDs
+      const existingVariants = await tx.query.productsVariants.findMany({
+        where: eq(productsVariants.productId, id),
+      });
+      const existingIds = existingVariants.map((v) => v.id);
+
+      // Determine which variants to update, create, or delete
+      const variantIdsToKeep: number[] = [];
+      const variantsToUpdate: typeof variants = [];
+      const variantsToCreate: typeof variants = [];
+
+      for (const variant of variants) {
+        if (variant.id && existingIds.includes(variant.id)) {
+          variantIdsToKeep.push(variant.id);
+          variantsToUpdate.push(variant);
+        } else {
+          variantsToCreate.push(variant);
+        }
+      }
+
+      // Delete variants that are no longer present
+      const idsToDelete = existingIds.filter((id) => !variantIdsToKeep.includes(id));
+      if (idsToDelete.length > 0) {
+        for (const variantId of idsToDelete) {
+          await tx
+            .delete(productsVariants)
+            .where(eq(productsVariants.id, variantId));
+        }
+      }
+
+      // Update existing variants
+      for (const variant of variantsToUpdate) {
+        if (variant.id) {
+          await tx
+            .update(productsVariants)
+            .set({
+              stripeId: variant.stripeId,
+              color: variant.color,
+              sizes: variant.sizes,
+              images: variant.images,
+            })
+            .where(eq(productsVariants.id, variant.id));
+        }
+      }
+
+      // Create new variants
+      if (variantsToCreate.length > 0) {
+        await tx.insert(productsVariants).values(
+          variantsToCreate.map((v) => ({
+            productId: id,
+            stripeId: v.stripeId,
+            color: v.color,
+            sizes: v.sizes,
+            images: v.images,
+          }))
+        );
+      }
+
+      // Fetch updated product with variants
+      const result = await tx.query.productsItems.findFirst({
+        where: eq(productsItems.id, id),
+        with: { variants: true },
+      });
+
+      return result ? transformProduct(result) : null;
+    });
+  },
+
   async delete(id: number): Promise<boolean> {
     const result = await db
       .delete(productsItems)
