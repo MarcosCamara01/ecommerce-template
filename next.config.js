@@ -1,3 +1,15 @@
+const getSupabaseHostname = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return null;
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+};
+
+const supabaseHostname = getSupabaseHostname();
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -5,11 +17,16 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
-      {
-        protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_SUPABASE_URL?.replace("https://", ""),
-        pathname: "/storage/v1/object/public/**",
-      },
+      // Only include Supabase pattern if URL is configured
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: "https",
+              hostname: supabaseHostname,
+              pathname: "/storage/v1/object/public/**",
+            },
+          ]
+        : []),
     ],
   },
 };
