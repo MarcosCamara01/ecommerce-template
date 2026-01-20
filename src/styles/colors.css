@@ -1,0 +1,62 @@
+/* Color variables */
+
+:root {
+  /* Primary colors */
+  --color-primary: #000;
+  --color-primary-light: #1a1a1a;
+  --color-primary-dark: #000;
+
+  /* Secondary colors */
+  --color-secondary: #fff;
+  --color-secondary-light: #f5f5f5;
+  --color-secondary-dark: #e0e0e0;
+
+  /* Accent colors */
+  --color-accent: #7c3aed; /* violet-600 */
+  --color-accent-light: #a78bfa; /* violet-400 */
+  --color-accent-dark: #6d28d9; /* violet-700 */
+
+  /* Status colors */
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Neutral */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Background */
+  --bg-primary: #0c0c0c;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #2e2e2e;
+
+  /* Border */
+  --border-primary: #2e2e2e;
+  --border-secondary: #454545;
+}
+
+/* Dark mode (default) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #ffffff;
+    --color-text-secondary: #a0a0a0;
+  }
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-text: #000000;
+    --color-text-secondary: #666666;
+  }
+}
+

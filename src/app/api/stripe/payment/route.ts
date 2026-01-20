@@ -1,35 +1,26 @@
-import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-08-16",
-});
-
-async function loadPrices() {
-  const prices = await stripe.prices.list();
-  return prices.data;
-}
+import { stripe } from "@/lib/stripe";
+import { stripeLogger } from "@/lib/stripe/logger";
+import { CartItemSchema } from "@/schemas";
 
 export async function POST(request: NextRequest) {
   try {
-    const { lineItems, userId } = await request.json();
+    const { cartItems, userId } = await request.json();
 
-    if (!lineItems || !userId) throw Error("Missing data");
+    if (!cartItems || !userId) {
+      throw Error("Missing data");
+    }
 
-    const products = await loadPrices();
+    const cartItemsList = CartItemSchema.array().parse(cartItems);
 
-    const lineItemsList = await lineItems.map((item: any) => {
-      const matchingProduct = products.find(
-        (product) => product.id === item.variantId,
-      );
-
-      if (!matchingProduct) {
-        throw new Error(`Product not found for variantId: ${item.variantId}`);
+    const lineItemsList = cartItemsList.map((item) => {
+      if (!item.stripeId) {
+        throw new Error("Missing stripeId in line item");
       }
 
       return {
-        price: matchingProduct.id,
-        quantity: item.quantity,
+        price: item.stripeId,
+        quantity: item.quantity || 1,
       };
     });
 
@@ -43,19 +34,26 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/result?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
       automatic_tax: {
-        enabled: true,
+        enabled: false,
       },
       phone_number_collection: {
         enabled: true,
       },
       metadata: {
         userId: userId,
+        cartItems: JSON.stringify(cartItemsList),
       },
     });
 
     return NextResponse.json({ session: session }, { status: 200 });
-  } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ statusCode: 500, message: error.message });
+  } catch (error) {
+    stripeLogger.error("Failed to create checkout session", error);
+    return NextResponse.json(
+      {
+        statusCode: 500,
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }

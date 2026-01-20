@@ -19,12 +19,20 @@ module.exports = {
     extend: {
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
         },
       },
       animation: {
@@ -38,28 +46,40 @@ module.exports = {
         "auto-fill-32": "repeat(auto-fill, minmax(32px, 1fr))",
       },
       colors: {
+        999: "#999",
         "border-primary": "#242424",
         "border-secondary": "#7F7F7F",
+        "background-primary": "#000",
         "background-secondary": "#0a0a0a",
+        "background-tertiary": "#1F1F1F",
         "background-alert": "rgba(0, 0, 0, 0.9)",
-        "color-secondary": "#1A1A1A",
-        "color-tertiary": "#888",
-        999: "#999",
+        "color-secondary": "#A1A1A1",
+        "color-tertiary": "#EDEDED",
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
       },
       height: {
+        260: "260px",
         "60vh": "60vh",
         "80vh": "80vh",
-        260: "260px",
       },
       minWidth: {
-        "grid-img": "560px",
         250: "250px",
+        "grid-img": "560px",
       },
       maxWidth: {
-        img: "850px",
-        350: "350px",
         90: "90%",
         180: "180px",
+        350: "350px",
+        img: "850px",
       },
       flexBasis: {
         600: "600px",

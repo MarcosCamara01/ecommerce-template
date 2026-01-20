@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDown } from "lucide-react";
+import { LuChevronDown } from "react-icons/lu";
 
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 
 const Accordion = AccordionPrimitive.Root;
 
@@ -29,12 +29,12 @@ const AccordionTrigger = React.forwardRef<
       ref={ref}
       className={cn(
         "flex flex-1 items-center justify-between py-4 font-medium transition-all [&[data-state=open]>svg]:rotate-180",
-        className,
+        className
       )}
       {...props}
     >
       {children}
-      <ChevronDown className="w-4 h-4 transition-transform duration-200 shrink-0" />
+      <LuChevronDown className="w-4 h-4 transition-transform duration-200 shrink-0" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));
@@ -42,11 +42,15 @@ AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 
 const AccordionContent = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content> & { forceMount?: true }
+>(({ className, children, forceMount, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}
-    className="overflow-hidden text-[#A1A1A1] text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+    forceMount={forceMount}
+    className={cn(
+      "overflow-hidden text-color-secondary text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
+      forceMount && "data-[state=closed]:hidden"
+    )}
     {...props}
   >
     <div className={cn("pb-4 pt-0", className)}>{children}</div>
@@ -56,3 +60,4 @@ const AccordionContent = React.forwardRef<
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+

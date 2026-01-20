@@ -1,75 +1,57 @@
-import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
+import { stripeLogger } from "@/lib/stripe/logger";
+import { handleWebhookEvent } from "@/lib/stripe/handlers";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-08-16",
-});
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
-
-const webhookHandler = async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
   try {
-    const buf = await req.text();
-    const sig = req.headers.get("stripe-signature")!;
+    const payload = await req.text();
+    const signature = req.headers.get("stripe-signature");
 
-    let event: Stripe.Event;
-
-    try {
-      event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      // On error, log and return the error message.
-      if (err! instanceof Error) console.log(err);
-      console.log(`❌ Error message: ${errorMessage}`);
-
+    if (!signature) {
+      stripeLogger.error("Missing stripe-signature header");
       return NextResponse.json(
-        {
-          error: {
-            message: `Webhook Error: ${errorMessage}`,
-          },
-        },
-        { status: 400 },
+        { error: "Missing stripe-signature header" },
+        { status: 400 }
       );
     }
 
-    // Successfully constructed event.
-    console.log("✅ Success:", event.id);
-
-    // getting to the data we want from the event
-    const payment = event.data.object as Stripe.PaymentIntent;
-    const paymentId = payment.id;
-
-    switch (event.type) {
-      case "payment_intent.succeeded":
-        console.log("Successful purchase", paymentId);
-        break;
-
-      case "charge.succeeded":
-        const charge = event.data.object as Stripe.Charge;
-        console.log(`💵 Charge id: ${charge.id}`);
-        break;
-
-      case "payment_intent.canceled":
-        console.log("The purchase has not been completed");
-        break;
-
-      default:
-        console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
-        break;
+    // Verify webhook signature
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    } catch (err) {
+      stripeLogger.error("Webhook signature verification failed", err);
+      return NextResponse.json(
+        { error: "Webhook signature verification failed" },
+        { status: 400 }
+      );
     }
 
-    // Return a response to acknowledge receipt of the event.
-    return NextResponse.json({ received: true });
-  } catch {
-    return NextResponse.json(
-      {
-        error: {
-          message: `Method Not Allowed`,
-        },
-      },
-      { status: 405 },
-    ).headers.set("Allow", "POST");
-  }
-};
+    // Process the event
+    const result = await handleWebhookEvent(event);
 
-export { webhookHandler as POST };
+    if (!result.success) {
+      // Return 200 even on processing errors to prevent Stripe retries
+      // The error is logged and can be investigated
+      return NextResponse.json({
+        received: true,
+        processed: false,
+        error: result.error,
+      });
+    }
+
+    return NextResponse.json({
+      received: true,
+      processed: result.handled,
+    });
+  } catch (error) {
+    stripeLogger.error("Unexpected webhook error", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

@@ -4,9 +4,9 @@ import * as React from "react";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
 
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -56,14 +56,14 @@ const Carousel = React.forwardRef<
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
       },
-      plugins,
+      plugins
     );
     const [canScrollPrev, setCanScrollPrev] = React.useState(false);
     const [canScrollNext, setCanScrollNext] = React.useState(false);
@@ -95,7 +95,7 @@ const Carousel = React.forwardRef<
           scrollNext();
         }
       },
-      [scrollPrev, scrollNext],
+      [scrollPrev, scrollNext]
     );
 
     React.useEffect(() => {
@@ -146,7 +146,7 @@ const Carousel = React.forwardRef<
         </div>
       </CarouselContext.Provider>
     );
-  },
+  }
 );
 Carousel.displayName = "Carousel";
 
@@ -163,7 +163,7 @@ const CarouselContent = React.forwardRef<
         className={cn(
           "flex",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
-          className,
+          className
         )}
         {...props}
       />
@@ -186,7 +186,7 @@ const CarouselItem = React.forwardRef<
       className={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
-        className,
+        className
       )}
       {...props}
     />
@@ -210,13 +210,13 @@ const CarouselPrevious = React.forwardRef<
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
+        className
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft className="h-4 w-4" />
+      <LuArrowLeft className="h-4 w-4" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -239,18 +239,79 @@ const CarouselNext = React.forwardRef<
         orientation === "horizontal"
           ? "-right-12 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
+        className
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight className="h-4 w-4" />
+      <LuArrowRight className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
     </Button>
   );
 });
 CarouselNext.displayName = "CarouselNext";
+
+const CarouselDots = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const { api } = useCarousel();
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);
+
+  const onDotClick = React.useCallback(
+    (index: number) => {
+      if (!api) return;
+      api.scrollTo(index);
+    },
+    [api]
+  );
+
+  const onSelect = React.useCallback(() => {
+    if (!api) return;
+    setSelectedIndex(api.selectedScrollSnap());
+  }, [api]);
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    setScrollSnaps(api.scrollSnapList());
+    onSelect();
+
+    api.on("select", onSelect);
+    api.on("reInit", onSelect);
+
+    return () => {
+      api.off("select", onSelect);
+      api.off("reInit", onSelect);
+    };
+  }, [api, onSelect]);
+
+  return (
+    <div
+      ref={ref}
+      className={cn("flex justify-center gap-1.5", className)}
+      {...props}
+    >
+      {scrollSnaps.map((_, index) => (
+        <button
+          key={index}
+          type="button"
+          onClick={() => onDotClick(index)}
+          className={cn(
+            "w-2 h-2 rounded-full transition-all duration-200",
+            selectedIndex === index
+              ? "bg-white w-4"
+              : "bg-white/40 hover:bg-white/60"
+          )}
+          aria-label={`Go to slide ${index + 1}`}
+        />
+      ))}
+    </div>
+  );
+});
+CarouselDots.displayName = "CarouselDots";
 
 export {
   type CarouselApi,
@@ -259,4 +320,6 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots,
+  useCarousel,
 };

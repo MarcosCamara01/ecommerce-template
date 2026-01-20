@@ -1,67 +1,59 @@
 "use client";
 
-import axios from "axios";
-import { ItemDocument } from "@/types/types";
-import { useTransition, useCallback, useMemo } from "react";
-import { Loader } from "../common/Loader";
+/** FUNCTIONALITY */
 import { toast } from "sonner";
-import { Session } from "next-auth";
+import { useSession } from "@/lib/auth/client";
+import { useMutation } from "@tanstack/react-query";
+/** COMPONENTS */
+import LoadingButton from "@/components/ui/loadingButton";
+/** TYPES */
+import type { CartItem } from "@/schemas";
 
 interface ButtonCheckoutProps {
-  cartWithProducts: ItemDocument[];
-  session: Session | null;
+  cartItems: CartItem[];
 }
 
-const ButtonCheckout = ({ cartWithProducts, session }: ButtonCheckoutProps) => {
-  let [isPending, startTransition] = useTransition();
+export const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
+  const { data: session } = useSession();
 
-  const lineItems = useMemo(
-    () =>
-      cartWithProducts.map((cartItem: ItemDocument) => ({
-        productId: cartItem.productId,
-        quantity: cartItem.quantity,
-        variantId: cartItem.variantId,
-        size: cartItem.size,
-        color: cartItem.color,
-      })),
-    [cartWithProducts]
-  );
-
-  const buyProducts = useCallback(async () => {
-    if (!session) {
-      toast.error("User information not found");
-      return;
-    }
-
-    try {
-      const { data } = await axios.post("/api/stripe/payment", {
-        lineItems,
-        userId: session.user._id,
-      });
-
-      if (data.statusCode === 500) {
-        toast.error(data.message);
-        console.error(data.statusCode, data.message);
-        return;
+  const { mutate: buyProducts, isPending } = useMutation({
+    mutationFn: async () => {
+      if (!session?.user) {
+        throw new Error("User information not found");
       }
 
+      const response = await fetch("/api/stripe/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItems, userId: session.user.id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || "Error adding to cart";
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
       window.location.href = data.session.url;
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error(error);
       toast.error(
-        "An error occurred while processing your request. Please try again."
+        error instanceof Error
+          ? error.message
+          : "An error occurred while processing your request. Please try again."
       );
-    }
-  }, [session, lineItems]);
+    },
+  });
 
   return (
-    <button
-      onClick={() => startTransition(buyProducts)}
-      className="w-full text-sm p-2.5 h-full transition-all hover:bg-color-secondary"
+    <LoadingButton
+      onClick={() => buyProducts()}
+      className="w-full rounded-none bg-background-secondary p-2.5 h-full transition-all hover:bg-background-tertiary"
+      loading={isPending}
     >
-      {isPending ? <Loader height={20} width={20} /> : "Continue"}
-    </button>
+      Continue
+    </LoadingButton>
   );
 };
-
-export default ButtonCheckout;
