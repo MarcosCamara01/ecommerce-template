@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
 export async function POST(request: NextRequest) {
   const { name, email, message, subject } = await request.json();
@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   if (!name || !email || !message || !subject) {
     return NextResponse.json(
       { message: "We need more information to send an email!" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -38,13 +38,13 @@ export async function POST(request: NextRequest) {
     await transporter.sendMail(mailOptions);
     return NextResponse.json(
       { message: "Email sent successfully!" },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error: any) {
     console.error(error);
     return NextResponse.json(
       { message: "COULT NOT SEND THE MESSAGE" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -1,86 +1,55 @@
 "use client";
 
-import { useCallback } from "react";
-import { EnrichedProducts } from "@/types/types";
-import { addItem, delOneItem } from "@/app/(carts)/cart/action";
+/** FUNCTIONALITY */
+import { useThrottleFn } from "ahooks";
+import { useCartMutation } from "@/hooks/cart";
+/** ICONS */
+import { IoAdd, IoRemove } from "react-icons/io5";
+/** TYPES */
+import type { ProductVariant, CartItem } from "@/schemas";
 
-const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
-  const {
-    productId,
-    size,
-    variantId,
-    category,
-    price,
-    quantity,
-    purchased,
-    color,
-  } = product;
+interface ProductCartInfoProps {
+  cartItemId: CartItem["id"];
+  size: CartItem["size"];
+  quantity: CartItem["quantity"];
+  color: ProductVariant["color"];
+}
 
-  const handleAddItem = useCallback(() => {
-    addItem(category, productId, size, variantId, price);
-  }, [category, productId, size, variantId, price]);
+export const ProductCartInfo = ({
+  cartItemId,
+  size,
+  quantity,
+  color,
+}: ProductCartInfoProps) => {
+  const { update: editQuantity, remove: removeFromCart } = useCartMutation();
 
-  const handleDelItem = useCallback(() => {
-    delOneItem(productId, size, variantId);
-  }, [productId, size, variantId]);
-
-  const quantityButtons = useCallback(() => {
-    if (purchased) {
-      return (
-        <div className="text-sm">
-          {quantity ? (price * quantity).toFixed(2) : price}€
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex bg-black w-min">
-          <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-[#A1A1A1] transition-all hover:text-white border-border-primary"
-            onClick={handleDelItem}
-          >
-            <svg
-              data-test="geist-icon"
-              height="14"
-              strokeLinejoin="round"
-              viewBox="0 0 16 16"
-              width="14"
-              style={{ color: "currentColor" }}
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M2 7.25H2.75H13.25H14V8.75H13.25H2.75H2V7.25Z"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </button>
-          <span className="flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary">
-            {quantity}
-          </span>
-          <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-[#A1A1A1] transition-all hover:text-white border-border-primary"
-            onClick={handleAddItem}
-          >
-            <svg
-              data-test="geist-icon"
-              height="14"
-              strokeLinejoin="round"
-              viewBox="0 0 16 16"
-              width="14"
-              style={{ color: "currentColor" }}
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M8.75 1.75V1H7.25V1.75V6.75H2.25H1.5V8.25H2.25H7.25V13.25V14H8.75V13.25V8.25H13.75H14.5V6.75H13.75H8.75V1.75Z"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </button>
-        </div>
-      );
+  const { run: throttledIncrease } = useThrottleFn(
+    () => {
+      editQuantity({
+        itemId: cartItemId,
+        quantity: quantity + 1,
+      });
+    },
+    {
+      wait: 300,
     }
-  }, [purchased, quantity, price, handleAddItem, handleDelItem]);
+  );
+
+  const { run: throttledDecrease } = useThrottleFn(
+    () => {
+      if (quantity > 1) {
+        editQuantity({
+          itemId: cartItemId,
+          quantity: quantity - 1,
+        });
+      } else {
+        removeFromCart({ itemId: cartItemId });
+      }
+    },
+    {
+      wait: 300,
+    }
+  );
 
   return (
     <>
@@ -89,10 +58,56 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
         <div className="text-sm pl-2.5">{color}</div>
       </div>
       <div className="flex items-center justify-between sm:hidden">
-        {quantityButtons()}
+        <div className="flex bg-background-primary w-min">
+          <button
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledDecrease}
+            disabled={false}
+            aria-label="Decrease quantity"
+          >
+            <IoRemove className="w-4 h-4" />
+          </button>
+          <span
+            className="flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary"
+            aria-label={`Current quantity: ${quantity}`}
+          >
+            {quantity}
+          </span>
+          <button
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledIncrease}
+            disabled={false}
+            aria-label="Increase quantity"
+          >
+            <IoAdd className="w-4 h-4" />
+          </button>
+        </div>
       </div>
       <div className="items-center justify-between hidden sm:flex">
-        {quantityButtons()}
+        <div className="flex bg-background-primary w-min">
+          <button
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledDecrease}
+            disabled={false}
+            aria-label="Decrease quantity"
+          >
+            <IoRemove className="w-4 h-4" />
+          </button>
+          <span
+            className="flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary"
+            aria-label={`Current quantity: ${quantity}`}
+          >
+            {quantity}
+          </span>
+          <button
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            onClick={throttledIncrease}
+            disabled={false}
+            aria-label="Increase quantity"
+          >
+            <IoAdd className="w-4 h-4" />
+          </button>
+        </div>
         <div className="flex">
           <div className="text-sm pr-2.5 border-r">{size}</div>
           <div className="text-sm pl-2.5">{color}</div>
@@ -101,5 +116,3 @@ const ProductCartInfo = ({ product }: { product: EnrichedProducts }) => {
     </>
   );
 };
-
-export default ProductCartInfo;

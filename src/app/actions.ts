@@ -1,65 +1,91 @@
 "use server";
 
-import { connectDB } from "@/libs/mongodb";
-import { Product } from "@/models/Products";
-import { EnrichedProducts } from "@/types/types";
+import { unstable_cache, revalidateTag } from "next/cache";
+import { productsRepository } from "@/lib/db/drizzle/repositories";
+import {
+  type ProductCategory,
+  ProductWithVariantsSchema,
+  type ProductWithVariants,
+} from "@/schemas";
 
-export const getAllProducts = async () => {
-  try {
-    await connectDB();
+// Cache for 1 hour, revalidate on demand
+const CACHE_REVALIDATE = 3600;
 
-    const products: EnrichedProducts[] = await Product.find();
-    return products;
-  } catch (error) {
-    console.error("Error getting products:", error);
-    throw new Error("Failed to fetch category products");
-  }
-};
-
-export const getCategoryProducts = async (category: string) => {
-  try {
-    await connectDB();
-
-    const products: EnrichedProducts[] = await Product.find({ category });
-    return products;
-  } catch (error) {
-    console.error("Error getting products:", error);
-    throw new Error("Failed to fetch category products");
-  }
-};
-
-export const getRandomProducts = async (productId: string) => {
-  const shuffleArray = (array: EnrichedProducts[]) => {
-    let shuffled = array.slice();
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+export const getAllProducts = unstable_cache(
+  async (): Promise<ProductWithVariants[]> => {
+    try {
+      const products = await productsRepository.findAll();
+      const validatedProducts = ProductWithVariantsSchema.array().parse(products);
+      return validatedProducts.sort((a, b) => a.name.localeCompare(b.name));
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return [];
     }
-    return shuffled;
-  };
+  },
+  ["all-products"],
+  { revalidate: CACHE_REVALIDATE, tags: ["products"] }
+);
 
+export async function getCategoryProducts(
+  category: ProductCategory
+): Promise<ProductWithVariants[]> {
+  return unstable_cache(
+    async (): Promise<ProductWithVariants[]> => {
+      try {
+        const products = await productsRepository.findByCategory(category);
+        const validatedProducts = ProductWithVariantsSchema.array().parse(products);
+        return validatedProducts.sort((a, b) => a.name.localeCompare(b.name));
+      } catch (error) {
+        console.error("Error fetching category products:", error);
+        return [];
+      }
+    },
+    [`category-products-${category}`],
+    { revalidate: CACHE_REVALIDATE, tags: ["products", `category-${category}`] }
+  )();
+}
+
+export async function getProduct(productId: number): Promise<ProductWithVariants | null> {
+  return unstable_cache(
+    async (): Promise<ProductWithVariants | null> => {
+      try {
+        const product = await productsRepository.findById(productId);
+        if (!product) return null;
+        return ProductWithVariantsSchema.parse(product);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        return null;
+      }
+    },
+    [`product-${productId}`],
+    { revalidate: CACHE_REVALIDATE, tags: ["products", `product-${productId}`] }
+  )();
+}
+
+export async function getRandomProducts(
+  productIdToExclude: number
+): Promise<ProductWithVariants[]> {
   try {
-    await connectDB();
-
-    const allProducts: EnrichedProducts[] = await Product.find();
-    const shuffledProducts = shuffleArray(allProducts);
-    const randomProducts = shuffledProducts
-      .filter((product) => product._id.toString() !== productId)
-      .slice(0, 6);
-    return randomProducts;
+    const allProducts = await getAllProducts();
+    const filtered = allProducts.filter((p) => p.id !== productIdToExclude);
+    const shuffled = filtered.sort(() => Math.random() - 0.5);
+    return ProductWithVariantsSchema.array().parse(shuffled.slice(0, 6));
   } catch (error) {
-    console.error("Error getting products:", error);
-    throw new Error("Failed to fetch random products");
+    console.error("Error fetching random products:", error);
+    return [];
   }
-};
+}
 
-export const getProduct = async (_id: string) => {
-  try {
-    await connectDB();
-
-    const product = await Product.findOne({ _id });
-    return product;
-  } catch (error) {
-    console.error("Error getting product:", error);
+/**
+ * Revalidates all product caches
+ * Call this after creating, updating, or deleting products
+ */
+export async function revalidateProducts(productId?: number): Promise<void> {
+  // Always revalidate the general products tag
+  revalidateTag("products", "max");
+  
+  // If a specific product ID is provided, also revalidate that specific product
+  if (productId) {
+    revalidateTag(`product-${productId}`, "max");
   }
-};
+}
