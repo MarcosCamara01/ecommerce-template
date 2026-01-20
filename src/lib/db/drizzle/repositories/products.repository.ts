@@ -1,6 +1,7 @@
+import { z } from "zod";
 import { eq, desc, sql } from "drizzle-orm";
 import { db } from "../connection";
-import { productsItems, productsVariants } from "../schema";
+import { productsItems, productsVariants, ProductSizeZod } from "../schema";
 import type {
   Product,
   ProductWithVariants,
@@ -8,6 +9,12 @@ import type {
   InsertProductVariant,
   ProductCategory,
 } from "@/schemas";
+
+const sizesSchema = z.array(ProductSizeZod);
+
+function parseSizes(sizes: string[]) {
+  return sizesSchema.parse(sizes);
+}
 
 export const productsRepository = {
   async findAll(): Promise<ProductWithVariants[]> {
@@ -175,7 +182,7 @@ export const productsRepository = {
             .set({
               stripeId: variant.stripeId,
               color: variant.color,
-              sizes: variant.sizes,
+              sizes: parseSizes(variant.sizes),
               images: variant.images,
             })
             .where(eq(productsVariants.id, variant.id));
@@ -189,7 +196,7 @@ export const productsRepository = {
             productId: id,
             stripeId: v.stripeId,
             color: v.color,
-            sizes: v.sizes,
+            sizes: parseSizes(v.sizes),
             images: v.images,
           }))
         );
