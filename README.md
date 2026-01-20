@@ -40,6 +40,10 @@ npm install
 
 3. Run database migrations
 ```bash
+# First, run migrations to create required PostgreSQL functions (like app.current_user_id())
+npm run db:migrate
+
+# Then, push the schema to the database
 npm run db:push
 ```
 
@@ -162,9 +166,9 @@ npm run start        # Start production server
 npm run lint         # Run ESLint
 
 # Database (Drizzle)
-npm run db:generate  # Generate migrations
-npm run db:migrate   # Run migrations
-npm run db:push      # Push schema to database
+npm run db:generate  # Generate migrations from schema changes
+npm run db:migrate   # Run migrations (required first for RLS functions)
+npm run db:push      # Push schema to database (run after db:migrate)
 npm run db:studio    # Open Drizzle Studio
 npm run db:pull      # Introspect database
 ```
