@@ -3,15 +3,28 @@ import {
   SingleProductSkeleton,
   SuspenseRandomProducts,
 } from "@/components/product";
-import { getProduct } from "@/app/actions";
+import { getAllProducts, getProduct } from "@/app/actions";
 import { Suspense } from "react";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
 type PageProps = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; category: string }>;
   searchParams: Promise<{ variant: string | undefined }>;
 };
+
+/**
+ * Generate static params for popular products
+ * This enables PPR subshells for category + product combinations
+ */
+export async function generateStaticParams() {
+  const products = await getAllProducts();
+
+  return products.map((product) => ({
+    category: product.category,
+    id: String(product.id),
+  }));
+}
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;

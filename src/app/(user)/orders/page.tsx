@@ -12,35 +12,47 @@ export async function generateMetadata() {
   };
 }
 
-const UserOrders = async () => {
+/**
+ * Orders page with PPR: static shell + dynamic user content
+ * The user check and orders content stream in via Suspense
+ */
+const UserOrders = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-[calc(100vh-91px)]">
+          <SVGLoadingIcon height={30} width={30} />
+        </div>
+      }
+    >
+      <OrdersContent />
+    </Suspense>
+  );
+};
+
+/**
+ * Dynamic component that checks user and renders orders
+ * This streams at request time (uses headers() via getUser)
+ */
+const OrdersContent = async () => {
   const user = await getUser();
 
-  if (user) {
+  if (!user) {
     return (
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-            <SVGLoadingIcon height={30} width={30} />
-          </div>
-        }
-      >
-        <Orders />
-      </Suspense>
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-91px)] gap-2 px-4">
+        <h2 className="mb-6 text-4xl font-bold">NO ORDERS YET</h2>
+        <p className="mb-4 text-lg">To view your orders you must be logged in.</p>
+        <Link
+          className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-background-tertiary hover:border-[#454545]"
+          href="/login"
+        >
+          Login
+        </Link>
+      </div>
     );
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-91px)] gap-2 px-4">
-      <h2 className="mb-6 text-4xl font-bold">NO ORDERS YET</h2>
-      <p className="mb-4 text-lg">To view your orders you must be logged in.</p>
-      <Link
-        className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-background-tertiary hover:border-[#454545]"
-        href="/login"
-      >
-        Login
-      </Link>
-    </div>
-  );
+  return <Orders />;
 };
 
 const Orders = async () => {
