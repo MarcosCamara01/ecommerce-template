@@ -6,6 +6,7 @@ import {
   createStripeProductForVariant,
   updateStripeProduct,
 } from "@/services/stripe.service";
+import { revalidateProducts } from "@/app/actions";
 import type { ProductCategory, InsertProductVariant } from "@/schemas";
 import type { VariantApiData } from "@/types/admin";
 
@@ -193,6 +194,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Invalidate products cache after creating a new product
+    await revalidateProducts();
+
     return NextResponse.json({
       success: true,
       message: "Product created successfully",
@@ -343,6 +347,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Invalidate products cache after updating a product
+    await revalidateProducts(id);
+
     return NextResponse.json({
       success: true,
       message: "Product updated successfully",
@@ -383,6 +390,9 @@ export async function DELETE(request: NextRequest) {
     if (!deleted) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
+
+    // Invalidate products cache after deleting a product
+    await revalidateProducts(id);
 
     return NextResponse.json({
       success: true,

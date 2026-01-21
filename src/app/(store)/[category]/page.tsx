@@ -13,6 +13,18 @@ interface Props {
   }>;
 }
 
+/**
+ * Generate static params for all product categories
+ * This enables PPR subshells for each category
+ */
+export function generateStaticParams() {
+  return [
+    { category: "t-shirts" },
+    { category: "pants" },
+    { category: "sweatshirts" },
+  ];
+}
+
 export async function generateMetadata({ params }: Props) {
   const capitalizeFirstLetter = (string: string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
