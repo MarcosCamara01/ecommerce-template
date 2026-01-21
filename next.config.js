@@ -11,6 +11,7 @@ const getSupabaseHostname = () => {
 const supabaseHostname = getSupabaseHostname();
 
 const nextConfig = {
+  cacheComponents: true,
   images: {
     remotePatterns: [
       {
