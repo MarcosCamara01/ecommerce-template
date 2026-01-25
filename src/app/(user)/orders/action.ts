@@ -10,11 +10,11 @@ import {
   InsertOrderProductSchema,
 } from "@/schemas";
 import type {
-  CartItem,
   OrderItem,
   CustomerInfo,
   OrderProduct,
   OrderWithDetails,
+  MinimalCartItem,
 } from "@/schemas";
 
 export const getUserOrders = async (): Promise<OrderWithDetails[] | null> => {
@@ -39,7 +39,7 @@ export const getUserOrders = async (): Promise<OrderWithDetails[] | null> => {
 };
 
 export const getOrder = async (
-  orderId: OrderItem["id"]
+  orderId: OrderItem["id"],
 ): Promise<OrderWithDetails | null> => {
   try {
     const user = await getUser();
@@ -58,8 +58,7 @@ export const getOrder = async (
 
     return OrderWithDetailsSchema.parse(order);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Error fetching order:", errorMessage);
     return null;
   }
@@ -70,7 +69,7 @@ export const getOrder = async (
  */
 export async function createOrderItem(
   userId: string,
-  orderNumber: number
+  orderNumber: number,
 ): Promise<OrderItem> {
   const deliveryDate = new Date();
   deliveryDate.setDate(deliveryDate.getDate() + 7);
@@ -95,7 +94,7 @@ export async function createOrderItem(
  */
 export async function saveCustomerInfo(
   orderId: number,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
 ): Promise<CustomerInfo | null> {
   const customerInfoToSave = InsertCustomerInfoSchema.parse({
     orderId,
@@ -116,7 +115,7 @@ export async function saveCustomerInfo(
 
   const customerInfo = await ordersRepository.addCustomerInfo(
     orderId,
-    customerInfoToSave
+    customerInfoToSave,
   );
 
   if (!customerInfo) {
@@ -132,24 +131,22 @@ export async function saveCustomerInfo(
     address: customerInfo.address,
     stripeOrderId: customerInfo.stripeOrderId,
     totalPrice: customerInfo.totalPrice,
-    createdAt: customerInfo.createdAt?.toISOString() ?? new Date().toISOString(),
-    updatedAt: customerInfo.updatedAt?.toISOString() ?? new Date().toISOString(),
+    createdAt:
+      customerInfo.createdAt?.toISOString() ?? new Date().toISOString(),
+    updatedAt:
+      customerInfo.updatedAt?.toISOString() ?? new Date().toISOString(),
   };
 }
 
-/**
- * Match Stripe line items with cart items and create order products
- * Returns order products that were saved
- */
 export async function saveOrderProducts(
   orderId: number,
   lineItems: Stripe.LineItem[],
-  cartItems: CartItem[]
+  cartItems: MinimalCartItem[],
 ): Promise<OrderProduct[]> {
   const orderProductsData = lineItems
     .map((lineItem) => {
       const cartItem = cartItems.find(
-        (item) => item.stripeId === lineItem.price?.id
+        (item) => item.stripeId === lineItem.price?.id,
       );
 
       if (!cartItem) {
@@ -172,7 +169,7 @@ export async function saveOrderProducts(
 
   const savedProducts = await ordersRepository.addProducts(
     orderId,
-    orderProductsData
+    orderProductsData,
   );
 
   return savedProducts.map((p) => ({

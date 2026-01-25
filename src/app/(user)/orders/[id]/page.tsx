@@ -18,11 +18,19 @@ interface Props {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-const OrderDetails = async ({ params }: Props) => {
+async function DynamicOrderContent({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
+  return <OrderProducts id={id} />;
+}
+
+const OrderDetails = async ({ params }: Props) => {
   return (
     <Suspense fallback={<OrderDetailsSkeleton items={6} />}>
-      <OrderProducts id={id} />
+      <DynamicOrderContent params={params} />
     </Suspense>
   );
 };
@@ -68,7 +76,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
           },
         ],
       };
-    }
+    },
   );
 
   return (
