@@ -39,12 +39,20 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-const CategoryPage = async ({ params }: Props) => {
+async function DynamicCategoryContent({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
   const { category } = await params;
+  return <CategoryProducts category={ProductCategoryZod.parse(category)} />;
+}
+
+const CategoryPage = async ({ params }: Props) => {
   return (
     <section className="pt-14">
       <Suspense fallback={<ProductsSkeleton items={6} />}>
-        <CategoryProducts category={ProductCategoryZod.parse(category)} />
+        <DynamicCategoryContent params={params} />
       </Suspense>
     </section>
   );

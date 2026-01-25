@@ -13,10 +13,6 @@ type PageProps = {
   searchParams: Promise<{ variant: string | undefined }>;
 };
 
-/**
- * Generate static params for popular products
- * This enables PPR subshells for category + product combinations
- */
 export async function generateStaticParams() {
   const products = await getAllProducts();
 
@@ -41,19 +37,30 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-export default async function ProductPage({ params, searchParams }: PageProps) {
-  const { id } = await params;
-  const sp = await searchParams;
-
+async function DynamicProductContent({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string; category: string }>;
+  searchParams: Promise<{ variant: string | undefined }>;
+}) {
+  const [{ id }, sp] = await Promise.all([params, searchParams]);
   const selectedVariantColor = pickFirst(sp, "variant");
 
   return (
+    <>
+      <SingleProduct id={id} selectedVariantColor={selectedVariantColor} />
+      <SuspenseRandomProducts productIdToExclude={Number(id)} />
+    </>
+  );
+}
+
+export default async function ProductPage({ params, searchParams }: PageProps) {
+  return (
     <section className="pt-14">
       <Suspense fallback={<SingleProductSkeleton />}>
-        <SingleProduct id={id} selectedVariantColor={selectedVariantColor} />
+        <DynamicProductContent params={params} searchParams={searchParams} />
       </Suspense>
-
-      <SuspenseRandomProducts productIdToExclude={Number(id)} />
     </section>
   );
 }
