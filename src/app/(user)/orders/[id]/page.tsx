@@ -3,8 +3,12 @@ import type {
   ProductWithVariants,
   OrderProductWithDetails,
 } from "@/lib/db/drizzle/schema";
-import { GridProducts, ProductItem } from "@/components/products";
-import { OrderSummary, OrderSummarySkeleton } from "@/components/orders";
+import { GridProducts } from "@/components/products";
+import {
+  OrderProduct,
+  OrderSummary,
+  OrderSummarySkeleton,
+} from "@/components/orders";
 import { HiArrowLeft } from "react-icons/hi";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -60,12 +64,15 @@ const OrderProducts = async ({ id }: { id: string }) => {
     );
   }
 
-  const allProducts: ProductWithVariants[] = order.orderProducts.map(
+  const allProducts = order.orderProducts.map(
     (orderProduct: OrderProductWithDetails) => {
       const variant = orderProduct.variant;
       const product = variant.product;
-      return {
+
+      const productWithVariants: ProductWithVariants = {
         ...product,
+        // Show the bought variant image (like in the cart)
+        img: variant.images[0] ?? product.img,
         variants: [
           {
             id: variant.id,
@@ -79,6 +86,13 @@ const OrderProducts = async ({ id }: { id: string }) => {
           },
         ],
       };
+
+      return {
+        orderProductId: orderProduct.id,
+        product: productWithVariants,
+        size: orderProduct.size,
+        quantity: orderProduct.quantity,
+      };
     },
   );
 
@@ -90,8 +104,13 @@ const OrderProducts = async ({ id }: { id: string }) => {
         <div className="flex-1">
           <h2 className="mb-6 text-2xl font-bold">Order Items</h2>
           <GridProducts className="cart-ord-mobile">
-            {allProducts.map((product) => (
-              <ProductItem key={product.id} product={product} />
+            {allProducts.map(({ orderProductId, product, size, quantity }) => (
+              <OrderProduct
+                key={orderProductId}
+                product={product}
+                size={size}
+                quantity={quantity}
+              />
             ))}
           </GridProducts>
         </div>
