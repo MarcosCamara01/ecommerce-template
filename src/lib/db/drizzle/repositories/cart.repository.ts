@@ -1,7 +1,11 @@
 import { eq, and } from "drizzle-orm";
 import { db, withRLS } from "../connection";
 import { cartItems, productsVariants, productsItems } from "../schema";
-import type { CartItem, InsertCartItem, ProductSize } from "@/schemas";
+import type {
+  CartItem,
+  InsertCartItem,
+  ProductSize,
+} from "@/lib/db/drizzle/schema";
 
 export const cartRepository = {
   async findByUserId(userId: string): Promise<CartItem[]> {
@@ -24,8 +28,14 @@ export const cartRepository = {
           product: productsItems,
         })
         .from(cartItems)
-        .innerJoin(productsVariants, eq(cartItems.variantId, productsVariants.id))
-        .innerJoin(productsItems, eq(productsVariants.productId, productsItems.id))
+        .innerJoin(
+          productsVariants,
+          eq(cartItems.variantId, productsVariants.id),
+        )
+        .innerJoin(
+          productsItems,
+          eq(productsVariants.productId, productsItems.id),
+        )
         .where(eq(cartItems.userId, userId));
 
       return result.map((row) => ({
@@ -37,8 +47,10 @@ export const cartRepository = {
           color: row.variant.color,
           sizes: row.variant.sizes,
           images: row.variant.images,
-          createdAt: row.variant.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt: row.variant.updatedAt?.toISOString() ?? new Date().toISOString(),
+          createdAt:
+            row.variant.createdAt?.toISOString() ?? new Date().toISOString(),
+          updatedAt:
+            row.variant.updatedAt?.toISOString() ?? new Date().toISOString(),
         },
         product: {
           id: row.product.id,
@@ -47,8 +59,10 @@ export const cartRepository = {
           price: Number(row.product.price),
           category: row.product.category,
           img: row.product.img,
-          createdAt: row.product.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt: row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
+          createdAt:
+            row.product.createdAt?.toISOString() ?? new Date().toISOString(),
+          updatedAt:
+            row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
         },
       }));
     });
@@ -57,7 +71,7 @@ export const cartRepository = {
   async findOne(
     userId: string,
     variantId: number,
-    size: ProductSize
+    size: ProductSize,
   ): Promise<CartItem | null> {
     return withRLS(userId, async () => {
       const [result] = await db
@@ -67,8 +81,8 @@ export const cartRepository = {
           and(
             eq(cartItems.userId, userId),
             eq(cartItems.variantId, variantId),
-            eq(cartItems.size, size)
-          )
+            eq(cartItems.size, size),
+          ),
         );
 
       return result ? transformCartItem(result) : null;
@@ -80,11 +94,14 @@ export const cartRepository = {
       const existing = await this.findOneInternal(
         data.userId,
         data.variantId,
-        data.size as ProductSize
+        data.size as ProductSize,
       );
 
       if (existing) {
-        return this.updateQuantityInternal(existing.id, existing.quantity + data.quantity);
+        return this.updateQuantityInternal(
+          existing.id,
+          existing.quantity + data.quantity,
+        );
       }
 
       const [result] = await db
@@ -122,7 +139,7 @@ export const cartRepository = {
   async updateQuantity(
     userId: string,
     id: number,
-    quantity: number
+    quantity: number,
   ): Promise<CartItem | null> {
     return withRLS(userId, async () => {
       return this.updateQuantityInternal(id, quantity);
@@ -151,7 +168,7 @@ export const cartRepository = {
   async findOneInternal(
     userId: string,
     variantId: number,
-    size: ProductSize
+    size: ProductSize,
   ): Promise<CartItem | null> {
     const [result] = await db
       .select()
@@ -160,14 +177,17 @@ export const cartRepository = {
         and(
           eq(cartItems.userId, userId),
           eq(cartItems.variantId, variantId),
-          eq(cartItems.size, size)
-        )
+          eq(cartItems.size, size),
+        ),
       );
 
     return result ? transformCartItem(result) : null;
   },
 
-  async updateQuantityInternal(id: number, quantity: number): Promise<CartItem | null> {
+  async updateQuantityInternal(
+    id: number,
+    quantity: number,
+  ): Promise<CartItem | null> {
     const [result] = await db
       .update(cartItems)
       .set({ quantity })

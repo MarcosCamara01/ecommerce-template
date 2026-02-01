@@ -1,5 +1,9 @@
 import { cartRepository } from "@/lib/db/drizzle/repositories";
-import type { CartItem, AddToCartInput, ProductSize } from "@/schemas";
+import type {
+  CartItem,
+  AddToCartInput,
+  ProductSize,
+} from "@/lib/db/drizzle/schema";
 
 export async function getCart(userId: string): Promise<CartItem[]> {
   try {
@@ -21,7 +25,7 @@ export async function getCartWithDetails(userId: string) {
 
 export async function addToCart(
   userId: string,
-  cartItem: AddToCartInput
+  cartItem: AddToCartInput,
 ): Promise<CartItem | null> {
   try {
     return await cartRepository.upsert({
@@ -36,7 +40,7 @@ export async function addToCart(
 
 export async function removeFromCart(
   userId: string,
-  cartItemId: number
+  cartItemId: number,
 ): Promise<boolean> {
   try {
     return await cartRepository.delete(userId, cartItemId);
@@ -49,7 +53,7 @@ export async function removeFromCart(
 export async function updateCartItem(
   userId: string,
   cartItemId: number,
-  quantity: number
+  quantity: number,
 ): Promise<CartItem | null> {
   try {
     return await cartRepository.updateQuantity(userId, cartItemId, quantity);
@@ -71,7 +75,7 @@ export async function clearCart(userId: string): Promise<boolean> {
 export async function findCartItem(
   userId: string,
   variantId: number,
-  size: ProductSize
+  size: ProductSize,
 ): Promise<CartItem | null> {
   try {
     return await cartRepository.findOne(userId, variantId, size);

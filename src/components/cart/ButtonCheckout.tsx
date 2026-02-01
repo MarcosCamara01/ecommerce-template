@@ -7,13 +7,13 @@ import { useMutation } from "@tanstack/react-query";
 /** COMPONENTS */
 import LoadingButton from "@/components/ui/loadingButton";
 /** TYPES */
-import type { CartItem } from "@/schemas";
+import type { CartItem } from "@/lib/db/drizzle/schema";
 
 interface ButtonCheckoutProps {
-  cartItems: CartItem[];
+  cartItemIds: CartItem["id"][];
 }
 
-export const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
+export const ButtonCheckout = ({ cartItemIds }: ButtonCheckoutProps) => {
   const { data: session } = useSession();
 
   const { mutate: buyProducts, isPending } = useMutation({
@@ -25,24 +25,25 @@ export const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
       const response = await fetch("/api/stripe/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cartItems, userId: session.user.id }),
+        body: JSON.stringify({ cartItemIds }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || "Error adding to cart";
+        const errorMessage = errorData.message || "Error processing checkout";
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
+
       window.location.href = data.session.url;
     },
     onError: (error) => {
-      console.error(error);
+      console.error("Checkout error:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "An error occurred while processing your request. Please try again."
+          : "An error occurred while processing your request. Please try again.",
       );
     },
   });
@@ -52,6 +53,7 @@ export const ButtonCheckout = ({ cartItems }: ButtonCheckoutProps) => {
       onClick={() => buyProducts()}
       className="w-full rounded-none bg-background-secondary p-2.5 h-full transition-all hover:bg-background-tertiary"
       loading={isPending}
+      disabled={cartItemIds.length === 0}
     >
       Continue
     </LoadingButton>

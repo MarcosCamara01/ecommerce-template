@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { WishlistItemSchema, type WishlistItem } from "@/schemas";
+import {
+  selectWishlistItemSchema,
+  type WishlistItem,
+} from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { WISHLIST_QUERY_KEYS } from "../keys";
@@ -18,7 +21,7 @@ export const useWishlistMutation = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -28,7 +31,7 @@ export const useWishlistMutation = () => {
       }
 
       const { item } = await response.json();
-      return WishlistItemSchema.parse(item);
+      return selectWishlistItemSchema.parse(item);
     },
     onMutate: async (productId: number) => {
       if (!session?.user?.id) {
@@ -41,7 +44,7 @@ export const useWishlistMutation = () => {
       });
 
       const previousData = queryClient.getQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(session.user.id)
+        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
       );
 
       const tempItem: WishlistItem = {
@@ -59,7 +62,7 @@ export const useWishlistMutation = () => {
             return old;
           }
           return { items: [tempItem, ...old.items] };
-        }
+        },
       );
 
       return { previousData, tempItem };
@@ -77,7 +80,7 @@ export const useWishlistMutation = () => {
             .filter((i) => i.id !== tempItem.id)
             .filter((i) => i.productId !== data.productId)
             .concat(data),
-        })
+        }),
       );
     },
     onError: (error, _, context) => {
@@ -88,7 +91,7 @@ export const useWishlistMutation = () => {
       if (previousData) {
         queryClient.setQueryData<WishlistResponse>(
           WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
-          previousData
+          previousData,
         );
       }
 
@@ -125,7 +128,7 @@ export const useWishlistMutation = () => {
       });
 
       const previousData = queryClient.getQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(session.user.id)
+        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
       );
 
       queryClient.setQueryData<WishlistResponse>(
@@ -134,9 +137,9 @@ export const useWishlistMutation = () => {
           items: current.items.filter((i) =>
             params.itemId
               ? i.id !== params.itemId
-              : i.productId !== params.productId
+              : i.productId !== params.productId,
           ),
-        })
+        }),
       );
 
       return { previousData };
@@ -147,7 +150,7 @@ export const useWishlistMutation = () => {
       if (previousData) {
         queryClient.setQueryData<WishlistResponse>(
           WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
-          previousData
+          previousData,
         );
       }
 

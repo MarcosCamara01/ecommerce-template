@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { cn } from "@/lib/utils";
-import type { ProductCategory } from "@/schemas";
+import type { ProductCategory } from "@/lib/db/drizzle/schema";
 
 const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: "t-shirts", label: "T-Shirts" },
@@ -43,9 +43,13 @@ interface BasicInfoProps {
 export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
   ({ errors, initialData }, ref) => {
     const [name, setName] = useState(initialData?.name || "");
-    const [description, setDescription] = useState(initialData?.description || "");
+    const [description, setDescription] = useState(
+      initialData?.description || "",
+    );
     const [price, setPrice] = useState(initialData?.price?.toString() || "");
-    const [category, setCategory] = useState<ProductCategory | "">(initialData?.category || "");
+    const [category, setCategory] = useState<ProductCategory | "">(
+      initialData?.category || "",
+    );
 
     useImperativeHandle(ref, () => ({
       name,
@@ -64,7 +68,10 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
       <div className="space-y-5">
         {/* Product Name */}
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-sm font-medium text-color-secondary">
+          <Label
+            htmlFor="name"
+            className="text-sm font-medium text-color-secondary"
+          >
             Product Name <span className="text-red-400">*</span>
           </Label>
           <Input
@@ -74,7 +81,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             placeholder="Enter product name"
             className={cn(
               "h-11",
-              errors?.name && "border-red-500 focus-visible:ring-red-500"
+              errors?.name && "border-red-500 focus-visible:ring-red-500",
             )}
           />
           {errors?.name && (
@@ -84,7 +91,10 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
 
         {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm font-medium text-color-secondary">
+          <Label
+            htmlFor="description"
+            className="text-sm font-medium text-color-secondary"
+          >
             Description <span className="text-red-400">*</span>
           </Label>
           <Textarea
@@ -94,11 +104,14 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             placeholder="Describe your product in detail..."
             className={cn(
               "min-h-[120px] resize-none",
-              errors?.description && "border-red-500 focus-visible:ring-red-500"
+              errors?.description &&
+                "border-red-500 focus-visible:ring-red-500",
             )}
           />
           {errors?.description && (
-            <p className="text-sm text-red-400 font-medium">{errors.description[0]}</p>
+            <p className="text-sm text-red-400 font-medium">
+              {errors.description[0]}
+            </p>
           )}
         </div>
 
@@ -106,7 +119,10 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Price */}
           <div className="space-y-2">
-            <Label htmlFor="price" className="text-sm font-medium text-color-secondary">
+            <Label
+              htmlFor="price"
+              className="text-sm font-medium text-color-secondary"
+            >
               Price (€) <span className="text-red-400">*</span>
             </Label>
             <div className="relative">
@@ -123,26 +139,35 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
                 placeholder="0.00"
                 className={cn(
                   "h-11 pl-8",
-                  errors?.price && "border-red-500 focus-visible:ring-red-500"
+                  errors?.price && "border-red-500 focus-visible:ring-red-500",
                 )}
               />
             </div>
             {errors?.price && (
-              <p className="text-sm text-red-400 font-medium">{errors.price[0]}</p>
+              <p className="text-sm text-red-400 font-medium">
+                {errors.price[0]}
+              </p>
             )}
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-sm font-medium text-color-secondary">
+            <Label
+              htmlFor="category"
+              className="text-sm font-medium text-color-secondary"
+            >
               Category <span className="text-red-400">*</span>
             </Label>
-            <Select value={category} onValueChange={(v) => setCategory(v as ProductCategory)}>
-              <SelectTrigger 
+            <Select
+              value={category}
+              onValueChange={(v) => setCategory(v as ProductCategory)}
+            >
+              <SelectTrigger
                 id="category"
                 className={cn(
                   "h-11",
-                  errors?.category && "border-red-500 focus-visible:ring-red-500"
+                  errors?.category &&
+                    "border-red-500 focus-visible:ring-red-500",
                 )}
               >
                 <SelectValue placeholder="Select a category" />
@@ -156,13 +181,15 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
               </SelectContent>
             </Select>
             {errors?.category && (
-              <p className="text-sm text-red-400 font-medium">{errors.category[0]}</p>
+              <p className="text-sm text-red-400 font-medium">
+                {errors.category[0]}
+              </p>
             )}
           </div>
         </div>
       </div>
     );
-  }
+  },
 );
 
 BasicInfo.displayName = "BasicInfo";

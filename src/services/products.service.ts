@@ -5,7 +5,7 @@ import type {
   InsertProduct,
   InsertProductVariant,
   ProductCategory,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 export async function getAllProducts(): Promise<ProductWithVariants[]> {
   try {
@@ -17,7 +17,7 @@ export async function getAllProducts(): Promise<ProductWithVariants[]> {
 }
 
 export async function getProductById(
-  id: number
+  id: number,
 ): Promise<ProductWithVariants | null> {
   try {
     return await productsRepository.findById(id);
@@ -28,7 +28,7 @@ export async function getProductById(
 }
 
 export async function getProductsByCategory(
-  category: string
+  category: string,
 ): Promise<ProductWithVariants[]> {
   try {
     return await productsRepository.findByCategory(category as ProductCategory);
@@ -39,7 +39,7 @@ export async function getProductsByCategory(
 }
 
 export async function createProduct(
-  product: InsertProduct
+  product: InsertProduct,
 ): Promise<Product | null> {
   try {
     return await productsRepository.create(product);
@@ -51,7 +51,7 @@ export async function createProduct(
 
 export async function createProductWithVariants(
   product: InsertProduct,
-  variants: Omit<InsertProductVariant, "productId">[]
+  variants: Omit<InsertProductVariant, "productId">[],
 ): Promise<ProductWithVariants | null> {
   try {
     return await productsRepository.createWithVariants(product, variants);
@@ -63,7 +63,7 @@ export async function createProductWithVariants(
 
 export async function updateProduct(
   id: number,
-  product: Partial<InsertProduct>
+  product: Partial<InsertProduct>,
 ): Promise<Product | null> {
   try {
     return await productsRepository.update(id, product);
@@ -83,7 +83,7 @@ export async function deleteProduct(id: number): Promise<boolean> {
 }
 
 export async function searchProductsInDB(
-  query: string
+  query: string,
 ): Promise<ProductWithVariants[]> {
   try {
     return await productsRepository.search(query);
@@ -94,7 +94,7 @@ export async function searchProductsInDB(
 }
 
 export async function getRandomProducts(
-  limit: number = 4
+  limit: number = 4,
 ): Promise<ProductWithVariants[]> {
   try {
     return await productsRepository.findRandom(limit);

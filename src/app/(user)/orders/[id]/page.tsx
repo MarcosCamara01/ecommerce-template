@@ -1,5 +1,8 @@
 import { getOrder } from "../action";
-import type { ProductWithVariants, OrderProductWithDetails } from "@/schemas";
+import type {
+  ProductWithVariants,
+  OrderProductWithDetails,
+} from "@/lib/db/drizzle/schema";
 import { GridProducts, ProductItem } from "@/components/products";
 import { OrderSummary, OrderSummarySkeleton } from "@/components/orders";
 import { HiArrowLeft } from "react-icons/hi";

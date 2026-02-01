@@ -9,7 +9,7 @@ import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { useWishlistMutation } from "@/hooks/wishlist/mutations/useWishlistMutation";
 
 interface WishlistButtonProps {
@@ -33,7 +33,7 @@ const WishlistButton = ({ productId }: WishlistButtonProps) => {
     },
     {
       wait: 300,
-    }
+    },
   );
 
   if (isLoading) {

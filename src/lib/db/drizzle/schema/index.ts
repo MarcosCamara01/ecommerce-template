@@ -44,10 +44,12 @@ export {
   insertCartItemSchema,
   updateCartItemSchema,
   addToCartSchema,
+  minimalCartItemSchema,
   type CartItem,
   type InsertCartItem,
   type UpdateCartItem,
   type AddToCartInput,
+  type MinimalCartItem,
 } from "./cart";
 
 // Orders

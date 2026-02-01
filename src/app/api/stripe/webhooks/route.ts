@@ -6,6 +6,8 @@ import { handleWebhookEvent } from "@/lib/stripe/handlers";
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+
   try {
     const payload = await req.text();
     const signature = req.headers.get("stripe-signature");
@@ -18,7 +20,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify webhook signature
     let event;
     try {
       event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
@@ -30,18 +31,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Process the event
+    stripeLogger.webhook(event.type, event.id, "received");
+
     const result = await handleWebhookEvent(event);
+    const processingTime = Date.now() - startTime;
 
     if (!result.success) {
-      // Return 200 even on processing errors to prevent Stripe retries
-      // The error is logged and can be investigated
+      stripeLogger.webhook(event.type, event.id, "failed", {
+        error: result.error,
+        processingTimeMs: processingTime,
+      });
+
+      // 500 triggers Stripe retry, 200 acknowledges without retry
+      if (result.retryable) {
+        return NextResponse.json(
+          { error: "Temporary processing error", retryable: true },
+          { status: 500 }
+        );
+      }
+
       return NextResponse.json({
         received: true,
         processed: false,
         error: result.error,
       });
     }
+
+    stripeLogger.webhook(event.type, event.id, "processed", {
+      handled: result.handled,
+      processingTimeMs: processingTime,
+    });
 
     return NextResponse.json({
       received: true,
