@@ -1,7 +1,7 @@
 /** COMPONENTS */
 import Image from "next/image";
 /** TYPES */
-import type { Product, ProductVariant } from "@/schemas";
+import type { Product, ProductVariant } from "@/lib/db/drizzle/schema";
 
 interface ProductImageProps {
   image: ProductVariant["images"][number];

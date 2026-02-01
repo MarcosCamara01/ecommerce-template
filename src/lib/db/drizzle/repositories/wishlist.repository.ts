@@ -1,7 +1,7 @@
 import { eq, and, desc } from "drizzle-orm";
 import { db, withRLS } from "../connection";
 import { wishlist, productsItems, productsVariants } from "../schema";
-import type { WishlistItem, InsertWishlistItem } from "@/schemas";
+import type { WishlistItem, InsertWishlistItem } from "@/lib/db/drizzle/schema";
 
 export const wishlistRepository = {
   async findByUserId(userId: string): Promise<WishlistItem[]> {
@@ -35,7 +35,7 @@ export const wishlistRepository = {
         .where(
           productIds.length > 0
             ? eq(productsVariants.productId, productIds[0])
-            : undefined
+            : undefined,
         );
 
       const variantsByProduct = new Map<number, typeof variants>();
@@ -54,8 +54,10 @@ export const wishlistRepository = {
           price: Number(row.product.price),
           category: row.product.category,
           img: row.product.img,
-          createdAt: row.product.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt: row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
+          createdAt:
+            row.product.createdAt?.toISOString() ?? new Date().toISOString(),
+          updatedAt:
+            row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
           variants: (variantsByProduct.get(row.product.id) || []).map((v) => ({
             id: v.id,
             productId: v.productId,
@@ -76,7 +78,9 @@ export const wishlistRepository = {
       const [result] = await db
         .select({ id: wishlist.id })
         .from(wishlist)
-        .where(and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)));
+        .where(
+          and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
+        );
 
       return !!result;
     });
@@ -88,7 +92,10 @@ export const wishlistRepository = {
         .select({ id: wishlist.id })
         .from(wishlist)
         .where(
-          and(eq(wishlist.userId, data.userId), eq(wishlist.productId, data.productId))
+          and(
+            eq(wishlist.userId, data.userId),
+            eq(wishlist.productId, data.productId),
+          ),
         );
 
       if (existing) return null;
@@ -113,11 +120,16 @@ export const wishlistRepository = {
     });
   },
 
-  async deleteByUserAndProduct(userId: string, productId: number): Promise<boolean> {
+  async deleteByUserAndProduct(
+    userId: string,
+    productId: number,
+  ): Promise<boolean> {
     return withRLS(userId, async () => {
       const result = await db
         .delete(wishlist)
-        .where(and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)))
+        .where(
+          and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
+        )
         .returning({ id: wishlist.id });
 
       return result.length > 0;
@@ -126,18 +138,22 @@ export const wishlistRepository = {
 
   async toggle(
     userId: string,
-    productId: number
+    productId: number,
   ): Promise<{ added: boolean; item: WishlistItem | null }> {
     return withRLS(userId, async () => {
       const [existing] = await db
         .select({ id: wishlist.id })
         .from(wishlist)
-        .where(and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)));
+        .where(
+          and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
+        );
 
       if (existing) {
         await db
           .delete(wishlist)
-          .where(and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)));
+          .where(
+            and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
+          );
         return { added: false, item: null };
       }
 
@@ -161,7 +177,9 @@ export const wishlistRepository = {
   },
 };
 
-function transformWishlistItem(row: typeof wishlist.$inferSelect): WishlistItem {
+function transformWishlistItem(
+  row: typeof wishlist.$inferSelect,
+): WishlistItem {
   return {
     id: row.id,
     userId: row.userId,

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import { ProductImage } from "../products/ProductImage";
 /** TYPES */
-import type { Product, ProductVariant } from "@/schemas";
+import type { Product, ProductVariant } from "@/lib/db/drizzle/schema";
 
 interface ProductImagesProps {
   name: Product["name"];

@@ -5,7 +5,10 @@ import { colorMapping } from "@/constants/colors";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 /** TYPES */
-import type { ProductVariant, ProductWithVariants } from "@/schemas";
+import type {
+  ProductVariant,
+  ProductWithVariants,
+} from "@/lib/db/drizzle/schema";
 
 interface ColorsProps {
   variants: ProductWithVariants["variants"];
@@ -43,7 +46,7 @@ export function Colors({
               "border-border-secondary": selectedVariantColor === v.color,
               "w-8 h-8": !compact,
               "w-6 h-6": compact,
-            }
+            },
           )}
           style={{ backgroundColor: colorMapping[v.color.toLowerCase()] }}
           onClick={() => handleColorChange(v)}

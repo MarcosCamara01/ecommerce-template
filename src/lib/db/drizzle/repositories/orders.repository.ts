@@ -13,7 +13,7 @@ import type {
   InsertOrderItem,
   InsertOrderProduct,
   InsertCustomerInfo,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 export const ordersRepository = {
   /**
@@ -29,7 +29,9 @@ export const ordersRepository = {
   /**
    * Find order by Stripe session ID
    */
-  async findByStripeSessionId(stripeSessionId: string): Promise<OrderWithDetails | null> {
+  async findByStripeSessionId(
+    stripeSessionId: string,
+  ): Promise<OrderWithDetails | null> {
     const customer = await db.query.customerInfo.findFirst({
       where: eq(customerInfo.stripeOrderId, stripeSessionId),
     });
@@ -80,7 +82,9 @@ export const ordersRepository = {
     return order ? transformOrderWithDetails(order) : null;
   },
 
-  async findByOrderNumber(orderNumber: number): Promise<OrderWithDetails | null> {
+  async findByOrderNumber(
+    orderNumber: number,
+  ): Promise<OrderWithDetails | null> {
     const order = await db.query.orderItems.findFirst({
       where: eq(orderItems.orderNumber, orderNumber),
       with: {
@@ -103,7 +107,7 @@ export const ordersRepository = {
   async createComplete(
     orderData: InsertOrderItem,
     customerData: Omit<InsertCustomerInfo, "orderId">,
-    products: Omit<InsertOrderProduct, "orderId">[]
+    products: Omit<InsertOrderProduct, "orderId">[],
   ): Promise<OrderWithDetails | null> {
     return await db.transaction(async (tx) => {
       const [newOrder] = await tx
@@ -133,7 +137,7 @@ export const ordersRepository = {
           variantId: p.variantId,
           quantity: p.quantity,
           size: p.size,
-        }))
+        })),
       );
 
       return this.findById(newOrder.id);
@@ -153,7 +157,10 @@ export const ordersRepository = {
     return result ? transformOrderItem(result) : null;
   },
 
-  async addCustomerInfo(orderId: number, data: Omit<InsertCustomerInfo, "orderId">) {
+  async addCustomerInfo(
+    orderId: number,
+    data: Omit<InsertCustomerInfo, "orderId">,
+  ) {
     const [result] = await db
       .insert(customerInfo)
       .values({
@@ -170,7 +177,10 @@ export const ordersRepository = {
     return result;
   },
 
-  async addProducts(orderId: number, products: Omit<InsertOrderProduct, "orderId">[]) {
+  async addProducts(
+    orderId: number,
+    products: Omit<InsertOrderProduct, "orderId">[],
+  ) {
     const result = await db
       .insert(orderProducts)
       .values(
@@ -179,7 +189,7 @@ export const ordersRepository = {
           variantId: p.variantId,
           quantity: p.quantity,
           size: p.size,
-        }))
+        })),
       )
       .returning();
 
@@ -246,8 +256,12 @@ function transformOrderWithDetails(row: {
           address: row.customerInfo.address,
           stripeOrderId: row.customerInfo.stripeOrderId,
           totalPrice: row.customerInfo.totalPrice,
-          createdAt: row.customerInfo.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt: row.customerInfo.updatedAt?.toISOString() ?? new Date().toISOString(),
+          createdAt:
+            row.customerInfo.createdAt?.toISOString() ??
+            new Date().toISOString(),
+          updatedAt:
+            row.customerInfo.updatedAt?.toISOString() ??
+            new Date().toISOString(),
         }
       : {
           id: 0,
@@ -276,8 +290,10 @@ function transformOrderWithDetails(row: {
         color: op.variant.color,
         sizes: op.variant.sizes,
         images: op.variant.images,
-        createdAt: op.variant.createdAt?.toISOString() ?? new Date().toISOString(),
-        updatedAt: op.variant.updatedAt?.toISOString() ?? new Date().toISOString(),
+        createdAt:
+          op.variant.createdAt?.toISOString() ?? new Date().toISOString(),
+        updatedAt:
+          op.variant.updatedAt?.toISOString() ?? new Date().toISOString(),
         product: {
           id: op.variant.product.id,
           name: op.variant.product.name,
@@ -285,8 +301,12 @@ function transformOrderWithDetails(row: {
           price: Number(op.variant.product.price),
           category: op.variant.product.category,
           img: op.variant.product.img,
-          createdAt: op.variant.product.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt: op.variant.product.updatedAt?.toISOString() ?? new Date().toISOString(),
+          createdAt:
+            op.variant.product.createdAt?.toISOString() ??
+            new Date().toISOString(),
+          updatedAt:
+            op.variant.product.updatedAt?.toISOString() ??
+            new Date().toISOString(),
         },
       },
     })),

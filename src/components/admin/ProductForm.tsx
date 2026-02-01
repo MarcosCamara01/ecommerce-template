@@ -5,13 +5,19 @@ import { useProductMutation } from "@/hooks/product/mutations/useProductMutation
 import { Button } from "@/components/ui/button";
 import LoadingButton from "@/components/ui/loadingButton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
 import { BasicInfo, type BasicInfoRef } from "./BasicInfo";
 import { MainImage, type MainImageRef } from "./MainImage";
 import { VariantsSection, type VariantsSectionRef } from "./VariantsSection";
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
 
 export type { ProductFormData };
@@ -28,8 +34,13 @@ interface ProductFormProps {
   onSuccess?: (product: ProductWithVariants) => void;
 }
 
-export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) {
-  const { createAsync, updateAsync, isPending, isUpdatePending } = useProductMutation();
+export function ProductForm({
+  mode,
+  initialData,
+  onSuccess,
+}: ProductFormProps) {
+  const { createAsync, updateAsync, isPending, isUpdatePending } =
+    useProductMutation();
   const [state, setState] = useState<FormState>({
     success: false,
     message: "",
@@ -46,7 +57,7 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
     e.preventDefault();
 
     const formData = new FormData();
-    
+
     if (mode === "edit" && initialData?.id) {
       formData.append("id", initialData.id.toString());
     }
@@ -73,7 +84,7 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
       });
       formData.append(
         `variant_${index}_imageCount`,
-        variantImages.length.toString()
+        variantImages.length.toString(),
       );
     });
 
@@ -91,9 +102,10 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
     formData.append("variants", JSON.stringify(variantsForSubmit));
 
     try {
-      const result = mode === "create" 
-        ? await createAsync(formData)
-        : await updateAsync(formData);
+      const result =
+        mode === "create"
+          ? await createAsync(formData)
+          : await updateAsync(formData);
 
       setState({
         success: result.success,
@@ -121,16 +133,23 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
   };
 
   const title = mode === "create" ? "Create Product" : "Edit Product";
-  const subtitle = mode === "create"
-    ? "Add a new product with variants and images to your store"
-    : "Update product information, variants and images";
-  const submitButtonText = mode === "create" ? "Create Product" : "Update Product";
+  const subtitle =
+    mode === "create"
+      ? "Add a new product with variants and images to your store"
+      : "Update product information, variants and images";
+  const submitButtonText =
+    mode === "create" ? "Create Product" : "Update Product";
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 md:p-8 space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-3xl mx-auto p-6 md:p-8 space-y-6"
+    >
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-color-primary">{title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-color-primary">
+          {title}
+        </h1>
         <p className="text-color-tertiary">{subtitle}</p>
       </div>
 
@@ -165,9 +184,9 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
           </div>
         </CardHeader>
         <CardContent>
-          <BasicInfo 
-            ref={basicInfoRef} 
-            errors={state.errors} 
+          <BasicInfo
+            ref={basicInfoRef}
+            errors={state.errors}
             initialData={initialData?.basicInfo}
           />
         </CardContent>
@@ -189,8 +208,8 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
           </div>
         </CardHeader>
         <CardContent>
-          <MainImage 
-            ref={mainImageRef} 
+          <MainImage
+            ref={mainImageRef}
             errors={state.errors}
             initialImageUrl={initialData?.mainImageUrl}
           />
@@ -213,7 +232,7 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
           </div>
         </CardHeader>
         <CardContent>
-          <VariantsSection 
+          <VariantsSection
             ref={variantsSectionRef}
             initialVariants={initialData?.variants}
           />
@@ -234,9 +253,9 @@ export function ProductForm({ mode, initialData, onSuccess }: ProductFormProps) 
               <FiX className="mr-2 h-4 w-4" />
               {mode === "create" ? "Clear Form" : "Reset Changes"}
             </Button>
-            <LoadingButton 
-              loading={isLoading} 
-              className="flex-1 bg-white text-black hover:bg-white/90" 
+            <LoadingButton
+              loading={isLoading}
+              className="flex-1 bg-white text-black hover:bg-white/90"
               size="lg"
               icon={<FiCheck className="h-4 w-4" />}
               iconPosition="left"

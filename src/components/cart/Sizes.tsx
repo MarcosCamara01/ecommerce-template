@@ -6,9 +6,9 @@ import { useImperativeHandle, useState, forwardRef, Ref } from "react";
 /** TYPES */
 import {
   type ProductVariant,
-  ProductSizeEnum,
+  ProductSizeZod,
   type ProductSize,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 export type SizesRef = {
   selectedSize: ProductSize;
@@ -24,7 +24,7 @@ export const Sizes = forwardRef(
     const availableSizes = new Set(productSizes);
 
     const [selectedSize, setSelectedSize] = useState<ProductSize>(
-      productSizes[0]
+      productSizes[0],
     );
 
     useImperativeHandle(ref, () => ({
@@ -44,7 +44,7 @@ export const Sizes = forwardRef(
           "grid-cols-6 sm:grid-cols-8 gap-1.5": compact,
         })}
       >
-        {ProductSizeEnum.options.map((size) => {
+        {ProductSizeZod.options.map((size) => {
           const isAvailable = availableSizes.has(size);
           return (
             <button
@@ -57,7 +57,7 @@ export const Sizes = forwardRef(
                   "bg-white text-black": selectedSize === size && isAvailable,
                   "px-1 py-1.5 text-xs": !compact,
                   "px-2 py-1 text-[10px]": compact,
-                }
+                },
               )}
               onClick={() => handleSizeClick(size)}
             >
@@ -67,7 +67,7 @@ export const Sizes = forwardRef(
         })}
       </div>
     );
-  }
+  },
 );
 
 Sizes.displayName = "Sizes";
