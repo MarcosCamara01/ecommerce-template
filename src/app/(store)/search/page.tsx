@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { getAllProducts } from "@/app/actions";
 import { pickFirst, searchProducts } from "@/utils";
 import { GridProducts, ProductItem } from "@/components/products";
@@ -6,14 +8,10 @@ interface SearchProps {
   searchParams: Promise<{ q: string | undefined }>;
 }
 
-const Search = async ({ searchParams }: SearchProps) => {
-  const [products, params] = await Promise.all([
-    getAllProducts(),
-    searchParams,
-  ]);
+async function SearchResults({ searchParams }: SearchProps) {
+  const [products, params] = await Promise.all([getAllProducts(), searchParams]);
 
   const q = pickFirst(params, "q");
-
   const filteredProducts = searchProducts(products, q);
 
   return (
@@ -31,6 +29,12 @@ const Search = async ({ searchParams }: SearchProps) => {
       )}
     </section>
   );
-};
+}
 
-export default Search;
+export default function Search(props: SearchProps) {
+  return (
+    <Suspense fallback={<section className="pt-14" />}>
+      <SearchResults searchParams={props.searchParams} />
+    </Suspense>
+  );
+}

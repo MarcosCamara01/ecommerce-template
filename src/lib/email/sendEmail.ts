@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { CustomerInfo, OrderItem, OrderProduct } from "@/schemas";
+import { CustomerInfo, OrderItem, OrderProduct } from "@/lib/db/drizzle/schema";
 import { getAllProducts } from "@/app/actions";
 
 type OrderDetails = {
@@ -23,13 +23,13 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
       year: "numeric",
       month: "long",
       day: "numeric",
-    }
+    },
   );
 
   let productsHtml = products
     .map((item) => {
       const product = allProducts.find((p) =>
-        p.variants.some((v) => v.id === item.variantId)
+        p.variants.some((v) => v.id === item.variantId),
       );
       const variant = product?.variants.find((v) => v.id === item.variantId);
 
@@ -80,7 +80,7 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
         <h3 style="margin-top: 0; color: #333;">Order Details</h3>
         <p><strong>Order Number:</strong> #${order.orderNumber}</p>
         <p><strong>Order Date:</strong> ${new Date(
-          order.createdAt
+          order.createdAt,
         ).toLocaleDateString("en-US")}</p>
       </div>
 
@@ -128,7 +128,7 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
 
 async function sendCustomerEmail(
   data: Stripe.Checkout.Session,
-  orderDetails: OrderDetails
+  orderDetails: OrderDetails,
 ) {
   const message = await formatOrderEmail(orderDetails);
 
@@ -145,7 +145,7 @@ async function sendCustomerEmail(
       {
         method: "POST",
         body: JSON.stringify(emailCustomer),
-      }
+      },
     );
 
     if (!responseCustomer.ok) {
@@ -161,13 +161,13 @@ async function sendCustomerEmail(
 
 async function sendOwnerEmail(
   data: Stripe.Checkout.Session,
-  orderDetails: OrderDetails
+  orderDetails: OrderDetails,
 ) {
   const customerInfo = orderDetails.customerInfo;
   const totalPrice = (customerInfo.totalPrice / 100).toFixed(2);
   const productsCount = orderDetails.products.reduce(
     (sum, item) => sum + item.quantity,
-    0
+    0,
   );
 
   const allProducts = await getAllProducts();
@@ -175,7 +175,7 @@ async function sendOwnerEmail(
   const productsDetails = orderDetails.products
     .map((item) => {
       const product = allProducts.find((p) =>
-        p.variants.some((v) => v.id === item.variantId)
+        p.variants.some((v) => v.id === item.variantId),
       );
       const variant = product?.variants.find((v) => v.id === item.variantId);
 
@@ -206,8 +206,8 @@ async function sendOwnerEmail(
           customerInfo.address.line2 ? customerInfo.address.line2 + "<br/>" : ""
         }
         ${customerInfo.address.city || ""}, ${
-    customerInfo.address.postal_code || ""
-  } ${customerInfo.address.country || ""}<br/>
+          customerInfo.address.postal_code || ""
+        } ${customerInfo.address.country || ""}<br/>
         ${customerInfo.phone ? "Phone: " + customerInfo.phone : ""}
       </p>
     </div>
@@ -226,7 +226,7 @@ async function sendOwnerEmail(
       {
         method: "POST",
         body: JSON.stringify(emailOwner),
-      }
+      },
     );
 
     if (!responseEmailOwner.ok) {
@@ -242,7 +242,7 @@ async function sendOwnerEmail(
 
 export const sendEmail = async (
   data: Stripe.Checkout.Session,
-  orderDetails: OrderDetails
+  orderDetails: OrderDetails,
 ) => {
   try {
     await sendCustomerEmail(data, orderDetails);

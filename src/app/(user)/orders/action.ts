@@ -4,18 +4,18 @@ import { ordersRepository } from "@/lib/db/drizzle/repositories";
 import Stripe from "stripe";
 import { getUser } from "@/lib/auth/server";
 import {
-  OrderWithDetailsSchema,
-  InsertOrderItemSchema,
-  InsertCustomerInfoSchema,
-  InsertOrderProductSchema,
-} from "@/schemas";
+  orderWithDetailsSchema,
+  insertOrderItemSchema,
+  insertCustomerInfoSchema,
+  insertOrderProductSchema,
+} from "@/lib/db/drizzle/schema";
 import type {
   OrderItem,
   CustomerInfo,
   OrderProduct,
   OrderWithDetails,
   MinimalCartItem,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 export const getUserOrders = async (): Promise<OrderWithDetails[] | null> => {
   try {
@@ -28,7 +28,7 @@ export const getUserOrders = async (): Promise<OrderWithDetails[] | null> => {
     }
 
     const orders = await ordersRepository.findByUserId(userId);
-    return OrderWithDetailsSchema.array().parse(orders);
+    return orderWithDetailsSchema.array().parse(orders);
   } catch (error) {
     console.error("Unexpected error fetching orders:", error);
     if (error instanceof Error) {
@@ -56,7 +56,7 @@ export const getOrder = async (
       return null;
     }
 
-    return OrderWithDetailsSchema.parse(order);
+    return orderWithDetailsSchema.parse(order);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Error fetching order:", errorMessage);
@@ -74,7 +74,7 @@ export async function createOrderItem(
   const deliveryDate = new Date();
   deliveryDate.setDate(deliveryDate.getDate() + 7);
 
-  const orderItemToSave = InsertOrderItemSchema.parse({
+  const orderItemToSave = insertOrderItemSchema.parse({
     userId,
     deliveryDate,
     orderNumber,
@@ -96,7 +96,7 @@ export async function saveCustomerInfo(
   orderId: number,
   session: Stripe.Checkout.Session,
 ): Promise<CustomerInfo | null> {
-  const customerInfoToSave = InsertCustomerInfoSchema.parse({
+  const customerInfoToSave = insertCustomerInfoSchema.parse({
     orderId,
     name: session.customer_details?.name || "Unknown",
     email: session.customer_details?.email || "unknown@email.com",
@@ -154,7 +154,7 @@ export async function saveOrderProducts(
         return null;
       }
 
-      return InsertOrderProductSchema.parse({
+      return insertOrderProductSchema.parse({
         orderId,
         variantId: cartItem.variantId,
         quantity: lineItem.quantity || 1,

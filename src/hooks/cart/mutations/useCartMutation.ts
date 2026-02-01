@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CartItemSchema, type CartItem, type ProductSize } from "@/schemas";
+import {
+  selectCartItemSchema,
+  type CartItem,
+  type ProductSize,
+} from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { CART_QUERY_KEYS } from "../keys";
@@ -32,7 +36,7 @@ export const useCartMutation = () => {
       }
 
       const { item } = await response.json();
-      return CartItemSchema.parse(item);
+      return selectCartItemSchema.parse(item);
     },
     onMutate: async (params: {
       variantId: number;
@@ -52,10 +56,10 @@ export const useCartMutation = () => {
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(session.user.id)
+        CART_QUERY_KEYS.cartList(session.user.id),
       );
 
-      const tempItem = CartItemSchema.parse({
+      const tempItem = selectCartItemSchema.parse({
         id: -Math.floor(Math.random() * 1e9),
         userId: "temp",
         variantId,
@@ -70,7 +74,7 @@ export const useCartMutation = () => {
         CART_QUERY_KEYS.cartList(session.user.id),
         (old = { items: [] }) => {
           const idx = old.items.findIndex(
-            (i) => i.variantId === variantId && i.size === size
+            (i) => i.variantId === variantId && i.size === size,
           );
           if (idx >= 0) {
             const next = [...old.items];
@@ -82,7 +86,7 @@ export const useCartMutation = () => {
             return { items: next };
           }
           return { items: [tempItem, ...old.items] };
-        }
+        },
       );
 
       return { previousData, tempItem };
@@ -98,14 +102,14 @@ export const useCartMutation = () => {
         (old = { items: [] }) => {
           const filtered = old.items.filter((i) => i.id !== tempItem.id);
           const idx = filtered.findIndex(
-            (i) => i.variantId === data.variantId && i.size === data.size
+            (i) => i.variantId === data.variantId && i.size === data.size,
           );
           if (idx >= 0) {
             filtered[idx] = data;
             return { items: filtered };
           }
           return { items: [data, ...filtered] };
-        }
+        },
       );
     },
     onError: (error, _, context) => {
@@ -117,7 +121,7 @@ export const useCartMutation = () => {
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
           CART_QUERY_KEYS.cartList(session?.user?.id!),
-          previousData
+          previousData,
         );
       }
 
@@ -143,7 +147,7 @@ export const useCartMutation = () => {
       }
 
       const { item } = await response.json();
-      return CartItemSchema.parse(item);
+      return selectCartItemSchema.parse(item);
     },
     onMutate: async (params: { itemId: number; quantity: number }) => {
       if (!session?.user?.id) {
@@ -157,7 +161,7 @@ export const useCartMutation = () => {
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(session.user.id)
+        CART_QUERY_KEYS.cartList(session.user.id),
       );
 
       queryClient.setQueryData<CartResponse>(
@@ -173,7 +177,7 @@ export const useCartMutation = () => {
             };
           }
           return { items: next };
-        }
+        },
       );
 
       return { previousData };
@@ -186,7 +190,7 @@ export const useCartMutation = () => {
           const idx = next.findIndex((i) => i.id === data.id);
           if (idx >= 0) next[idx] = data;
           return { items: next };
-        }
+        },
       );
     },
     onError: (error, _, context) => {
@@ -195,7 +199,7 @@ export const useCartMutation = () => {
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
           CART_QUERY_KEYS.cartList(session?.user?.id!),
-          previousData
+          previousData,
         );
       }
 
@@ -235,14 +239,14 @@ export const useCartMutation = () => {
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(session.user.id)
+        CART_QUERY_KEYS.cartList(session.user.id),
       );
 
       queryClient.setQueryData<CartResponse>(
         CART_QUERY_KEYS.cartList(session.user.id),
         (current = { items: [] }) => ({
           items: current.items.filter((i) => i.id !== itemId),
-        })
+        }),
       );
 
       return { previousData };
@@ -253,7 +257,7 @@ export const useCartMutation = () => {
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
           CART_QUERY_KEYS.cartList(session?.user?.id!),
-          previousData
+          previousData,
         );
       }
 
@@ -286,12 +290,12 @@ export const useCartMutation = () => {
       });
 
       const previousData = queryClient.getQueryData<CartResponse>(
-        CART_QUERY_KEYS.cartList(session.user.id)
+        CART_QUERY_KEYS.cartList(session.user.id),
       );
 
       queryClient.setQueryData<CartResponse>(
         CART_QUERY_KEYS.cartList(session.user.id),
-        { items: [] }
+        { items: [] },
       );
 
       return { previousData };
@@ -302,7 +306,7 @@ export const useCartMutation = () => {
       if (previousData) {
         queryClient.setQueryData<CartResponse>(
           CART_QUERY_KEYS.cartList(session?.user?.id!),
-          previousData
+          previousData,
         );
       }
 

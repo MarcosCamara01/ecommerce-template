@@ -4,7 +4,11 @@ import Link from "next/link";
 import { DeleteButton } from "./DeleteButton";
 import { ProductCartInfo } from "./ProductCartInfo";
 /** TYPES */
-import type { CartItem, ProductVariant, ProductWithVariants } from "@/schemas";
+import type {
+  CartItem,
+  ProductVariant,
+  ProductWithVariants,
+} from "@/lib/db/drizzle/schema";
 
 interface CartProductProps {
   product: ProductWithVariants;

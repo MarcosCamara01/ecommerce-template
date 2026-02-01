@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cartRepository } from "@/lib/db/drizzle/repositories";
-import { ProductSize } from "@/schemas";
+import { ProductSize } from "@/lib/db/drizzle/schema";
 import { getUser } from "@/lib/auth/server";
 
 export async function GET() {
@@ -14,7 +14,7 @@ export async function GET() {
     console.error("Error getting cart items:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     console.error("Error adding/updating cart item:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -74,7 +74,7 @@ export async function PATCH(req: Request) {
     console.error("Error updating cart item:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -101,7 +101,7 @@ export async function DELETE(req: Request) {
     console.error("Error deleting cart item(s):", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 
 /**
  * Search products and variants using fuse.js
@@ -9,7 +9,7 @@ import type { ProductWithVariants } from "@/schemas";
  */
 export function searchProducts(
   products: ProductWithVariants[],
-  query?: string
+  query?: string,
 ): ProductWithVariants[] {
   if (!query || query.trim() === "") {
     return products;

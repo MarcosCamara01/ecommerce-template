@@ -6,7 +6,7 @@ import { useCartMutation } from "@/hooks/cart";
 /** ICONS */
 import { IoAdd, IoRemove } from "react-icons/io5";
 /** TYPES */
-import type { ProductVariant, CartItem } from "@/schemas";
+import type { ProductVariant, CartItem } from "@/lib/db/drizzle/schema";
 
 interface ProductCartInfoProps {
   cartItemId: CartItem["id"];
@@ -32,7 +32,7 @@ export const ProductCartInfo = ({
     },
     {
       wait: 300,
-    }
+    },
   );
 
   const { run: throttledDecrease } = useThrottleFn(
@@ -48,7 +48,7 @@ export const ProductCartInfo = ({
     },
     {
       wait: 300,
-    }
+    },
   );
 
   return (

@@ -1,10 +1,20 @@
-import type { Product, ProductVariant, ProductWithVariants } from "@/schemas";
+import type {
+  Product,
+  ProductVariant,
+  ProductWithVariants,
+} from "@/lib/db/drizzle/schema";
 
 // Derived from Product schema
-export type BasicInfoData = Pick<Product, "name" | "description" | "price" | "category">;
+export type BasicInfoData = Pick<
+  Product,
+  "name" | "description" | "price" | "category"
+>;
 
 // Derived from ProductVariant - form state representation
-export type VariantFormData = Pick<ProductVariant, "color" | "stripeId" | "sizes" | "images"> & {
+export type VariantFormData = Pick<
+  ProductVariant,
+  "color" | "stripeId" | "sizes" | "images"
+> & {
   id?: ProductVariant["id"];
 };
 

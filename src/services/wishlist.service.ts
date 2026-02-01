@@ -1,5 +1,5 @@
 import { wishlistRepository } from "@/lib/db/drizzle/repositories";
-import type { WishlistItem } from "@/schemas";
+import type { WishlistItem } from "@/lib/db/drizzle/schema";
 
 export async function getWishlist(userId: string): Promise<WishlistItem[]> {
   try {
@@ -21,7 +21,7 @@ export async function getWishlistWithDetails(userId: string) {
 
 export async function isInWishlist(
   userId: string,
-  productId: number
+  productId: number,
 ): Promise<boolean> {
   try {
     return await wishlistRepository.exists(userId, productId);
@@ -33,7 +33,7 @@ export async function isInWishlist(
 
 export async function addToWishlist(
   userId: string,
-  productId: number
+  productId: number,
 ): Promise<WishlistItem | null> {
   try {
     return await wishlistRepository.create({ userId, productId });
@@ -45,7 +45,7 @@ export async function addToWishlist(
 
 export async function removeFromWishlist(
   userId: string,
-  wishlistItemId: number
+  wishlistItemId: number,
 ): Promise<boolean> {
   try {
     return await wishlistRepository.delete(userId, wishlistItemId);
@@ -57,7 +57,7 @@ export async function removeFromWishlist(
 
 export async function removeFromWishlistByProduct(
   userId: string,
-  productId: number
+  productId: number,
 ): Promise<boolean> {
   try {
     return await wishlistRepository.deleteByUserAndProduct(userId, productId);
@@ -69,7 +69,7 @@ export async function removeFromWishlistByProduct(
 
 export async function toggleWishlist(
   userId: string,
-  productId: number
+  productId: number,
 ): Promise<{ added: boolean; item: WishlistItem | null }> {
   try {
     return await wishlistRepository.toggle(userId, productId);

@@ -4,9 +4,9 @@ import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { productsRepository } from "@/lib/db/drizzle/repositories";
 import {
   type ProductCategory,
-  ProductWithVariantsSchema,
+  productWithVariantsSchema,
   type ProductWithVariants,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 /**
  * Fetch all products with caching
@@ -19,7 +19,7 @@ export async function getAllProducts(): Promise<ProductWithVariants[]> {
 
   try {
     const products = await productsRepository.findAll();
-    const validatedProducts = ProductWithVariantsSchema.array().parse(products);
+    const validatedProducts = productWithVariantsSchema.array().parse(products);
     return validatedProducts.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -32,7 +32,7 @@ export async function getAllProducts(): Promise<ProductWithVariants[]> {
  * Each category has its own cache entry (category arg becomes part of cache key)
  */
 export async function getCategoryProducts(
-  category: ProductCategory
+  category: ProductCategory,
 ): Promise<ProductWithVariants[]> {
   "use cache";
   cacheTag("products", `category-${category}`);
@@ -40,7 +40,7 @@ export async function getCategoryProducts(
 
   try {
     const products = await productsRepository.findByCategory(category);
-    const validatedProducts = ProductWithVariantsSchema.array().parse(products);
+    const validatedProducts = productWithVariantsSchema.array().parse(products);
     return validatedProducts.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error("Error fetching category products:", error);
@@ -53,7 +53,7 @@ export async function getCategoryProducts(
  * Each product has its own cache entry (productId arg becomes part of cache key)
  */
 export async function getProduct(
-  productId: number
+  productId: number,
 ): Promise<ProductWithVariants | null> {
   "use cache";
   cacheTag("products", `product-${productId}`);
@@ -62,7 +62,7 @@ export async function getProduct(
   try {
     const product = await productsRepository.findById(productId);
     if (!product) return null;
-    return ProductWithVariantsSchema.parse(product);
+    return productWithVariantsSchema.parse(product);
   } catch (error) {
     console.error("Error fetching product:", error);
     return null;
@@ -75,13 +75,13 @@ export async function getProduct(
  * It benefits from the cached getAllProducts() call
  */
 export async function getRandomProducts(
-  productIdToExclude: number
+  productIdToExclude: number,
 ): Promise<ProductWithVariants[]> {
   try {
     const allProducts = await getAllProducts();
     const filtered = allProducts.filter((p) => p.id !== productIdToExclude);
     const shuffled = filtered.sort(() => Math.random() - 0.5);
-    return ProductWithVariantsSchema.array().parse(shuffled.slice(0, 6));
+    return productWithVariantsSchema.array().parse(shuffled.slice(0, 6));
   } catch (error) {
     console.error("Error fetching random products:", error);
     return [];
