@@ -5,11 +5,9 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 
-const WishlistButton = dynamic(
-  () => import("../wishlist/WishlistButton")
-);
+const WishlistButton = dynamic(() => import("../wishlist/WishlistButton"));
 
 interface ProductItemProps {
   product: ProductWithVariants;

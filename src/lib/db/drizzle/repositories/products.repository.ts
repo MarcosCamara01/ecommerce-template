@@ -8,7 +8,7 @@ import type {
   InsertProduct,
   InsertProductVariant,
   ProductCategory,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 const sizesSchema = z.array(ProductSizeZod);
 
@@ -35,7 +35,9 @@ export const productsRepository = {
     return result ? transformProduct(result) : null;
   },
 
-  async findByCategory(category: ProductCategory): Promise<ProductWithVariants[]> {
+  async findByCategory(
+    category: ProductCategory,
+  ): Promise<ProductWithVariants[]> {
     const result = await db.query.productsItems.findMany({
       where: eq(productsItems.category, category),
       with: { variants: true },
@@ -62,7 +64,7 @@ export const productsRepository = {
 
   async createWithVariants(
     product: InsertProduct,
-    variants: Omit<InsertProductVariant, "productId">[]
+    variants: Omit<InsertProductVariant, "productId">[],
   ): Promise<ProductWithVariants | null> {
     return await db.transaction(async (tx) => {
       const [newProduct] = await tx
@@ -87,7 +89,7 @@ export const productsRepository = {
             color: v.color,
             sizes: v.sizes,
             images: v.images,
-          }))
+          })),
         )
         .returning();
 
@@ -98,11 +100,15 @@ export const productsRepository = {
     });
   },
 
-  async update(id: number, data: Partial<InsertProduct>): Promise<Product | null> {
+  async update(
+    id: number,
+    data: Partial<InsertProduct>,
+  ): Promise<Product | null> {
     const updateData: Record<string, unknown> = {};
 
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.price !== undefined) updateData.price = String(data.price);
     if (data.category !== undefined) updateData.category = data.category;
     if (data.img !== undefined) updateData.img = data.img;
@@ -125,15 +131,17 @@ export const productsRepository = {
       color: string;
       sizes: string[];
       images: string[];
-    }>
+    }>,
   ): Promise<ProductWithVariants | null> {
     return await db.transaction(async (tx) => {
       // Update product
       const updateData: Record<string, unknown> = {};
       if (product.name !== undefined) updateData.name = product.name;
-      if (product.description !== undefined) updateData.description = product.description;
+      if (product.description !== undefined)
+        updateData.description = product.description;
       if (product.price !== undefined) updateData.price = String(product.price);
-      if (product.category !== undefined) updateData.category = product.category;
+      if (product.category !== undefined)
+        updateData.category = product.category;
       if (product.img !== undefined) updateData.img = product.img;
 
       const [updatedProduct] = await tx
@@ -165,7 +173,9 @@ export const productsRepository = {
       }
 
       // Delete variants that are no longer present
-      const idsToDelete = existingIds.filter((id) => !variantIdsToKeep.includes(id));
+      const idsToDelete = existingIds.filter(
+        (id) => !variantIdsToKeep.includes(id),
+      );
       if (idsToDelete.length > 0) {
         for (const variantId of idsToDelete) {
           await tx
@@ -198,7 +208,7 @@ export const productsRepository = {
             color: v.color,
             sizes: parseSizes(v.sizes),
             images: v.images,
-          }))
+          })),
         );
       }
 
@@ -271,7 +281,7 @@ function transformVariant(row: typeof productsVariants.$inferSelect) {
 function transformProduct(
   row: typeof productsItems.$inferSelect & {
     variants: (typeof productsVariants.$inferSelect)[];
-  }
+  },
 ): ProductWithVariants {
   return {
     ...transformProductBase(row),

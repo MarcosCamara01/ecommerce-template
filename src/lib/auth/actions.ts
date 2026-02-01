@@ -1,5 +1,5 @@
 import { authClient } from "./client";
-import type { SignInInput, SignUpInput } from "@/schemas";
+import type { SignInInput, SignUpInput } from "@/schemas/auth";
 
 export async function signInWithEmail(credentials: SignInInput) {
   try {

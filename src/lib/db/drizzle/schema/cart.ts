@@ -30,21 +30,33 @@ export const cartItems = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [
-    unique("cart_user_variant_size_unique").on(table.userId, table.variantId, table.size),
+    unique("cart_user_variant_size_unique").on(
+      table.userId,
+      table.variantId,
+      table.size,
+    ),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],
       name: "cart_items_user_id_fkey",
-    }).onDelete("cascade").onUpdate("cascade"),
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
     foreignKey({
       columns: [table.variantId],
       foreignColumns: [productsVariants.id],
       name: "cart_items_variant_id_fkey",
-    }).onDelete("cascade").onUpdate("cascade"),
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
     index("idx_cart_user_id").on(table.userId),
     index("idx_cart_variant_id").on(table.variantId),
     index("idx_cart_updated_at").on(table.updatedAt),
-    index("idx_cart_user_variant_size").on(table.userId, table.variantId, table.size),
+    index("idx_cart_user_variant_size").on(
+      table.userId,
+      table.variantId,
+      table.size,
+    ),
     check("quantity_positive", sql`quantity > 0`),
     pgPolicy("Users can view own cart items", {
       as: "permissive",
@@ -71,7 +83,7 @@ export const cartItems = pgTable(
       to: "public",
       using: sql`app.current_user_id() = user_id`,
     }),
-  ]
+  ],
 );
 
 // Zod Schemas
@@ -98,8 +110,16 @@ export const updateCartItemSchema = z.object({
 
 export const addToCartSchema = insertCartItemSchema.omit({ userId: true });
 
+export const minimalCartItemSchema = z.object({
+  variantId: z.number(),
+  size: ProductSizeZod,
+  quantity: z.number().int().positive("Quantity must be greater than 0"),
+  stripeId: z.string().min(1, "Stripe ID is required"),
+});
+
 // Types
 export type CartItem = z.infer<typeof selectCartItemSchema>;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
 export type UpdateCartItem = z.infer<typeof updateCartItemSchema>;
 export type AddToCartInput = z.infer<typeof addToCartSchema>;
+export type MinimalCartItem = z.infer<typeof minimalCartItemSchema>;

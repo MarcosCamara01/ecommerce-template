@@ -3,11 +3,11 @@ import type {
   OrderProduct,
   Product,
   ProductVariant,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 export function transformCartItemToOrderProduct(
   cartItem: CartItem,
-  orderId: number
+  orderId: number,
 ): OrderProduct {
   return {
     id: Math.random(),
@@ -21,7 +21,7 @@ export function transformCartItemToOrderProduct(
 }
 
 export function transformProductPrice(
-  product: Product
+  product: Product,
 ): Product & { priceFormatted: string } {
   return {
     ...product,
@@ -45,7 +45,7 @@ export function transformVariantSelectOptions(variant: ProductVariant) {
 
 export function calculateCartTotal(
   items: CartItem[],
-  products: Map<number, Product>
+  products: Map<number, Product>,
 ): number {
   return items.reduce((total, item) => {
     const product = products.get(item.variantId);

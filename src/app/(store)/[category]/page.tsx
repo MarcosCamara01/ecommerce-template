@@ -4,7 +4,10 @@ import {
   GridProducts,
   ProductItem,
 } from "@/components/products";
-import { type ProductCategory, ProductCategoryZod } from "@/schemas";
+import {
+  type ProductCategory,
+  ProductCategoryZod,
+} from "@/lib/db/drizzle/schema";
 import { Suspense } from "react";
 
 interface Props {

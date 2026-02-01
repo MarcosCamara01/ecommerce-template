@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ProductForm } from "./ProductForm";
 import { revalidateProducts } from "@/app/actions";
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 
 export function CreateProductForm() {
   const router = useRouter();

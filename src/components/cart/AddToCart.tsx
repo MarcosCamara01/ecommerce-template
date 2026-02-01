@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Sizes, type SizesRef } from "./Sizes";
 import { Colors } from "./Colors";
 /** TYPES */
-import { ProductWithVariantsSchema, type ProductVariant } from "@/schemas";
+import {
+  productWithVariantsSchema,
+  type ProductVariant,
+} from "@/lib/db/drizzle/schema";
 
 interface AddToCartProps {
   productJSON: string;
@@ -23,7 +26,7 @@ export function AddToCart({
   isMobileBar = false,
 }: AddToCartProps) {
   const { add: addToCart } = useCartMutation();
-  const product = ProductWithVariantsSchema.parse(JSON.parse(productJSON));
+  const product = productWithVariantsSchema.parse(JSON.parse(productJSON));
   const sizesRef = useRef<SizesRef>(null!);
 
   const { run: throttledAddToCart } = useThrottleFn(
@@ -36,7 +39,7 @@ export function AddToCart({
         stripeId: selectedVariant.stripeId,
       });
     },
-    { wait: 300 }
+    { wait: 300 },
   );
 
   if (isMobileBar) {

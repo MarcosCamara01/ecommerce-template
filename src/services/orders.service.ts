@@ -5,10 +5,10 @@ import type {
   InsertOrderItem,
   InsertOrderProduct,
   InsertCustomerInfo,
-} from "@/schemas";
+} from "@/lib/db/drizzle/schema";
 
 export async function getUserOrders(
-  userId: string
+  userId: string,
 ): Promise<OrderWithDetails[]> {
   try {
     return await ordersRepository.findByUserId(userId);
@@ -19,7 +19,7 @@ export async function getUserOrders(
 }
 
 export async function getOrderById(
-  orderId: number
+  orderId: number,
 ): Promise<OrderWithDetails | null> {
   try {
     return await ordersRepository.findById(orderId);
@@ -30,7 +30,7 @@ export async function getOrderById(
 }
 
 export async function getOrderByNumber(
-  orderNumber: number
+  orderNumber: number,
 ): Promise<OrderWithDetails | null> {
   try {
     return await ordersRepository.findByOrderNumber(orderNumber);
@@ -42,7 +42,7 @@ export async function getOrderByNumber(
 
 export async function createOrder(
   userId: string,
-  orderNumber: number
+  orderNumber: number,
 ): Promise<OrderItem | null> {
   try {
     const deliveryDate = new Date();
@@ -62,13 +62,13 @@ export async function createOrder(
 export async function createCompleteOrder(
   orderData: InsertOrderItem,
   customerData: Omit<InsertCustomerInfo, "orderId">,
-  products: Omit<InsertOrderProduct, "orderId">[]
+  products: Omit<InsertOrderProduct, "orderId">[],
 ): Promise<OrderWithDetails | null> {
   try {
     return await ordersRepository.createComplete(
       orderData,
       customerData,
-      products
+      products,
     );
   } catch (error) {
     console.error("Error creating complete order:", error);
@@ -78,7 +78,7 @@ export async function createCompleteOrder(
 
 export async function addCustomerInfoToOrder(
   orderId: number,
-  customerData: Omit<InsertCustomerInfo, "orderId">
+  customerData: Omit<InsertCustomerInfo, "orderId">,
 ) {
   try {
     return await ordersRepository.addCustomerInfo(orderId, customerData);
@@ -90,7 +90,7 @@ export async function addCustomerInfoToOrder(
 
 export async function addProductsToOrder(
   orderId: number,
-  products: Omit<InsertOrderProduct, "orderId">[]
+  products: Omit<InsertOrderProduct, "orderId">[],
 ) {
   try {
     return await ordersRepository.addProducts(orderId, products);

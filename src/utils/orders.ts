@@ -1,10 +1,14 @@
 import type { Order, OrderLineItem, DomainAddress } from "@/types/domain";
-import type { OrderItem, CustomerInfo, OrderProduct } from "@/schemas";
+import type {
+  OrderItem,
+  CustomerInfo,
+  OrderProduct,
+} from "@/lib/db/drizzle/schema";
 
 export function transformOrderToViewModel(
   order: OrderItem,
   products: OrderProduct[],
-  customerInfo: CustomerInfo
+  customerInfo: CustomerInfo,
 ): Order {
   return {
     id: order.id,

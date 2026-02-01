@@ -7,7 +7,7 @@ import { AddToCart } from "../cart/AddToCart";
 import { ProductInfo } from "./ProductInfo";
 import { EditProductButton } from "./EditProductButton";
 /** TYPES */
-import type { ProductVariant } from "@/schemas";
+import type { ProductVariant } from "@/lib/db/drizzle/schema";
 
 interface SingleProductProps {
   id: string;
@@ -27,12 +27,12 @@ export const SingleProduct = async ({
   }
 
   const selectedVariantObject = productPlainObject.variants.find(
-    (v) => v.color === selectedVariantColor
+    (v) => v.color === selectedVariantColor,
   );
 
   if (!selectedVariantObject) {
     return redirect(
-      `/${productPlainObject.category}/${id}?variant=${productPlainObject.variants[0].color}`
+      `/${productPlainObject.category}/${id}?variant=${productPlainObject.variants[0].color}`,
     );
   }
 

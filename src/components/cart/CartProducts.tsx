@@ -8,7 +8,7 @@ import { ButtonCheckout } from "./ButtonCheckout";
 import { GridProducts } from "../products/GridProducts";
 import { CartProduct } from "./CartProduct";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 
 export const CartProducts = ({
   allProducts,
@@ -21,12 +21,12 @@ export const CartProducts = ({
     const cartProductsWithInfo = items
       .map((cartItem) => {
         const product = allProducts.find((p) =>
-          p.variants.some((variant) => variant.id === cartItem.variantId)
+          p.variants.some((variant) => variant.id === cartItem.variantId),
         );
         if (!product) return null;
 
         const variant = product.variants.find(
-          (v) => v.id === cartItem.variantId
+          (v) => v.id === cartItem.variantId,
         );
         if (!variant) return null;
 
@@ -41,7 +41,7 @@ export const CartProducts = ({
     const totalPrice = cartProductsWithInfo
       .reduce(
         (sum, { product, cartItem }) => sum + product.price * cartItem.quantity,
-        0
+        0,
       )
       .toFixed(2);
 
@@ -72,7 +72,7 @@ export const CartProducts = ({
             <span className="text-xs">+ TAX INCL.</span>
           </div>
           <div className="w-1/2 border-l border-solid bg-background-secondary border-border-primary">
-            <ButtonCheckout cartItems={items} />
+            <ButtonCheckout cartItemIds={items.map((item) => item.id)} />
           </div>
         </div>
       </div>

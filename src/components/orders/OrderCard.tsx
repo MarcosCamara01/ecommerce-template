@@ -4,7 +4,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 /** TYPES */
-import type { OrderWithDetails } from "@/schemas";
+import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
 /** ICONS */
 import {
   HiOutlineShoppingBag,
@@ -19,7 +19,7 @@ interface OrderCardProps {
 export function OrderCard({ order }: OrderCardProps) {
   const totalItems = order.orderProducts.reduce(
     (total: number, product: { quantity: number }) => total + product.quantity,
-    0
+    0,
   );
 
   const rawPrice = order.customerInfo?.totalPrice || 0;
@@ -56,7 +56,7 @@ export function OrderCard({ order }: OrderCardProps) {
               "px-3 py-1 text-xs font-semibold rounded-full",
               isUpcoming
                 ? "bg-color-secondary/20 text-color-secondary"
-                : "bg-color-secondary/10 text-color-secondary"
+                : "bg-color-secondary/10 text-color-secondary",
             )}
           >
             {isUpcoming ? "In Transit" : "Delivered"}

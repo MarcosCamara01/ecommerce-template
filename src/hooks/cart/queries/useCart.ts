@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { CART_QUERY_KEYS } from "../keys";
-import { CartItemSchema, type CartItem } from "@/schemas";
+import { selectCartItemSchema, type CartItem } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 
 type CartResponse = { items: CartItem[] };
@@ -25,7 +25,7 @@ export const useCart = () => {
 
       const data = await response.json();
       return {
-        items: CartItemSchema.array().parse(data.items),
+        items: selectCartItemSchema.array().parse(data.items),
       } as CartResponse;
     },
     refetchOnWindowFocus: false,

@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { WISHLIST_QUERY_KEYS } from "../keys";
-import { WishlistItemSchema, type WishlistItem } from "@/schemas";
+import {
+  selectWishlistItemSchema,
+  type WishlistItem,
+} from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 
 type WishlistResponse = { items: WishlistItem[] };
@@ -25,7 +28,7 @@ export const useWishlist = () => {
 
       const data = await response.json();
       return {
-        items: WishlistItemSchema.array().parse(data.items),
+        items: selectWishlistItemSchema.array().parse(data.items),
       } as WishlistResponse;
     },
     refetchOnWindowFocus: false,

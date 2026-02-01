@@ -7,7 +7,7 @@ import Link from "next/link";
 /** FUNCTIONALITY */
 import { useWishlist } from "@/hooks/wishlist";
 /** TYPES */
-import type { ProductWithVariants } from "@/schemas";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 
 export const WishlistProducts = ({
   allProducts,
@@ -19,8 +19,8 @@ export const WishlistProducts = ({
   if (wishlistProducts && wishlistProducts.length > 0) {
     const products = allProducts.filter((product) =>
       wishlistProducts.some(
-        (wishlistProduct) => wishlistProduct.productId === product.id
-      )
+        (wishlistProduct) => wishlistProduct.productId === product.id,
+      ),
     );
 
     return (

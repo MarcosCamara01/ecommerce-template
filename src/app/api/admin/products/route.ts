@@ -7,12 +7,17 @@ import {
   updateStripeProduct,
 } from "@/services/stripe.service";
 import { revalidateProducts } from "@/app/actions";
-import type { ProductCategory, InsertProductVariant } from "@/schemas";
+import type {
+  ProductCategory,
+  InsertProductVariant,
+} from "@/lib/db/drizzle/schema";
 import type { VariantApiData } from "@/types/admin";
 
 const BUCKET = "product-images";
 
-type ProcessedVariant = Omit<InsertProductVariant, "productId"> & { id?: number };
+type ProcessedVariant = Omit<InsertProductVariant, "productId"> & {
+  id?: number;
+};
 
 async function verifyAdmin(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -89,12 +94,14 @@ export async function POST(request: NextRequest) {
     const price = Number(formData.get("price"));
     const category = formData.get("category") as ProductCategory;
     const mainImageFile = formData.get("mainImage") as File;
-    const variantsData = JSON.parse(formData.get("variants") as string) as VariantApiData[];
+    const variantsData = JSON.parse(
+      formData.get("variants") as string,
+    ) as VariantApiData[];
 
     if (!name || !description || !price || !category || !mainImageFile) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -109,13 +116,13 @@ export async function POST(request: NextRequest) {
     if (!product) {
       return NextResponse.json(
         { error: "Error creating product" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const mainImageUrl = await uploadImage(
       mainImageFile,
-      `products/${product.id}`
+      `products/${product.id}`,
     );
 
     if (!mainImageUrl) {
@@ -123,7 +130,7 @@ export async function POST(request: NextRequest) {
       await cleanupProductImages(product.id);
       return NextResponse.json(
         { error: "Error uploading main image" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -142,7 +149,7 @@ export async function POST(request: NextRequest) {
           if (file) {
             const url = await uploadImage(
               file,
-              `products/${product.id}/variants/${colorPath}`
+              `products/${product.id}/variants/${colorPath}`,
             );
             if (url) images.push(url);
           }
@@ -170,7 +177,7 @@ export async function POST(request: NextRequest) {
           sizes: variant.sizes,
           images,
         };
-      })
+      }),
     );
 
     await productsRepository.delete(product.id);
@@ -183,14 +190,14 @@ export async function POST(request: NextRequest) {
         category,
         img: mainImageUrl,
       },
-      variants
+      variants,
     );
 
     if (!productWithVariants) {
       await cleanupProductImages(product.id);
       return NextResponse.json(
         { error: "Error creating product with variants" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -206,7 +213,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating product:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -226,22 +233,23 @@ export async function PUT(request: NextRequest) {
     const price = Number(formData.get("price"));
     const category = formData.get("category") as ProductCategory;
     const mainImageFile = formData.get("mainImage") as File | null;
-    const existingMainImage = formData.get("existingMainImage") as string | null;
-    const variantsData = JSON.parse(formData.get("variants") as string) as VariantApiData[];
+    const existingMainImage = formData.get("existingMainImage") as
+      | string
+      | null;
+    const variantsData = JSON.parse(
+      formData.get("variants") as string,
+    ) as VariantApiData[];
 
     if (!id || !name || !description || !price || !category) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const existingProduct = await productsRepository.findById(id);
     if (!existingProduct) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     let mainImageUrl = existingMainImage || existingProduct.img;
@@ -250,7 +258,7 @@ export async function PUT(request: NextRequest) {
       if (existingProduct.img) {
         await deleteImageByUrl(existingProduct.img);
       }
-      
+
       const uploadedUrl = await uploadImage(mainImageFile, `products/${id}`);
       if (uploadedUrl) {
         mainImageUrl = uploadedUrl;
@@ -279,7 +287,7 @@ export async function PUT(request: NextRequest) {
           if (file && file.size > 0) {
             const url = await uploadImage(
               file,
-              `products/${id}/variants/${colorPath}`
+              `products/${id}/variants/${colorPath}`,
             );
             if (url) newImages.push(url);
           }
@@ -325,7 +333,7 @@ export async function PUT(request: NextRequest) {
           sizes: variant.sizes,
           images: allImages,
         };
-      })
+      }),
     );
 
     const updatedProduct = await productsRepository.updateWithVariants(
@@ -337,13 +345,13 @@ export async function PUT(request: NextRequest) {
         category,
         img: mainImageUrl,
       },
-      variants
+      variants,
     );
 
     if (!updatedProduct) {
       return NextResponse.json(
         { error: "Error updating product" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -359,7 +367,7 @@ export async function PUT(request: NextRequest) {
     console.error("Error updating product:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -377,7 +385,7 @@ export async function DELETE(request: NextRequest) {
     if (!productId) {
       return NextResponse.json(
         { error: "Product ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -402,7 +410,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Error deleting product:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

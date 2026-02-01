@@ -2,10 +2,14 @@
 
 import { toast } from "sonner";
 import { IoClose } from "react-icons/io5";
-import type { CartItem } from "@/schemas";
+import type { CartItem } from "@/lib/db/drizzle/schema";
 import { useCartMutation } from "@/hooks/cart";
 
-export const DeleteButton = ({ cartItemId }: { cartItemId: CartItem["id"] }) => {
+export const DeleteButton = ({
+  cartItemId,
+}: {
+  cartItemId: CartItem["id"];
+}) => {
   const { remove: removeFromCart } = useCartMutation();
 
   const handleDelete = async () => {

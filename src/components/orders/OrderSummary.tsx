@@ -1,5 +1,5 @@
 /** TYPES */
-import type { OrderWithDetails } from "@/schemas";
+import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
 /** UTILS */
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -20,7 +20,7 @@ interface OrderSummaryProps {
 export function OrderSummary({ order }: OrderSummaryProps) {
   const totalItems = order.orderProducts.reduce(
     (total: number, product: { quantity: number }) => total + product.quantity,
-    0
+    0,
   );
 
   const rawPrice = order.customerInfo?.totalPrice || 0;
@@ -41,7 +41,7 @@ export function OrderSummary({ order }: OrderSummaryProps) {
               "px-3 py-1 text-xs font-semibold rounded-full",
               isUpcoming
                 ? "bg-color-secondary/20 text-color-secondary"
-                : "bg-color-secondary/10 text-color-secondary"
+                : "bg-color-secondary/10 text-color-secondary",
             )}
           >
             {isUpcoming ? "In Transit" : "Delivered"}
@@ -58,7 +58,7 @@ export function OrderSummary({ order }: OrderSummaryProps) {
             <div
               className={cn(
                 "h-full bg-gradient-to-r from-color-secondary to-color-secondary transition-all duration-300",
-                isUpcoming ? "w-3/4" : "w-full"
+                isUpcoming ? "w-3/4" : "w-full",
               )}
             />
           </div>

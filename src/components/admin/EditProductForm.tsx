@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ProductForm } from "./ProductForm";
 import { revalidateProducts } from "@/app/actions";
-import type { ProductWithVariants, ProductSize } from "@/schemas";
+import type { ProductWithVariants, ProductSize } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
 
 interface EditProductFormProps {
@@ -39,8 +39,8 @@ export function EditProductForm({ product }: EditProductFormProps) {
   };
 
   return (
-    <ProductForm 
-      mode="edit" 
+    <ProductForm
+      mode="edit"
       initialData={mapProductToFormData(product)}
       onSuccess={handleSuccess}
     />
