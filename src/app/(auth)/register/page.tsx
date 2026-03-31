@@ -1,19 +1,32 @@
 "use client";
 
+import { AuthShell } from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import LoadingButton from "@/components/ui/loadingButton";
 import { PasswordInput } from "@/components/ui/form/PasswordInput";
-import Link from "next/link";
+import { useAuthMutation } from "@/hooks/auth";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
-import { useAuthMutation } from "@/hooks/auth";
-import { FormEvent, useRef } from "react";
 
 const Register = () => {
   const { signUp, signInWithGoogle } = useAuthMutation();
+  const [redirectSearch, setRedirectSearch] = useState("");
 
   const nameRef = useRef<HTMLInputElement>(null!);
   const emailRef = useRef<HTMLInputElement>(null!);
   const passwordRef = useRef<HTMLInputElement>(null!);
   // const phoneRef = useRef<HTMLInputElement>(null!);
+
+  useEffect(() => {
+    const redirect = new URLSearchParams(window.location.search).get("redirect");
+
+    if (redirect && redirect.startsWith("/")) {
+      setRedirectSearch(`?redirect=${encodeURIComponent(redirect)}`);
+    }
+  }, []);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,99 +39,117 @@ const Register = () => {
   };
 
   const error = signUp.error || signInWithGoogle.error;
-  const isLoading = signUp.isPending || signInWithGoogle.isPending;
+  const isSubmitting = signUp.isPending;
+  const isGoogleLoading = signInWithGoogle.isPending;
+  const isLoading = isSubmitting || isGoogleLoading;
 
   return (
-    <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">
-      <form
-        onSubmit={handleSubmit}
-        className="p-6 xs:p-10 w-full max-w-350 flex flex-col justify-between items-center gap-2.5 border border-solid border-[#2E2E2E] bg-background-secondary rounded-md"
-      >
+    <AuthShell
+      title="Create your account"
+      description="Create your account in seconds with your email and password."
+      footerText="Already have an account?"
+      footerHref={`/login${redirectSearch}`}
+      footerLinkLabel="Sign in here"
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="text-[#FF6166] flex items-center justify-center gap-2">
-            <MdError />
-            <div className="text-sm">
-              {error instanceof Error
-                ? error.message
-                : "Error creating account"}
-            </div>
+          <div className="flex items-start gap-2.5 rounded-xl border border-[#4a1f23] bg-[#1a0b0d] px-3.5 py-2.5 text-[#ff8d92]">
+            <MdError className="mt-0.5 shrink-0" size={16} />
+            <p className="text-[13px] leading-5">
+              {error instanceof Error ? error.message : "Error creating account"}
+            </p>
           </div>
         )}
-        <h1 className="w-full mb-5 text-2xl font-bold">Signup</h1>
 
-        <label className="w-full text-sm">Fullname:</label>
-        <input
-          type="text"
-          ref={nameRef}
-          required
-          placeholder="Fullname"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
-          name="name"
-          disabled={isLoading}
-        />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label
+              htmlFor="register-name"
+              className="text-[13px] text-color-tertiary"
+            >
+              Full name
+            </Label>
+            <Input
+              id="register-name"
+              type="text"
+              ref={nameRef}
+              required
+              placeholder="Alex Morgan"
+              className="h-11 rounded-md border-border-primary bg-background-primary px-3.5 text-sm text-white placeholder:text-color-secondary focus-visible:ring-white/20 focus-visible:ring-offset-0"
+              name="name"
+              autoComplete="name"
+              disabled={isLoading}
+            />
+          </div>
 
-        <label className="w-full text-sm">Email:</label>
-        <input
-          type="email"
-          ref={emailRef}
-          required
-          placeholder="Email"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
-          name="email"
-          disabled={isLoading}
-        />
+          <div className="space-y-2">
+            <Label
+              htmlFor="register-email"
+              className="text-[13px] text-color-tertiary"
+            >
+              Email
+            </Label>
+            <Input
+              id="register-email"
+              type="email"
+              ref={emailRef}
+              required
+              placeholder="name@example.com"
+              className="h-11 rounded-md border-border-primary bg-background-primary px-3.5 text-sm text-white placeholder:text-color-secondary focus-visible:ring-white/20 focus-visible:ring-offset-0"
+              name="email"
+              autoComplete="email"
+              disabled={isLoading}
+            />
+          </div>
 
-        <label className="w-full text-sm">Password:</label>
-        <PasswordInput
-          ref={passwordRef}
-          name="password"
-          required
-          disabled={isLoading}
-        />
-
-        {/* <label className="w-full text-sm">Phone:</label>
-        <input
-          type="text"
-          placeholder="Phone (not required)"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
-          name="phone"
-          disabled={isLoading}
-        /> */}
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="items-center w-full gap-3 px-4 py-2 text-sm font-semibold text-center text-white transition-all ease rounded align-middle bg-violet-600 border-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? "Creating account..." : "Sign up"}
-        </button>
-
-        <div className="relative flex items-center justify-center w-full h-10">
-          <div className="absolute w-full h-px top-2/4 bg-[#2E2E2E]"></div>
-          <p className="z-10 flex items-center justify-center w-8 h-6 bg-background-secondary">
-            or
-          </p>
+          <div className="space-y-2">
+            <Label
+              htmlFor="register-password"
+              className="text-[13px] text-color-tertiary"
+            >
+              Password
+            </Label>
+            <PasswordInput
+              id="register-password"
+              ref={passwordRef}
+              name="password"
+              autoComplete="new-password"
+              required
+              disabled={isLoading}
+            />
+          </div>
         </div>
 
-        <button
+        <LoadingButton
+          type="submit"
+          className="h-11 w-full rounded-md bg-white text-sm font-semibold text-black transition-colors hover:bg-neutral-200 focus-visible:ring-white/20 focus-visible:ring-offset-0"
+          loading={isSubmitting}
+          disabled={isLoading}
+        >
+          {isSubmitting ? "Creating account..." : "Create account"}
+        </LoadingButton>
+
+        <div className="relative flex items-center justify-center">
+          <div className="absolute inset-x-0 h-px bg-border-primary" />
+          <span className="relative bg-background-secondary px-3 text-[10px] uppercase tracking-[0.28em] text-color-secondary">
+            Or
+          </span>
+        </div>
+
+        <Button
           type="button"
+          variant="outline"
+          size="lg"
           onClick={() => signInWithGoogle.mutate()}
-          disabled={signInWithGoogle.isPending}
-          className="w-full bg-background-primary border border-solid border-[#2E2E2E] py-1.5 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
+          disabled={isLoading}
+          className="h-11 w-full rounded-md border-border-primary bg-background-primary text-sm font-medium text-white hover:border-[#3b3b3b] hover:bg-background-tertiary"
         >
-          <FaGoogle />
-          Sign in with Google
-        </button>
-        <Link
-          href="/login"
-          className="text-sm transition duration-150 text-color-secondary ease hover:text-white"
-        >
-          Already have an account?
-        </Link>
+          <FaGoogle className="mr-2.5 size-4" />
+          {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
+        </Button>
       </form>
-    </section>
+    </AuthShell>
   );
 };
 
 export default Register;
-

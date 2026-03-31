@@ -1,18 +1,30 @@
 "use client";
 
+import { AuthShell } from "@/components/auth/AuthShell";
+import LoadingButton from "@/components/ui/loadingButton";
+import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/form/PasswordInput";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthMutation } from "@/hooks/auth";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
-import { useAuthMutation } from "@/hooks/auth";
-import { FormEvent, useRef } from "react";
-import LoadingButton from "@/components/ui/loadingButton";
 
 const Login = () => {
   const { signIn, signInWithGoogle } = useAuthMutation();
+  const [redirectSearch, setRedirectSearch] = useState("");
 
   const emailRef = useRef<HTMLInputElement>(null!);
   const passwordRef = useRef<HTMLInputElement>(null!);
+
+  useEffect(() => {
+    const redirect = new URLSearchParams(window.location.search).get("redirect");
+
+    if (redirect && redirect.startsWith("/")) {
+      setRedirectSearch(`?redirect=${encodeURIComponent(redirect)}`);
+    }
+  }, []);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,78 +36,98 @@ const Login = () => {
   };
 
   const error = signIn.error || signInWithGoogle.error;
-  const isLoading = signIn.isPending || signInWithGoogle.isPending;
+  const isSubmitting = signIn.isPending;
+  const isGoogleLoading = signInWithGoogle.isPending;
+  const isLoading = isSubmitting || isGoogleLoading;
 
   return (
-    <section className="flex items-center justify-center w-full pt-12 xs:h-80vh">
-      <form
-        className="p-6 xs:p-10 w-full max-w-350 flex flex-col justify-between items-center gap-2.5 border border-solid border-[#2E2E2E] bg-background-secondary rounded-md"
-        onSubmit={handleSubmit}
-      >
+    <AuthShell
+      title="Welcome back"
+      description="Sign in with your email and password to access your account."
+      footerText="Don't have an account?"
+      footerHref={`/register${redirectSearch}`}
+      footerLinkLabel="Create one here"
+    >
+      <form className="space-y-5" onSubmit={handleSubmit}>
         {error && (
-          <div className="text-[#FF6166] flex items-center justify-center gap-2">
-            <MdError />
-            <div className="text-sm">
+          <div className="flex items-start gap-2.5 rounded-xl border border-[#4a1f23] bg-[#1a0b0d] px-3.5 py-2.5 text-[#ff8d92]">
+            <MdError className="mt-0.5 shrink-0" size={16} />
+            <p className="text-[13px] leading-5">
               {error instanceof Error
                 ? error.message
                 : "Invalid email or password"}
-            </div>
+            </p>
           </div>
         )}
 
-        <h1 className="w-full mb-5 text-2xl font-bold">Sign in</h1>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label
+              htmlFor="login-email"
+              className="text-[13px] text-color-tertiary"
+            >
+              Email
+            </Label>
+            <Input
+              id="login-email"
+              type="email"
+              ref={emailRef}
+              placeholder="name@example.com"
+              className="h-11 rounded-md border-border-primary bg-background-primary px-3.5 text-sm text-white placeholder:text-color-secondary focus-visible:ring-white/20 focus-visible:ring-offset-0"
+              name="email"
+              autoComplete="email"
+              required
+              disabled={isLoading}
+            />
+          </div>
 
-        <label className="w-full text-sm">Email:</label>
-        <input
-          type="email"
-          ref={emailRef}
-          placeholder="Email"
-          className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded bg-background-primary text-13"
-          name="email"
-          required
-          disabled={isLoading}
-        />
-
-        <label className="w-full text-sm">Password:</label>
-        <PasswordInput
-          ref={passwordRef}
-          name="password"
-          required
-          disabled={isLoading}
-        />
+          <div className="space-y-2">
+            <Label
+              htmlFor="login-password"
+              className="text-[13px] text-color-tertiary"
+            >
+              Password
+            </Label>
+            <PasswordInput
+              id="login-password"
+              ref={passwordRef}
+              name="password"
+              autoComplete="current-password"
+              required
+              disabled={isLoading}
+            />
+          </div>
+        </div>
 
         <LoadingButton
           type="submit"
-          className="w-full bg-background-primary border border-solid border-[#2E2E2E] py-0 mt-2.5 rounded transition-all hover:bg-background-tertiary hover:border-[#454545] text-13"
-          loading={isLoading}
+          className="h-11 w-full rounded-md bg-white text-sm font-semibold text-black transition-colors hover:bg-neutral-200 focus-visible:ring-white/20 focus-visible:ring-offset-0"
+          loading={isSubmitting}
+          disabled={isLoading}
         >
-          {isLoading ? "Signing in..." : "Sign in"}
+          {isSubmitting ? "Signing in..." : "Sign in"}
         </LoadingButton>
 
-        <div className="relative flex items-center justify-center w-full h-10">
-          <div className="absolute w-full h-px top-2/4 bg-[#2E2E2E]"></div>
-          <p className="z-10 flex items-center justify-center w-8 h-6 bg-background-secondary">
-            or
-          </p>
+        <div className="relative flex items-center justify-center">
+          <div className="absolute inset-x-0 h-px bg-border-primary" />
+          <span className="relative bg-background-secondary px-3 text-[10px] uppercase tracking-[0.28em] text-color-secondary">
+            Or
+          </span>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="lg"
           onClick={() => signInWithGoogle.mutate()}
-          disabled={signInWithGoogle.isPending}
-          className="flex text-color-secondary items-center gap-3 px-4 py-2 text-sm align-middle transition-all bg-background-primary border border-solid rounded border-[#2E2E2E] ease hover:bg-background-tertiary hover:border-[#454545] disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isLoading}
+          className="h-11 w-full rounded-md border-border-primary bg-background-primary text-sm font-medium text-white hover:border-[#3b3b3b] hover:bg-background-tertiary"
         >
-          <FaGoogle />
-          Sign in with Google
-        </button>
-        <Link
-          href="/register"
-          className="text-sm transition duration-150 text-color-secondary ease hover:text-white"
-        >
-          Don&apos;t have an account?
-        </Link>
+          <FaGoogle className="mr-2.5 size-4" />
+          {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
+        </Button>
       </form>
-    </section>
+    </AuthShell>
   );
 };
 

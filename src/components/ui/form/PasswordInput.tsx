@@ -2,43 +2,54 @@
 
 /** FUNCTIONALITY */
 import { forwardRef, useState, InputHTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
 /** ICONS */
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
-export const PasswordInput = forwardRef<
-  HTMLInputElement,
-  InputHTMLAttributes<HTMLInputElement>
->((props, ref) => {
-  const [showPassword, setShowPassword] = useState(false);
+interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
+  containerClassName?: string;
+}
 
-  return (
-    <div className="flex w-full">
-      <input
-        {...props}
-        ref={ref}
-        required
-        type={showPassword ? "text" : "password"}
-        placeholder={props.placeholder || "Password"}
-        className="w-full text-color-secondary h-8 border border-solid border-[#2E2E2E] py-1 px-2.5 rounded-l bg-background-primary text-13"
-        name={props.name || "password"}
-      />
-      <button
-        className="flex text-color-secondary items-center justify-center w-2/12 transition duration-150 bg-background-primary border-r border-solid rounded-r border-y border-[#2E2E2E] ease hover:bg-background-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
-        onClick={(e) => {
-          e.preventDefault();
-          setShowPassword(!showPassword);
-        }}
-        type="button"
-        disabled={props.disabled}
-      >
-        {showPassword ? (
-          <AiOutlineEye size={16} />
-        ) : (
-          <AiOutlineEyeInvisible size={16} />
+export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
+  ({ className, containerClassName, ...props }, ref) => {
+    const [showPassword, setShowPassword] = useState(false);
+
+    return (
+      <div
+        className={cn(
+          "group flex w-full overflow-hidden rounded-md border border-border-primary bg-background-primary transition-colors focus-within:border-[#3b3b3b] focus-within:bg-background-secondary focus-within:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]",
+          containerClassName
         )}
-      </button>
-    </div>
-  );
-});
+      >
+        <input
+          {...props}
+          ref={ref}
+          type={showPassword ? "text" : "password"}
+          placeholder={props.placeholder || "Password"}
+          className={cn(
+            "h-11 w-full border-0 bg-transparent px-3.5 text-sm text-white placeholder:text-color-secondary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
+          name={props.name || "password"}
+        />
+        <button
+          className="flex w-11 shrink-0 items-center justify-center border-l border-border-primary bg-background-primary text-color-secondary transition-colors duration-150 hover:bg-background-tertiary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={(e) => {
+            e.preventDefault();
+            setShowPassword(!showPassword);
+          }}
+          type="button"
+          disabled={props.disabled}
+        >
+          {showPassword ? (
+            <AiOutlineEye size={16} />
+          ) : (
+            <AiOutlineEyeInvisible size={16} />
+          )}
+        </button>
+      </div>
+    );
+  }
+);
 
 PasswordInput.displayName = "PasswordInput";
