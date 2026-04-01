@@ -36,7 +36,11 @@ export const ButtonCheckout = ({ cartItemIds }: ButtonCheckoutProps) => {
 
       const data = await response.json();
 
-      window.location.href = data.session.url;
+      if (!data.url) {
+        throw new Error("Checkout URL is not available");
+      }
+
+      window.location.assign(data.url);
     },
     onError: (error) => {
       console.error("Checkout error:", error);
@@ -55,7 +59,7 @@ export const ButtonCheckout = ({ cartItemIds }: ButtonCheckoutProps) => {
       loading={isPending}
       disabled={cartItemIds.length === 0}
     >
-      Continue
+      Proceed to Checkout
     </LoadingButton>
   );
 };

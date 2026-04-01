@@ -19,10 +19,10 @@ const LOG_COLORS = {
 } as const;
 
 const LOG_ICONS = {
-  info: "ℹ️",
-  warn: "⚠️",
-  error: "❌",
-  debug: "🔍",
+  info: "[info]",
+  warn: "[warn]",
+  error: "[error]",
+  debug: "[debug]",
 } as const;
 
 function formatConsoleLog(entry: StripeLogEntry): string {
@@ -32,7 +32,9 @@ function formatConsoleLog(entry: StripeLogEntry): string {
 
   let log = `${color}[Stripe] ${icon} ${entry.message}${reset}`;
   if (entry.eventType) log += ` | Event: ${entry.eventType}`;
-  if (entry.sessionId) log += ` | Session: ${entry.sessionId.substring(0, 20)}...`;
+  if (entry.sessionId) {
+    log += ` | Session: ${entry.sessionId.substring(0, 20)}...`;
+  }
 
   return log;
 }
@@ -45,8 +47,11 @@ function formatJsonLog(entry: StripeLogEntry): string {
   });
 }
 
-function useStructuredLogging(): boolean {
-  return process.env.NODE_ENV === "production" || process.env.STRIPE_JSON_LOGS === "true";
+function shouldUseStructuredLogging(): boolean {
+  return (
+    process.env.NODE_ENV === "production" ||
+    process.env.STRIPE_JSON_LOGS === "true"
+  );
 }
 
 export const stripeLogger = {
@@ -58,7 +63,9 @@ export const stripeLogger = {
       ...details,
     };
 
-    console.log(useStructuredLogging() ? formatJsonLog(entry) : formatConsoleLog(entry));
+    console.log(
+      shouldUseStructuredLogging() ? formatJsonLog(entry) : formatConsoleLog(entry),
+    );
   },
 
   warn(message: string, details?: Partial<StripeLogEntry>) {
@@ -69,7 +76,9 @@ export const stripeLogger = {
       ...details,
     };
 
-    console.warn(useStructuredLogging() ? formatJsonLog(entry) : formatConsoleLog(entry));
+    console.warn(
+      shouldUseStructuredLogging() ? formatJsonLog(entry) : formatConsoleLog(entry),
+    );
   },
 
   error(message: string, error?: unknown, details?: Partial<StripeLogEntry>) {
@@ -84,12 +93,12 @@ export const stripeLogger = {
       ...details,
     };
 
-    if (useStructuredLogging()) {
+    if (shouldUseStructuredLogging()) {
       console.error(formatJsonLog(entry));
     } else {
       console.error(formatConsoleLog(entry));
       if (error instanceof Error) {
-        console.error(`  └─ ${error.message}`);
+        console.error(`  -> ${error.message}`);
       }
     }
   },
@@ -107,7 +116,11 @@ export const stripeLogger = {
     console.log(formatConsoleLog(entry));
   },
 
-  order(orderNumber: number, action: "created" | "updated" | "error", details?: string) {
+  order(
+    orderNumber: number,
+    action: "created" | "updated" | "error",
+    details?: string,
+  ) {
     const messages = {
       created: `Order #${orderNumber} created`,
       updated: `Order #${orderNumber} updated`,
@@ -115,17 +128,23 @@ export const stripeLogger = {
     };
 
     const level = action === "error" ? "error" : "info";
-    this[level](details || messages[action], { details: { orderNumber, action } });
+    this[level](details || messages[action], {
+      details: { orderNumber, action },
+    });
   },
 
   webhook(
     eventType: string,
     eventId: string,
     status: "received" | "processed" | "failed",
-    details?: Record<string, unknown>
+    details?: Record<string, unknown>,
   ) {
     const level = status === "failed" ? "error" : "info";
-    this[level](`Webhook ${status}: ${eventType}`, { eventType, eventId, details });
+    this[level](`Webhook ${status}: ${eventType}`, {
+      eventType,
+      eventId,
+      details,
+    });
   },
 };
 

@@ -15,6 +15,7 @@ export async function createProduct(
       return {
         success: false,
         message: result.error || "Error creating product",
+        errors: result.errors,
       };
     }
 
@@ -44,6 +45,7 @@ export async function updateProduct(
       return {
         success: false,
         message: result.error || "Error updating product",
+        errors: result.errors,
       };
     }
 

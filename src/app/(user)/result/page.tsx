@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+
 import { fetchCheckoutData } from "@/services/stripe.service";
 import { pickFirst } from "@/utils/pickFirst";
 import {
@@ -15,8 +16,7 @@ import {
 export async function generateMetadata() {
   return {
     title: "Purchase Result | Ecommerce Template",
-    description:
-      "Result of the purchase in the test ecommerce created by Marcos Cámara",
+    description: "Result of your purchase in Ecommerce Template by Marcos Camara",
   };
 }
 
@@ -65,7 +65,7 @@ async function DynamicCheckoutContent({
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <CheckoutResult sessionId={sessionId} />
     </div>
   );
@@ -73,7 +73,7 @@ async function DynamicCheckoutContent({
 
 export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
-    <section className="py-12 px-6 sm:px-8">
+    <section className="px-6 py-12 sm:px-8">
       <Suspense fallback={<ResultSkeleton />}>
         <DynamicCheckoutContent searchParams={searchParams} />
       </Suspense>

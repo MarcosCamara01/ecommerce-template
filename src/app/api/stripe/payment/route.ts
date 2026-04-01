@@ -4,7 +4,6 @@ import { stripe } from "@/lib/stripe";
 import { stripeLogger } from "@/lib/stripe/logger";
 import { getOrCreateStripeCustomer } from "@/services/stripe.service";
 import { auth } from "@/utils/auth";
-import { headers } from "next/headers";
 import { cartRepository } from "@/lib/db/drizzle/repositories/cart.repository";
 
 const SESSION_EXPIRY_MINUTES = 30;
@@ -15,7 +14,7 @@ const checkoutRequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const authSession = await auth.api.getSession({ headers: await headers() });
+    const authSession = await auth.api.getSession({ headers: request.headers });
 
     if (!authSession?.user?.id) {
       return NextResponse.json(
@@ -27,8 +26,30 @@ export async function POST(request: NextRequest) {
     const userId = authSession.user.id;
     const userEmail = authSession.user.email;
 
-    const body = await request.json();
-    const { cartItemIds } = checkoutRequestSchema.parse(body);
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { statusCode: 400, message: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
+
+    const parsedBody = checkoutRequestSchema.safeParse(body);
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        {
+          statusCode: 400,
+          message: "Invalid checkout payload",
+          details: parsedBody.error.flatten(),
+        },
+        { status: 400 },
+      );
+    }
+
+    const { cartItemIds } = parsedBody.data;
 
     const userCartItems = await cartRepository.findByUserId(userId);
 
@@ -37,7 +58,10 @@ export async function POST(request: NextRequest) {
     );
 
     if (cartItemsList.length === 0) {
-      throw new Error("No valid cart items found");
+      return NextResponse.json(
+        { statusCode: 400, message: "No valid cart items found" },
+        { status: 400 },
+      );
     }
 
     if (cartItemsList.length !== cartItemIds.length) {
@@ -62,6 +86,7 @@ export async function POST(request: NextRequest) {
 
     const expiresAt =
       Math.floor(Date.now() / 1000) + SESSION_EXPIRY_MINUTES * 60;
+    const origin = request.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL;
 
     const session = await stripe.checkout.sessions.create({
       ...(customerId && { customer: customerId }),
@@ -72,8 +97,8 @@ export async function POST(request: NextRequest) {
       invoice_creation: { enabled: true },
       billing_address_collection: "required",
       phone_number_collection: { enabled: true },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/result?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
+      success_url: `${origin}/result?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/cart`,
       automatic_tax: { enabled: false },
       metadata: {
         userId,
@@ -81,12 +106,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    if (!session.url) {
+      throw new Error("Stripe checkout session URL is missing");
+    }
+
     stripeLogger.info("Checkout session created", {
       sessionId: session.id,
       details: { userId, itemCount: cartItemsList.length },
     });
 
-    return NextResponse.json({ session }, { status: 200 });
+    return NextResponse.json({ url: session.url }, { status: 200 });
   } catch (error) {
     stripeLogger.error("Failed to create checkout session", error);
     return NextResponse.json(
