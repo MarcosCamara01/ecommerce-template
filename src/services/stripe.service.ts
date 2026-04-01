@@ -4,32 +4,25 @@ import {
   ordersRepository,
 } from "@/lib/db/drizzle/repositories";
 import { stripeLogger } from "@/lib/stripe/logger";
-import type { OrderDetails } from "@/lib/email";
-import {
-  createOrderItem,
-  saveCustomerInfo,
-  saveOrderProducts,
-} from "@/app/(user)/orders/action";
 import type { MinimalCartItem } from "@/lib/db/drizzle/schema/cart";
+import {
+  createOrderItemInputSchema,
+  insertCustomerInfoSchema,
+  insertOrderProductSchema,
+  type OrderWithDetails,
+} from "@/lib/db/drizzle/schema";
 
 export { stripe };
-
-const customerIdCache = new Map<string, string>();
 
 export async function getOrCreateStripeCustomer(
   userId: string,
   email: string,
 ): Promise<string> {
-  const cachedId = customerIdCache.get(userId);
-  if (cachedId) return cachedId;
-
   try {
     const existing = await stripe.customers.list({ email, limit: 1 });
 
     if (existing.data.length > 0) {
-      const customerId = existing.data[0].id;
-      customerIdCache.set(userId, customerId);
-      return customerId;
+      return existing.data[0].id;
     }
 
     const customer = await stripe.customers.create({
@@ -38,7 +31,6 @@ export async function getOrCreateStripeCustomer(
     });
 
     stripeLogger.info(`Created Stripe customer ${customer.id}`);
-    customerIdCache.set(userId, customer.id);
     return customer.id;
   } catch (error) {
     stripeLogger.error("Failed to get/create Stripe customer", error);
@@ -64,6 +56,7 @@ export interface CreateStripeProductParams {
 export interface StripeProductResult {
   productId: string;
   priceId: string;
+  replacedPriceId?: string;
 }
 
 export async function createStripeProductForVariant(
@@ -133,8 +126,6 @@ export async function updateStripeProduct(
       const newAmount = Math.round(params.price * 100);
 
       if (existingAmount !== newAmount) {
-        await stripe.prices.update(priceId, { active: false });
-
         const newPrice = await stripe.prices.create({
           product: productId,
           unit_amount: newAmount,
@@ -148,6 +139,7 @@ export async function updateStripeProduct(
         return {
           productId,
           priceId: newPrice.id,
+          replacedPriceId: priceId,
         };
       }
     }
@@ -201,25 +193,13 @@ export async function fetchCheckoutData(
   sessionId: string,
 ): Promise<CheckoutResult> {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/checkout_sessions?session_id=${sessionId}`,
-    );
-
-    if (!res.ok) {
-      if (res.status === 404) {
-        return { status: "not_found", error: "Session not found" };
-      }
-      return { status: "error", error: `Server error: ${res.status}` };
+    if (!sessionId.startsWith("cs_")) {
+      return { status: "not_found", error: "Invalid session" };
     }
 
-    const data = await res.json();
-
-    // API returns error object on invalid session
-    if ("statusCode" in data && data.statusCode === 500) {
-      return { status: "not_found", error: data.message || "Invalid session" };
-    }
-
-    const session = data as Stripe.Checkout.Session;
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["payment_intent"],
+    });
 
     // Map Stripe session status to our status
     if (session.status === "complete" && session.payment_status === "paid") {
@@ -240,8 +220,27 @@ export async function fetchCheckoutData(
 
     return { status: "failed", session };
   } catch (err) {
+    if (
+      err instanceof Stripe.errors.StripeError &&
+      (err.type === "StripeInvalidRequestError" ||
+        err.code === "resource_missing")
+    ) {
+      return { status: "not_found", error: err.message };
+    }
+
     stripeLogger.error("Error fetching checkout data", err);
     return { status: "error", error: "Could not connect to payment service" };
+  }
+}
+
+export async function deactivateStripePrice(priceId: string): Promise<boolean> {
+  try {
+    await stripe.prices.update(priceId, { active: false });
+    stripeLogger.info(`Deactivated Stripe price ${priceId}`);
+    return true;
+  } catch (error) {
+    stripeLogger.error("Error deactivating Stripe price", error);
+    return false;
   }
 }
 
@@ -289,34 +288,45 @@ async function getCartItemsFromMetadata(
     }));
 }
 
+function buildOrderProductsInput(
+  lineItems: Stripe.LineItem[],
+  cartItems: MinimalCartItem[],
+) {
+  const createOrderProductInputSchema = insertOrderProductSchema.omit({
+    orderId: true,
+  });
+
+  return lineItems
+    .map((lineItem) => {
+      const cartItem = cartItems.find(
+        (item) => item.stripeId === lineItem.price?.id,
+      );
+
+      if (!cartItem) {
+        stripeLogger.warn("No cart item found for Stripe line item", {
+          details: { priceId: lineItem.price?.id },
+        });
+        return null;
+      }
+
+      return createOrderProductInputSchema.parse({
+        variantId: cartItem.variantId,
+        quantity: lineItem.quantity || 1,
+        size: cartItem.size,
+      });
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+}
+
 // Idempotent: returns existing order if already processed
 export async function processCompletedOrder(
   session: Stripe.Checkout.Session,
-): Promise<OrderDetails> {
+): Promise<OrderWithDetails> {
   const existingOrder = await ordersRepository.findByStripeSessionId(
     session.id,
   );
   if (existingOrder) {
-    return {
-      order: {
-        id: existingOrder.id,
-        userId: existingOrder.userId,
-        orderNumber: existingOrder.orderNumber,
-        deliveryDate: existingOrder.deliveryDate,
-        createdAt: existingOrder.createdAt,
-        updatedAt: existingOrder.updatedAt,
-      },
-      customerInfo: existingOrder.customerInfo,
-      products: existingOrder.orderProducts.map((op) => ({
-        id: op.id,
-        orderId: op.orderId,
-        variantId: op.variantId,
-        quantity: op.quantity,
-        size: op.size,
-        createdAt: op.createdAt,
-        updatedAt: op.updatedAt,
-      })),
-    };
+    return existingOrder;
   }
 
   const userId = session.metadata?.userId;
@@ -328,21 +338,48 @@ export async function processCompletedOrder(
   const lineItems = await getLineItemsFromSession(session.id);
   if (lineItems.length === 0) throw new Error("No line items from Stripe");
 
-  const orderNumber = await ordersRepository.getNextOrderNumber();
-  const orderData = await createOrderItem(userId, orderNumber);
-  const savedCustomerInfo = await saveCustomerInfo(orderData.id, session);
-  const savedOrderProducts = await saveOrderProducts(
-    orderData.id,
-    lineItems,
-    cartItems,
-  );
-  await clearUserCart(userId);
+  const deliveryDate = new Date();
+  deliveryDate.setDate(deliveryDate.getDate() + 7);
 
-  return {
-    order: orderData,
-    customerInfo: savedCustomerInfo!,
-    products: savedOrderProducts,
-  };
+  const orderData = createOrderItemInputSchema.parse({
+    userId,
+    deliveryDate,
+  });
+
+  const customerData = insertCustomerInfoSchema
+    .omit({ orderId: true })
+    .parse({
+      name: session.customer_details?.name || "Unknown",
+      email: session.customer_details?.email || "unknown@email.com",
+      phone: session.customer_details?.phone || undefined,
+      address: {
+        line1: session.customer_details?.address?.line1 || "",
+        line2: session.customer_details?.address?.line2,
+        city: session.customer_details?.address?.city || "",
+        state: session.customer_details?.address?.state,
+        postal_code: session.customer_details?.address?.postal_code || "",
+        country: session.customer_details?.address?.country || "",
+      },
+      stripeOrderId: session.id,
+      totalPrice: session.amount_total || 0,
+    });
+
+  const orderProductsData = buildOrderProductsInput(lineItems, cartItems);
+  if (orderProductsData.length === 0) {
+    throw new Error("No valid order products to save");
+  }
+
+  const savedOrder = await ordersRepository.createComplete(
+    orderData,
+    customerData,
+    orderProductsData,
+  );
+  if (!savedOrder) {
+    throw new Error("Error creating complete order");
+  }
+
+  await clearUserCart(userId);
+  return savedOrder;
 }
 
 // Hook for abandoned cart recovery (analytics, emails, etc.)

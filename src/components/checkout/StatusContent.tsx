@@ -1,15 +1,33 @@
-import { HiOutlineXCircle, HiOutlineClock, HiOutlineExclamation } from "react-icons/hi";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import {
+  HiOutlineXCircle,
+  HiOutlineClock,
+  HiOutlineExclamation,
+} from "react-icons/hi";
+
+import { Button } from "@/components/ui/button";
 import type { CheckoutStatus } from "@/services/stripe.service";
 
+import { AutoRefreshStatus } from "./AutoRefreshStatus";
+
+type NonSuccessCheckoutStatus = Exclude<CheckoutStatus, "success">;
+
 interface StatusContentProps {
-  status: CheckoutStatus;
+  status: NonSuccessCheckoutStatus;
   sessionId: string;
   error?: string;
 }
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<
+  NonSuccessCheckoutStatus,
+  {
+    icon: typeof HiOutlineXCircle;
+    iconColor: string;
+    title: string;
+    message: string;
+    showRetry: boolean;
+  }
+> = {
   expired: {
     icon: HiOutlineClock,
     iconColor: "text-yellow-500",
@@ -52,20 +70,19 @@ const STATUS_CONFIG = {
     message: "We couldn't verify your payment status. Please check your email or orders page.",
     showRetry: false,
   },
-} as const;
+};
 
 export function StatusContent({ status, sessionId, error }: StatusContentProps) {
-  const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG];
-  
-  if (!config) return null;
-
+  const config = STATUS_CONFIG[status];
   const Icon = config.icon;
 
   return (
     <>
-      <div className="p-6 border border-solid rounded-lg bg-background-secondary border-border-primary">
-        <div className="flex items-center gap-3 mb-3">
-          <Icon className={`w-8 h-8 ${config.iconColor}`} />
+      <AutoRefreshStatus active={status === "pending"} />
+
+      <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-6">
+        <div className="mb-3 flex items-center gap-3">
+          <Icon className={`h-8 w-8 ${config.iconColor}`} />
           <h1 className="text-2xl font-bold sm:text-3xl">{config.title}</h1>
         </div>
         <p className="text-sm text-muted-foreground">{config.message}</p>
@@ -76,13 +93,17 @@ export function StatusContent({ status, sessionId, error }: StatusContentProps) 
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+      <div className="flex flex-col justify-center gap-3 sm:flex-row">
         {config.showRetry && (
           <Button asChild className="gap-2">
             <Link href="/cart">Return to Cart</Link>
           </Button>
         )}
-        <Button asChild variant={config.showRetry ? "outline" : "default"} className="gap-2">
+        <Button
+          asChild
+          variant={config.showRetry ? "outline" : "default"}
+          className="gap-2"
+        >
           <Link href="/orders">Check Orders</Link>
         </Button>
         <Button asChild variant="outline" className="gap-2">
@@ -91,7 +112,7 @@ export function StatusContent({ status, sessionId, error }: StatusContentProps) 
       </div>
 
       {(status === "error" || status === "failed") && (
-        <div className="p-3 border border-solid rounded-lg bg-background-tertiary border-border-primary">
+        <div className="rounded-lg border border-solid border-border-primary bg-background-tertiary p-3">
           <p className="text-xs text-muted-foreground">
             Reference: <span className="font-mono">{sessionId.slice(0, 20)}...</span>
           </p>

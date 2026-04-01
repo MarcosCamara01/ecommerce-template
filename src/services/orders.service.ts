@@ -1,8 +1,7 @@
 import { ordersRepository } from "@/lib/db/drizzle/repositories";
 import type {
-  OrderItem,
   OrderWithDetails,
-  InsertOrderItem,
+  CreateOrderItemInput,
   InsertOrderProduct,
   InsertCustomerInfo,
 } from "@/lib/db/drizzle/schema";
@@ -40,27 +39,8 @@ export async function getOrderByNumber(
   }
 }
 
-export async function createOrder(
-  userId: string,
-  orderNumber: number,
-): Promise<OrderItem | null> {
-  try {
-    const deliveryDate = new Date();
-    deliveryDate.setDate(deliveryDate.getDate() + 7);
-
-    return await ordersRepository.create({
-      userId,
-      orderNumber,
-      deliveryDate,
-    });
-  } catch (error) {
-    console.error("Error creating order:", error);
-    return null;
-  }
-}
-
 export async function createCompleteOrder(
-  orderData: InsertOrderItem,
+  orderData: CreateOrderItemInput,
   customerData: Omit<InsertCustomerInfo, "orderId">,
   products: Omit<InsertOrderProduct, "orderId">[],
 ): Promise<OrderWithDetails | null> {
@@ -73,38 +53,5 @@ export async function createCompleteOrder(
   } catch (error) {
     console.error("Error creating complete order:", error);
     return null;
-  }
-}
-
-export async function addCustomerInfoToOrder(
-  orderId: number,
-  customerData: Omit<InsertCustomerInfo, "orderId">,
-) {
-  try {
-    return await ordersRepository.addCustomerInfo(orderId, customerData);
-  } catch (error) {
-    console.error("Error adding customer info:", error);
-    return null;
-  }
-}
-
-export async function addProductsToOrder(
-  orderId: number,
-  products: Omit<InsertOrderProduct, "orderId">[],
-) {
-  try {
-    return await ordersRepository.addProducts(orderId, products);
-  } catch (error) {
-    console.error("Error adding products to order:", error);
-    return null;
-  }
-}
-
-export async function getNextOrderNumber(): Promise<number> {
-  try {
-    return await ordersRepository.getNextOrderNumber();
-  } catch (error) {
-    console.error("Error getting next order number:", error);
-    return Date.now();
   }
 }

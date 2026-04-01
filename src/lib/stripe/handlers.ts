@@ -98,6 +98,6 @@ function isRetryableError(error: unknown): boolean {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const orderDetails = await processCompletedOrder(session);
-  stripeLogger.order(orderDetails.order.orderNumber, "created");
-  await sendEmail(session, orderDetails);
+  stripeLogger.order(orderDetails.orderNumber, "created");
+  await sendEmail(orderDetails);
 }
