@@ -1,17 +1,48 @@
-import { NextResponse } from "next/server";
-import { wishlistRepository } from "@/lib/db/drizzle/repositories";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import {
+  addToWishlistSchema,
+  selectWishlistItemSchema,
+  wishlistItemWithProductSchema,
+} from "@/lib/db/drizzle/schema";
 import { getUser } from "@/lib/auth/server";
+import {
+  addToWishlist,
+  getWishlist,
+  getWishlistWithDetails,
+  removeFromWishlist,
+  removeFromWishlistByProduct,
+} from "@/services/wishlist.service";
 
-export async function GET() {
+const deleteWishlistItemSchema = z
+  .object({
+    itemId: z.coerce.number().int().positive().optional(),
+    productId: z.coerce.number().int().positive().optional(),
+  })
+  .refine((value) => value.itemId || value.productId, {
+    message: "An itemId or productId is required",
+  });
+
+export async function GET(request: NextRequest) {
   try {
     const user = await getUser();
     if (!user) return NextResponse.json({ items: [] });
 
-    const items = await wishlistRepository.findByUserId(user.id);
+    const view = request.nextUrl.searchParams.get("view");
+    const items =
+      view === "details"
+        ? wishlistItemWithProductSchema
+            .array()
+            .parse(await getWishlistWithDetails(user.id))
+        : selectWishlistItemSchema.array().parse(await getWishlist(user.id));
+
     return NextResponse.json({ items });
   } catch (error) {
     console.error("Error getting wishlist items:", error);
-    return NextResponse.json({ items: [] }, { status: 200 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -21,23 +52,23 @@ export async function POST(req: Request) {
     if (!user)
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const { productId } = await req.json();
-    if (typeof productId !== "number") {
-      return NextResponse.json({ error: "invalid productId" }, { status: 400 });
+    const parsed = addToWishlistSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid wishlist item", details: parsed.error.flatten() },
+        { status: 400 },
+      );
     }
 
-    // Check if already exists for idempotency
-    const exists = await wishlistRepository.exists(user.id, productId);
-    if (exists) {
-      const items = await wishlistRepository.findByUserId(user.id);
-      const existingItem = items.find((i) => i.productId === productId);
+    const item = await addToWishlist(user.id, parsed.data.productId);
+
+    if (!item) {
+      const items = await getWishlist(user.id);
+      const existingItem = items.find(
+        (wishlistItem) => wishlistItem.productId === parsed.data.productId,
+      );
       return NextResponse.json({ item: existingItem });
     }
-
-    const item = await wishlistRepository.create({
-      userId: user.id,
-      productId,
-    });
 
     return NextResponse.json({ item });
   } catch (error) {
@@ -49,27 +80,32 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     const user = await getUser();
     if (!user)
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const { searchParams } = new URL(req.url);
-    const itemId = Number(searchParams.get("itemId"));
-    const productId = Number(searchParams.get("productId"));
-
-    if (!itemId && !productId) {
+    const parsed = deleteWishlistItemSchema.safeParse({
+      itemId: req.nextUrl.searchParams.get("itemId") ?? undefined,
+      productId: req.nextUrl.searchParams.get("productId") ?? undefined,
+    });
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "missing identifier" },
-        { status: 400 }
+        { error: "Invalid wishlist identifier", details: parsed.error.flatten() },
+        { status: 400 },
       );
     }
 
-    if (itemId) {
-      await wishlistRepository.delete(user.id, itemId);
-    } else if (productId) {
-      await wishlistRepository.deleteByUserAndProduct(user.id, productId);
+    const deleted = parsed.data.itemId
+      ? await removeFromWishlist(user.id, parsed.data.itemId)
+      : await removeFromWishlistByProduct(user.id, parsed.data.productId!);
+
+    if (!deleted) {
+      return NextResponse.json(
+        { error: "Wishlist item not found" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({ ok: true });

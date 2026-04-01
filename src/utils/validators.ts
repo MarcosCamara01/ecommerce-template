@@ -38,7 +38,7 @@ export function isValidPrice(price: number): boolean {
   return price >= 0 && !isNaN(price);
 }
 
-export function isEmpty(value: any): boolean {
+export function isEmpty(value: unknown): boolean {
   if (value === null || value === undefined) return true;
   if (typeof value === "string") return value.trim().length === 0;
   if (Array.isArray(value)) return value.length === 0;

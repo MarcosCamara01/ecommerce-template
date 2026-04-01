@@ -1,48 +1,28 @@
 "use client";
 
-/** FUNCTIONALITY */
-import { useCart } from "@/hooks/cart";
-/** COMPONENTS */
 import Link from "next/link";
+
+import { useCartDetails } from "@/hooks/cart";
+import { SVGLoadingIcon } from "@/components/ui/loader";
+
 import { ButtonCheckout } from "./ButtonCheckout";
-import { GridProducts } from "../products/GridProducts";
 import { CartProduct } from "./CartProduct";
-/** TYPES */
-import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
+import { GridProducts } from "../products/GridProducts";
 
-export const CartProducts = ({
-  allProducts,
-}: {
-  allProducts: ProductWithVariants[];
-}) => {
-  const { items } = useCart();
+export const CartProducts = () => {
+  const { items, isPending } = useCartDetails();
 
-  if (items && items.length > 0) {
-    const cartProductsWithInfo = items
-      .map((cartItem) => {
-        const product = allProducts.find((p) =>
-          p.variants.some((variant) => variant.id === cartItem.variantId),
-        );
-        if (!product) return null;
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-91px)]">
+        <SVGLoadingIcon height={30} width={30} />
+      </div>
+    );
+  }
 
-        const variant = product.variants.find(
-          (v) => v.id === cartItem.variantId,
-        );
-        if (!variant) return null;
-
-        return {
-          cartItem,
-          product,
-          variant,
-        };
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null);
-
-    const totalPrice = cartProductsWithInfo
-      .reduce(
-        (sum, { product, cartItem }) => sum + product.price * cartItem.quantity,
-        0,
-      )
+  if (items.length > 0) {
+    const totalPrice = items
+      .reduce((sum, item) => sum + item.product.price * item.quantity, 0)
       .toFixed(2);
 
     return (
@@ -51,27 +31,27 @@ export const CartProducts = ({
           YOUR SHOPPING CART
         </h2>
         <GridProducts className="grid-cols-1">
-          {cartProductsWithInfo.map(({ product, cartItem, variant }) => (
+          {items.map(({ id, product, size, quantity, variant }) => (
             <CartProduct
-              key={cartItem.id}
+              key={id}
               product={product}
-              cartItemId={cartItem.id}
-              size={cartItem.size}
-              quantity={cartItem.quantity}
+              cartItemId={id}
+              size={size}
+              quantity={quantity}
               variant={variant}
             />
           ))}
         </GridProducts>
 
-        <div className="fixed left-[50%] translate-x-[-50%] bottom-4 w-[90%] z-10 sm:w-[360px] rounded-xl overflow-hidden flex bg-background-primary border border-solid border-border-primary h-min">
-          <div className="flex flex-col p-2.5 justify-center w-1/2 gap-2 text-center">
-            <div className="flex gap-2.5 justify-center text-sm">
+        <div className="fixed bottom-4 left-[50%] z-10 flex h-min w-[90%] translate-x-[-50%] overflow-hidden rounded-xl border border-solid border-border-primary bg-background-primary sm:w-[360px]">
+          <div className="flex w-1/2 flex-col justify-center gap-2 p-2.5 text-center">
+            <div className="flex justify-center gap-2.5 text-sm">
               <span>Total:</span>
-              <span>{totalPrice}€</span>
+              <span>{totalPrice} EUR</span>
             </div>
             <span className="text-xs">+ TAX INCL.</span>
           </div>
-          <div className="w-1/2 border-l border-solid bg-background-secondary border-border-primary">
+          <div className="w-1/2 border-l border-solid border-border-primary bg-background-secondary">
             <ButtonCheckout cartItemIds={items.map((item) => item.id)} />
           </div>
         </div>
@@ -80,14 +60,14 @@ export const CartProducts = ({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-91px)] gap-2 px-4">
+    <div className="flex h-[calc(100vh-91px)] w-full flex-col items-center justify-center gap-2 px-4">
       <h1 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h1>
       <p className="mb-4 text-lg">
         When you have added something to your cart, it will appear here. Want to
         get started?
       </p>
       <Link
-        className="flex font-medium items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-background-tertiary hover:border-[#454545]"
+        className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-all hover:border-[#454545] hover:bg-background-tertiary"
         href="/"
       >
         Start

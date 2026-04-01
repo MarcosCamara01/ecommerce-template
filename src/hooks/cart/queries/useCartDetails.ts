@@ -1,18 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { CART_QUERY_KEYS } from "../keys";
-import { selectCartItemSchema, type CartItem } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
-import type { CartListResponse } from "../types";
+import {
+  cartItemWithDetailsSchema,
+  type CartItemWithDetails,
+} from "@/lib/db/drizzle/schema";
+import { CART_QUERY_KEYS } from "../keys";
+import type { CartDetailsResponse } from "../types";
 
-export const useCart = () => {
+export const useCartDetails = () => {
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
   const query = useQuery({
     enabled: Boolean(userId),
-    queryKey: CART_QUERY_KEYS.cartList(userId ?? "anonymous"),
+    queryKey: CART_QUERY_KEYS.cartDetails(userId ?? "anonymous"),
     queryFn: async () => {
-      const response = await fetch("/api/user/cart", {
+      const response = await fetch("/api/user/cart?view=details", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -20,19 +23,21 @@ export const useCart = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch cart");
+        throw new Error("Failed to fetch cart details");
       }
 
       const data = await response.json();
       return {
-        items: selectCartItemSchema.array().parse(data.items),
-      } satisfies CartListResponse;
+        items: cartItemWithDetailsSchema.array().parse(data.items),
+      } satisfies CartDetailsResponse;
     },
   });
 
   const items = query.data?.items ?? [];
 
-  const getCartItemById = (id: CartItem["id"]): CartItem | undefined => {
+  const getCartItemById = (
+    id: CartItemWithDetails["id"],
+  ): CartItemWithDetails | undefined => {
     return items.find((item) => item.id === id);
   };
 

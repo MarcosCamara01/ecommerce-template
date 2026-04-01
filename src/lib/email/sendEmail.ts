@@ -1,66 +1,30 @@
-import Stripe from "stripe";
-import { CustomerInfo, OrderItem, OrderProduct } from "@/lib/db/drizzle/schema";
-import { getAllProducts } from "@/app/actions";
+import "server-only";
 
-type OrderDetails = {
-  order: OrderItem;
-  customerInfo: CustomerInfo;
-  products: OrderProduct[];
-};
+import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
 
-/**
- * Format order details for email
- */
-async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
-  const { order, customerInfo, products } = orderDetails;
+import { escapeHtml, getContactEmailAddress, sendMail } from "./mailer";
 
-  const allProducts = await getAllProducts();
+type OrderDetails = OrderWithDetails;
 
-  const totalPrice = (customerInfo.totalPrice / 100).toFixed(2);
-  const deliveryDate = new Date(order.deliveryDate).toLocaleDateString(
-    "en-US",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  );
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "EUR",
+});
 
-  let productsHtml = products
-    .map((item) => {
-      const product = allProducts.find((p) =>
-        p.variants.some((v) => v.id === item.variantId),
-      );
-      const variant = product?.variants.find((v) => v.id === item.variantId);
+function formatCurrency(amount: number) {
+  return currencyFormatter.format(amount);
+}
 
-      if (!variant || !product) {
-        return null;
-      }
+function formatOrderDate(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 
-      const subtotal = (product.price * item.quantity).toFixed(2);
-
-      return `
-      <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">
-          <strong>${product?.name}</strong><br/>
-          <small>Color: ${variant.color} | Size: ${item.size}</small>
-        </td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
-          ${item.quantity}
-        </td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
-          ${product.price.toFixed(2)}€
-        </td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
-          <strong>${subtotal}€</strong>
-        </td>
-      </tr>
-    `;
-    })
-    .join("");
-
-  const address = customerInfo.address;
-  const fullAddress = [
+function formatAddress(address: OrderDetails["customerInfo"]["address"]) {
+  return [
     address.line1,
     address.line2,
     address.city,
@@ -68,20 +32,48 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
     address.country,
   ]
     .filter(Boolean)
+    .map((part) => escapeHtml(part))
     .join(", ");
+}
+
+function formatOrderEmail(orderDetails: OrderDetails): string {
+  const totalPrice = formatCurrency(orderDetails.customerInfo.totalPrice / 100);
+  const deliveryDate = formatOrderDate(orderDetails.deliveryDate);
+
+  const productsHtml = orderDetails.orderProducts
+    .map(({ quantity, size, variant }) => {
+      const unitPrice = variant.product.price;
+
+      return `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">
+            <strong>${escapeHtml(variant.product.name)}</strong><br/>
+            <small>Color: ${escapeHtml(variant.color)} | Size: ${escapeHtml(size)}</small>
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+            ${quantity}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
+            ${formatCurrency(unitPrice)}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
+            <strong>${formatCurrency(unitPrice * quantity)}</strong>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
 
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Thank you for your purchase!</h2>
-      <p>Hello <strong>${customerInfo.name}</strong>,</p>
+      <p>Hello <strong>${escapeHtml(orderDetails.customerInfo.name)}</strong>,</p>
       <p>Your order has been confirmed and will be delivered approximately on <strong>${deliveryDate}</strong>.</p>
-      
+
       <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
         <h3 style="margin-top: 0; color: #333;">Order Details</h3>
-        <p><strong>Order Number:</strong> #${order.orderNumber}</p>
-        <p><strong>Order Date:</strong> ${new Date(
-          order.createdAt,
-        ).toLocaleDateString("en-US")}</p>
+        <p><strong>Order Number:</strong> #${orderDetails.orderNumber}</p>
+        <p><strong>Order Date:</strong> ${formatOrderDate(orderDetails.createdAt)}</p>
       </div>
 
       <h3 style="color: #333;">Products</h3>
@@ -103,7 +95,7 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
               <strong>Total:</strong>
             </td>
             <td style="padding: 15px; text-align: right; font-size: 18px;">
-              <strong>${totalPrice}€</strong>
+              <strong>${totalPrice}</strong>
             </td>
           </tr>
         </tfoot>
@@ -111,144 +103,91 @@ async function formatOrderEmail(orderDetails: OrderDetails): Promise<string> {
 
       <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
         <h3 style="margin-top: 0; color: #333;">Delivery Address</h3>
-        <p>${fullAddress}</p>
+        <p>${formatAddress(orderDetails.customerInfo.address)}</p>
         ${
-          customerInfo.phone
-            ? `<p><strong>Phone:</strong> ${customerInfo.phone}</p>`
+          orderDetails.customerInfo.phone
+            ? `<p><strong>Phone:</strong> ${escapeHtml(orderDetails.customerInfo.phone)}</p>`
             : ""
         }
       </div>
 
       <p style="color: #666; font-size: 14px; margin-top: 30px;">
-        If you have any questions about your order, please don't hesitate to contact us.
+        If you have any questions about your order, please do not hesitate to contact us.
       </p>
     </div>
   `;
 }
 
-async function sendCustomerEmail(
-  data: Stripe.Checkout.Session,
-  orderDetails: OrderDetails,
-) {
-  const message = await formatOrderEmail(orderDetails);
-
-  const emailCustomer = {
-    name: data?.customer_details?.name,
-    email: data?.customer_details?.email,
-    message,
-    subject: "Order Confirmation - Purchase Receipt",
-  };
-
-  try {
-    const responseCustomer = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/email`,
-      {
-        method: "POST",
-        body: JSON.stringify(emailCustomer),
-      },
-    );
-
-    if (!responseCustomer.ok) {
-      throw new Error(`response status: ${responseCustomer.status}`);
-    } else {
-      console.log("Customer's email successfully sent");
-    }
-  } catch (err) {
-    console.error("Error sending customer's email:", err);
-    throw err;
-  }
-}
-
-async function sendOwnerEmail(
-  data: Stripe.Checkout.Session,
-  orderDetails: OrderDetails,
-) {
-  const customerInfo = orderDetails.customerInfo;
-  const totalPrice = (customerInfo.totalPrice / 100).toFixed(2);
-  const productsCount = orderDetails.products.reduce(
+function formatOwnerEmail(orderDetails: OrderDetails): string {
+  const productsCount = orderDetails.orderProducts.reduce(
     (sum, item) => sum + item.quantity,
     0,
   );
 
-  const allProducts = await getAllProducts();
+  const productsDetails = orderDetails.orderProducts
+    .map(
+      ({ quantity, size, variant }) =>
+        `- ${escapeHtml(variant.product.name)} (${escapeHtml(variant.color)}, Size: ${escapeHtml(size)}) x${quantity}`,
+    )
+    .join("<br />");
 
-  const productsDetails = orderDetails.products
-    .map((item) => {
-      const product = allProducts.find((p) =>
-        p.variants.some((v) => v.id === item.variantId),
-      );
-      const variant = product?.variants.find((v) => v.id === item.variantId);
-
-      if (!variant || !product) {
-        return null;
-      }
-
-      return `- ${product.name} (${variant.color}, Size: ${item.size}) x${item.quantity}`;
-    })
-    .join("\n");
-
-  const message = `
+  return `
     <div style="font-family: Arial, sans-serif;">
       <h2>New Order Received!</h2>
-      <p><strong>Customer:</strong> ${data?.customer_details?.name}</p>
-      <p><strong>Email:</strong> ${data?.customer_details?.email}</p>
-      <p><strong>Order Number:</strong> #${orderDetails.order.orderNumber}</p>
-      <p><strong>Total:</strong> ${totalPrice}€</p>
+      <p><strong>Customer:</strong> ${escapeHtml(orderDetails.customerInfo.name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(orderDetails.customerInfo.email)}</p>
+      <p><strong>Order Number:</strong> #${orderDetails.orderNumber}</p>
+      <p><strong>Total:</strong> ${formatCurrency(orderDetails.customerInfo.totalPrice / 100)}</p>
       <p><strong>Number of Products:</strong> ${productsCount}</p>
-      
+
       <h3>Products:</h3>
-      <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">${productsDetails}</pre>
-      
+      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">${productsDetails}</div>
+
       <h3>Shipping Address:</h3>
       <p>
-        ${customerInfo.address.line1 || ""}<br/>
+        ${formatAddress(orderDetails.customerInfo.address)}<br/>
         ${
-          customerInfo.address.line2 ? customerInfo.address.line2 + "<br/>" : ""
+          orderDetails.customerInfo.phone
+            ? `Phone: ${escapeHtml(orderDetails.customerInfo.phone)}`
+            : ""
         }
-        ${customerInfo.address.city || ""}, ${
-          customerInfo.address.postal_code || ""
-        } ${customerInfo.address.country || ""}<br/>
-        ${customerInfo.phone ? "Phone: " + customerInfo.phone : ""}
       </p>
     </div>
   `;
-
-  const emailOwner = {
-    name: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
-    email: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
-    message: message,
-    subject: `New Order #${orderDetails.order.orderNumber}`,
-  };
-
-  try {
-    const responseEmailOwner = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/email`,
-      {
-        method: "POST",
-        body: JSON.stringify(emailOwner),
-      },
-    );
-
-    if (!responseEmailOwner.ok) {
-      throw new Error(`response status: ${responseEmailOwner.status}`);
-    } else {
-      console.log("Owner's email sent correctly");
-    }
-  } catch (err) {
-    console.error("Error sending owner's email:", err);
-    throw err;
-  }
 }
 
-export const sendEmail = async (
-  data: Stripe.Checkout.Session,
-  orderDetails: OrderDetails,
-) => {
-  try {
-    await sendCustomerEmail(data, orderDetails);
-    await sendOwnerEmail(data, orderDetails);
-  } catch (err) {
-    console.error(err);
+async function sendCustomerEmail(orderDetails: OrderDetails) {
+  if (!orderDetails.customerInfo.email) {
+    console.warn("Skipping customer email: missing customer email address");
+    return;
+  }
+
+  await sendMail({
+    to: orderDetails.customerInfo.email,
+    subject: "Order Confirmation - Purchase Receipt",
+    html: formatOrderEmail(orderDetails),
+  });
+}
+
+async function sendOwnerEmail(orderDetails: OrderDetails) {
+  await sendMail({
+    to: getContactEmailAddress(),
+    subject: `New Order #${orderDetails.orderNumber}`,
+    replyTo: orderDetails.customerInfo.email || undefined,
+    html: formatOwnerEmail(orderDetails),
+  });
+}
+
+export const sendEmail = async (orderDetails: OrderDetails) => {
+  const results = await Promise.allSettled([
+    sendCustomerEmail(orderDetails),
+    sendOwnerEmail(orderDetails),
+  ]);
+
+  for (const result of results) {
+    if (result.status === "rejected") {
+      console.error("Error sending order email:", result.reason);
+    }
   }
 };
 

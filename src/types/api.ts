@@ -8,7 +8,7 @@ export interface ApiResponse<T> {
 }
 
 export interface CartResponse {
-  items: any[];
+  items: unknown[];
   total: number;
   count: number;
 }
@@ -27,12 +27,12 @@ export interface ProductResponse {
   description: string;
   price: number;
   category: string;
-  variants: any[];
+  variants: unknown[];
 }
 
 export interface AuthResponse {
-  user: any;
-  session: any;
+  user: unknown;
+  session: unknown;
   error?: string;
 }
 

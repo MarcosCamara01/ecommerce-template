@@ -1,6 +1,7 @@
 import { cartRepository } from "@/lib/db/drizzle/repositories";
 import type {
   CartItem,
+  CartItemWithDetails,
   AddToCartInput,
   ProductSize,
 } from "@/lib/db/drizzle/schema";
@@ -14,7 +15,9 @@ export async function getCart(userId: string): Promise<CartItem[]> {
   }
 }
 
-export async function getCartWithDetails(userId: string) {
+export async function getCartWithDetails(
+  userId: string,
+): Promise<CartItemWithDetails[]> {
   try {
     return await cartRepository.findByUserIdWithDetails(userId);
   } catch (error) {

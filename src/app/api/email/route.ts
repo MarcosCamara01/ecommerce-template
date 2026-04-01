@@ -1,50 +1,48 @@
-import { NextResponse, NextRequest } from "next/server";
-import nodemailer from "nodemailer";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { contactEmailSchema, sendContactEmail } from "@/lib/email/mailer";
+
+async function readJsonBody(request: NextRequest): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(request: NextRequest) {
-  const { name, email, message, subject } = await request.json();
+  const body = await readJsonBody(request);
 
-  if (!name || !email || !message || !subject) {
+  if (body === null) {
     return NextResponse.json(
-      { message: "We need more information to send an email!" },
-      { status: 400 }
+      { message: "Invalid JSON body" },
+      { status: 400 },
     );
   }
 
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    service: "gmail",
-    auth: {
-      user: process.env.NEXT_PUBLIC_EMAIL_USERNAME,
-      pass: process.env.NEXT_PUBLIC_EMAIL_PASSWORD,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
+  const parsed = contactEmailSchema.safeParse(body);
 
-  const mailOptions = {
-    from: process.env.NEXT_PUBLIC_EMAIL_USERNAME,
-    to: email,
-    replyTo: process.env.NEXT_PUBLIC_PERSONAL_EMAIL,
-    subject: subject,
-    html: ` 
-            <p>Hello ${name}!</p>
-            <p>${message}</p>
-            `,
-  };
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        message: "We need more information to send the message.",
+        details: parsed.error.flatten(),
+      },
+      { status: 400 },
+    );
+  }
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendContactEmail(parsed.data);
     return NextResponse.json(
       { message: "Email sent successfully!" },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (error: any) {
-    console.error(error);
+  } catch (error) {
+    console.error("Could not send contact email:", error);
     return NextResponse.json(
-      { message: "COULT NOT SEND THE MESSAGE" },
-      { status: 500 }
+      { message: "Could not send the message" },
+      { status: 500 },
     );
   }
 }
