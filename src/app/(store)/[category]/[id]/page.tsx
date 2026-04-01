@@ -1,10 +1,12 @@
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+
 import {
   SingleProduct,
   SingleProductSkeleton,
   SuspenseRandomProducts,
 } from "@/components/product";
 import { getAllProducts, getProduct } from "@/app/actions";
-import { Suspense } from "react";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
@@ -24,16 +26,27 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
-  const product = await getProduct(Number(id));
+  const productId = Number(id);
 
-  const title = product?.name
-    ? capitalizeFirstLetter(product?.name) + " |"
-    : undefined;
-  const description = product?.description ?? undefined;
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return {
+      title: "Product | Ecommerce Template",
+      description: "Explore the latest product details at Ecommerce Template.",
+    };
+  }
+
+  const product = await getProduct(productId);
+
+  if (!product) {
+    return {
+      title: "Product not found | Ecommerce Template",
+      description: "The requested product is not available.",
+    };
+  }
 
   return {
-    title: `${title} Ecommerce Template`,
-    description: description,
+    title: `${capitalizeFirstLetter(product.name)} | Ecommerce Template`,
+    description: product.description,
   };
 }
 
@@ -44,13 +57,22 @@ async function DynamicProductContent({
   params: Promise<{ id: string; category: string }>;
   searchParams: Promise<{ variant: string | undefined }>;
 }) {
-  const [{ id }, sp] = await Promise.all([params, searchParams]);
+  const [{ id, category }, sp] = await Promise.all([params, searchParams]);
   const selectedVariantColor = pickFirst(sp, "variant");
+  const productId = Number(id);
+
+  if (!Number.isInteger(productId) || productId <= 0) {
+    notFound();
+  }
 
   return (
     <>
-      <SingleProduct id={id} selectedVariantColor={selectedVariantColor} />
-      <SuspenseRandomProducts productIdToExclude={Number(id)} />
+      <SingleProduct
+        id={productId}
+        category={category}
+        selectedVariantColor={selectedVariantColor}
+      />
+      <SuspenseRandomProducts productIdToExclude={productId} />
     </>
   );
 }

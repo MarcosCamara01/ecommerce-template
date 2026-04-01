@@ -1,12 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import {
-  FaTriangleExclamation,
-  FaLinkedin,
-  FaGithub,
-  FaMedium,
-} from "react-icons/fa6";
 
 export const Footer = () => {
   const linkStyles = "text-sm transition duration-150 ease hover:text-white";
@@ -19,26 +11,17 @@ export const Footer = () => {
           <h2 className="my-3 text-sm font-medium">Products</h2>
           <ul className="grid grid-cols-2">
             <li className={liStyles}>
-              <Link
-                href={`${process.env.NEXT_PUBLIC_APP_URL}/t-shirts`}
-                className={linkStyles}
-              >
+              <Link href="/t-shirts" className={linkStyles}>
                 T-shirts
               </Link>
             </li>
             <li className={liStyles}>
-              <Link
-                href={`${process.env.NEXT_PUBLIC_APP_URL}/pants`}
-                className={linkStyles}
-              >
+              <Link href="/pants" className={linkStyles}>
                 Pants
               </Link>
             </li>
             <li className={liStyles}>
-              <Link
-                href={`${process.env.NEXT_PUBLIC_APP_URL}/sweatshirts`}
-                className={linkStyles}
-              >
+              <Link href="/sweatshirts" className={linkStyles}>
                 Sweatshirts
               </Link>
             </li>

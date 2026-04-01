@@ -2,14 +2,14 @@
 
 export default function Error({ reset }: { reset: () => void }) {
   return (
-    <div className="flex flex-col max-w-xl p-8 mx-auto my-4 bg-white border rounded-lg border-neutral-200 dark:border-neutral-800 dark:bg-background-primary md:p-12">
-      <h2 className="text-xl font-bold">Oh no!</h2>
-      <p className="my-2">
+    <div className="mx-auto my-4 flex max-w-xl flex-col rounded-lg border border-solid border-border-primary bg-background-secondary p-8 md:p-12">
+      <h2 className="text-xl font-bold">Something went wrong</h2>
+      <p className="my-2 text-muted-foreground">
         There was an issue with our storefront. This could be a temporary issue,
         please try your action again.
       </p>
       <button
-        className="flex items-center justify-center w-full p-4 mx-auto mt-4 tracking-wide text-white bg-blue-600 rounded-full hover:opacity-90"
+        className="mt-4 inline-flex h-11 items-center justify-center rounded-md border border-solid border-border-primary bg-background-tertiary px-6 text-sm font-medium transition-colors hover:bg-border-secondary"
         onClick={() => reset()}
       >
         Try Again

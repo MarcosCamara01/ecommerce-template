@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+
 import { getCategoryProducts } from "@/app/actions";
 import {
   ProductsSkeleton,
@@ -8,7 +11,7 @@ import {
   type ProductCategory,
   ProductCategoryZod,
 } from "@/lib/db/drizzle/schema";
-import { Suspense } from "react";
+import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
 interface Props {
   params: Promise<{
@@ -16,10 +19,6 @@ interface Props {
   }>;
 }
 
-/**
- * Generate static params for all product categories
- * This enables PPR subshells for each category
- */
 export function generateStaticParams() {
   return [
     { category: "t-shirts" },
@@ -29,16 +28,21 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props) {
-  const capitalizeFirstLetter = (string: string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
-
   const { category } = await params;
-  const capitalizedCategory = capitalizeFirstLetter(category);
+  const parsedCategory = ProductCategoryZod.safeParse(category);
+
+  if (!parsedCategory.success) {
+    return {
+      title: "Category | Ecommerce Template",
+      description: "Browse the catalog by category.",
+    };
+  }
+
+  const capitalizedCategory = capitalizeFirstLetter(parsedCategory.data);
 
   return {
     title: `${capitalizedCategory} | Ecommerce Template`,
-    description: `${capitalizedCategory} category at e-commerce template made by Marcos Cámara`,
+    description: `${capitalizedCategory} category at Ecommerce Template by Marcos Camara`,
   };
 }
 
@@ -48,7 +52,13 @@ async function DynamicCategoryContent({
   params: Promise<{ category: string }>;
 }) {
   const { category } = await params;
-  return <CategoryProducts category={ProductCategoryZod.parse(category)} />;
+  const parsedCategory = ProductCategoryZod.safeParse(category);
+
+  if (!parsedCategory.success) {
+    notFound();
+  }
+
+  return <CategoryProducts category={parsedCategory.data} />;
 }
 
 const CategoryPage = async ({ params }: Props) => {

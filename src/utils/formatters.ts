@@ -1,10 +1,20 @@
 // String and data formatters
 
+const euroCurrencyFormatter = new Intl.NumberFormat("es-ES", {
+  style: "currency",
+  currency: "EUR",
+});
+
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price / 100);
+  return formatPriceFromCents(price);
+}
+
+export function formatPriceFromCents(price: number): string {
+  return euroCurrencyFormatter.format(price / 100);
+}
+
+export function formatPriceFromEuros(price: number): string {
+  return euroCurrencyFormatter.format(price);
 }
 
 export function formatDate(date: string | Date): string {
