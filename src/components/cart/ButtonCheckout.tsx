@@ -59,7 +59,7 @@ export const ButtonCheckout = ({ cartItemIds }: ButtonCheckoutProps) => {
       loading={isPending}
       disabled={cartItemIds.length === 0}
     >
-      Proceed to Checkout
+      Continue
     </LoadingButton>
   );
 };
