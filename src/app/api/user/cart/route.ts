@@ -1,14 +1,38 @@
-import { NextResponse } from "next/server";
-import { cartRepository } from "@/lib/db/drizzle/repositories";
-import { ProductSize } from "@/lib/db/drizzle/schema";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import {
+  addToCartSchema,
+  cartItemWithDetailsSchema,
+  selectCartItemSchema,
+  updateCartItemSchema,
+} from "@/lib/db/drizzle/schema";
 import { getUser } from "@/lib/auth/server";
+import {
+  addToCart,
+  clearCart,
+  getCart,
+  getCartWithDetails,
+  removeFromCart,
+  updateCartItem,
+} from "@/services/cart.service";
 
-export async function GET() {
+const deleteCartItemSchema = z.object({
+  itemId: z.coerce.number().int().positive().optional(),
+});
+
+export async function GET(request: NextRequest) {
   try {
     const user = await getUser();
     if (!user) return NextResponse.json({ items: [] });
 
-    const items = await cartRepository.findByUserId(user.id);
+    const view = request.nextUrl.searchParams.get("view");
+    const items =
+      view === "details"
+        ? cartItemWithDetailsSchema
+            .array()
+            .parse(await getCartWithDetails(user.id))
+        : selectCartItemSchema.array().parse(await getCart(user.id));
+
     return NextResponse.json({ items });
   } catch (error) {
     console.error("Error getting cart items:", error);
@@ -25,26 +49,18 @@ export async function POST(req: Request) {
     if (!user)
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const body = await req.json();
-    const {
-      variantId,
-      size,
-      stripeId,
-      quantity = 1,
-    } = body as {
-      variantId: number;
-      size: ProductSize;
-      stripeId: string;
-      quantity?: number;
-    };
+    const parsed = addToCartSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid cart item", details: parsed.error.flatten() },
+        { status: 400 },
+      );
+    }
 
-    const result = await cartRepository.upsert({
-      userId: user.id,
-      variantId,
-      size,
-      stripeId,
-      quantity,
-    });
+    const result = await addToCart(user.id, parsed.data);
+    if (!result) {
+      return NextResponse.json({ error: "Cart item not created" }, { status: 500 });
+    }
 
     return NextResponse.json({ item: result });
   } catch (error) {
@@ -62,13 +78,23 @@ export async function PATCH(req: Request) {
     if (!user)
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const body = await req.json();
-    const { id, quantity } = body as {
-      id: number;
-      quantity: number;
-    };
+    const parsed = updateCartItemSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid cart update", details: parsed.error.flatten() },
+        { status: 400 },
+      );
+    }
 
-    const result = await cartRepository.updateQuantity(user.id, id, quantity);
+    const result = await updateCartItem(
+      user.id,
+      parsed.data.id,
+      parsed.data.quantity,
+    );
+    if (!result) {
+      return NextResponse.json({ error: "Cart item not found" }, { status: 404 });
+    }
+
     return NextResponse.json({ item: result });
   } catch (error) {
     console.error("Error updating cart item:", error);
@@ -79,21 +105,29 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     const user = await getUser();
     if (!user)
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const { searchParams } = new URL(req.url);
-    const itemId = searchParams.get("itemId");
+    const parsed = deleteCartItemSchema.safeParse({
+      itemId: req.nextUrl.searchParams.get("itemId") ?? undefined,
+    });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid cart item id", details: parsed.error.flatten() },
+        { status: 400 },
+      );
+    }
 
-    if (itemId) {
-      // Delete a specific item
-      await cartRepository.delete(user.id, Number(itemId));
+    if (parsed.data.itemId) {
+      const deleted = await removeFromCart(user.id, parsed.data.itemId);
+      if (!deleted) {
+        return NextResponse.json({ error: "Cart item not found" }, { status: 404 });
+      }
     } else {
-      // Clear all cart items for user
-      await cartRepository.clearByUserId(user.id);
+      await clearCart(user.id);
     }
 
     return NextResponse.json({ success: true });

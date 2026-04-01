@@ -1,5 +1,8 @@
 import { wishlistRepository } from "@/lib/db/drizzle/repositories";
-import type { WishlistItem } from "@/lib/db/drizzle/schema";
+import type {
+  WishlistItem,
+  WishlistItemWithProduct,
+} from "@/lib/db/drizzle/schema";
 
 export async function getWishlist(userId: string): Promise<WishlistItem[]> {
   try {
@@ -10,7 +13,9 @@ export async function getWishlist(userId: string): Promise<WishlistItem[]> {
   }
 }
 
-export async function getWishlistWithDetails(userId: string) {
+export async function getWishlistWithDetails(
+  userId: string,
+): Promise<WishlistItemWithProduct[]> {
   try {
     return await wishlistRepository.findByUserIdWithDetails(userId);
   } catch (error) {

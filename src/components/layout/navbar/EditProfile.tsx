@@ -1,6 +1,10 @@
 "use client";
 
-/** COMPONENTS */
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
+import { toast } from "sonner";
+
 import {
   Dialog,
   DialogContent,
@@ -12,17 +16,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loadingButton";
-/** FUNCTIONALITY */
-import { useSession } from "@/lib/auth/client";
-import { useMutation } from "@tanstack/react-query";
-import { useRef } from "react";
-import { toast } from "sonner";
-/** TYPES */
 import type { Manager } from "@/hooks/useManager";
+import { useSession } from "@/lib/auth/client";
+
+type UpdateProfileResponse = {
+  error?: string;
+};
 
 export default function EditProfile({ manager }: { manager: Manager }) {
   const { data: session } = useSession();
-
+  const router = useRouter();
   const nameRef = useRef<HTMLInputElement>(null!);
 
   const { mutate: updateProfile, isPending } = useMutation({
@@ -38,20 +41,22 @@ export default function EditProfile({ manager }: { manager: Manager }) {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Error updating profile");
+        const payload = (await response.json()) as UpdateProfileResponse;
+        throw new Error(payload.error || "Error updating profile");
       }
 
       return response.json();
     },
     onSuccess: () => {
+      manager.close();
+      router.refresh();
       toast.success("Profile updated successfully");
-      // Refresh page to update user data
-      window.location.reload();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(
-        error.message || "An error occurred while updating your profile"
+        error instanceof Error
+          ? error.message
+          : "An error occurred while updating your profile",
       );
     },
   });
@@ -90,7 +95,7 @@ export default function EditProfile({ manager }: { manager: Manager }) {
               <Input
                 id="email"
                 defaultValue={session?.user?.email || ""}
-                disabled={true}
+                disabled
                 className="col-span-3"
               />
             </div>
@@ -99,7 +104,7 @@ export default function EditProfile({ manager }: { manager: Manager }) {
             <LoadingButton
               type="submit"
               loading={isPending}
-              className="text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px]"
+              className="h-[40px] min-w-[160px] max-w-[160px] px-[10px] text-sm"
             >
               Save changes
             </LoadingButton>

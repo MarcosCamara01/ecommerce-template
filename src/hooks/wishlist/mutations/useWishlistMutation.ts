@@ -6,23 +6,20 @@ import {
 import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { WISHLIST_QUERY_KEYS } from "../keys";
-
-type WishlistResponse = { items: WishlistItem[] };
+import type { WishlistDetailsResponse, WishlistListResponse } from "../types";
 
 export const useWishlistMutation = () => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
+  const userId = session?.user?.id;
 
   const add = useMutation({
     mutationFn: async (productId: number) => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/user/wishlist`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId }),
-        },
-      );
+      const response = await fetch("/api/user/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -34,17 +31,17 @@ export const useWishlistMutation = () => {
       return selectWishlistItemSchema.parse(item);
     },
     onMutate: async (productId: number) => {
-      if (!session?.user?.id) {
+      if (!userId) {
         toast.info("Login first to add to wishlist");
         throw new Error("Unauthorized");
       }
 
       await queryClient.cancelQueries({
-        queryKey: WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
+        queryKey: WISHLIST_QUERY_KEYS.wishlistList(userId),
       });
 
-      const previousData = queryClient.getQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
+      const previousData = queryClient.getQueryData<WishlistListResponse>(
+        WISHLIST_QUERY_KEYS.wishlistList(userId),
       );
 
       const tempItem: WishlistItem = {
@@ -55,8 +52,8 @@ export const useWishlistMutation = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      queryClient.setQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
+      queryClient.setQueryData<WishlistListResponse>(
+        WISHLIST_QUERY_KEYS.wishlistList(userId),
         (old = { items: [] }) => {
           if (old.items.some((w) => w.productId === productId)) {
             return old;
@@ -68,13 +65,17 @@ export const useWishlistMutation = () => {
       return { previousData, tempItem };
     },
     onSuccess: (data, _, context) => {
+      if (!userId) {
+        return;
+      }
+
       const { tempItem } = context as {
-        previousData?: WishlistResponse;
+        previousData?: WishlistListResponse;
         tempItem: WishlistItem;
       };
 
-      queryClient.setQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
+      queryClient.setQueryData<WishlistListResponse>(
+        WISHLIST_QUERY_KEYS.wishlistList(userId),
         (old = { items: [] }) => ({
           items: old.items
             .filter((i) => i.id !== tempItem.id)
@@ -82,15 +83,19 @@ export const useWishlistMutation = () => {
             .concat(data),
         }),
       );
+
+      void queryClient.invalidateQueries({
+        queryKey: WISHLIST_QUERY_KEYS.wishlistDetails(userId),
+      });
     },
     onError: (error, _, context) => {
       const { previousData } = context as {
-        previousData?: WishlistResponse;
+        previousData?: WishlistListResponse;
         tempItem: WishlistItem;
       };
-      if (previousData) {
-        queryClient.setQueryData<WishlistResponse>(
-          WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
+      if (previousData && userId) {
+        queryClient.setQueryData<WishlistListResponse>(
+          WISHLIST_QUERY_KEYS.wishlistList(userId),
           previousData,
         );
       }
@@ -119,20 +124,23 @@ export const useWishlistMutation = () => {
       return true;
     },
     onMutate: async (params: { itemId?: number; productId?: number }) => {
-      if (!session?.user?.id) {
+      if (!userId) {
         throw new Error("Unauthorized");
       }
 
       await queryClient.cancelQueries({
-        queryKey: WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
+        queryKey: WISHLIST_QUERY_KEYS.wishlistList(userId),
       });
 
-      const previousData = queryClient.getQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
+      const previousData = queryClient.getQueryData<WishlistListResponse>(
+        WISHLIST_QUERY_KEYS.wishlistList(userId),
+      );
+      const previousDetails = queryClient.getQueryData<WishlistDetailsResponse>(
+        WISHLIST_QUERY_KEYS.wishlistDetails(userId),
       );
 
-      queryClient.setQueryData<WishlistResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(session.user.id),
+      queryClient.setQueryData<WishlistListResponse>(
+        WISHLIST_QUERY_KEYS.wishlistList(userId),
         (current = { items: [] }) => ({
           items: current.items.filter((i) =>
             params.itemId
@@ -142,20 +150,50 @@ export const useWishlistMutation = () => {
         }),
       );
 
-      return { previousData };
+      queryClient.setQueryData<WishlistDetailsResponse>(
+        WISHLIST_QUERY_KEYS.wishlistDetails(userId),
+        (current = { items: [] }) => ({
+          items: current.items.filter((item) =>
+            params.itemId
+              ? item.id !== params.itemId
+              : item.productId !== params.productId,
+          ),
+        }),
+      );
+
+      return { previousData, previousDetails };
     },
     onError: (error, _, context) => {
-      const { previousData } = context as { previousData?: WishlistResponse };
+      const { previousData, previousDetails } = context as {
+        previousData?: WishlistListResponse;
+        previousDetails?: WishlistDetailsResponse;
+      };
 
-      if (previousData) {
-        queryClient.setQueryData<WishlistResponse>(
-          WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
+      if (previousData && userId) {
+        queryClient.setQueryData<WishlistListResponse>(
+          WISHLIST_QUERY_KEYS.wishlistList(userId),
           previousData,
+        );
+      }
+
+      if (previousDetails && userId) {
+        queryClient.setQueryData<WishlistDetailsResponse>(
+          WISHLIST_QUERY_KEYS.wishlistDetails(userId),
+          previousDetails,
         );
       }
 
       console.error("Error removing from wishlist:", error);
       toast.error("Error removing from wishlist");
+    },
+    onSuccess: () => {
+      if (!userId) {
+        return;
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: WISHLIST_QUERY_KEYS.wishlistDetails(userId),
+      });
     },
   });
 

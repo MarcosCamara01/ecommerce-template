@@ -1,17 +1,17 @@
-/** COMPONENTS */
-import { ProductImage } from "../products/ProductImage";
 import Link from "next/link";
-import { DeleteButton } from "./DeleteButton";
-import { ProductCartInfo } from "./ProductCartInfo";
-/** TYPES */
+
 import type {
   CartItem,
+  Product,
   ProductVariant,
-  ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
 
+import { ProductImage } from "../products/ProductImage";
+import { DeleteButton } from "./DeleteButton";
+import { ProductCartInfo } from "./ProductCartInfo";
+
 interface CartProductProps {
-  product: ProductWithVariants;
+  product: Product;
   cartItemId: CartItem["id"];
   size: CartItem["size"];
   quantity: CartItem["quantity"];
@@ -30,8 +30,8 @@ export const CartProduct = ({
   const productLink = `/${category}/${id}?variant=${variant.color}`;
 
   return (
-    <div className="flex flex-col justify-between border border-solid border-border-primary rounded-md overflow-hidden">
-      <Link href={productLink} className="hover:scale-105 transition-all">
+    <div className="flex flex-col justify-between overflow-hidden rounded-md border border-solid border-border-primary">
+      <Link href={productLink} className="transition-all hover:scale-105">
         <ProductImage
           image={variant.images[0]}
           name={name}
@@ -40,15 +40,15 @@ export const CartProduct = ({
           sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
         />
       </Link>
-      <div className="flex justify-between flex-col gap-2.5 p-3.5 bg-background-secondary z-10">
-        <div className="flex justify-between w-full">
+      <div className="z-10 flex flex-col justify-between gap-2.5 bg-background-secondary p-3.5">
+        <div className="flex w-full justify-between">
           <Link href={productLink} className="w-10/12">
-            <h2 className="text-sm font-semibold truncate">{name}</h2>
+            <h2 className="truncate text-sm font-semibold">{name}</h2>
           </Link>
 
           <DeleteButton cartItemId={cartItemId} />
         </div>
-        <div className="text-sm">{price.toFixed(2)} €</div>
+        <div className="text-sm">{price.toFixed(2)} EUR</div>
         <ProductCartInfo
           cartItemId={cartItemId}
           size={size}

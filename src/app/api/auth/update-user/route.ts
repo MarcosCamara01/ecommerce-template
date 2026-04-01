@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/utils/auth";
 import { headers } from "next/headers";
+import { UpdateProfileSchema } from "@/schemas/auth";
 
 export async function POST(req: Request) {
   try {
@@ -13,26 +14,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { name } = body;
+    const parsed = UpdateProfileSchema.pick({ name: true })
+      .required({ name: true })
+      .safeParse(await req.json());
 
-    if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid profile payload", details: parsed.error.flatten() },
+        { status: 400 },
+      );
     }
 
     const updatedUser = await auth.api.updateUser({
       headers: headersList,
       body: {
-        name,
+        name: parsed.data.name,
       },
     });
 
     return NextResponse.json({ user: updatedUser });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
-      { status: 500 }
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      { status: 500 },
     );
   }
 }

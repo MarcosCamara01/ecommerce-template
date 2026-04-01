@@ -5,15 +5,15 @@ import {
   type WishlistItem,
 } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
-
-type WishlistResponse = { items: WishlistItem[] };
+import type { WishlistListResponse } from "../types";
 
 export const useWishlist = () => {
   const { data: session } = useSession();
+  const userId = session?.user?.id;
 
   const query = useQuery({
-    enabled: !!session?.user?.id,
-    queryKey: WISHLIST_QUERY_KEYS.wishlistList(session?.user?.id!),
+    enabled: Boolean(userId),
+    queryKey: WISHLIST_QUERY_KEYS.wishlistList(userId ?? "anonymous"),
     queryFn: async () => {
       const response = await fetch("/api/user/wishlist", {
         method: "GET",
@@ -29,11 +29,8 @@ export const useWishlist = () => {
       const data = await response.json();
       return {
         items: selectWishlistItemSchema.array().parse(data.items),
-      } as WishlistResponse;
+      } satisfies WishlistListResponse;
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
   });
 
   const items = query.data?.items ?? [];
