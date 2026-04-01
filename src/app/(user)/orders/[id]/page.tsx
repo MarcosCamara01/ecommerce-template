@@ -50,7 +50,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
       <div className="flex flex-col items-center justify-center h-[80vh] gap-4">
         <h2 className="text-2xl font-bold">Order Not Found</h2>
         <p className="text-muted-foreground">
-          The order you're looking for doesn't exist or you don't have access to
+          The order you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to
           it.
         </p>
         <Link

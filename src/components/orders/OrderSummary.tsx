@@ -3,6 +3,7 @@ import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
 /** UTILS */
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { formatPriceFromCents } from "@/utils/formatters";
 /** ICONS */
 import {
   HiOutlineCube,
@@ -23,8 +24,7 @@ export function OrderSummary({ order }: OrderSummaryProps) {
     0,
   );
 
-  const rawPrice = order.customerInfo?.totalPrice || 0;
-  const totalPrice = rawPrice > 0 ? (rawPrice / 100).toFixed(2) : "0.00";
+  const totalPrice = formatPriceFromCents(order.customerInfo?.totalPrice || 0);
 
   const deliveryDate = new Date(order.deliveryDate);
   const orderDate = new Date(order.createdAt);
@@ -32,13 +32,12 @@ export function OrderSummary({ order }: OrderSummaryProps) {
 
   return (
     <div className="space-y-6">
-      {/* Status Badge */}
-      <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
-        <div className="flex items-center justify-between mb-3">
+      <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-4">
+        <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-bold">Order Status</h3>
           <div
             className={cn(
-              "px-3 py-1 text-xs font-semibold rounded-full",
+              "rounded-full px-3 py-1 text-xs font-semibold",
               isUpcoming
                 ? "bg-color-secondary/20 text-color-secondary"
                 : "bg-color-secondary/10 text-color-secondary",
@@ -48,7 +47,6 @@ export function OrderSummary({ order }: OrderSummaryProps) {
           </div>
         </div>
 
-        {/* Progress bar */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Order placed</span>
@@ -69,10 +67,9 @@ export function OrderSummary({ order }: OrderSummaryProps) {
         </div>
       </div>
 
-      {/* Order Details */}
-      <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
-        <h3 className="flex items-center gap-2 mb-4 text-lg font-bold">
-          <HiOutlineCube className="w-5 h-5" />
+      <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-4">
+        <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <HiOutlineCube className="h-5 w-5" />
           Order Details
         </h3>
         <div className="space-y-3">
@@ -95,10 +92,9 @@ export function OrderSummary({ order }: OrderSummaryProps) {
         </div>
       </div>
 
-      {/* Delivery Address */}
-      <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
-        <h3 className="flex items-center gap-2 mb-4 text-lg font-bold">
-          <HiOutlineLocationMarker className="w-5 h-5" />
+      <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-4">
+        <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <HiOutlineLocationMarker className="h-5 w-5" />
           Delivery Address
         </h3>
         <div className="space-y-2 text-sm">
@@ -119,25 +115,24 @@ export function OrderSummary({ order }: OrderSummaryProps) {
             {order.customerInfo?.address?.country}
           </p>
 
-          <div className="pt-3 mt-3 space-y-2 border-t border-border-primary">
+          <div className="mt-3 space-y-2 border-t border-border-primary pt-3">
             {order.customerInfo?.phone && (
               <div className="flex items-center gap-2 text-muted-foreground">
-                <HiOutlinePhone className="w-4 h-4" />
+                <HiOutlinePhone className="h-4 w-4" />
                 <span>{order.customerInfo.phone}</span>
               </div>
             )}
             <div className="flex items-center gap-2 text-muted-foreground">
-              <HiOutlineMail className="w-4 h-4" />
+              <HiOutlineMail className="h-4 w-4" />
               <span>{order.customerInfo?.email}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Order Summary */}
-      <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
-        <h3 className="flex items-center gap-2 mb-4 text-lg font-bold">
-          <HiOutlineCreditCard className="w-5 h-5" />
+      <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-4">
+        <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <HiOutlineCreditCard className="h-5 w-5" />
           Order Summary
         </h3>
         <div className="space-y-3">
@@ -145,24 +140,24 @@ export function OrderSummary({ order }: OrderSummaryProps) {
             <span className="text-muted-foreground">
               {totalItems} {totalItems === 1 ? "item" : "items"}
             </span>
-            <span className="font-medium">{totalPrice} €</span>
+            <span className="font-medium">{totalPrice}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-1 text-muted-foreground">
-              <HiOutlineTruck className="w-4 h-4" />
+              <HiOutlineTruck className="h-4 w-4" />
               Delivery
             </span>
             <span className="font-medium text-muted-foreground">FREE</span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Discount</span>
-            <span className="font-medium">0 €</span>
+            <span className="font-medium">{formatPriceFromCents(0)}</span>
           </div>
 
-          <div className="pt-3 border-t border-border-primary">
+          <div className="border-t border-border-primary pt-3">
             <div className="flex items-center justify-between">
               <span className="text-base font-bold">Total</span>
-              <span className="text-xl font-bold">{totalPrice} €</span>
+              <span className="text-xl font-bold">{totalPrice}</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">(VAT included)</p>
           </div>

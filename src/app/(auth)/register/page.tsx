@@ -1,32 +1,30 @@
 "use client";
 
-import { AuthShell } from "@/components/auth/AuthShell";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import LoadingButton from "@/components/ui/loadingButton";
-import { PasswordInput } from "@/components/ui/form/PasswordInput";
-import { useAuthMutation } from "@/hooks/auth";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { Suspense, type FormEvent, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { FaGoogle } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 
-const Register = () => {
-  const { signUp, signInWithGoogle } = useAuthMutation();
-  const [redirectSearch, setRedirectSearch] = useState("");
+import { AuthShell } from "@/components/auth/AuthShell";
+import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/form/PasswordInput";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import LoadingButton from "@/components/ui/loadingButton";
+import { useAuthMutation } from "@/hooks/auth";
 
+function RegisterContent() {
+  const { signUp, signInWithGoogle } = useAuthMutation();
+  const searchParams = useSearchParams();
   const nameRef = useRef<HTMLInputElement>(null!);
   const emailRef = useRef<HTMLInputElement>(null!);
   const passwordRef = useRef<HTMLInputElement>(null!);
-  // const phoneRef = useRef<HTMLInputElement>(null!);
 
-  useEffect(() => {
-    const redirect = new URLSearchParams(window.location.search).get("redirect");
-
-    if (redirect && redirect.startsWith("/")) {
-      setRedirectSearch(`?redirect=${encodeURIComponent(redirect)}`);
-    }
-  }, []);
+  const redirect = searchParams.get("redirect");
+  const redirectSearch =
+    redirect && redirect.startsWith("/")
+      ? `?redirect=${encodeURIComponent(redirect)}`
+      : "";
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,7 +54,9 @@ const Register = () => {
           <div className="flex items-start gap-2.5 rounded-xl border border-[#4a1f23] bg-[#1a0b0d] px-3.5 py-2.5 text-[#ff8d92]">
             <MdError className="mt-0.5 shrink-0" size={16} />
             <p className="text-[13px] leading-5">
-              {error instanceof Error ? error.message : "Error creating account"}
+              {error instanceof Error
+                ? error.message
+                : "Error creating account"}
             </p>
           </div>
         )}
@@ -150,6 +150,12 @@ const Register = () => {
       </form>
     </AuthShell>
   );
-};
+}
 
-export default Register;
+export default function Register() {
+  return (
+    <Suspense>
+      <RegisterContent />
+    </Suspense>
+  );
+}

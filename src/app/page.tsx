@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { getAllProducts } from "./actions";
-import { ErrorBoundary } from "react-error-boundary";
 import {
   ProductsSkeleton,
   GridProducts,
@@ -10,52 +9,34 @@ import {
 const Home = async () => {
   return (
     <section className="pt-14">
-      <ErrorBoundary fallback={<ErrorComponent />}>
-        <Suspense fallback={<ProductsSkeleton items={18} />}>
-          <AllProducts />
-        </Suspense>
-      </ErrorBoundary>
+      <Suspense fallback={<ProductsSkeleton items={18} />}>
+        <AllProducts />
+      </Suspense>
     </section>
   );
 };
 
-const ErrorComponent = () => {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh]">
-      <h2 className="text-xl font-bold">Oops! Something went wrong</h2>
-      <p className="mt-2 text-gray-600">
-        We couldn&apos;t load the products. Please try again later.
-      </p>
-    </div>
-  );
-};
-
 const AllProducts = async () => {
-  try {
-    const products = await getAllProducts();
+  const products = await getAllProducts();
 
-    if (!products || products.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-[50vh]">
-          <h2 className="text-xl font-bold">No products available</h2>
-          <p className="mt-2 text-gray-600">
-            Check back later to see our products
-          </p>
-        </div>
-      );
-    }
-
+  if (products.length === 0) {
     return (
-      <GridProducts>
-        {products.map((product) => (
-          <ProductItem key={product.id} product={product} />
-        ))}
-      </GridProducts>
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <h2 className="text-xl font-bold">No products available</h2>
+        <p className="mt-2 text-gray-600">
+          Check back later to see our products
+        </p>
+      </div>
     );
-  } catch (error) {
-    console.error("Error loading products:", error);
-    throw new Error("Error loading products");
   }
+
+  return (
+    <GridProducts>
+      {products.map((product) => (
+        <ProductItem key={product.id} product={product} />
+      ))}
+    </GridProducts>
+  );
 };
 
 export default Home;

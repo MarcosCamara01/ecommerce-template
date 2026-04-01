@@ -1,30 +1,29 @@
 "use client";
 
+import { Suspense, type FormEvent, useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import { FaGoogle } from "react-icons/fa6";
+import { MdError } from "react-icons/md";
+
 import { AuthShell } from "@/components/auth/AuthShell";
-import LoadingButton from "@/components/ui/loadingButton";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/form/PasswordInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import LoadingButton from "@/components/ui/loadingButton";
 import { useAuthMutation } from "@/hooks/auth";
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { FaGoogle } from "react-icons/fa6";
-import { MdError } from "react-icons/md";
 
-const Login = () => {
+function LoginContent() {
   const { signIn, signInWithGoogle } = useAuthMutation();
-  const [redirectSearch, setRedirectSearch] = useState("");
-
+  const searchParams = useSearchParams();
   const emailRef = useRef<HTMLInputElement>(null!);
   const passwordRef = useRef<HTMLInputElement>(null!);
 
-  useEffect(() => {
-    const redirect = new URLSearchParams(window.location.search).get("redirect");
-
-    if (redirect && redirect.startsWith("/")) {
-      setRedirectSearch(`?redirect=${encodeURIComponent(redirect)}`);
-    }
-  }, []);
+  const redirect = searchParams.get("redirect");
+  const redirectSearch =
+    redirect && redirect.startsWith("/")
+      ? `?redirect=${encodeURIComponent(redirect)}`
+      : "";
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -129,6 +128,12 @@ const Login = () => {
       </form>
     </AuthShell>
   );
-};
+}
 
-export default Login;
+export default function Login() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
+  );
+}

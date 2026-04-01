@@ -20,7 +20,12 @@ const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
     ) : null;
 
     return (
-      <Button {...props} ref={ref} disabled={loading}>
+      <Button
+        {...props}
+        ref={ref}
+        aria-busy={loading || undefined}
+        disabled={Boolean(props.disabled || loading)}
+      >
         {iconPosition === "left" && iconElement}
         <span>{children}</span>
         {iconPosition === "right" && iconElement}
