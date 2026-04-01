@@ -8,6 +8,27 @@
       "when": 1735084800000,
       "tag": "0000_auth_uid_function",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775001600000,
+      "tag": "0001_order_idempotency",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775001601000,
+      "tag": "0002_rls_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775001602000,
+      "tag": "0003_policy_cleanup",
+      "breakpoints": true
     }
   ]
 }
