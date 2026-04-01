@@ -15,7 +15,13 @@ import {
   foreignKey,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { productsVariants, sizesEnum, ProductSizeZod } from "./products";
+import {
+  productsVariants,
+  selectProductSchema,
+  selectVariantSchema,
+  sizesEnum,
+  ProductSizeZod,
+} from "./products";
 
 export const cartItems = pgTable(
   "cart_items",
@@ -84,7 +90,7 @@ export const cartItems = pgTable(
       using: sql`app.current_user_id() = user_id`,
     }),
   ],
-);
+).enableRLS();
 
 // Zod Schemas
 export const selectCartItemSchema = createSelectSchema(cartItems, {
@@ -117,9 +123,15 @@ export const minimalCartItemSchema = z.object({
   stripeId: z.string().min(1, "Stripe ID is required"),
 });
 
+export const cartItemWithDetailsSchema = selectCartItemSchema.extend({
+  variant: selectVariantSchema,
+  product: selectProductSchema,
+});
+
 // Types
 export type CartItem = z.infer<typeof selectCartItemSchema>;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
 export type UpdateCartItem = z.infer<typeof updateCartItemSchema>;
 export type AddToCartInput = z.infer<typeof addToCartSchema>;
 export type MinimalCartItem = z.infer<typeof minimalCartItemSchema>;
+export type CartItemWithDetails = z.infer<typeof cartItemWithDetailsSchema>;

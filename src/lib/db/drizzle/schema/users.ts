@@ -9,7 +9,6 @@ import {
   index,
   pgPolicy,
 } from "drizzle-orm/pg-core";
-import { authenticatedRole } from "drizzle-orm/supabase";
 
 export const users = pgTable(
   "user",
@@ -25,21 +24,28 @@ export const users = pgTable(
   (table) => [
     index("idx_user_email").on(table.email),
     index("idx_user_created_at").on(table.createdAt),
+    pgPolicy("Backend can manage auth users", {
+      as: "permissive",
+      for: "all",
+      to: "public",
+      using: sql`current_setting('request.jwt.claim.role', true) is null`,
+      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
+    }),
     pgPolicy("Users can view own profile", {
       as: "permissive",
       for: "select",
-      to: authenticatedRole,
-      using: sql`auth.uid()::text = id`,
+      to: "public",
+      using: sql`app.current_user_id() = id`,
     }),
     pgPolicy("Users can update own profile", {
       as: "permissive",
       for: "update",
-      to: authenticatedRole,
-      using: sql`auth.uid()::text = id`,
-      withCheck: sql`auth.uid()::text = id`,
+      to: "public",
+      using: sql`app.current_user_id() = id`,
+      withCheck: sql`app.current_user_id() = id`,
     }),
   ]
-);
+).enableRLS();
 
 // Zod Schemas
 export const selectUserSchema = createSelectSchema(users, {

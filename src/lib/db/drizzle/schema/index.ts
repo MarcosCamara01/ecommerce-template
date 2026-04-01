@@ -45,11 +45,13 @@ export {
   updateCartItemSchema,
   addToCartSchema,
   minimalCartItemSchema,
+  cartItemWithDetailsSchema,
   type CartItem,
   type InsertCartItem,
   type UpdateCartItem,
   type AddToCartInput,
   type MinimalCartItem,
+  type CartItemWithDetails,
 } from "./cart";
 
 // Orders
@@ -61,6 +63,7 @@ export {
   InsertAddressSchema,
   selectOrderItemSchema,
   insertOrderItemSchema,
+  createOrderItemInputSchema,
   selectCustomerInfoSchema,
   insertCustomerInfoSchema,
   selectOrderProductSchema,
@@ -70,6 +73,7 @@ export {
   type Address,
   type OrderItem,
   type InsertOrderItem,
+  type CreateOrderItemInput,
   type CustomerInfo,
   type InsertCustomerInfo,
   type OrderProduct,
@@ -84,9 +88,11 @@ export {
   selectWishlistItemSchema,
   insertWishlistItemSchema,
   addToWishlistSchema,
+  wishlistItemWithProductSchema,
   type WishlistItem,
   type InsertWishlistItem,
   type AddToWishlistInput,
+  type WishlistItemWithProduct,
 } from "./wishlist";
 
 // Relations

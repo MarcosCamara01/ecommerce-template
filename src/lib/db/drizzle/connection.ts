@@ -14,17 +14,21 @@ const queryClient = postgres(connectionString, {
 export const db = drizzle(queryClient, { schema });
 export { schema };
 export type Database = typeof db;
+export type RLSClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /** Sets the current user ID in PostgreSQL session for RLS policies */
 export async function setCurrentUserId(
+  client: RLSClient,
   userId: string | null | undefined
 ): Promise<void> {
   const value = userId || "";
-  await db.execute(sql`SELECT set_config('app.current_user_id', ${value}, true)`);
+  await client.execute(
+    sql`SELECT set_config('app.current_user_id', ${value}, true)`,
+  );
 }
 
-export async function clearCurrentUserId(): Promise<void> {
-  await db.execute(sql`SELECT set_config('app.current_user_id', '', true)`);
+export async function clearCurrentUserId(client: RLSClient): Promise<void> {
+  await client.execute(sql`SELECT set_config('app.current_user_id', '', true)`);
 }
 
 /**
@@ -34,19 +38,18 @@ export async function clearCurrentUserId(): Promise<void> {
  */
 export async function withRLS<T>(
   userId: string | null | undefined,
-  operation: () => Promise<T>
+  operation: (tx: RLSClient) => Promise<T>,
 ): Promise<T> {
-  await setCurrentUserId(userId);
-  return operation();
+  return db.transaction(async (tx) => {
+    await setCurrentUserId(tx, userId);
+    return operation(tx);
+  });
 }
 
 /** Creates a database transaction with RLS context */
 export async function withRLSTransaction<T>(
   userId: string,
-  operation: (tx: Parameters<Parameters<typeof db.transaction>[0]>[0]) => Promise<T>
+  operation: (tx: RLSClient) => Promise<T>,
 ): Promise<T> {
-  return db.transaction(async (tx) => {
-    await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
-    return operation(tx);
-  });
+  return withRLS(userId, operation);
 }

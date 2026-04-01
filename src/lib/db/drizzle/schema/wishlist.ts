@@ -13,7 +13,7 @@ import {
   foreignKey,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { productsItems } from "./products";
+import { productWithVariantsSchema, productsItems } from "./products";
 
 export const wishlist = pgTable(
   "wishlist",
@@ -59,7 +59,7 @@ export const wishlist = pgTable(
       using: sql`app.current_user_id() = user_id`,
     }),
   ]
-);
+).enableRLS();
 
 // Zod Schemas
 export const selectWishlistItemSchema = createSelectSchema(wishlist, {
@@ -75,7 +75,14 @@ export const insertWishlistItemSchema = createInsertSchema(wishlist).omit({
 
 export const addToWishlistSchema = insertWishlistItemSchema.omit({ userId: true });
 
+export const wishlistItemWithProductSchema = selectWishlistItemSchema.extend({
+  product: productWithVariantsSchema,
+});
+
 // Types
 export type WishlistItem = z.infer<typeof selectWishlistItemSchema>;
 export type InsertWishlistItem = z.infer<typeof insertWishlistItemSchema>;
 export type AddToWishlistInput = z.infer<typeof addToWishlistSchema>;
+export type WishlistItemWithProduct = z.infer<
+  typeof wishlistItemWithProductSchema
+>;

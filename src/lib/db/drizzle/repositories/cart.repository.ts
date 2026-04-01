@@ -1,5 +1,5 @@
 import { eq, and } from "drizzle-orm";
-import { db, withRLS } from "../connection";
+import { withRLS, type RLSClient } from "../connection";
 import { cartItems, productsVariants, productsItems } from "../schema";
 import type {
   CartItem,
@@ -9,8 +9,8 @@ import type {
 
 export const cartRepository = {
   async findByUserId(userId: string): Promise<CartItem[]> {
-    return withRLS(userId, async () => {
-      const result = await db
+    return withRLS(userId, async (tx) => {
+      const result = await tx
         .select()
         .from(cartItems)
         .where(eq(cartItems.userId, userId));
@@ -20,8 +20,8 @@ export const cartRepository = {
   },
 
   async findByUserIdWithDetails(userId: string) {
-    return withRLS(userId, async () => {
-      const result = await db
+    return withRLS(userId, async (tx) => {
+      const result = await tx
         .select({
           cartItem: cartItems,
           variant: productsVariants,
@@ -73,25 +73,15 @@ export const cartRepository = {
     variantId: number,
     size: ProductSize,
   ): Promise<CartItem | null> {
-    return withRLS(userId, async () => {
-      const [result] = await db
-        .select()
-        .from(cartItems)
-        .where(
-          and(
-            eq(cartItems.userId, userId),
-            eq(cartItems.variantId, variantId),
-            eq(cartItems.size, size),
-          ),
-        );
-
-      return result ? transformCartItem(result) : null;
-    });
+    return withRLS(userId, async (tx) =>
+      this.findOneInternal(tx, userId, variantId, size),
+    );
   },
 
   async upsert(data: InsertCartItem): Promise<CartItem | null> {
-    return withRLS(data.userId, async () => {
+    return withRLS(data.userId, async (tx) => {
       const existing = await this.findOneInternal(
+        tx,
         data.userId,
         data.variantId,
         data.size as ProductSize,
@@ -99,12 +89,13 @@ export const cartRepository = {
 
       if (existing) {
         return this.updateQuantityInternal(
+          tx,
           existing.id,
           existing.quantity + data.quantity,
         );
       }
 
-      const [result] = await db
+      const [result] = await tx
         .insert(cartItems)
         .values({
           userId: data.userId,
@@ -120,8 +111,8 @@ export const cartRepository = {
   },
 
   async create(data: InsertCartItem): Promise<CartItem | null> {
-    return withRLS(data.userId, async () => {
-      const [result] = await db
+    return withRLS(data.userId, async (tx) => {
+      const [result] = await tx
         .insert(cartItems)
         .values({
           userId: data.userId,
@@ -141,14 +132,14 @@ export const cartRepository = {
     id: number,
     quantity: number,
   ): Promise<CartItem | null> {
-    return withRLS(userId, async () => {
-      return this.updateQuantityInternal(id, quantity);
-    });
+    return withRLS(userId, async (tx) =>
+      this.updateQuantityInternal(tx, id, quantity),
+    );
   },
 
   async delete(userId: string, id: number): Promise<boolean> {
-    return withRLS(userId, async () => {
-      const result = await db
+    return withRLS(userId, async (tx) => {
+      const result = await tx
         .delete(cartItems)
         .where(eq(cartItems.id, id))
         .returning({ id: cartItems.id });
@@ -158,19 +149,20 @@ export const cartRepository = {
   },
 
   async clearByUserId(userId: string): Promise<boolean> {
-    return withRLS(userId, async () => {
-      await db.delete(cartItems).where(eq(cartItems.userId, userId));
+    return withRLS(userId, async (tx) => {
+      await tx.delete(cartItems).where(eq(cartItems.userId, userId));
       return true;
     });
   },
 
   // Internal methods (no RLS wrapper, for use within other methods)
   async findOneInternal(
+    tx: RLSClient,
     userId: string,
     variantId: number,
     size: ProductSize,
   ): Promise<CartItem | null> {
-    const [result] = await db
+    const [result] = await tx
       .select()
       .from(cartItems)
       .where(
@@ -185,10 +177,11 @@ export const cartRepository = {
   },
 
   async updateQuantityInternal(
+    tx: RLSClient,
     id: number,
     quantity: number,
   ): Promise<CartItem | null> {
-    const [result] = await db
+    const [result] = await tx
       .update(cartItems)
       .set({ quantity })
       .where(eq(cartItems.id, id))

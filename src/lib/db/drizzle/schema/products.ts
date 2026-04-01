@@ -48,6 +48,13 @@ export const productsItems = pgTable(
     index("idx_products_created_at").on(table.createdAt),
     index("idx_products_updated_at").on(table.updatedAt),
     check("price_positive", sql`price > 0`),
+    pgPolicy("Backend can manage products", {
+      as: "permissive",
+      for: "all",
+      to: "public",
+      using: sql`current_setting('request.jwt.claim.role', true) is null`,
+      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
+    }),
     pgPolicy("Anyone can view products", {
       as: "permissive",
       for: "select",
@@ -55,7 +62,7 @@ export const productsItems = pgTable(
       using: sql`true`,
     }),
   ]
-);
+).enableRLS();
 
 export const productsVariants = pgTable(
   "products_variants",
@@ -78,6 +85,13 @@ export const productsVariants = pgTable(
     index("idx_variants_color").on(table.color),
     index("idx_variants_created_at").on(table.createdAt),
     index("idx_variants_updated_at").on(table.updatedAt),
+    pgPolicy("Backend can manage variants", {
+      as: "permissive",
+      for: "all",
+      to: "public",
+      using: sql`current_setting('request.jwt.claim.role', true) is null`,
+      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
+    }),
     pgPolicy("Anyone can view variants", {
       as: "permissive",
       for: "select",
@@ -85,7 +99,7 @@ export const productsVariants = pgTable(
       using: sql`true`,
     }),
   ]
-);
+).enableRLS();
 
 // Zod Schemas
 export const selectProductSchema = createSelectSchema(productsItems, {

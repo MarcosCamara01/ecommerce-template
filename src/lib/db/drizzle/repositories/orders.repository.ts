@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { db } from "../connection";
 import {
   orderItems,
@@ -8,27 +8,18 @@ import {
   productsItems,
 } from "../schema";
 import type {
-  OrderItem,
   OrderWithDetails,
-  InsertOrderItem,
+  CreateOrderItemInput,
   InsertOrderProduct,
   InsertCustomerInfo,
 } from "@/lib/db/drizzle/schema";
 
-export const ordersRepository = {
-  /**
-   * Check if an order already exists by Stripe session ID (idempotency check)
-   */
-  async existsByStripeSessionId(stripeSessionId: string): Promise<boolean> {
-    const existing = await db.query.customerInfo.findFirst({
-      where: eq(customerInfo.stripeOrderId, stripeSessionId),
-    });
-    return !!existing;
-  },
+const ORDER_NUMBER_LOCK_NAMESPACE = 42_001;
+const ORDER_NUMBER_LOCK_RESOURCE = 1;
+const MAX_CREATE_COMPLETE_ATTEMPTS = 3;
+const UNIQUE_VIOLATION_CODE = "23505";
 
-  /**
-   * Find order by Stripe session ID
-   */
+export const ordersRepository = {
   async findByStripeSessionId(
     stripeSessionId: string,
   ): Promise<OrderWithDetails | null> {
@@ -44,39 +35,16 @@ export const ordersRepository = {
   async findByUserId(userId: string): Promise<OrderWithDetails[]> {
     const orders = await db.query.orderItems.findMany({
       where: eq(orderItems.userId, userId),
-      with: {
-        customerInfo: true,
-        orderProducts: {
-          with: {
-            variant: {
-              with: {
-                product: true,
-              },
-            },
-          },
-        },
-      },
+      with: ORDER_WITH_DETAILS,
       orderBy: [desc(orderItems.createdAt)],
     });
-
     return orders.map(transformOrderWithDetails);
   },
 
   async findById(id: number): Promise<OrderWithDetails | null> {
     const order = await db.query.orderItems.findFirst({
       where: eq(orderItems.id, id),
-      with: {
-        customerInfo: true,
-        orderProducts: {
-          with: {
-            variant: {
-              with: {
-                product: true,
-              },
-            },
-          },
-        },
-      },
+      with: ORDER_WITH_DETAILS,
     });
 
     return order ? transformOrderWithDetails(order) : null;
@@ -87,136 +55,121 @@ export const ordersRepository = {
   ): Promise<OrderWithDetails | null> {
     const order = await db.query.orderItems.findFirst({
       where: eq(orderItems.orderNumber, orderNumber),
-      with: {
-        customerInfo: true,
-        orderProducts: {
-          with: {
-            variant: {
-              with: {
-                product: true,
-              },
-            },
-          },
-        },
-      },
+      with: ORDER_WITH_DETAILS,
     });
 
     return order ? transformOrderWithDetails(order) : null;
   },
 
   async createComplete(
-    orderData: InsertOrderItem,
+    orderData: CreateOrderItemInput,
     customerData: Omit<InsertCustomerInfo, "orderId">,
     products: Omit<InsertOrderProduct, "orderId">[],
   ): Promise<OrderWithDetails | null> {
-    return await db.transaction(async (tx) => {
-      const [newOrder] = await tx
-        .insert(orderItems)
-        .values({
-          userId: orderData.userId,
-          deliveryDate: orderData.deliveryDate,
-          orderNumber: orderData.orderNumber,
-        })
-        .returning();
+    const existingOrder = await this.findByStripeSessionId(
+      customerData.stripeOrderId,
+    );
+    if (existingOrder) {
+      return existingOrder;
+    }
 
-      if (!newOrder) return null;
+    for (let attempt = 0; attempt < MAX_CREATE_COMPLETE_ATTEMPTS; attempt += 1) {
+      try {
+        return await db.transaction(async (tx) => {
+          await tx.execute(
+            sql`select pg_advisory_xact_lock(${ORDER_NUMBER_LOCK_NAMESPACE}, ${ORDER_NUMBER_LOCK_RESOURCE})`,
+          );
 
-      await tx.insert(customerInfo).values({
-        orderId: newOrder.id,
-        name: customerData.name,
-        email: customerData.email,
-        phone: customerData.phone,
-        address: customerData.address,
-        stripeOrderId: customerData.stripeOrderId,
-        totalPrice: customerData.totalPrice,
-      });
+          const [lastOrder] = await tx
+            .select({ orderNumber: orderItems.orderNumber })
+            .from(orderItems)
+            .orderBy(desc(orderItems.orderNumber))
+            .limit(1);
 
-      await tx.insert(orderProducts).values(
-        products.map((p) => ({
-          orderId: newOrder.id,
-          variantId: p.variantId,
-          quantity: p.quantity,
-          size: p.size,
-        })),
-      );
+          const [newOrder] = await tx
+            .insert(orderItems)
+            .values({
+              userId: orderData.userId,
+              deliveryDate: orderData.deliveryDate,
+              orderNumber: (lastOrder?.orderNumber ?? 0) + 1,
+            })
+            .returning();
 
-      return this.findById(newOrder.id);
-    });
-  },
+          if (!newOrder) return null;
 
-  async create(data: InsertOrderItem): Promise<OrderItem | null> {
-    const [result] = await db
-      .insert(orderItems)
-      .values({
-        userId: data.userId,
-        deliveryDate: data.deliveryDate,
-        orderNumber: data.orderNumber,
-      })
-      .returning();
+          await tx.insert(customerInfo).values({
+            orderId: newOrder.id,
+            name: customerData.name,
+            email: customerData.email,
+            phone: customerData.phone,
+            address: customerData.address,
+            stripeOrderId: customerData.stripeOrderId,
+            totalPrice: customerData.totalPrice,
+          });
 
-    return result ? transformOrderItem(result) : null;
-  },
+          await tx.insert(orderProducts).values(
+            products.map((product) => ({
+              orderId: newOrder.id,
+              variantId: product.variantId,
+              quantity: product.quantity,
+              size: product.size,
+            })),
+          );
 
-  async addCustomerInfo(
-    orderId: number,
-    data: Omit<InsertCustomerInfo, "orderId">,
-  ) {
-    const [result] = await db
-      .insert(customerInfo)
-      .values({
-        orderId,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        stripeOrderId: data.stripeOrderId,
-        totalPrice: data.totalPrice,
-      })
-      .returning();
+          const createdOrder = await tx.query.orderItems.findFirst({
+            where: eq(orderItems.id, newOrder.id),
+            with: ORDER_WITH_DETAILS,
+          });
 
-    return result;
-  },
+          return createdOrder ? transformOrderWithDetails(createdOrder) : null;
+        });
+      } catch (error) {
+        if (!isUniqueViolation(error)) {
+          throw error;
+        }
 
-  async addProducts(
-    orderId: number,
-    products: Omit<InsertOrderProduct, "orderId">[],
-  ) {
-    const result = await db
-      .insert(orderProducts)
-      .values(
-        products.map((p) => ({
-          orderId,
-          variantId: p.variantId,
-          quantity: p.quantity,
-          size: p.size,
-        })),
-      )
-      .returning();
+        const concurrentOrder = await this.findByStripeSessionId(
+          customerData.stripeOrderId,
+        );
+        if (concurrentOrder) {
+          return concurrentOrder;
+        }
 
-    return result;
-  },
+        if (attempt === MAX_CREATE_COMPLETE_ATTEMPTS - 1) {
+          throw error;
+        }
+      }
+    }
 
-  async getNextOrderNumber(): Promise<number> {
-    const [result] = await db
-      .select({ maxOrderNumber: orderItems.orderNumber })
-      .from(orderItems)
-      .orderBy(desc(orderItems.orderNumber))
-      .limit(1);
-
-    return (result?.maxOrderNumber ?? 0) + 1;
+    return null;
   },
 };
 
-function transformOrderItem(row: typeof orderItems.$inferSelect): OrderItem {
-  return {
-    id: row.id,
-    userId: row.userId,
-    deliveryDate: row.deliveryDate.toISOString(),
-    orderNumber: row.orderNumber,
-    createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
-    updatedAt: row.updatedAt?.toISOString() ?? new Date().toISOString(),
-  };
+function isUniqueViolation(
+  error: unknown,
+): error is {
+  code: string;
+} {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === UNIQUE_VIOLATION_CODE
+  );
 }
+
+const ORDER_WITH_DETAILS = {
+  customerInfo: true,
+  orderProducts: {
+    with: {
+      variant: {
+        with: {
+          product: true,
+        },
+      },
+    },
+  },
+} as const;
 
 function transformOrderWithDetails(row: {
   id: number;

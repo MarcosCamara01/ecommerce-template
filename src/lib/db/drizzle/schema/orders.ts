@@ -73,15 +73,21 @@ export const orderItems = pgTable(
     index("idx_order_items_created_at").on(table.createdAt),
     index("idx_order_items_delivery_date").on(table.deliveryDate),
     index("idx_order_items_user_created").on(table.userId, table.createdAt),
-    pgPolicy("Allow all order operations", {
+    pgPolicy("Backend can manage orders", {
       as: "permissive",
       for: "all",
       to: "public",
-      using: sql`true`,
-      withCheck: sql`true`,
+      using: sql`current_setting('request.jwt.claim.role', true) is null`,
+      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
+    }),
+    pgPolicy("Users can view own orders", {
+      as: "permissive",
+      for: "select",
+      to: "public",
+      using: sql`app.current_user_id() = user_id`,
     }),
   ]
-);
+).enableRLS();
 
 export const customerInfo = pgTable(
   "customer_info",
@@ -92,7 +98,7 @@ export const customerInfo = pgTable(
     email: text("email").notNull(),
     phone: text("phone"),
     address: jsonb("address").notNull().$type<Address>(),
-    stripeOrderId: text("stripe_order_id").notNull(),
+    stripeOrderId: text("stripe_order_id").notNull().unique(),
     totalPrice: bigint("total_price", { mode: "number" }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -108,15 +114,22 @@ export const customerInfo = pgTable(
     index("idx_customer_info_order_id").on(table.orderId),
     index("idx_customer_info_stripe_order_id").on(table.stripeOrderId),
     index("idx_customer_info_email").on(table.email),
-    pgPolicy("Allow all customer info operations", {
+    pgPolicy("Backend can manage customer info", {
       as: "permissive",
       for: "all",
       to: "public",
-      using: sql`true`,
-      withCheck: sql`true`,
+      using: sql`current_setting('request.jwt.claim.role', true) is null`,
+      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
+    }),
+    pgPolicy("Users can view own customer info", {
+      as: "permissive",
+      for: "select",
+      to: "public",
+      using:
+        sql`exists (select 1 from order_items where order_items.id = order_id and order_items.user_id = app.current_user_id())`,
     }),
   ]
-);
+).enableRLS();
 
 export const orderProducts = pgTable(
   "order_products",
@@ -147,15 +160,22 @@ export const orderProducts = pgTable(
     index("idx_order_products_order_id").on(table.orderId),
     index("idx_order_products_variant_id").on(table.variantId),
     check("order_quantity_positive", sql`quantity > 0`),
-    pgPolicy("Allow all order products operations", {
+    pgPolicy("Backend can manage order products", {
       as: "permissive",
       for: "all",
       to: "public",
-      using: sql`true`,
-      withCheck: sql`true`,
+      using: sql`current_setting('request.jwt.claim.role', true) is null`,
+      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
+    }),
+    pgPolicy("Users can view own order products", {
+      as: "permissive",
+      for: "select",
+      to: "public",
+      using:
+        sql`exists (select 1 from order_items where order_items.id = order_id and order_items.user_id = app.current_user_id())`,
     }),
   ]
-);
+).enableRLS();
 
 // Zod Schemas
 export const selectOrderItemSchema = createSelectSchema(orderItems, {
@@ -170,6 +190,11 @@ export const insertOrderItemSchema = createInsertSchema(orderItems, {
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const createOrderItemInputSchema = insertOrderItemSchema.pick({
+  userId: true,
+  deliveryDate: true,
 });
 
 export const selectCustomerInfoSchema = createSelectSchema(customerInfo, {
@@ -219,6 +244,7 @@ export const orderWithDetailsSchema = selectOrderItemSchema.extend({
 // Types
 export type OrderItem = z.infer<typeof selectOrderItemSchema>;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type CreateOrderItemInput = z.infer<typeof createOrderItemInputSchema>;
 export type CustomerInfo = z.infer<typeof selectCustomerInfoSchema>;
 export type InsertCustomerInfo = z.infer<typeof insertCustomerInfoSchema>;
 export type OrderProduct = z.infer<typeof selectOrderProductSchema>;
