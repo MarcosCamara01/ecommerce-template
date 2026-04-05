@@ -79,7 +79,6 @@ module.exports = {
         90: "90%",
         180: "180px",
         350: "350px",
-        img: "850px",
       },
       flexBasis: {
         600: "600px",

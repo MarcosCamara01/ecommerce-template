@@ -1,5 +1,7 @@
 /** COMPONENTS */
 import Image from "next/image";
+/** FUNCTIONALITY */
+import { cn } from "@/lib/utils";
 /** TYPES */
 import type { Product, ProductVariant } from "@/lib/db/drizzle/schema";
 
@@ -10,6 +12,9 @@ interface ProductImageProps {
   height: number;
   sizes: string;
   priority?: boolean;
+  quality?: number;
+  unoptimized?: boolean;
+  className?: string;
 }
 
 export const ProductImage = ({
@@ -19,6 +24,9 @@ export const ProductImage = ({
   height,
   priority,
   sizes,
+  quality,
+  unoptimized,
+  className,
 }: ProductImageProps) => {
   return (
     <Image
@@ -27,7 +35,9 @@ export const ProductImage = ({
       src={image}
       alt={name}
       priority={priority}
-      className="w-full max-w-img aspect-[2/3] brightness-90"
+      quality={quality}
+      unoptimized={unoptimized}
+      className={cn("block h-auto w-full aspect-[2/3] brightness-90", className)}
       sizes={sizes}
     />
   );
