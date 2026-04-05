@@ -1,7 +1,7 @@
 "use client";
 
 /** FUNCTIONALITY */
-import { colorMapping } from "@/constants/colors";
+import { getColorSwatchStyle } from "@/constants/colors";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 /** TYPES */
@@ -48,7 +48,7 @@ export function Colors({
               "w-6 h-6": compact,
             },
           )}
-          style={{ backgroundColor: colorMapping[v.color.toLowerCase()] }}
+          style={getColorSwatchStyle(v.color)}
           onClick={() => handleColorChange(v)}
           title={`Color ${v.color}`}
         >
