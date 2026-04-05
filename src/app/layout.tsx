@@ -51,7 +51,7 @@ export default async function RootLayout({
       <body className={GeistSans.className}>
         <Providers>
           <Navbar />
-          <main className="pointer-events-auto">
+          <main className="pointer-events-auto mx-auto w-full max-w-[1920px]">
             {children}
             <Toaster position="bottom-right" />
             <Analytics />
