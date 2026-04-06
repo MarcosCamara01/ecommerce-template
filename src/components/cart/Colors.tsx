@@ -33,7 +33,7 @@ export function Colors({
     <div
       className={cn("grid gap-2", {
         "grid-cols-auto-fill-32 gap-2.5 mt-5": !compact,
-        "grid-flow-col auto-cols-max gap-1.5": compact,
+        "flex flex-wrap gap-2": compact,
       })}
     >
       {variants.map((v) => (
