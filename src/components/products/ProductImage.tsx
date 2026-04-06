@@ -14,6 +14,7 @@ interface ProductImageProps {
   priority?: boolean;
   quality?: number;
   unoptimized?: boolean;
+  blurDataURL?: string | null;
   className?: string;
 }
 
@@ -26,19 +27,26 @@ export const ProductImage = ({
   sizes,
   quality,
   unoptimized,
+  blurDataURL,
   className,
 }: ProductImageProps) => {
   return (
-    <Image
-      width={width}
-      height={height}
-      src={image}
-      alt={name}
-      priority={priority}
-      quality={quality}
-      unoptimized={unoptimized}
-      className={cn("block h-auto w-full aspect-[2/3] brightness-90", className)}
-      sizes={sizes}
-    />
+    <div
+      className="relative w-full overflow-hidden"
+      style={{ aspectRatio: `${width} / ${height}` }}
+    >
+      <Image
+        fill
+        src={image}
+        alt={name}
+        priority={priority}
+        placeholder={blurDataURL ? "blur" : "empty"}
+        blurDataURL={blurDataURL ?? undefined}
+        quality={quality}
+        unoptimized={unoptimized}
+        sizes={sizes}
+        className={cn("object-cover brightness-90", className)}
+      />
+    </div>
   );
 };

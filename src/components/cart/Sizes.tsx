@@ -41,7 +41,7 @@ export const Sizes = forwardRef(
       <div
         className={cn("grid gap-2", {
           "grid-cols-4 gap-2.5 justify-center": !compact,
-          "grid-cols-6 sm:grid-cols-8 gap-1.5": compact,
+          "flex flex-wrap gap-2": compact,
         })}
       >
         {ProductSizeZod.options.map((size) => {
@@ -56,7 +56,7 @@ export const Sizes = forwardRef(
                 {
                   "bg-white text-black": selectedSize === size && isAvailable,
                   "px-1 py-1.5 text-xs": !compact,
-                  "px-2 py-1 text-[10px]": compact,
+                  "min-w-[3rem] px-2.5 py-1.5 text-[10px]": compact,
                 },
               )}
               onClick={() => handleSizeClick(size)}

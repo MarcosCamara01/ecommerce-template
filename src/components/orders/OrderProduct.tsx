@@ -7,6 +7,7 @@ import type {
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
+import { getBlurDataURL } from "@/lib/images/blur.server";
 
 interface OrderProductProps {
   product: ProductWithVariants;
@@ -14,13 +15,14 @@ interface OrderProductProps {
   quantity: OrderProductWithDetails["quantity"];
 }
 
-export const OrderProduct = ({
+export const OrderProduct = async ({
   product,
   size,
   quantity,
 }: OrderProductProps) => {
   const { name, price, category, id, variants } = product;
   const variant = variants[0];
+  const blurDataURL = await getBlurDataURL(variant.images[0]);
 
   const productLink = `/${category}/${id}?variant=${variant.color}`;
 
@@ -29,6 +31,7 @@ export const OrderProduct = ({
       <Link href={productLink} className="transition-all hover:scale-105">
         <ProductImage
           image={variant.images[0]}
+          blurDataURL={blurDataURL}
           name={name}
           width={280}
           height={425}

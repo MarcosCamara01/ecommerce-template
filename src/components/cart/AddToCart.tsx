@@ -84,22 +84,18 @@ export function MobileAddToCart({
     useAddToCartAction(selectedVariant);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <div className="flex-1">
-          <Sizes
-            ref={sizesRef}
-            productSizes={selectedVariant?.sizes ?? []}
-            compact
-          />
-        </div>
-        <div className="flex-shrink-0">
-          <Colors
-            variants={product.variants}
-            selectedVariantColor={selectedVariant?.color}
-            compact
-          />
-        </div>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3.5">
+        <Sizes
+          ref={sizesRef}
+          productSizes={selectedVariant?.sizes ?? []}
+          compact
+        />
+        <Colors
+          variants={product.variants}
+          selectedVariantColor={selectedVariant?.color}
+          compact
+        />
       </div>
 
       <Button
