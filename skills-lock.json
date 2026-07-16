@@ -1,6 +1,24 @@
 {
   "version": 1,
   "skills": {
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "sourceType": "github",
+      "skillPath": "skills/agent-browser/SKILL.md",
+      "computedHash": "ecc7641aea05f85ca3b11e7759d32aaf52fe05946ab4b63739c7bf78a41237a2"
+    },
+    "ai-cli": {
+      "source": "vercel-labs/ai-cli",
+      "sourceType": "github",
+      "skillPath": "skills/ai-cli/SKILL.md",
+      "computedHash": "c4dda584f739cebaeb47ddd91d976f3fb259b904130e180b7c922546994c0f56"
+    },
+    "emulate": {
+      "source": "vercel-labs/emulate",
+      "sourceType": "github",
+      "skillPath": "skills/emulate/SKILL.md",
+      "computedHash": "f459933ee20c2600f1f8f61efd1bc05e98ffdd65b1960350e9fe0da370b52b51"
+    },
     "frontend-code-review": {
       "source": "langgenius/dify",
       "sourceType": "github",
@@ -13,11 +31,35 @@
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
     },
+    "next": {
+      "source": "vercel-labs/emulate",
+      "sourceType": "github",
+      "skillPath": "skills/next/SKILL.md",
+      "computedHash": "e9bd68c5dcf38e92a84f7d538713f88d676c48a068120c3102336b2a131c74ba"
+    },
     "next-cache-components-optimizer": {
       "source": "vercel/next.js",
       "sourceType": "github",
       "skillPath": "skills/next-cache-components-optimizer/SKILL.md",
       "computedHash": "b8d757a1fe10ebe7b10de1d5ee83f9bcdbd1de1e1147efc68cf249377f471067"
+    },
+    "oauth": {
+      "source": "vercel-labs/portless",
+      "sourceType": "github",
+      "skillPath": "skills/oauth/SKILL.md",
+      "computedHash": "9dbf0a5cc15d805924816a4df6654b105a163618ff986c79f6974211164b34a7"
+    },
+    "portless": {
+      "source": "vercel-labs/portless",
+      "sourceType": "github",
+      "skillPath": "skills/portless/SKILL.md",
+      "computedHash": "63bff4a71f23671d9aa36591475773dda1a507d54d63591040bd5ffc94556593"
+    },
+    "stripe": {
+      "source": "vercel-labs/emulate",
+      "sourceType": "github",
+      "skillPath": "skills/stripe/SKILL.md",
+      "computedHash": "55b1fd8a03705e70858032956c5b9045d4a263595e9910a7be98c4fb9208a07a"
     },
     "stripe-best-practices": {
       "source": "stripe/ai",
@@ -30,6 +72,18 @@
       "sourceType": "github",
       "skillPath": "plugins/javascript-typescript/skills/typescript-advanced-types/SKILL.md",
       "computedHash": "8cbf2bf600f392d7260e476e3202932a876e2281cda3b15a8b6a5a43f383252d"
+    },
+    "vercel": {
+      "source": "vercel-labs/emulate",
+      "sourceType": "github",
+      "skillPath": "skills/vercel/SKILL.md",
+      "computedHash": "75f252a2d7e42886373f960bbe2c4ca95309cdf7425b6e8cfb0cf980f31132e9"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/composition-patterns/SKILL.md",
+      "computedHash": "575757e3e25761c8c562d6e395d29f0b76c98b1273c0bd72d88e6ab1bc9c7d42"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
