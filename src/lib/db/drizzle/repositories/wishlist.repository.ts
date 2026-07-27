@@ -112,7 +112,7 @@ export const wishlistRepository = {
     return withRLS(userId, async (tx) => {
       const result = await tx
         .delete(wishlist)
-        .where(eq(wishlist.id, id))
+        .where(and(eq(wishlist.id, id), eq(wishlist.userId, userId)))
         .returning({ id: wishlist.id });
 
       return result.length > 0;

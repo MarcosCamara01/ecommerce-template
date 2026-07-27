@@ -90,6 +90,7 @@ export const cartRepository = {
       if (existing) {
         return this.updateQuantityInternal(
           tx,
+          data.userId,
           existing.id,
           existing.quantity + data.quantity,
         );
@@ -133,7 +134,7 @@ export const cartRepository = {
     quantity: number,
   ): Promise<CartItem | null> {
     return withRLS(userId, async (tx) =>
-      this.updateQuantityInternal(tx, id, quantity),
+      this.updateQuantityInternal(tx, userId, id, quantity),
     );
   },
 
@@ -141,7 +142,7 @@ export const cartRepository = {
     return withRLS(userId, async (tx) => {
       const result = await tx
         .delete(cartItems)
-        .where(eq(cartItems.id, id))
+        .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
         .returning({ id: cartItems.id });
 
       return result.length > 0;
@@ -178,13 +179,14 @@ export const cartRepository = {
 
   async updateQuantityInternal(
     tx: RLSClient,
+    userId: string,
     id: number,
     quantity: number,
   ): Promise<CartItem | null> {
     const [result] = await tx
       .update(cartItems)
       .set({ quantity })
-      .where(eq(cartItems.id, id))
+      .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
       .returning();
 
     return result ? transformCartItem(result) : null;
