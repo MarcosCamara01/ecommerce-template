@@ -17,28 +17,6 @@ export async function getUserOrders(
   }
 }
 
-export async function getOrderById(
-  orderId: number,
-): Promise<OrderWithDetails | null> {
-  try {
-    return await ordersRepository.findById(orderId);
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    return null;
-  }
-}
-
-export async function getOrderByNumber(
-  orderNumber: number,
-): Promise<OrderWithDetails | null> {
-  try {
-    return await ordersRepository.findByOrderNumber(orderNumber);
-  } catch (error) {
-    console.error("Error fetching order by number:", error);
-    return null;
-  }
-}
-
 export async function createCompleteOrder(
   orderData: CreateOrderItemInput,
   customerData: Omit<InsertCustomerInfo, "orderId">,
