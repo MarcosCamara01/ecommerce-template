@@ -38,3 +38,6 @@ next-env.d.ts
 # cursor
 .cursor/
 .agents/
+
+# private vulnerability reports / local artifacts (never commit: public repo)
+/reports/

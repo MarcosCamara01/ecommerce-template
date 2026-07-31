@@ -31,7 +31,6 @@ function useAddToCartAction(selectedVariant?: ProductVariant) {
       addToCart({
         size: sizesRef.current.selectedSize,
         variantId: selectedVariant.id,
-        stripeId: selectedVariant.stripeId,
       });
     },
     { wait: 300 },

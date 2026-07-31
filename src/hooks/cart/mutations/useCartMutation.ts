@@ -19,15 +19,14 @@ export const useCartMutation = () => {
     mutationFn: async (params: {
       variantId: number;
       size: ProductSize;
-      stripeId: string;
       quantity?: number;
     }) => {
-      const { variantId, size, stripeId, quantity = 1 } = params;
+      const { variantId, size, quantity = 1 } = params;
 
       const response = await fetch("/api/user/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variantId, size, stripeId, quantity }),
+        body: JSON.stringify({ variantId, size, quantity }),
       });
 
       if (!response.ok) {
@@ -42,7 +41,6 @@ export const useCartMutation = () => {
     onMutate: async (params: {
       variantId: number;
       size: ProductSize;
-      stripeId: string;
       quantity?: number;
     }) => {
       if (!userId) {
@@ -50,7 +48,7 @@ export const useCartMutation = () => {
         throw new Error("Unauthorized");
       }
 
-      const { variantId, size, stripeId, quantity = 1 } = params;
+      const { variantId, size, quantity = 1 } = params;
 
       await queryClient.cancelQueries({
         queryKey: CART_QUERY_KEYS.cartList(userId),
@@ -66,7 +64,9 @@ export const useCartMutation = () => {
         variantId,
         size,
         quantity,
-        stripeId,
+        // Placeholder only: the real Stripe price is resolved server-side and
+        // arrives with the response, which replaces this optimistic row.
+        stripeId: "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe";
+import { buildLineItems } from "@/lib/stripe/line-items";
 import { stripeLogger } from "@/lib/stripe/logger";
 import { getOrCreateStripeCustomer } from "@/services/stripe.service";
 import { auth } from "@/utils/auth";
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     const { cartItemIds } = parsedBody.data;
 
-    const userCartItems = await cartRepository.findByUserId(userId);
+    const userCartItems = await cartRepository.findByUserIdWithDetails(userId);
 
     const cartItemsList = userCartItems.filter((item) =>
       cartItemIds.includes(item.id),
@@ -73,12 +74,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const lineItemsList = cartItemsList.map((item) => {
-      if (!item.stripeId) {
-        throw new Error(`Missing stripeId for variant ${item.variantId}`);
-      }
-      return { price: item.stripeId, quantity: item.quantity || 1 };
-    });
+    const lineItemsList = buildLineItems(cartItemsList);
 
     const customerId = userEmail
       ? await getOrCreateStripeCustomer(userId, userEmail)

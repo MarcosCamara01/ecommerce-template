@@ -284,7 +284,7 @@ async function getCartItemsFromMetadata(
   const cartItemIds = parseCartItemIds(metadata.cartItemIds);
   if (cartItemIds.length === 0) return [];
 
-  const userCartItems = await cartRepository.findByUserId(userId);
+  const userCartItems = await cartRepository.findByUserIdWithDetails(userId);
 
   return userCartItems
     .filter((item) => cartItemIds.includes(item.id))
@@ -292,7 +292,11 @@ async function getCartItemsFromMetadata(
       variantId: item.variantId,
       size: item.size,
       quantity: item.quantity,
-      stripeId: item.stripeId,
+      // Authoritative variant -> price mapping, matching how the checkout
+      // line items were built. Using the cart row's stripe_id here would fail
+      // to match (and silently drop the order product) for any legacy row
+      // whose stripe_id disagrees with its variant.
+      stripeId: item.variant.stripeId,
     }));
 }
 

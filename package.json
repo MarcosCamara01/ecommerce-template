@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test": "node --test",
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/utils/migration.ts",
     "db:generate": "drizzle-kit generate",

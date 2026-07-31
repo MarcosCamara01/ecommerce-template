@@ -1,4 +1,7 @@
-import { cartRepository } from "@/lib/db/drizzle/repositories";
+import {
+  cartRepository,
+  productsRepository,
+} from "@/lib/db/drizzle/repositories";
 import type {
   CartItem,
   CartItemWithDetails,
@@ -31,9 +34,28 @@ export async function addToCart(
   cartItem: AddToCartInput,
 ): Promise<CartItem | null> {
   try {
+    // Resolve the Stripe price from the variant itself. The client only says
+    // WHICH variant it wants; it never gets to say what that variant costs.
+    const variant = await productsRepository.findVariantById(cartItem.variantId);
+    if (!variant) {
+      console.error("Add to cart rejected: unknown variant", cartItem.variantId);
+      return null;
+    }
+
+    // The requested size must actually be offered by this variant.
+    if (!variant.sizes.includes(cartItem.size)) {
+      console.error(
+        "Add to cart rejected: size not available for variant",
+        cartItem.variantId,
+        cartItem.size,
+      );
+      return null;
+    }
+
     return await cartRepository.upsert({
       ...cartItem,
       userId,
+      stripeId: variant.stripeId,
     });
   } catch (error) {
     console.error("Error adding to cart:", error);

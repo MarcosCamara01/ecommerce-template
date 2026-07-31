@@ -8,6 +8,7 @@ import type {
   InsertProduct,
   InsertProductVariant,
   ProductCategory,
+  ProductVariant,
 } from "@/lib/db/drizzle/schema";
 
 const sizesSchema = z.array(ProductSizeZod);
@@ -33,6 +34,14 @@ export const productsRepository = {
     });
 
     return result ? transformProduct(result) : null;
+  },
+
+  async findVariantById(id: number): Promise<ProductVariant | null> {
+    const result = await db.query.productsVariants.findFirst({
+      where: eq(productsVariants.id, id),
+    });
+
+    return result ? transformVariant(result) : null;
   },
 
   async findByCategory(

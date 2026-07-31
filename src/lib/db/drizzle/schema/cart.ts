@@ -114,8 +114,18 @@ export const updateCartItemSchema = z.object({
   quantity: z.number().int().positive("Quantity must be greater than 0"),
 });
 
-export const addToCartSchema = insertCartItemSchema.omit({ userId: true });
+// stripeId is deliberately NOT accepted from the client: it is resolved
+// server-side from the variant. Letting the caller pick which Stripe price is
+// charged for a given variantId allowed price substitution fraud (REPORT-1627).
+export const addToCartSchema = insertCartItemSchema.omit({
+  userId: true,
+  stripeId: true,
+});
 
+// Server-internal projection of a cart row joined to its variant. stripeId here
+// is always products_variants.stripe_id (the authoritative mapping), never the
+// cart row's own column — it is the key used to match Stripe line items back to
+// cart entries when building the order.
 export const minimalCartItemSchema = z.object({
   variantId: z.number(),
   size: ProductSizeZod,
