@@ -32,7 +32,9 @@ export const useAuthMutation = () => {
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Error signing in");
+      // Surface the real reason: an unverified address fails with a specific
+      // message that the user needs to act on, not a generic failure.
+      toast.error(error.message || "Error signing in");
     },
   });
 
@@ -59,13 +61,22 @@ export const useAuthMutation = () => {
 
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // When email verification is required, sign-up does not open a session:
+      // the account stays inert until the address is confirmed. Sending the
+      // user to the home page would look like a silent no-op login.
+      if (!result.data?.token) {
+        toast.success("Check your email to confirm your address before signing in.");
+        router.push("/login");
+        return;
+      }
+
       router.push("/");
       router.refresh();
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Error signing up");
+      toast.error(error.message || "Error signing up");
     },
   });
 
