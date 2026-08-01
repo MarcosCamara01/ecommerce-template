@@ -4,6 +4,7 @@ import {
   ordersRepository,
 } from "@/lib/db/drizzle/repositories";
 import { stripeLogger } from "@/lib/stripe/logger";
+import { getUser } from "@/lib/auth/server";
 import type { MinimalCartItem } from "@/lib/db/drizzle/schema/cart";
 import {
   createOrderItemInputSchema,
@@ -197,9 +198,16 @@ export async function fetchCheckoutData(
       return { status: "not_found", error: "Invalid session" };
     }
 
+    const user = await getUser();
+    if (!user) return { status: "not_found" };
+
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["payment_intent"],
     });
+
+    if (session.metadata?.userId !== user.id) {
+      return { status: "not_found" };
+    }
 
     // Map Stripe session status to our status
     if (session.status === "complete" && session.payment_status === "paid") {
