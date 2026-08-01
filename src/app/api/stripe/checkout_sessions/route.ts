@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 
 import { stripe } from "@/lib/stripe";
+import { auth } from "@/utils/auth";
 
 const checkoutSessionQuerySchema = z.object({
   session_id: z.string().startsWith("cs_", "Invalid CheckoutSession ID"),
@@ -10,6 +11,14 @@ const checkoutSessionQuerySchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
+    const authSession = await auth.api.getSession({ headers: req.headers });
+    if (!authSession?.user?.id) {
+      return NextResponse.json(
+        { statusCode: 401, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+
     const parsed = checkoutSessionQuerySchema.safeParse({
       session_id: req.nextUrl.searchParams.get("session_id"),
     });
@@ -30,6 +39,13 @@ export async function GET(req: NextRequest) {
       expand: ["payment_intent"],
       },
     );
+
+    if (checkoutSession.metadata?.userId !== authSession.user.id) {
+      return NextResponse.json(
+        { statusCode: 403, message: "Forbidden" },
+        { status: 403 },
+      );
+    }
 
     return NextResponse.json(checkoutSession);
   } catch (err) {
