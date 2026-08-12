@@ -4,12 +4,6 @@ The spec workflow in this repo is [`mattpocock/skills`](https://github.com/mattp
 (aihero.dev). The previous in-repo SDD — `.sdd/`, `specs/`, and the twenty `spec-*` /
 `verify` / `review` skills — has been removed; do not rebuild any part of it.
 
-## Precondition
-
-`/setup-matt-pocock-skills` has **not** been run in this repo yet. Run it once, before the
-first use of any engineering skill: it configures the issue tracker, the triage label
-vocabulary, and where domain docs live, and writes `docs/agents/`.
-
 ## The main flow
 
 ```
@@ -25,18 +19,37 @@ the full map of the set, including the on-ramps (`/triage` for issues you didn't
 `/finish`, which stages, drafts a conventional commit message, and waits for explicit
 approval. Pushing needs its own separate consent.
 
-## Where the skills live
+## Agent skills
 
-Two directories, read by different agents — a skill in one is invisible to the other.
+### Issue tracker
+
+GitHub issues on `MarcosCamara01/ecommerce-template`, via the `gh` CLI. The repo is
+public, so specs and tickets are visible to anyone. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical roles, each label string equal to its name. Only `wontfix` exists on
+the tracker today. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. Neither exists yet;
+`/domain-modeling` creates them lazily. See `docs/agents/domain.md`.
+
+## Where the skills live
 
 | Directory | Contents | Read by |
 |---|---|---|
-| `.claude/skills/` | the 35 aihero.dev skills | Claude Code (`/name`) |
-| `.agents/skills/` | 16 project tooling skills + `finish` | Codex (`$name`) |
+| `.claude/skills/` | 52 — the 35 aihero.dev skills as files, plus junctions to all 17 below | Claude Code (`/name`) |
+| `.agents/skills/` | 17 — 16 project tooling skills and `finish` | Codex (`$name`) |
 
-To even this out, install the aihero set for Codex too with
-`npx skills add mattpocock/skills --skill '*' --agent codex -y`, and link `.agents/skills/`
-into `.claude/skills/` for the tooling ones.
+The project skills are junctioned rather than copied, so both agents read one file. Codex
+does not yet see the aihero set; install it there with
+`npx skills add mattpocock/skills --skill '*' --agent codex -y`.
+
+`.claude/` is untracked and `.agents/` is committed. `skills-lock.json` records every
+installed skill, so `npx skills experimental_install` restores `.claude/skills/` on a
+fresh clone.
 
 ## Project tooling skills
 
@@ -59,10 +72,3 @@ Not covered by the aihero set — this repo's own.
 
 Note: `$frontend-code-review` is written against the Dify codebase, not this one. Adapt it
 before relying on it.
-
-## Domain knowledge
-
-There is no `CONTEXT.md` in this repo yet. Several aihero skills (`tdd`, `triage`,
-`domain-modeling`, `diagnosing-bugs`, both grill wrappers) open it for a mental model of the
-code and look for ADRs. `/setup-matt-pocock-skills` decides where those live; `/domain-modeling`
-is what fills the glossary in.
