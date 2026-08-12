@@ -14,9 +14,25 @@ description: >-
 
 ---
 
-Latest Stripe API version: **2026-06-24.dahlia**. Always use the latest API version and SDK unless the user specifies otherwise.
+Latest Stripe API version: **2026-07-29.dahlia**. Always use the latest API version and SDK unless the user specifies otherwise.
+
+Latest SDK versions:
+
+| Language | Latest version |
+| --- | --- |
+| Ruby | 19.4.0 |
+| Python | 15.4.0 |
+| Node.js | 22.4.0 |
+| PHP | 21.1.0 |
+| Java | 33.2.0 |
+| Go | 86.2.0 |
+| .NET | 52.2.0 |
 
 If you don’t have a Stripe account, you can call a CLI command to generate working API keys with no registration required. You can install the Stripe CLI (`npm i -g @stripe/cli`) and run the command `stripe sandbox create` to get started.
+
+If `stripe sandbox create` is used, don’t use MCP.
+
+If you try to use MCP after running sandbox creation, first make sure `stripe sandbox claim` is run. Use `stripe whoami --format json` for CLI auth checks; do not run `stripe config --list`.
 
 API key default: Always recommend a [restricted API key (RAK)](https://docs.stripe.com/keys/restricted-api-keys.md) (`rk_` prefix) over a secret key (`sk_` prefix).
 
@@ -43,6 +59,8 @@ Read the relevant reference file before answering any integration question or wr
 - *Never include `payment_method_types` in any Stripe API call*, with one exception: Terminal (in-person payments) integrations must pass `payment_method_types: ['card_present']` on the PaymentIntent. For all other integrations, omit this parameter entirely to enable dynamic payment methods, which enables you to configure payment method settings from the Dashboard and dynamically display the most relevant eligible payment methods to each customer to maximize conversion. To customize which payment methods you accept, use [`payment_method_configurations`](https://docs.stripe.com/payments/payment-method-configurations.md) or `excluded_payment_method_types` instead of `payment_method_types`.
 
 - On API version `2026-03-25.dahlia` or later, pass the parameter `integration_identifier` to `checkout.sessions.create` to tag sessions with a custom label for tracking and comparing checkout flows in the Dashboard. The label should include a suffix of 8 random letters.
+
+- *Always instantiate a `StripeClient` and call methods on that instance.* Do **not** use the deprecated global/module-level API key pattern (`stripe.api_key = …`, `Stripe.setApiKey`, `stripe.Key = …`, `StripeConfiguration.ApiKey = …`). The global pattern is deprecated in all current SDKs.
 
 ## Key documentation
 

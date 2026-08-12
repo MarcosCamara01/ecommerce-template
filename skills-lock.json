@@ -19,6 +19,18 @@
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
       "computedHash": "fff0bc3373f1f44b1df71e11d1d490177c6a15be3a7da3c206145e242f18566b"
     },
+    "better-auth-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/best-practices/SKILL.md",
+      "computedHash": "e8b46af23c6b1bc7aefdae3cf816368058c05e46eadb9bdca4f744b17d05a866"
+    },
+    "better-auth-security-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "security/SKILL.md",
+      "computedHash": "087c1094fa5f1834af4785c058dcc8c9abe4c1321b853883c76ea46c93a21cfe"
+    },
     "claude-handoff": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -48,6 +60,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/domain-modeling/SKILL.md",
       "computedHash": "b747e8b4dcd0f367ef940c290b14f858bf9576ad9961fd6684bacff5688f4a2b"
+    },
+    "email-and-password-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/emailAndPassword/SKILL.md",
+      "computedHash": "7786d722fa682b3d6a99793e73a9d51b59becefa595676134a993020633e068f"
     },
     "emulate": {
       "source": "vercel-labs/emulate",
@@ -131,7 +149,7 @@
       "source": "vercel/next.js",
       "sourceType": "github",
       "skillPath": "skills/next-cache-components-optimizer/SKILL.md",
-      "computedHash": "b8d757a1fe10ebe7b10de1d5ee83f9bcdbd1de1e1147efc68cf249377f471067"
+      "computedHash": "bb56d029b57617215a64283adff4a020b2484162234595a9e4cb3703dd9084bf"
     },
     "oauth": {
       "source": "vercel-labs/portless",
@@ -191,13 +209,25 @@
       "source": "vercel-labs/emulate",
       "sourceType": "github",
       "skillPath": "skills/stripe/SKILL.md",
-      "computedHash": "55b1fd8a03705e70858032956c5b9045d4a263595e9910a7be98c4fb9208a07a"
+      "computedHash": "d2e822c16e3e7698b719e9dd06e21ed1019cc37a62e29c1b51718da838ee106d"
     },
     "stripe-best-practices": {
       "source": "stripe/ai",
       "sourceType": "github",
       "skillPath": "skills/stripe-best-practices/SKILL.md",
-      "computedHash": "3c85d46c6d927918aef200e4ced45ffb737aa108b05e2d538af7afbed09b0d27"
+      "computedHash": "572138335dd0d757a1654dac7e800e31abc0d0bee3e8b5e3c0cf3107ac52decf"
+    },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase/SKILL.md",
+      "computedHash": "a6260582f48df8ba53380bb9b9e870ed2ae5fe147799e90ed783b8aa25167d50"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "128fac78002d916c8ca908245d398e634f540d8bcf20915b2b2359aeb18eba59"
     },
     "tdd": {
       "source": "mattpocock/skills",
