@@ -25,8 +25,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
+# env files — ignore every variant, keep the checked-in template.
+# `.env*.local` alone left plain `.env` and `.env.production` committable,
+# which on a public repo is one `git add` away from leaking real secrets.
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -35,9 +39,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# cursor
+# agent state
 .cursor/
-.agents/
+# `.claude/` is local: `settings.local.json` plus junctions into `.agents/`.
+# `npx skills experimental_install` rebuilds it from skills-lock.json.
+.claude/
+# `.agents/` is NOT ignored — AGENTS.md declares it committed, and 123 files
+# under it are already tracked. The previous `.agents/` entry here silently
+# hid every newly installed skill from `git status`.
 
 # private vulnerability reports / local artifacts (never commit: public repo)
 /reports/
