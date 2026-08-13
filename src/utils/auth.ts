@@ -80,6 +80,14 @@ export const auth = betterAuth({
   },
 
   account: {
+    // Encrypts the provider access/refresh tokens at rest with AES-256-GCM.
+    // These rows were readable by the public `anon` key until the Supabase
+    // grants on `public` were revoked, and they were stored in plaintext, so
+    // every Google token pair in `account` has to be treated as disclosed.
+    // Encryption applies to tokens written from here on: it does not retrofit
+    // existing rows, which is why it must be deployed BEFORE forcing users to
+    // re-authenticate — otherwise the replacements land in plaintext too.
+    encryptOAuthTokens: true,
     accountLinking: {
       // Linking stays enabled so that a verified owner can still attach Google
       // to their existing account, and so the authenticated `linkSocial`
