@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { WishlistProducts } from "@/components/wishlist";
 import { SVGLoadingIcon } from "@/components/ui/loader";
-import { getUser } from "@/lib/auth/server";
+import { getPrincipal } from "@/lib/identity";
 
 export async function generateMetadata() {
   return {
@@ -27,7 +27,7 @@ const WishlistPage = () => {
 };
 
 const WishlistContent = async () => {
-  const user = await getUser();
+  const user = await getPrincipal();
 
   if (!user) {
     return (

@@ -18,10 +18,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { forwardRef, useImperativeHandle, useRef, useEffect } from "react";
-import { FiTrash2, FiHelpCircle, FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { VariantSizes, type VariantSizesRef } from "./VariantSizes";
 import { VariantImages, type VariantImagesRef } from "./VariantImages";
 import type { VariantFormData, VariantSubmitData } from "@/types/admin";
+import { CATALOG_VARIANT_COLOR_MAX_LENGTH } from "@/lib/catalog-sync/input-validation";
 
 export type VariantFormRef = {
   getData: () => VariantSubmitData;
@@ -41,14 +42,12 @@ interface VariantFormProps {
 export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
   ({ index, onRemove, canRemove = true, initialData, onMoveUp, onMoveDown }, ref) => {
     const colorRef = useRef<HTMLInputElement>(null);
-    const stripeIdRef = useRef<HTMLInputElement>(null);
     const sizesRef = useRef<VariantSizesRef>(null!);
     const imagesRef = useRef<VariantImagesRef>(null!);
 
     useEffect(() => {
       if (initialData) {
         if (colorRef.current) colorRef.current.value = initialData.color;
-        if (stripeIdRef.current) stripeIdRef.current.value = initialData.stripeId;
       }
     }, [initialData]);
 
@@ -56,7 +55,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
       getData: () => ({
         id: initialData?.id,
         color: colorRef.current?.value || "",
-        stripe_id: stripeIdRef.current?.value || "",
         sizes: sizesRef.current?.sizes || [],
         imageCount: imagesRef.current?.images?.length || 0,
         existingImages: imagesRef.current?.existingImages || [],
@@ -65,7 +63,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
       getImages: () => imagesRef.current?.images || [],
       reset: () => {
         if (colorRef.current) colorRef.current.value = initialData?.color || "";
-        if (stripeIdRef.current) stripeIdRef.current.value = initialData?.stripeId || "";
         sizesRef.current?.reset();
         imagesRef.current?.reset();
       },
@@ -146,43 +143,18 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
           </div>
         </CardHeader>
         <CardContent className="p-4 space-y-4">
-          {/* Color and Stripe ID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor={`color-${index}`} className="text-sm font-medium text-color-secondary">
-                Color
-              </Label>
-              <Input
-                id={`color-${index}`}
-                ref={colorRef}
-                placeholder="e.g., Black, White, Red"
-                className="h-10"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-1">
-                <Label htmlFor={`stripe-${index}`} className="text-sm font-medium text-color-secondary">
-                  Stripe Price ID
-                  <span className="ml-1 text-xs text-color-tertiary font-normal">(optional)</span>
-                </Label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <FiHelpCircle className="h-3.5 w-3.5 text-color-tertiary cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[250px]">
-                      <p>Leave empty to auto-generate a Stripe product and price. Or enter an existing price ID from your Stripe dashboard (e.g., price_1234...)</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <Input
-                id={`stripe-${index}`}
-                ref={stripeIdRef}
-                placeholder="Auto-generated if empty"
-                className="h-10 font-mono text-sm"
-              />
-            </div>
+          {/* Color */}
+          <div className="space-y-2">
+            <Label htmlFor={`color-${index}`} className="text-sm font-medium text-color-secondary">
+              Color
+            </Label>
+            <Input
+              id={`color-${index}`}
+              ref={colorRef}
+              maxLength={CATALOG_VARIANT_COLOR_MAX_LENGTH}
+              placeholder="e.g., Black, White, Red"
+              className="h-10"
+            />
           </div>
 
           {/* Sizes and Images in Accordion */}

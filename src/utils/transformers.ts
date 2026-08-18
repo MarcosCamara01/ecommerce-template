@@ -8,6 +8,7 @@ import type {
 export function transformCartItemToOrderProduct(
   cartItem: CartItem,
   orderId: number,
+  chargedPrice: { unitAmount: number; currency: string },
 ): OrderProduct {
   return {
     id: Math.random(),
@@ -15,6 +16,8 @@ export function transformCartItemToOrderProduct(
     variantId: cartItem.variantId,
     quantity: cartItem.quantity,
     size: cartItem.size,
+    unitAmount: chargedPrice.unitAmount,
+    currency: chargedPrice.currency,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

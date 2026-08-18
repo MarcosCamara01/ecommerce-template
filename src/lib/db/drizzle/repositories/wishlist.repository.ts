@@ -1,188 +1,136 @@
-import { eq, and, desc, inArray } from "drizzle-orm";
-import { withRLS } from "../connection";
-import { wishlist, productsItems, productsVariants } from "../schema";
-import type { WishlistItem, InsertWishlistItem } from "@/lib/db/drizzle/schema";
+import "server-only";
+
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+
+import { db } from "../connection";
+import { productsItems, productsVariants, wishlist } from "../schema";
+import type { WishlistItem } from "@/lib/db/drizzle/schema";
 
 export const wishlistRepository = {
   async findByUserId(userId: string): Promise<WishlistItem[]> {
-    return withRLS(userId, async (tx) => {
-      const result = await tx
-        .select()
-        .from(wishlist)
-        .where(eq(wishlist.userId, userId))
-        .orderBy(desc(wishlist.createdAt));
-
-      return result.map(transformWishlistItem);
-    });
+    const result = await db
+      .select({ wishlistItem: wishlist })
+      .from(wishlist)
+      .innerJoin(productsItems, eq(wishlist.productId, productsItems.id))
+      .where(
+        and(
+          eq(wishlist.userId, userId),
+          isNull(productsItems.archivedAt),
+        ),
+      )
+      .orderBy(desc(wishlist.createdAt));
+    return result.map((row) => transformWishlistItem(row.wishlistItem));
   },
 
   async findByUserIdWithDetails(userId: string) {
-    return withRLS(userId, async (tx) => {
-      const result = await tx
-        .select({
-          wishlistItem: wishlist,
-          product: productsItems,
-        })
-        .from(wishlist)
-        .innerJoin(productsItems, eq(wishlist.productId, productsItems.id))
-        .where(eq(wishlist.userId, userId))
-        .orderBy(desc(wishlist.createdAt));
-
-      const productIds = result.map((r) => r.product.id);
-      const variants =
-        productIds.length > 0
-          ? await tx
-              .select()
-              .from(productsVariants)
-              .where(inArray(productsVariants.productId, productIds))
-          : [];
-
-      const variantsByProduct = new Map<number, typeof variants>();
-      for (const variant of variants) {
-        const existing = variantsByProduct.get(variant.productId) || [];
-        existing.push(variant);
-        variantsByProduct.set(variant.productId, existing);
-      }
-
-      return result.map((row) => ({
-        ...transformWishlistItem(row.wishlistItem),
-        product: {
-          id: row.product.id,
-          name: row.product.name,
-          description: row.product.description,
-          price: Number(row.product.price),
-          category: row.product.category,
-          img: row.product.img,
-          createdAt:
-            row.product.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt:
-            row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
-          variants: (variantsByProduct.get(row.product.id) || []).map((v) => ({
-            id: v.id,
-            productId: v.productId,
-            stripeId: v.stripeId,
-            color: v.color,
-            sizes: v.sizes,
-            images: v.images,
-            createdAt: v.createdAt?.toISOString() ?? new Date().toISOString(),
-            updatedAt: v.updatedAt?.toISOString() ?? new Date().toISOString(),
-          })),
-        },
-      }));
-    });
+    const result = await db
+      .select({ wishlistItem: wishlist, product: productsItems })
+      .from(wishlist)
+      .innerJoin(productsItems, eq(wishlist.productId, productsItems.id))
+      .where(
+        and(
+          eq(wishlist.userId, userId),
+          isNull(productsItems.archivedAt),
+        ),
+      )
+      .orderBy(desc(wishlist.createdAt));
+    const productIds = result.map((row) => row.product.id);
+    const variants = productIds.length
+      ? await db
+          .select()
+          .from(productsVariants)
+          .where(
+            and(
+              inArray(productsVariants.productId, productIds),
+              isNull(productsVariants.archivedAt),
+            ),
+          )
+      : [];
+    const variantsByProduct = new Map<number, typeof variants>();
+    for (const variant of variants) {
+      const values = variantsByProduct.get(variant.productId) ?? [];
+      values.push(variant);
+      variantsByProduct.set(variant.productId, values);
+    }
+    return result.map((row) => ({
+      ...transformWishlistItem(row.wishlistItem),
+      product: {
+        ...row.product,
+        price: Number(row.product.price),
+        createdAt: row.product.createdAt?.toISOString() ?? new Date().toISOString(),
+        updatedAt: row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
+        variants: (variantsByProduct.get(row.product.id) ?? []).map((variant) => ({
+          ...variant,
+          createdAt: variant.createdAt?.toISOString() ?? new Date().toISOString(),
+          updatedAt: variant.updatedAt?.toISOString() ?? new Date().toISOString(),
+        })),
+      },
+    }));
   },
 
-  async exists(userId: string, productId: number): Promise<boolean> {
-    return withRLS(userId, async (tx) => {
-      const [result] = await tx
-        .select({ id: wishlist.id })
-        .from(wishlist)
-        .where(
-          and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
-        );
-
-      return !!result;
-    });
+  async create(userId: string, productId: number): Promise<WishlistItem> {
+    const [result] = await db
+      .insert(wishlist)
+      .values({ userId, productId })
+      .onConflictDoUpdate({
+        target: [wishlist.userId, wishlist.productId],
+        set: { updatedAt: new Date() },
+      })
+      .returning();
+    if (!result) throw new Error("Wishlist insert returned no row");
+    return transformWishlistItem(result);
   },
 
-  async create(data: InsertWishlistItem): Promise<WishlistItem | null> {
-    return withRLS(data.userId, async (tx) => {
-      const [existing] = await tx
-        .select({ id: wishlist.id })
-        .from(wishlist)
+  async createAvailable(
+    userId: string,
+    productId: number,
+  ): Promise<WishlistItem | null> {
+    return db.transaction(async (tx) => {
+      const [product] = await tx
+        .select({ id: productsItems.id })
+        .from(productsItems)
         .where(
           and(
-            eq(wishlist.userId, data.userId),
-            eq(wishlist.productId, data.productId),
+            eq(productsItems.id, productId),
+            isNull(productsItems.archivedAt),
           ),
-        );
-
-      if (existing) return null;
-
-      const [result] = await tx
-        .insert(wishlist)
-        .values({ userId: data.userId, productId: data.productId })
-        .returning();
-
-      return result ? transformWishlistItem(result) : null;
-    });
-  },
-
-  async delete(userId: string, id: number): Promise<boolean> {
-    return withRLS(userId, async (tx) => {
-      const result = await tx
-        .delete(wishlist)
-        .where(and(eq(wishlist.id, id), eq(wishlist.userId, userId)))
-        .returning({ id: wishlist.id });
-
-      return result.length > 0;
-    });
-  },
-
-  async deleteByUserAndProduct(
-    userId: string,
-    productId: number,
-  ): Promise<boolean> {
-    return withRLS(userId, async (tx) => {
-      const result = await tx
-        .delete(wishlist)
-        .where(
-          and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
         )
-        .returning({ id: wishlist.id });
-
-      return result.length > 0;
-    });
-  },
-
-  async toggle(
-    userId: string,
-    productId: number,
-  ): Promise<{ added: boolean; item: WishlistItem | null }> {
-    return withRLS(userId, async (tx) => {
-      const [existing] = await tx
-        .select({ id: wishlist.id })
-        .from(wishlist)
-        .where(
-          and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
-        );
-
-      if (existing) {
-        await tx
-          .delete(wishlist)
-          .where(
-            and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)),
-          );
-        return { added: false, item: null };
-      }
+        .for("share");
+      if (!product) return null;
 
       const [result] = await tx
         .insert(wishlist)
         .values({ userId, productId })
+        .onConflictDoUpdate({
+          target: [wishlist.userId, wishlist.productId],
+          set: { updatedAt: new Date() },
+        })
         .returning();
-
-      return {
-        added: true,
-        item: result ? transformWishlistItem(result) : null,
-      };
+      if (!result) throw new Error("Wishlist insert returned no row");
+      return transformWishlistItem(result);
     });
   },
 
-  async clearByUserId(userId: string): Promise<boolean> {
-    return withRLS(userId, async (tx) => {
-      await tx.delete(wishlist).where(eq(wishlist.userId, userId));
-      return true;
-    });
+  async delete(userId: string, id: number): Promise<boolean> {
+    const rows = await db
+      .delete(wishlist)
+      .where(and(eq(wishlist.id, id), eq(wishlist.userId, userId)))
+      .returning({ id: wishlist.id });
+    return rows.length > 0;
+  },
+
+  async deleteByUserAndProduct(userId: string, productId: number) {
+    const rows = await db
+      .delete(wishlist)
+      .where(and(eq(wishlist.userId, userId), eq(wishlist.productId, productId)))
+      .returning({ id: wishlist.id });
+    return rows.length > 0;
   },
 };
 
-function transformWishlistItem(
-  row: typeof wishlist.$inferSelect,
-): WishlistItem {
+function transformWishlistItem(row: typeof wishlist.$inferSelect): WishlistItem {
   return {
-    id: row.id,
-    userId: row.userId,
-    productId: row.productId,
+    ...row,
     createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
     updatedAt: row.updatedAt?.toISOString() ?? new Date().toISOString(),
   };

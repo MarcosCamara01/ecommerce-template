@@ -16,13 +16,24 @@ export async function createProduct(
         success: false,
         message: result.error || "Error creating product",
         errors: result.errors,
+        operationId: result.operationId,
+        syncState: result.syncState,
+        retryable: result.retryable,
       };
     }
 
     return {
       success: true,
-      message: result.message || "Product created successfully",
+      message:
+        result.message ||
+        (response.status === 202
+          ? "Product creation is being synchronized"
+          : "Product created successfully"),
       data: result.data,
+      accepted: response.status === 202 || result.accepted === true,
+      operationId: result.operationId,
+      syncState: result.syncState,
+      retryable: result.retryable,
     };
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -46,13 +57,24 @@ export async function updateProduct(
         success: false,
         message: result.error || "Error updating product",
         errors: result.errors,
+        operationId: result.operationId,
+        syncState: result.syncState,
+        retryable: result.retryable,
       };
     }
 
     return {
       success: true,
-      message: result.message || "Product updated successfully",
+      message:
+        result.message ||
+        (response.status === 202
+          ? "Product update is being synchronized"
+          : "Product updated successfully"),
       data: result.data,
+      accepted: response.status === 202 || result.accepted === true,
+      operationId: result.operationId,
+      syncState: result.syncState,
+      retryable: result.retryable,
     };
   } catch (error) {
     console.error("Unexpected error:", error);

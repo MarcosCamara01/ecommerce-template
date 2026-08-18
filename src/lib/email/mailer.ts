@@ -15,6 +15,7 @@ type MailOptions = {
   subject: string;
   html: string;
   replyTo?: string;
+  messageId?: string;
 };
 
 function getFirstEnvValue(keys: string[], trim = true) {
@@ -121,7 +122,13 @@ export function getContactEmailAddress() {
   return getEmailConfig().contactTo;
 }
 
-export async function sendMail({ to, subject, html, replyTo }: MailOptions) {
+export async function sendMail({
+  to,
+  subject,
+  html,
+  replyTo,
+  messageId,
+}: MailOptions) {
   const config = getEmailConfig();
 
   await getTransporter().sendMail({
@@ -130,6 +137,7 @@ export async function sendMail({ to, subject, html, replyTo }: MailOptions) {
     subject,
     html,
     ...(replyTo ? { replyTo } : {}),
+    ...(messageId ? { messageId } : {}),
   });
 }
 

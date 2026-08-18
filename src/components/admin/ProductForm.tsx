@@ -19,6 +19,11 @@ import { MainImage, type MainImageRef } from "./MainImage";
 import { VariantsSection, type VariantsSectionRef } from "./VariantsSection";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
+import {
+  selectCreateCommand,
+  serializeCreateCommand,
+  type StoredCreateCommand,
+} from "@/lib/catalog-sync/create-draft-command";
 
 export type { ProductFormData };
 
@@ -26,17 +31,40 @@ interface FormState {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
+  accepted?: boolean;
+  operationId?: string;
+  retryable?: boolean;
 }
+
+const CREATE_COMMAND_STORAGE_KEY = "admin-product-create-command-id";
+
+const digest = async (value: string | ArrayBuffer) => {
+  const bytes = typeof value === "string" ? new TextEncoder().encode(value) : value;
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(hash), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+};
+
+const fileFingerprint = async (file: File) => ({
+  name: file.name,
+  size: file.size,
+  type: file.type,
+  lastModified: file.lastModified,
+  contentHash: await digest(await file.arrayBuffer()),
+});
 
 interface ProductFormProps {
   mode: "create" | "edit";
   initialData?: ProductFormData;
+  restoreArchived?: boolean;
   onSuccess?: (product: ProductWithVariants) => void;
 }
 
 export function ProductForm({
   mode,
   initialData,
+  restoreArchived = false,
   onSuccess,
 }: ProductFormProps) {
   const { createAsync, updateAsync, isPending, isUpdatePending } =
@@ -50,58 +78,89 @@ export function ProductForm({
   const basicInfoRef = useRef<BasicInfoRef>(null!);
   const mainImageRef = useRef<MainImageRef>(null!);
   const variantsSectionRef = useRef<VariantsSectionRef>(null!);
+  const createCommandRef = useRef<StoredCreateCommand | null>(null);
+
+  const clearCreateCommand = () => {
+    createCommandRef.current = null;
+    sessionStorage.removeItem(CREATE_COMMAND_STORAGE_KEY);
+  };
 
   const isLoading = mode === "create" ? isPending : isUpdatePending;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const formData = new FormData();
-
-    if (mode === "edit" && initialData?.id) {
-      formData.append("id", initialData.id.toString());
-    }
-
-    formData.append("name", basicInfoRef.current.name);
-    formData.append("description", basicInfoRef.current.description);
-    formData.append("price", basicInfoRef.current.price);
-    formData.append("category", basicInfoRef.current.category);
-
-    // Handle main image
-    if (mainImageRef.current.hasNewImage && mainImageRef.current.file) {
-      formData.append("mainImage", mainImageRef.current.file);
-    } else if (mainImageRef.current.existingUrl) {
-      formData.append("existingMainImage", mainImageRef.current.existingUrl);
-    }
-
-    const variantsData = variantsSectionRef.current.getVariants();
-    const imagesData = variantsSectionRef.current.getImages();
-
-    variantsData.forEach((variant, index) => {
-      const variantImages = imagesData[`variant_${index}`] || [];
-      variantImages.forEach((image, imgIndex) => {
-        formData.append(`variant_${index}_image_${imgIndex}`, image);
-      });
-      formData.append(
-        `variant_${index}_imageCount`,
-        variantImages.length.toString(),
-      );
-    });
-
-    // Include variant data with existing images info for edit mode
-    const variantsForSubmit = variantsData.map((v) => ({
-      id: v.id,
-      color: v.color,
-      stripe_id: v.stripe_id,
-      sizes: v.sizes,
-      imageCount: v.imageCount,
-      existingImages: v.existingImages,
-      removedImages: v.removedImages,
-    }));
-
-    formData.append("variants", JSON.stringify(variantsForSubmit));
-
     try {
+      const formData = new FormData();
+      const basicInfo = {
+        name: basicInfoRef.current.name,
+        description: basicInfoRef.current.description,
+        price: basicInfoRef.current.price,
+        category: basicInfoRef.current.category,
+      };
+      const mainImage =
+        mainImageRef.current.hasNewImage && mainImageRef.current.file
+          ? mainImageRef.current.file
+          : null;
+      const variantsData = variantsSectionRef.current.getVariants();
+      const imagesData = variantsSectionRef.current.getImages();
+      const variantsForSubmit = variantsData.map((variant) => ({
+        id: variant.id,
+        color: variant.color,
+        sizes: variant.sizes,
+        imageCount: variant.imageCount,
+        existingImages: variant.existingImages,
+        removedImages: variant.removedImages,
+      }));
+
+      if (mode === "edit" && initialData?.id) {
+        formData.append("id", initialData.id.toString());
+        if (restoreArchived) formData.append("restoreArchived", "true");
+      }
+      if (mode === "create") {
+        const fingerprint = await digest(JSON.stringify({
+          ...basicInfo,
+          mainImage: mainImage ? await fileFingerprint(mainImage) : null,
+          variants: await Promise.all(
+            variantsForSubmit.map(async (variant, index) => ({
+              ...variant,
+              newImages: await Promise.all(
+                (imagesData[`variant_${index}`] || []).map(fileFingerprint),
+              ),
+            })),
+          ),
+        }));
+        const stored = createCommandRef.current
+          ? serializeCreateCommand(createCommandRef.current)
+          : sessionStorage.getItem(CREATE_COMMAND_STORAGE_KEY);
+        const command = selectCreateCommand(
+          stored,
+          fingerprint,
+          () => crypto.randomUUID(),
+        );
+        createCommandRef.current = command;
+        sessionStorage.setItem(
+          CREATE_COMMAND_STORAGE_KEY,
+          serializeCreateCommand(command),
+        );
+        formData.append("commandId", command.id);
+      }
+
+      for (const [key, value] of Object.entries(basicInfo)) {
+        formData.append(key, value);
+      }
+      if (mainImage) {
+        formData.append("mainImage", mainImage);
+      } else if (mainImageRef.current.existingUrl) {
+        formData.append("existingMainImage", mainImageRef.current.existingUrl);
+      }
+      variantsData.forEach((_, index) => {
+        const variantImages = imagesData[`variant_${index}`] || [];
+        variantImages.forEach((image, imageIndex) => {
+          formData.append(`variant_${index}_image_${imageIndex}`, image);
+        });
+      });
+      formData.append("variants", JSON.stringify(variantsForSubmit));
+
       const result =
         mode === "create"
           ? await createAsync(formData)
@@ -111,8 +170,18 @@ export function ProductForm({
         success: result.success,
         message: result.message,
         errors: result.errors,
+        accepted: result.accepted,
+        operationId: result.operationId,
+        retryable: result.retryable,
       });
 
+      if (
+        mode === "create" &&
+        result.success &&
+        !result.accepted
+      ) {
+        clearCreateCommand();
+      }
       if (result.success && result.data && onSuccess) {
         onSuccess(result.data);
       }
@@ -121,6 +190,8 @@ export function ProductForm({
         success: false,
         message: "An unexpected error occurred",
         errors: undefined,
+        operationId: createCommandRef.current?.id,
+        retryable: true,
       });
     }
   };
@@ -129,6 +200,7 @@ export function ProductForm({
     basicInfoRef.current.reset();
     mainImageRef.current.reset();
     variantsSectionRef.current.reset();
+    if (mode === "create") clearCreateCommand();
     setState({ success: false, message: "", errors: undefined });
   };
 
@@ -163,8 +235,21 @@ export function ProductForm({
           ) : (
             <FiX className="h-4 w-4" />
           )}
-          <AlertTitle>{state.success ? "Success" : "Error"}</AlertTitle>
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertTitle>
+            {state.success
+              ? state.accepted
+                ? "Synchronization pending"
+                : "Success"
+              : "Error"}
+          </AlertTitle>
+          <AlertDescription>
+            {state.message}
+            {state.operationId && (
+              <span className="mt-2 block font-mono text-xs">
+                Operation: {state.operationId}
+              </span>
+            )}
+          </AlertDescription>
         </Alert>
       )}
 

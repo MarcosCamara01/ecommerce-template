@@ -2,7 +2,6 @@ import { z } from "zod";
 import { sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import {
-  pgTable,
   bigserial,
   text,
   bigint,
@@ -11,9 +10,11 @@ import {
   jsonb,
   index,
   check,
-  pgPolicy,
   foreignKey,
+  unique,
 } from "drizzle-orm/pg-core";
+
+import { appPrivate } from "./namespace";
 import { users } from "./users";
 import {
   productsVariants,
@@ -33,24 +34,16 @@ export const AddressSchema = z.object({
 
 export const InsertAddressSchema = z.object({
   line1: z.string().min(1, "Address line 1 is required"),
-  line2: z
-    .string()
-    .nullable()
-    .optional()
-    .transform((val) => val ?? undefined),
+  line2: z.string().nullable().optional().transform((value) => value ?? undefined),
   city: z.string().min(1, "City is required"),
-  state: z
-    .string()
-    .nullable()
-    .optional()
-    .transform((val) => val ?? undefined),
+  state: z.string().nullable().optional().transform((value) => value ?? undefined),
   postal_code: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
 });
 
 export type Address = z.infer<typeof AddressSchema>;
 
-export const orderItems = pgTable(
+export const orderItems = appPrivate.table(
   "order_items",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -65,31 +58,16 @@ export const orderItems = pgTable(
       columns: [table.userId],
       foreignColumns: [users.id],
       name: "order_items_user_id_fkey",
-    })
-      .onDelete("cascade")
-      .onUpdate("cascade"),
+    }).onDelete("restrict").onUpdate("cascade"),
     index("idx_order_items_user_id").on(table.userId),
     index("idx_order_items_order_number").on(table.orderNumber),
     index("idx_order_items_created_at").on(table.createdAt),
     index("idx_order_items_delivery_date").on(table.deliveryDate),
     index("idx_order_items_user_created").on(table.userId, table.createdAt),
-    pgPolicy("Backend can manage orders", {
-      as: "permissive",
-      for: "all",
-      to: "public",
-      using: sql`current_setting('request.jwt.claim.role', true) is null`,
-      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
-    }),
-    pgPolicy("Users can view own orders", {
-      as: "permissive",
-      for: "select",
-      to: "public",
-      using: sql`app.current_user_id() = user_id`,
-    }),
-  ]
-).enableRLS();
+  ],
+);
 
-export const customerInfo = pgTable(
+export const customerInfo = appPrivate.table(
   "customer_info",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -100,6 +78,7 @@ export const customerInfo = pgTable(
     address: jsonb("address").notNull().$type<Address>(),
     stripeOrderId: text("stripe_order_id").notNull().unique(),
     totalPrice: bigint("total_price", { mode: "number" }).notNull(),
+    currency: text("currency").notNull().default("eur"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -108,30 +87,14 @@ export const customerInfo = pgTable(
       columns: [table.orderId],
       foreignColumns: [orderItems.id],
       name: "customer_info_order_id_fkey",
-    })
-      .onDelete("cascade")
-      .onUpdate("cascade"),
+    }).onDelete("cascade").onUpdate("cascade"),
     index("idx_customer_info_order_id").on(table.orderId),
     index("idx_customer_info_stripe_order_id").on(table.stripeOrderId),
     index("idx_customer_info_email").on(table.email),
-    pgPolicy("Backend can manage customer info", {
-      as: "permissive",
-      for: "all",
-      to: "public",
-      using: sql`current_setting('request.jwt.claim.role', true) is null`,
-      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
-    }),
-    pgPolicy("Users can view own customer info", {
-      as: "permissive",
-      for: "select",
-      to: "public",
-      using:
-        sql`exists (select 1 from order_items where order_items.id = order_id and order_items.user_id = app.current_user_id())`,
-    }),
-  ]
-).enableRLS();
+  ],
+);
 
-export const orderProducts = pgTable(
+export const orderProducts = appPrivate.table(
   "order_products",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -139,6 +102,8 @@ export const orderProducts = pgTable(
     variantId: bigint("variant_id", { mode: "number" }).notNull(),
     quantity: integer("quantity").notNull(),
     size: text("size").notNull(),
+    unitAmount: bigint("unit_amount", { mode: "number" }).notNull(),
+    currency: text("currency").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -147,37 +112,52 @@ export const orderProducts = pgTable(
       columns: [table.orderId],
       foreignColumns: [orderItems.id],
       name: "order_products_order_id_fkey",
-    })
-      .onDelete("cascade")
-      .onUpdate("cascade"),
+    }).onDelete("cascade").onUpdate("cascade"),
     foreignKey({
       columns: [table.variantId],
       foreignColumns: [productsVariants.id],
       name: "order_products_variant_id_fkey",
-    })
-      .onDelete("restrict")
-      .onUpdate("cascade"),
+    }).onDelete("restrict").onUpdate("cascade"),
     index("idx_order_products_order_id").on(table.orderId),
     index("idx_order_products_variant_id").on(table.variantId),
     check("order_quantity_positive", sql`quantity > 0`),
-    pgPolicy("Backend can manage order products", {
-      as: "permissive",
-      for: "all",
-      to: "public",
-      using: sql`current_setting('request.jwt.claim.role', true) is null`,
-      withCheck: sql`current_setting('request.jwt.claim.role', true) is null`,
-    }),
-    pgPolicy("Users can view own order products", {
-      as: "permissive",
-      for: "select",
-      to: "public",
-      using:
-        sql`exists (select 1 from order_items where order_items.id = order_id and order_items.user_id = app.current_user_id())`,
-    }),
-  ]
-).enableRLS();
+    check("order_unit_amount_nonnegative", sql`unit_amount >= 0`),
+  ],
+);
 
-// Zod Schemas
+export const historicalOrderPriceEvidence = appPrivate.table(
+  "historical_order_price_evidence",
+  {
+    orderProductId: bigint("order_product_id", { mode: "number" })
+      .primaryKey(),
+    stripeSessionId: text("stripe_session_id").notNull(),
+    stripeLineItemId: text("stripe_line_item_id").notNull(),
+    unitAmount: bigint("unit_amount", { mode: "number" }).notNull(),
+    currency: text("currency").notNull(),
+    verifiedAt: timestamp("verified_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.orderProductId],
+      foreignColumns: [orderProducts.id],
+      name: "historical_price_evidence_order_product_fk",
+    }).onDelete("restrict"),
+    unique("historical_price_stripe_line_item_unique").on(
+      table.stripeLineItemId,
+    ),
+    check(
+      "historical_price_unit_amount_nonnegative",
+      sql`${table.unitAmount} >= 0`,
+    ),
+    check(
+      "historical_price_currency_length",
+      sql`char_length(${table.currency}) = 3`,
+    ),
+  ],
+);
+
 export const selectOrderItemSchema = createSelectSchema(orderItems, {
   deliveryDate: z.coerce.string(),
   createdAt: z.coerce.string(),
@@ -186,11 +166,7 @@ export const selectOrderItemSchema = createSelectSchema(orderItems, {
 
 export const insertOrderItemSchema = createInsertSchema(orderItems, {
   deliveryDate: z.coerce.date(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+}).omit({ id: true, createdAt: true, updatedAt: true });
 
 export const createOrderItemInputSchema = insertOrderItemSchema.pick({
   userId: true,
@@ -208,11 +184,8 @@ export const insertCustomerInfoSchema = createInsertSchema(customerInfo, {
   name: z.string().min(1, "Name is required"),
   address: InsertAddressSchema,
   totalPrice: z.number().int().positive("Total price must be greater than 0"),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+  currency: z.string().length(3),
+}).omit({ id: true, createdAt: true, updatedAt: true });
 
 export const selectOrderProductSchema = createSelectSchema(orderProducts, {
   size: ProductSizeZod,
@@ -222,11 +195,9 @@ export const selectOrderProductSchema = createSelectSchema(orderProducts, {
 
 export const insertOrderProductSchema = createInsertSchema(orderProducts, {
   quantity: z.number().int().positive("Quantity must be greater than 0"),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+  unitAmount: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+}).omit({ id: true, createdAt: true, updatedAt: true });
 
 const variantWithProductSchema = selectVariantSchema.extend({
   product: selectProductSchema,
@@ -241,7 +212,6 @@ export const orderWithDetailsSchema = selectOrderItemSchema.extend({
   customerInfo: selectCustomerInfoSchema,
 });
 
-// Types
 export type OrderItem = z.infer<typeof selectOrderItemSchema>;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type CreateOrderItemInput = z.infer<typeof createOrderItemInputSchema>;
@@ -249,7 +219,5 @@ export type CustomerInfo = z.infer<typeof selectCustomerInfoSchema>;
 export type InsertCustomerInfo = z.infer<typeof insertCustomerInfoSchema>;
 export type OrderProduct = z.infer<typeof selectOrderProductSchema>;
 export type InsertOrderProduct = z.infer<typeof insertOrderProductSchema>;
-export type OrderProductWithDetails = z.infer<
-  typeof orderProductWithDetailsSchema
->;
+export type OrderProductWithDetails = z.infer<typeof orderProductWithDetailsSchema>;
 export type OrderWithDetails = z.infer<typeof orderWithDetailsSchema>;

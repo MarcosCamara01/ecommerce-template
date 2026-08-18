@@ -13,6 +13,8 @@ import {
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { ProductCategory } from "@/lib/db/drizzle/schema";
+import { STRIPE_EUR_MAX_CHARGE_CENTS } from "@/lib/stripe/amount-limits";
+import { CATALOG_PRODUCT_NAME_MAX_LENGTH } from "@/lib/catalog-sync/input-validation";
 
 const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: "t-shirts", label: "T-Shirts" },
@@ -76,6 +78,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
           </Label>
           <Input
             id="name"
+            maxLength={CATALOG_PRODUCT_NAME_MAX_LENGTH}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter product name"
@@ -133,7 +136,9 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
                 id="price"
                 type="number"
                 step="0.01"
-                min="0"
+                min="0.01"
+                max={STRIPE_EUR_MAX_CHARGE_CENTS / 100}
+                inputMode="decimal"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="0.00"

@@ -81,6 +81,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
             color: variant.color,
             sizes: variant.sizes,
             images: variant.images,
+            archivedAt: variant.archivedAt,
             createdAt: variant.createdAt,
             updatedAt: variant.updatedAt,
           },
@@ -92,6 +93,8 @@ const OrderProducts = async ({ id }: { id: string }) => {
         product: productWithVariants,
         size: orderProduct.size,
         quantity: orderProduct.quantity,
+        unitAmount: orderProduct.unitAmount,
+        currency: orderProduct.currency,
       };
     },
   );
@@ -104,12 +107,14 @@ const OrderProducts = async ({ id }: { id: string }) => {
         <div className="flex-1">
           <h2 className="mb-6 text-2xl font-bold">Order Items</h2>
           <GridProducts className="cart-ord-mobile">
-            {allProducts.map(({ orderProductId, product, size, quantity }) => (
+            {allProducts.map(({ orderProductId, product, size, quantity, unitAmount, currency }) => (
               <OrderProduct
                 key={orderProductId}
                 product={product}
                 size={size}
                 quantity={quantity}
+                unitAmount={unitAmount}
+                currency={currency}
               />
             ))}
           </GridProducts>

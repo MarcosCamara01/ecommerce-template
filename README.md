@@ -5,122 +5,84 @@ Modern ecommerce starter built with Next.js 16, React 19, App Router, Drizzle OR
 ## Stack
 
 - Next.js 16 with App Router and Cache Components
-- React 19
-- TypeScript strict mode
-- Tailwind CSS
-- TanStack Query
-- Drizzle ORM
-- Supabase PostgreSQL
-- Better Auth
-- Stripe Checkout
-- Zod
-- Nodemailer
+- React 19 and TypeScript strict mode
+- Tailwind CSS and TanStack Query
+- Drizzle ORM with Supabase PostgreSQL
+- Better Auth, Stripe Checkout, Zod, and Nodemailer
 
 ## Features
 
 - Product catalog with categories and variants
 - Shopping cart and wishlist
-- Stripe checkout
-- Order history
+- Stripe checkout and order history
 - Admin product management
 - Email notifications
 - Type-safe validation and data access
 
 ## Getting Started
 
-1. Install dependencies:
+1. Install dependencies.
 
-```bash
-npm install
-```
+    npm install
 
-2. Create `.env.local` from `.env.example`.
+2. Create .env.local from .env.example.
 
-3. Run the database setup:
+3. Configure the database roles and URLs before applying migrations:
 
-```bash
-npm run db:migrate
-npm run db:push
-```
+    DATABASE_URL is the app runtime connection.
+    MIGRATION_DATABASE_URL authenticates as app_migrator; db:migrate then assumes app_owner.
+    VERIFY_DATABASE_URL is the least-privileged connection used by db:verify.
+    AUTH_DATABASE_LAYOUT must be app_private.
+    The first-admin bootstrap uses MIGRATION_DATABASE_URL together with ADMIN_USER_ID.
+    ADMIN_BOOTSTRAP_DATABASE_URL is only for the temporary legacy-public cutover described in the runbook.
+    CRON_SECRET is required for scheduled operational flows.
 
-4. Start the development server:
+4. For a fresh database, run migrations and verify the resulting schema.
 
-```bash
-npm run dev
-```
+    npm run db:migrate
+    npm run db:verify
 
-5. Open `http://localhost:3000`.
+5. For an existing database, follow the [database cutover runbook](docs/runbooks/database-cutover.md) instead of applying ad-hoc schema changes.
+
+6. Start the development server.
+
+    npm run dev
+
+7. Open http://localhost:3000.
 
 ## Environment Variables
 
-```env
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# Database
-DATABASE_URL=your_supabase_database_url
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# Better Auth
-BETTER_AUTH_SECRET=your_better_auth_secret
-
-# Stripe
-STRIPE_SECRET_KEY=your_stripe_secret_key
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-
-# Email
-EMAIL_SERVER_HOST=your_email_host
-EMAIL_SERVER_PORT=your_email_port
-EMAIL_SERVER_USER=your_email_user
-EMAIL_SERVER_PASSWORD=your_email_password
-EMAIL_FROM=your_email_from
-EMAIL_CONTACT_TO=your_email_inbox
-```
+The complete list is maintained in .env.example. The database variables above intentionally use separate credentials so application runtime access cannot run migrations.
 
 ## Scripts
 
-```bash
-# App
-npm run dev
-npm run build
-npm run start
-npm run lint
-npm run typecheck
+    npm run dev
+    npm run build
+    npm run start
+    npm run lint
+    npm run typecheck
 
-# Database
-npm run db:generate
-npm run db:migrate
-npm run db:push
-npm run db:studio
-npm run db:pull
-```
+    npm run db:generate
+    npm run db:migrate
+    npm run db:verify
+    npm run db:verify-hosted
+    npm run db:mark-cutover
+    npm run db:studio
+    npm run db:pull
 
-## Project Structure
+`db:studio` and `db:pull` verify the `app_migrator` session and assume
+`app_owner` only for their Drizzle Kit subprocess; do not put `role=` in
+`MIGRATION_DATABASE_URL`.
 
-```text
-src/
-  app/         App Router routes, layouts, pages, route handlers
-  components/  UI and feature components
-  hooks/       Client hooks and React Query hooks
-  lib/         Infra code: auth, db, email, Stripe, shared helpers
-  schemas/     Zod schemas
-  services/    Business logic
-  styles/      Global CSS
-  types/       Shared TypeScript types
-  utils/       Stateless helpers and formatters
-```
+db:push is intentionally disabled. Generate a reviewed migration with db:generate, apply it with db:migrate, and use the cutover runbook for an already populated database.
 
 ## Deployment Notes
 
-- Configure all environment variables in production.
+- Configure every required environment variable in the deployment platform.
 - Use a public webhook URL for Stripe.
-- Run `npm run db:migrate` before `npm run db:push` on new environments.
-- Set `NEXT_PUBLIC_APP_URL` to the production domain.
+- Apply npm run db:migrate before deploying application code that depends on a schema change.
+- Never use db:push in any environment.
+- Set both NEXT_PUBLIC_APP_URL and BETTER_AUTH_URL to the production origin.
 
 ## License
 

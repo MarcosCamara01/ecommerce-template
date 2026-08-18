@@ -31,7 +31,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
         data: v,
       }));
     }
-    return [{ key: 0, data: { color: "", stripeId: "", sizes: [], images: [] } }];
+    return [{ key: 0, data: { color: "", sizes: [], images: [] } }];
   };
 
   const [variants, setVariants] = useState<VariantState[]>(createInitialState);
@@ -49,7 +49,6 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
           data: {
             id: currentData.id,
             color: currentData.color,
-            stripeId: currentData.stripe_id,
             sizes: currentData.sizes,
             images: currentData.existingImages,
           },
@@ -80,7 +79,6 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
         return (
           variantRef?.getData() || {
             color: "",
-            stripe_id: "",
             sizes: [],
             imageCount: 0,
             existingImages: [],
@@ -109,7 +107,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
   const addVariant = () => {
     setVariants((prev) => [
       ...prev,
-      { key: nextKey.current++, data: { color: "", stripeId: "", sizes: [], images: [] } },
+      { key: nextKey.current++, data: { color: "", sizes: [], images: [] } },
     ]);
   };
 

@@ -1,619 +1,572 @@
+import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { revalidateProducts } from "@/app/actions";
-import { productsRepository } from "@/lib/db/drizzle/repositories";
+import { compensateUploadedCatalogImages } from "@/lib/catalog-sync/create-compensation";
+import { planCatalogCreateCommand } from "@/lib/catalog-sync/create-command";
 import {
-  type InsertProductVariant,
-  ProductCategoryZod,
-  ProductSizeZod,
-} from "@/lib/db/drizzle/schema";
-import { createServiceClient } from "@/lib/db/supabase/server";
+  CatalogSyncError,
+  type CatalogVariantDraft,
+} from "@/lib/catalog-sync/model";
+import { parseCatalogPriceCents } from "@/lib/catalog-sync/money";
 import {
-  archiveStripeProduct,
-  createStripeProductForVariant,
-  deactivateStripePrice,
-  updateStripeProduct,
-} from "@/services/stripe.service";
-import { auth } from "@/utils/auth";
+  catalogProductNameSchema,
+  catalogVariantColorSchema,
+  catalogVariantImageCountSchema,
+  readVariantImageFiles,
+  mergeVariantImageUrls,
+} from "@/lib/catalog-sync/input-validation";
+import { revalidateProducts } from "@/lib/catalog-sync/revalidate";
+import { createCatalogSyncManager } from "@/lib/catalog-sync/service";
+import { shouldCompensateRejectedPreparedUpload } from "@/lib/catalog-sync/preparation-state";
+import { removeStorageObjectOrThrow } from "@/lib/catalog-sync/storage-compensation";
+import { ProductCategoryZod, ProductSizeZod } from "@/lib/db/drizzle/schema";
+import {
+  IdentityError,
+  identityErrorHttpStatus,
+  requireCapabilityFromHeaders,
+  type UserPrincipal,
+} from "@/lib/identity";
+import { createStorageAdminClient } from "@/lib/storage/supabase";
+import { createCatalogRouteHandler } from "./authorization";
 
 const BUCKET = "product-images";
-
-type ProcessedVariant = Omit<InsertProductVariant, "productId"> & {
-  id?: number;
-};
-
-type BuildVariantsTracker = {
-  uploadedImageUrls: string[];
-  newVariantStripePriceIds: string[];
-  replacementStripePriceIds: string[];
-  previousStripePriceIdsToDeactivate: string[];
-};
-
 const productIdSchema = z.coerce.number().int().positive();
-
-const productFormSchema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  description: z.string().trim().min(1, "Description is required"),
-  price: z.coerce.number().positive("Price must be greater than 0"),
-  category: ProductCategoryZod,
-});
-
+const commandIdSchema = z.uuid();
+const productFormSchema = z
+  .object({
+    name: catalogProductNameSchema,
+    description: z.string().trim().min(1),
+    price: z.string().trim().transform((value, context) => {
+      const cents = parseCatalogPriceCents(value);
+      if (cents === null) {
+        context.addIssue({
+          code: "custom",
+          message: "Price must be positive and use at most two decimal places",
+        });
+        return z.NEVER;
+      }
+      return cents;
+    }),
+    category: ProductCategoryZod,
+  })
+  .transform(({ price, ...product }) => ({ ...product, priceCents: price }));
 const variantFormSchema = z.object({
   id: z.number().int().positive().optional(),
-  color: z.string().trim().min(1, "Color is required"),
-  stripe_id: z.string().optional().default(""),
-  sizes: z.array(ProductSizeZod).min(1, "At least one size is required"),
-  imageCount: z.number().int().nonnegative().optional(),
+  color: catalogVariantColorSchema,
+  sizes: z.array(ProductSizeZod).min(1),
+  imageCount: catalogVariantImageCountSchema.optional(),
   existingImages: z.array(z.string()).optional(),
   removedImages: z.array(z.string()).optional(),
 });
+type VariantInput = z.infer<typeof variantFormSchema>;
 
-type VariantFormInput = z.infer<typeof variantFormSchema>;
-
-function validationErrorResponse(error: z.ZodError, message: string) {
-  return NextResponse.json(
-    {
-      error: message,
-      errors: error.flatten().fieldErrors,
-    },
-    { status: 400 },
-  );
-}
-
-async function verifyAdmin(request: NextRequest) {
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-
-  const adminEmail = process.env.ADMIN_EMAIL;
-
-  if (!session?.user || !adminEmail || session.user.email !== adminEmail) {
-    return null;
-  }
-
-  return session.user;
-}
-
-function parseVariantsData(rawVariants: FormDataEntryValue | null): VariantFormInput[] {
-  if (typeof rawVariants !== "string") {
+function parseVariants(value: FormDataEntryValue | null) {
+  if (typeof value !== "string") {
     throw new z.ZodError([
-      {
-        code: "custom",
-        message: "Variants are required",
-        path: ["variants"],
-      },
+      { code: "custom", message: "Variants are required", path: ["variants"] },
     ]);
   }
-
-  let parsedVariants: unknown;
-
+  let parsed: unknown;
   try {
-    parsedVariants = JSON.parse(rawVariants);
+    parsed = JSON.parse(value);
   } catch {
     throw new z.ZodError([
-      {
-        code: "custom",
-        message: "Invalid variants payload",
-        path: ["variants"],
-      },
+      { code: "custom", message: "Invalid variants payload", path: ["variants"] },
     ]);
   }
-
-  return z
-    .array(variantFormSchema)
-    .min(1, "At least one variant is required")
-    .parse(parsedVariants);
+  return z.array(variantFormSchema).min(1).max(50).parse(parsed);
 }
 
-function normalizeColorPath(color: string) {
-  return color.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+const normalizeColor = (color: string) =>
+  color
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+
+function imageExtension(file: File) {
+  const extension = file.name
+    .split(".")
+    .pop()
+    ?.toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  return extension || "bin";
 }
 
-async function uploadImage(file: File, path: string): Promise<string | null> {
-  const supabase = createServiceClient();
-
-  const ext = file.name.split(".").pop();
-  const name = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
-  const fullPath = `${path}/${name}`;
-
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(fullPath, file, { cacheControl: "3600", upsert: false });
-
-  if (error) {
-    console.error("Error uploading image:", error);
-    return null;
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from(BUCKET).getPublicUrl(fullPath);
-
-  return publicUrl;
+function randomStoragePath(prefix: string, file: File) {
+  return prefix + "/" + randomUUID() + "." + imageExtension(file);
 }
 
-async function deleteImageByUrl(imageUrl: string) {
-  const supabase = createServiceClient();
-  const urlParts = imageUrl.split(`/storage/v1/object/public/${BUCKET}/`);
-  if (urlParts.length < 2) return;
-
-  const path = urlParts[1];
-  await supabase.storage.from(BUCKET).remove([path]);
+function publicImageUrl(path: string) {
+  return createStorageAdminClient()
+    .storage.from(BUCKET)
+    .getPublicUrl(path).data.publicUrl;
 }
 
-async function cleanupProductImages(productId: number) {
-  try {
-    const supabase = createServiceClient();
-    const productPath = `products/${productId}`;
-    const paths: string[] = [];
+async function uploadImage(file: File, path: string, upsert = false) {
+  const storage = createStorageAdminClient();
+  const { error } = await storage.storage.from(BUCKET).upload(path, file, {
+    cacheControl: "3600",
+    upsert,
+  });
+  if (error) return null;
+  return storage.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
 
-    const { data: rootEntries } = await supabase.storage
-      .from(BUCKET)
-      .list(productPath, { limit: 100 });
-
-    for (const entry of rootEntries ?? []) {
-      if (entry.name === "variants") {
-        continue;
-      }
-
-      paths.push(`${productPath}/${entry.name}`);
-    }
-
-    const { data: variantFolders } = await supabase.storage
-      .from(BUCKET)
-      .list(`${productPath}/variants`, { limit: 100 });
-
-    for (const folder of variantFolders ?? []) {
-      const variantFolderPath = `${productPath}/variants/${folder.name}`;
-      const { data: variantFiles } = await supabase.storage
-        .from(BUCKET)
-        .list(variantFolderPath, { limit: 100 });
-
-      for (const file of variantFiles ?? []) {
-        paths.push(`${variantFolderPath}/${file.name}`);
-      }
-    }
-
-    if (paths.length > 0) {
-      await supabase.storage.from(BUCKET).remove(paths);
-    }
-  } catch (error) {
-    console.error("Error cleaning product images:", error);
+async function deleteImage(url: string) {
+  const marker = "/storage/v1/object/public/" + BUCKET + "/";
+  const path = url.split(marker)[1];
+  if (path) {
+    const storage = createStorageAdminClient().storage.from(BUCKET);
+    await removeStorageObjectOrThrow(path, (paths) => storage.remove(paths));
   }
 }
 
-function dedupeStrings(values: Array<string | null | undefined>) {
-  return Array.from(
-    new Set(values.filter((value): value is string => Boolean(value))),
+async function buildVariants(
+  formData: FormData,
+  inputs: VariantInput[],
+  productId: number,
+  uploads: string[],
+): Promise<CatalogVariantDraft[]> {
+  const drafts: CatalogVariantDraft[] = [];
+  for (let index = 0; index < inputs.length; index += 1) {
+    const variant = inputs[index];
+    const added: string[] = [];
+    const variantFiles = readVariantImageFiles(
+      formData,
+      index,
+      variant.imageCount ?? 0,
+    );
+    for (const file of variantFiles) {
+        const path = randomStoragePath(
+          "products/" + productId + "/variants/" + normalizeColor(variant.color),
+          file,
+        );
+        const url = await uploadImage(file, path);
+        if (!url) {
+          throw new Error(
+            "Error uploading image for variant " + variant.color,
+          );
+        }
+        added.push(url);
+        uploads.push(url);
+    }
+    const images = mergeVariantImageUrls(
+      variant.id ? (variant.existingImages ?? []) : [],
+      added,
+      index,
+    );
+    if (!images.length) {
+      throw new Error("Variant " + variant.color + " must include an image");
+    }
+    drafts.push({
+      id: variant.id,
+      color: variant.color,
+      sizes: variant.sizes,
+      images,
+    });
+  }
+  return drafts;
+}
+
+const identityStatus = (error: unknown) =>
+  error instanceof IdentityError ? identityErrorHttpStatus(error) : null;
+const validation = (error: z.ZodError) =>
+  NextResponse.json(
+    { error: "Invalid product payload", errors: error.flatten().fieldErrors },
+    { status: 400 },
+  );
+const domainError = (error: CatalogSyncError, retryable?: boolean) =>
+  NextResponse.json(
+    { error: error.message, code: error.code, retryable },
+    {
+      status:
+        error.code === "not_found"
+          ? 404
+          : error.code === "conflict"
+            ? 409
+            : 400,
+    },
+  );
+
+function queued(operationId: string, state: string, message: string) {
+  return NextResponse.json(
+    {
+      success: true,
+      accepted: true,
+      message,
+      operationId,
+      syncState: state,
+      retryable: true,
+    },
+    { status: 202 },
   );
 }
 
-async function cleanupExternalResources({
-  imageUrls = [],
-  archivePriceIds = [],
-  deactivatePriceIds = [],
-}: {
-  imageUrls?: string[];
-  archivePriceIds?: string[];
-  deactivatePriceIds?: string[];
+function pending(result: {
+  operationId: string;
+  state: string;
+  outcome: string;
 }) {
-  const tasks: Promise<void>[] = [];
-
-  for (const imageUrl of dedupeStrings(imageUrls)) {
-    tasks.push(
-      deleteImageByUrl(imageUrl).catch((error) => {
-        console.error("Error deleting image during cleanup:", error);
-      }),
+  if (result.outcome === "needs_attention") {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Catalog mutation requires attention",
+        operationId: result.operationId,
+        syncState: result.state,
+        retryable: false,
+      },
+      { status: 409 },
     );
   }
-
-  for (const priceId of dedupeStrings(archivePriceIds)) {
-    tasks.push(
-      archiveStripeProduct(priceId).then((archived) => {
-        if (!archived) {
-          console.error(`Could not archive Stripe product for price ${priceId}`);
-        }
-      }),
-    );
-  }
-
-  for (const priceId of dedupeStrings(deactivatePriceIds)) {
-    tasks.push(
-      deactivateStripePrice(priceId).then((deactivated) => {
-        if (!deactivated) {
-          console.error(`Could not deactivate Stripe price ${priceId}`);
-        }
-      }),
-    );
-  }
-
-  await Promise.all(tasks);
+  return queued(
+    result.operationId,
+    result.state,
+    "Catalog mutation is being synchronized",
+  );
 }
 
-async function safeRevalidateProducts(productId?: number) {
+async function postAuthorized(request: NextRequest, principal: UserPrincipal) {
+  const manager = createCatalogSyncManager(principal);
+  let durable: { operationId: string; state: string } | null = null;
+  let preparationWorkerId: string | null = null;
   try {
-    await revalidateProducts(productId);
-  } catch (error) {
-    console.error("Error revalidating products:", error);
-  }
-}
-
-async function buildVariants({
-  formData,
-  variantsData,
-  productId,
-  productName,
-  description,
-  price,
-  category,
-  tracker,
-}: {
-  formData: FormData;
-  variantsData: VariantFormInput[];
-  productId: number;
-  productName: string;
-  description: string;
-  price: number;
-  category: z.infer<typeof ProductCategoryZod>;
-  tracker: BuildVariantsTracker;
-}): Promise<ProcessedVariant[]> {
-  return Promise.all(
-    variantsData.map(async (variant, idx) => {
-      const existingImages = variant.existingImages ?? [];
-      const newImages: string[] = [];
-      const colorPath = normalizeColorPath(variant.color);
-
-      for (let i = 0; i < (variant.imageCount ?? 0); i++) {
-        const file = formData.get(`variant_${idx}_image_${i}`);
-        if (file instanceof File && file.size > 0) {
-          const url = await uploadImage(
-            file,
-            `products/${productId}/variants/${colorPath}`,
-          );
-          if (!url) {
-            throw new Error(
-              `Error uploading image ${i + 1} for variant ${variant.color}`,
-            );
-          }
-          newImages.push(url);
-          tracker.uploadedImageUrls.push(url);
-        }
-      }
-
-      const images = variant.id ? [...existingImages, ...newImages] : newImages;
-
-      if (images.length === 0) {
-        throw new Error(`Variant ${variant.color} must include at least one image`);
-      }
-
-      let stripeId = variant.stripe_id;
-      if (variant.id && stripeId) {
-        const updatedStripe = await updateStripeProduct(stripeId, {
-          productName,
-          variantColor: variant.color,
-          description,
-          price,
-          images,
-          metadata: {
-            product_id: productId.toString(),
-            category,
-          },
-        });
-
-        if (!updatedStripe) {
-          throw new Error(`Error updating Stripe product for variant ${variant.color}`);
-        }
-
-        stripeId = updatedStripe.priceId;
-
-        if (updatedStripe.replacedPriceId) {
-          tracker.replacementStripePriceIds.push(updatedStripe.priceId);
-          tracker.previousStripePriceIdsToDeactivate.push(
-            updatedStripe.replacedPriceId,
-          );
-        }
-      } else if (!stripeId || stripeId.trim() === "") {
-        const stripeResult = await createStripeProductForVariant({
-          productName,
-          variantColor: variant.color,
-          description,
-          price,
-          images,
-          metadata: {
-            product_id: productId.toString(),
-            category,
-          },
-        });
-        stripeId = stripeResult.priceId;
-        tracker.newVariantStripePriceIds.push(stripeResult.priceId);
-      }
-
-      return {
+    const form = await request.formData();
+    const product = productFormSchema.parse({
+      name: form.get("name"),
+      description: form.get("description"),
+      price: form.get("price"),
+      category: form.get("category"),
+    });
+    const commandId = commandIdSchema.parse(form.get("commandId"));
+    const mainImage = form.get("mainImage");
+    if (!(mainImage instanceof File) || !mainImage.size) {
+      throw new CatalogSyncError("invalid_target", "Main image is required");
+    }
+    const variantsInput = parseVariants(form.get("variants"));
+    const planned = await planCatalogCreateCommand({
+      commandId,
+      product,
+      mainImage,
+      variants: variantsInput.map((variant, variantIndex) => ({
         id: variant.id,
-        stripeId,
         color: variant.color,
         sizes: variant.sizes,
-        images,
-      };
-    }),
-  );
-}
-
-export async function POST(request: NextRequest) {
-  let createdProductId: number | null = null;
-  const tracker: BuildVariantsTracker = {
-    uploadedImageUrls: [],
-    newVariantStripePriceIds: [],
-    replacementStripePriceIds: [],
-    previousStripePriceIdsToDeactivate: [],
-  };
-
-  try {
-    const user = await verifyAdmin(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const formData = await request.formData();
-    const productData = productFormSchema.parse({
-      name: formData.get("name"),
-      description: formData.get("description"),
-      price: formData.get("price"),
-      category: formData.get("category"),
+        files: readVariantImageFiles(
+          form,
+          variantIndex,
+          variant.imageCount ?? 0,
+        ),
+      })),
+      publicUrlForPath: publicImageUrl,
     });
-    const variantsData = parseVariantsData(formData.get("variants"));
-    const mainImageEntry = formData.get("mainImage");
-
-    if (!(mainImageEntry instanceof File) || mainImageEntry.size === 0) {
-      return NextResponse.json(
-        { error: "Main image is required" },
-        { status: 400 },
-      );
-    }
-
-    const product = await productsRepository.create({
-      ...productData,
-      img: "",
+    let operation = await manager.prepareCreate({
+      operationId: commandId,
+      requestHash: planned.requestHash,
+      product: planned.product,
+      variants: planned.variants,
+      uploadedImageUrls: planned.uploads.map((upload) => upload.url),
     });
+    durable = { operationId: operation.id, state: operation.state };
 
-    if (!product) {
+    if (operation.state === "preparing") {
+      preparationWorkerId = randomUUID();
+      const claimed = await manager.claimPreparedCreate(
+        operation.id,
+        preparationWorkerId,
+      );
+      if (!claimed) {
+        return queued(
+          operation.id,
+          operation.state,
+          "Catalog creation is already uploading in another request",
+        );
+      }
+      operation = claimed;
+      durable = { operationId: operation.id, state: operation.state };
+      if (
+        operation.state === "preparing" &&
+        operation.target.kind === "preparing"
+      ) {
+        const completedImages = new Set(
+          operation.target.completedImageUrls ?? [],
+        );
+        for (const upload of planned.uploads) {
+          if (completedImages.has(upload.url)) continue;
+          const url = await uploadImage(upload.file, upload.path, true);
+          if (!url) {
+            throw new Error("Error uploading catalog image");
+          }
+          try {
+            operation = await manager.recordPreparedUpload(
+              operation.id,
+              url,
+              preparationWorkerId,
+            );
+            completedImages.add(url);
+          } catch (recordError) {
+            const current = await manager
+              .getOperation(operation.id)
+              .catch(() => null);
+            if (shouldCompensateRejectedPreparedUpload(current?.state)) {
+              try {
+                await deleteImage(url);
+              } catch (cleanupError) {
+                try {
+                  await manager.recordPreparedCleanupFailure(
+                    operation.id,
+                    cleanupError,
+                  );
+                } catch (recordCleanupError) {
+                  throw new AggregateError(
+                    [recordError, cleanupError, recordCleanupError],
+                    "Catalog upload cleanup failed and could not be recorded",
+                  );
+                }
+                throw new AggregateError(
+                  [recordError, cleanupError],
+                  "Catalog upload cleanup failed and was scheduled for retry",
+                );
+              }
+            }
+            throw recordError;
+          }
+        }
+        operation = await manager.activatePreparedCreate(
+          operation.id,
+          preparationWorkerId,
+        );
+      } else {
+        preparationWorkerId = null;
+      }
+      durable = { operationId: operation.id, state: operation.state };
+    }
+
+    if (operation.state === "cancelled") {
       return NextResponse.json(
-        { error: "Error creating product" },
-        { status: 500 },
+        {
+          success: false,
+          error: "Catalog creation was cancelled after upload recovery",
+          operationId: operation.id,
+          syncState: operation.state,
+          retryable: false,
+        },
+        { status: 409 },
       );
     }
 
-    createdProductId = product.id;
-
-    const mainImageUrl = await uploadImage(mainImageEntry, `products/${product.id}`);
-    if (!mainImageUrl) {
-      return NextResponse.json(
-        { error: "Error uploading main image" },
-        { status: 500 },
-      );
+    if (operation.state === "succeeded") {
+      await revalidateProducts(operation.productId);
+      return NextResponse.json({
+        success: true,
+        message: "Product created successfully",
+        data: await manager.findByIdIncludingArchived(operation.productId),
+        operationId: operation.id,
+      });
     }
 
-    const variants = await buildVariants({
-      formData,
-      variantsData,
-      productId: product.id,
-      productName: productData.name,
-      description: productData.description,
-      price: productData.price,
-      category: productData.category,
-      tracker,
-    });
-
-    const productWithVariants = await productsRepository.updateWithVariants(
-      product.id,
-      {
-        ...productData,
-        img: mainImageUrl,
-      },
-      variants,
-    );
-
-    if (!productWithVariants) {
-      return NextResponse.json(
-        { error: "Error creating product with variants" },
-        { status: 500 },
-      );
-    }
-
-    createdProductId = null;
-    await safeRevalidateProducts(product.id);
-
+    const sync = await manager.processOperation(operation.id);
+    durable = { operationId: sync.operationId, state: sync.state };
+    if (sync.outcome !== "succeeded") return pending(sync);
+    await revalidateProducts(operation.productId);
     return NextResponse.json({
       success: true,
       message: "Product created successfully",
-      data: productWithVariants,
+      data: await manager.findByIdIncludingArchived(operation.productId),
+      operationId: operation.id,
     });
   } catch (error) {
-    if (createdProductId) {
-      await cleanupProductImages(createdProductId);
-      await productsRepository.delete(createdProductId);
+    if (durable?.state === "preparing" && preparationWorkerId) {
+      try {
+        await manager.releasePreparedCreate(
+          durable.operationId,
+          preparationWorkerId,
+          error,
+        );
+      } catch (releaseError) {
+        console.error("Error releasing catalog preparation lease", releaseError);
+      }
     }
-
-    await cleanupExternalResources({
-      archivePriceIds: tracker.newVariantStripePriceIds,
-      deactivatePriceIds: tracker.replacementStripePriceIds,
-    });
-
-    if (error instanceof z.ZodError) {
-      return validationErrorResponse(error, "Invalid product payload");
+    if (error instanceof z.ZodError) return validation(error);
+    if (
+      error instanceof CatalogSyncError &&
+      durable?.state === "preparing" &&
+      error.code === "conflict"
+    ) {
+      return queued(
+        durable.operationId,
+        durable.state,
+        "Catalog creation is already being recovered. Retry the same command shortly.",
+      );
     }
-
-    console.error("Error creating product:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    if (error instanceof CatalogSyncError) {
+      return domainError(error, error.code === "conflict" ? false : undefined);
+    }
+    console.error("Error creating product", error);
+    if (durable && durable.state !== "succeeded") {
+      return queued(
+        durable.operationId,
+        durable.state,
+        "Catalog creation has been recorded. Submit the same form again to continue synchronization.",
+      );
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest) {
-  const tracker: BuildVariantsTracker = {
-    uploadedImageUrls: [],
-    newVariantStripePriceIds: [],
-    replacementStripePriceIds: [],
-    previousStripePriceIdsToDeactivate: [],
-  };
-
+async function putAuthorized(request: NextRequest, principal: UserPrincipal) {
+  const manager = createCatalogSyncManager(principal);
+  const uploads: string[] = [];
+  let durable: { operationId: string; state: string } | null = null;
   try {
-    const user = await verifyAdmin(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const formData = await request.formData();
-    const id = productIdSchema.parse(formData.get("id"));
-    const productData = productFormSchema.parse({
-      name: formData.get("name"),
-      description: formData.get("description"),
-      price: formData.get("price"),
-      category: formData.get("category"),
+    const form = await request.formData();
+    const id = productIdSchema.parse(form.get("id"));
+    const restoreArchived = z
+      .literal("true")
+      .optional()
+      .transform((value) => value === "true")
+      .parse(form.get("restoreArchived") ?? undefined);
+    const product = productFormSchema.parse({
+      name: form.get("name"),
+      description: form.get("description"),
+      price: form.get("price"),
+      category: form.get("category"),
     });
-    const variantsData = parseVariantsData(formData.get("variants"));
-    const mainImageEntry = formData.get("mainImage");
-    const existingMainImageEntry = formData.get("existingMainImage");
-    const existingMainImage =
-      typeof existingMainImageEntry === "string" && existingMainImageEntry
-        ? existingMainImageEntry
-        : null;
-
-    const existingProduct = await productsRepository.findById(id);
-    if (!existingProduct) {
+    const existing = restoreArchived
+      ? await manager.findArchivedByIdForRestoration(id)
+      : await manager.findByIdIncludingArchived(id);
+    if (!existing) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
-
-    const nextVariantIds = new Set(
-      variantsData.flatMap((variant) => (variant.id ? [variant.id] : [])),
-    );
-    const removedVariants = existingProduct.variants.filter(
-      (variant) => !nextVariantIds.has(variant.id),
-    );
-    const removedVariantStripeIds = removedVariants.map((variant) => variant.stripeId);
-    const removedImageUrls = dedupeStrings([
-      ...removedVariants.flatMap((variant) => variant.images),
-      ...variantsData.flatMap((variant) => variant.removedImages ?? []),
-    ]);
-
-    let mainImageUrl = existingMainImage ?? existingProduct.img;
-    let previousMainImageUrl: string | null = null;
-
-    if (mainImageEntry instanceof File && mainImageEntry.size > 0) {
-      const uploadedUrl = await uploadImage(mainImageEntry, `products/${id}`);
-      if (!uploadedUrl) {
-        return NextResponse.json(
-          { error: "Error uploading main image" },
-          { status: 500 },
-        );
-      }
-
-      tracker.uploadedImageUrls.push(uploadedUrl);
-      previousMainImageUrl = existingProduct.img || null;
-      mainImageUrl = uploadedUrl;
-    }
-
-    const variants = await buildVariants({
-      formData,
-      variantsData,
-      productId: id,
-      productName: productData.name,
-      description: productData.description,
-      price: productData.price,
-      category: productData.category,
-      tracker,
-    });
-
-    const updatedProduct = await productsRepository.updateWithVariants(
-      id,
-      {
-        ...productData,
-        img: mainImageUrl,
-      },
-      variants,
-    );
-
-    if (!updatedProduct) {
+    if (existing.archivedAt && !restoreArchived) {
       return NextResponse.json(
-        { error: "Error updating product" },
-        { status: 500 },
+        {
+          error: "Product was archived. Reopen it using the explicit restore action.",
+          code: "restore_required",
+          retryable: false,
+        },
+        { status: 409 },
       );
     }
-
-    await safeRevalidateProducts(id);
-    await cleanupExternalResources({
-      imageUrls: [
-        ...removedImageUrls,
-        ...(previousMainImageUrl ? [previousMainImageUrl] : []),
-      ],
-      archivePriceIds: removedVariantStripeIds,
-      deactivatePriceIds: tracker.previousStripePriceIdsToDeactivate,
+    let img =
+      typeof form.get("existingMainImage") === "string" &&
+      form.get("existingMainImage")
+        ? String(form.get("existingMainImage"))
+        : existing.img;
+    const main = form.get("mainImage");
+    if (main instanceof File && main.size) {
+      const uploaded = await uploadImage(
+        main,
+        randomStoragePath("products/" + id, main),
+      );
+      if (!uploaded) throw new Error("Error uploading main image");
+      img = uploaded;
+      uploads.push(uploaded);
+    }
+    const variants = await buildVariants(
+      form,
+      parseVariants(form.get("variants")),
+      id,
+      uploads,
+    );
+    const operation = await manager.enqueueUpsert({
+      productId: id,
+      product: { ...product, img },
+      variants,
+      uploadedImageUrls: uploads,
+      createdShell: false,
+      restoreArchived,
     });
-
+    durable = { operationId: operation.id, state: operation.state };
+    await revalidateProducts(id);
+    const sync = await manager.processOperation(operation.id);
+    durable = { operationId: sync.operationId, state: sync.state };
+    if (sync.outcome !== "succeeded") return pending(sync);
+    await revalidateProducts(id);
     return NextResponse.json({
       success: true,
       message: "Product updated successfully",
-      data: updatedProduct,
+      data: await manager.findByIdIncludingArchived(id),
+      operationId: operation.id,
     });
   } catch (error) {
-    await cleanupExternalResources({
-      imageUrls: tracker.uploadedImageUrls,
-      archivePriceIds: tracker.newVariantStripePriceIds,
-      deactivatePriceIds: tracker.replacementStripePriceIds,
-    });
-
-    if (error instanceof z.ZodError) {
-      return validationErrorResponse(error, "Invalid product payload");
+    if (!durable) {
+      try {
+        await compensateUploadedCatalogImages({
+          originalError: error,
+          uploadedImageUrls: uploads,
+          deleteImage,
+        });
+      } catch (compensationError) {
+        console.error(
+          "Catalog update failed and upload compensation failed",
+          compensationError,
+        );
+        return NextResponse.json(
+          { error: "Internal server error" },
+          { status: 500 },
+        );
+      }
     }
-
-    console.error("Error updating product:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    if (error instanceof z.ZodError) return validation(error);
+    if (durable) {
+      return queued(
+        durable.operationId,
+        durable.state,
+        "Catalog update has been recorded and will continue asynchronously.",
+      );
+    }
+    if (error instanceof CatalogSyncError) return domainError(error);
+    console.error("Error updating product", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest) {
+async function deleteAuthorized(request: NextRequest, principal: UserPrincipal) {
+  let durable: { operationId: string; state: string } | null = null;
   try {
-    const user = await verifyAdmin(request);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const productId = productIdSchema.parse(request.nextUrl.searchParams.get("id"));
-    const existingProduct = await productsRepository.findById(productId);
-    if (!existingProduct) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
-    }
-
-    const deleted = await productsRepository.delete(productId);
-    if (!deleted) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
-    }
-
-    await safeRevalidateProducts(productId);
-    await cleanupProductImages(productId);
-    await cleanupExternalResources({
-      archivePriceIds: existingProduct.variants.map((variant) => variant.stripeId),
-    });
-
+    const id = productIdSchema.parse(request.nextUrl.searchParams.get("id"));
+    const manager = createCatalogSyncManager(principal);
+    const operation = await manager.enqueueArchive(id);
+    durable = { operationId: operation.id, state: operation.state };
+    await revalidateProducts(id);
+    const sync = await manager.processOperation(operation.id);
+    durable = { operationId: sync.operationId, state: sync.state };
+    if (sync.outcome !== "succeeded") return pending(sync);
+    await revalidateProducts(id);
     return NextResponse.json({
       success: true,
       message: "Product deleted successfully",
+      operationId: operation.id,
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return validationErrorResponse(error, "Invalid product id");
+    if (error instanceof z.ZodError) return validation(error);
+    if (durable) {
+      return queued(
+        durable.operationId,
+        durable.state,
+        "Catalog archive has been recorded and will continue asynchronously.",
+      );
     }
-
-    console.error("Error deleting product:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    if (error instanceof CatalogSyncError) return domainError(error);
+    console.error("Error deleting product", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export const POST = createCatalogRouteHandler(
+  requireCapabilityFromHeaders,
+  identityStatus,
+  postAuthorized,
+);
+export const PUT = createCatalogRouteHandler(
+  requireCapabilityFromHeaders,
+  identityStatus,
+  putAuthorized,
+);
+export const DELETE = createCatalogRouteHandler(
+  requireCapabilityFromHeaders,
+  identityStatus,
+  deleteAuthorized,
+);

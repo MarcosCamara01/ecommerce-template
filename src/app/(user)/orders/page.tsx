@@ -1,5 +1,5 @@
 import { getUserOrders } from "./action";
-import { getUser } from "@/lib/auth/server";
+import { getPrincipal } from "@/lib/identity";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SVGLoadingIcon } from "@/components/ui/loader";
@@ -35,7 +35,7 @@ const UserOrders = () => {
  * This streams at request time (uses headers() via getUser)
  */
 const OrdersContent = async () => {
-  const user = await getUser();
+  const user = await getPrincipal();
 
   if (!user) {
     return (

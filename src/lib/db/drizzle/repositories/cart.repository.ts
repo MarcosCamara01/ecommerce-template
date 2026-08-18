@@ -1,207 +1,266 @@
-import { eq, and } from "drizzle-orm";
-import { withRLS, type RLSClient } from "../connection";
-import { cartItems, productsVariants, productsItems } from "../schema";
+import "server-only";
+
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+
+import { remainingCartQuantity } from "@/lib/cart/remaining-quantity";
+
+import { db, type DatabaseTransaction } from "../connection";
+import { cartItems, productsItems, productsVariants } from "../schema";
 import type {
   CartItem,
+  AddToCartInput,
   InsertCartItem,
   ProductSize,
 } from "@/lib/db/drizzle/schema";
 
 export const cartRepository = {
   async findByUserId(userId: string): Promise<CartItem[]> {
-    return withRLS(userId, async (tx) => {
-      const result = await tx
-        .select()
-        .from(cartItems)
-        .where(eq(cartItems.userId, userId));
-
-      return result.map(transformCartItem);
-    });
+    const result = await db
+      .select({ cartItem: cartItems })
+      .from(cartItems)
+      .innerJoin(productsVariants, eq(cartItems.variantId, productsVariants.id))
+      .innerJoin(productsItems, eq(productsVariants.productId, productsItems.id))
+      .where(
+        and(
+          eq(cartItems.userId, userId),
+          isNull(productsVariants.archivedAt),
+          isNull(productsItems.archivedAt),
+        ),
+      );
+    return result.map((row) => transformCartItem(row.cartItem));
   },
 
   async findByUserIdWithDetails(userId: string) {
-    return withRLS(userId, async (tx) => {
-      const result = await tx
-        .select({
-          cartItem: cartItems,
-          variant: productsVariants,
-          product: productsItems,
-        })
-        .from(cartItems)
-        .innerJoin(
-          productsVariants,
-          eq(cartItems.variantId, productsVariants.id),
-        )
-        .innerJoin(
-          productsItems,
-          eq(productsVariants.productId, productsItems.id),
-        )
-        .where(eq(cartItems.userId, userId));
-
-      return result.map((row) => ({
-        ...transformCartItem(row.cartItem),
-        variant: {
-          id: row.variant.id,
-          productId: row.variant.productId,
-          stripeId: row.variant.stripeId,
-          color: row.variant.color,
-          sizes: row.variant.sizes,
-          images: row.variant.images,
-          createdAt:
-            row.variant.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt:
-            row.variant.updatedAt?.toISOString() ?? new Date().toISOString(),
-        },
-        product: {
-          id: row.product.id,
-          name: row.product.name,
-          description: row.product.description,
-          price: Number(row.product.price),
-          category: row.product.category,
-          img: row.product.img,
-          createdAt:
-            row.product.createdAt?.toISOString() ?? new Date().toISOString(),
-          updatedAt:
-            row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
-        },
-      }));
-    });
-  },
-
-  async findOne(
-    userId: string,
-    variantId: number,
-    size: ProductSize,
-  ): Promise<CartItem | null> {
-    return withRLS(userId, async (tx) =>
-      this.findOneInternal(tx, userId, variantId, size),
-    );
-  },
-
-  async upsert(data: InsertCartItem): Promise<CartItem | null> {
-    return withRLS(data.userId, async (tx) => {
-      const existing = await this.findOneInternal(
-        tx,
-        data.userId,
-        data.variantId,
-        data.size as ProductSize,
+    const result = await db
+      .select({ cartItem: cartItems, variant: productsVariants, product: productsItems })
+      .from(cartItems)
+      .innerJoin(productsVariants, eq(cartItems.variantId, productsVariants.id))
+      .innerJoin(productsItems, eq(productsVariants.productId, productsItems.id))
+      .where(
+        and(
+          eq(cartItems.userId, userId),
+          isNull(productsVariants.archivedAt),
+          isNull(productsItems.archivedAt),
+        ),
       );
 
-      if (existing) {
-        return this.updateQuantityInternal(
-          tx,
-          data.userId,
-          existing.id,
-          existing.quantity + data.quantity,
-        );
-      }
-
-      const [result] = await tx
-        .insert(cartItems)
-        .values({
-          userId: data.userId,
-          variantId: data.variantId,
-          quantity: data.quantity,
-          size: data.size,
-          stripeId: data.stripeId,
-        })
-        .returning();
-
-      return result ? transformCartItem(result) : null;
-    });
+    return result.map(transformCartWithDetails);
   },
 
-  async create(data: InsertCartItem): Promise<CartItem | null> {
-    return withRLS(data.userId, async (tx) => {
-      const [result] = await tx
-        .insert(cartItems)
-        .values({
-          userId: data.userId,
-          variantId: data.variantId,
-          quantity: data.quantity,
-          size: data.size,
-          stripeId: data.stripeId,
-        })
-        .returning();
-
-      return result ? transformCartItem(result) : null;
-    });
-  },
-
-  async updateQuantity(
-    userId: string,
-    id: number,
-    quantity: number,
-  ): Promise<CartItem | null> {
-    return withRLS(userId, async (tx) =>
-      this.updateQuantityInternal(tx, userId, id, quantity),
-    );
-  },
-
-  async delete(userId: string, id: number): Promise<boolean> {
-    return withRLS(userId, async (tx) => {
-      const result = await tx
-        .delete(cartItems)
-        .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
-        .returning({ id: cartItems.id });
-
-      return result.length > 0;
-    });
-  },
-
-  async clearByUserId(userId: string): Promise<boolean> {
-    return withRLS(userId, async (tx) => {
-      await tx.delete(cartItems).where(eq(cartItems.userId, userId));
-      return true;
-    });
-  },
-
-  // Internal methods (no RLS wrapper, for use within other methods)
-  async findOneInternal(
-    tx: RLSClient,
-    userId: string,
-    variantId: number,
-    size: ProductSize,
-  ): Promise<CartItem | null> {
-    const [result] = await tx
-      .select()
+  async findCheckoutStateByUserId(userId: string) {
+    const result = await db
+      .select({ cartItem: cartItems, variant: productsVariants, product: productsItems })
       .from(cartItems)
+      .leftJoin(productsVariants, eq(cartItems.variantId, productsVariants.id))
+      .leftJoin(productsItems, eq(productsVariants.productId, productsItems.id))
+      .where(eq(cartItems.userId, userId));
+
+    return result.map((row) => {
+      const active = Boolean(
+        row.variant &&
+          row.product &&
+          row.variant.archivedAt === null &&
+          row.product.archivedAt === null,
+      );
+      return {
+        cartItemId: row.cartItem.id,
+        active,
+        item:
+          active && row.variant && row.product
+            ? transformCartWithDetails({
+                cartItem: row.cartItem,
+                variant: row.variant,
+                product: row.product,
+              })
+            : null,
+      };
+    });
+  },
+
+  async findOne(userId: string, variantId: number, size: ProductSize) {
+    const [result] = await db
+      .select({ cartItem: cartItems })
+      .from(cartItems)
+      .innerJoin(productsVariants, eq(cartItems.variantId, productsVariants.id))
+      .innerJoin(productsItems, eq(productsVariants.productId, productsItems.id))
       .where(
         and(
           eq(cartItems.userId, userId),
           eq(cartItems.variantId, variantId),
           eq(cartItems.size, size),
+          isNull(productsVariants.archivedAt),
+          isNull(productsItems.archivedAt),
         ),
       );
-
-    return result ? transformCartItem(result) : null;
+    return result ? transformCartItem(result.cartItem) : null;
   },
 
-  async updateQuantityInternal(
-    tx: RLSClient,
-    userId: string,
-    id: number,
-    quantity: number,
+  async upsertAvailable(
+    data: AddToCartInput & { userId: string },
   ): Promise<CartItem | null> {
-    const [result] = await tx
-      .update(cartItems)
-      .set({ quantity })
-      .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
-      .returning();
+    return db.transaction(async (tx) => {
+      const [variantIdentity] = await tx
+        .select({ productId: productsVariants.productId })
+        .from(productsVariants)
+        .where(eq(productsVariants.id, data.variantId));
+      if (!variantIdentity) return null;
 
-    return result ? transformCartItem(result) : null;
+      const [product] = await tx
+        .select({ id: productsItems.id })
+        .from(productsItems)
+        .where(
+          and(
+            eq(productsItems.id, variantIdentity.productId),
+            isNull(productsItems.archivedAt),
+          ),
+        )
+        .for("share");
+      if (!product) return null;
+
+      const [activeVariant] = await tx
+        .select({
+          stripeId: productsVariants.stripeId,
+          sizes: productsVariants.sizes,
+        })
+        .from(productsVariants)
+        .where(
+          and(
+            eq(productsVariants.id, data.variantId),
+            eq(productsVariants.productId, product.id),
+            isNull(productsVariants.archivedAt),
+          ),
+        );
+      if (!activeVariant || !activeVariant.sizes.includes(data.size)) return null;
+      return upsertInternal(tx, { ...data, stripeId: activeVariant.stripeId });
+    });
   },
+
+  async upsert(data: InsertCartItem): Promise<CartItem | null> {
+    return db.transaction((tx) => upsertInternal(tx, data));
+  },
+
+  async updateQuantity(userId: string, id: number, quantity: number) {
+    return updateQuantityInternal(db, userId, id, quantity);
+  },
+
+  async delete(userId: string, id: number): Promise<boolean> {
+    const result = await db
+      .delete(cartItems)
+      .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
+      .returning({ id: cartItems.id });
+    return result.length > 0;
+  },
+
+  async clearByUserId(userId: string): Promise<void> {
+    await db.delete(cartItems).where(eq(cartItems.userId, userId));
+  },
+
 };
+
+export async function consumePurchasedInTransaction(
+  tx: DatabaseTransaction,
+  userId: string,
+  purchases: readonly { cartItemId: number; quantity: number }[],
+): Promise<void> {
+  if (purchases.length === 0) return;
+  const rows = await tx
+    .select({ id: cartItems.id, quantity: cartItems.quantity })
+    .from(cartItems)
+    .where(
+      and(
+        eq(cartItems.userId, userId),
+        inArray(cartItems.id, purchases.map((item) => item.cartItemId)),
+      ),
+    )
+    .for("update");
+  const currentById = new Map(rows.map((row) => [row.id, row.quantity]));
+
+  for (const purchase of purchases) {
+    const currentQuantity = currentById.get(purchase.cartItemId);
+    if (currentQuantity === undefined) continue;
+    const remaining = remainingCartQuantity(currentQuantity, purchase.quantity);
+    if (remaining === null) {
+      await tx
+        .delete(cartItems)
+        .where(
+          and(
+            eq(cartItems.userId, userId),
+            eq(cartItems.id, purchase.cartItemId),
+          ),
+        );
+    } else {
+      await tx
+        .update(cartItems)
+        .set({ quantity: remaining, updatedAt: new Date() })
+        .where(
+          and(
+            eq(cartItems.userId, userId),
+            eq(cartItems.id, purchase.cartItemId),
+          ),
+        );
+    }
+  }
+}
+
+async function upsertInternal(
+  tx: DatabaseTransaction,
+  data: InsertCartItem,
+): Promise<CartItem | null> {
+  const [result] = await tx
+    .insert(cartItems)
+    .values(data)
+    .onConflictDoUpdate({
+      target: [cartItems.userId, cartItems.variantId, cartItems.size],
+      set: {
+        quantity: sql`${cartItems.quantity} + ${data.quantity}`,
+        updatedAt: new Date(),
+      },
+    })
+    .returning();
+  return result ? transformCartItem(result) : null;
+}
+
+type QueryExecutor = Pick<DatabaseTransaction, "update">;
+
+async function updateQuantityInternal(
+  executor: QueryExecutor,
+  userId: string,
+  id: number,
+  quantity: number,
+): Promise<CartItem | null> {
+  const [result] = await executor
+    .update(cartItems)
+    .set({ quantity, updatedAt: new Date() })
+    .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
+    .returning();
+  return result ? transformCartItem(result) : null;
+}
 
 function transformCartItem(row: typeof cartItems.$inferSelect): CartItem {
   return {
-    id: row.id,
-    userId: row.userId,
-    variantId: row.variantId,
-    quantity: row.quantity,
-    size: row.size,
-    stripeId: row.stripeId,
+    ...row,
     createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
     updatedAt: row.updatedAt?.toISOString() ?? new Date().toISOString(),
+  };
+}
+
+function transformCartWithDetails(row: {
+  cartItem: typeof cartItems.$inferSelect;
+  variant: typeof productsVariants.$inferSelect;
+  product: typeof productsItems.$inferSelect;
+}) {
+  return {
+    ...transformCartItem(row.cartItem),
+    variant: {
+      ...row.variant,
+      createdAt: row.variant.createdAt?.toISOString() ?? new Date().toISOString(),
+      updatedAt: row.variant.updatedAt?.toISOString() ?? new Date().toISOString(),
+    },
+    product: {
+      ...row.product,
+      price: Number(row.product.price),
+      createdAt: row.product.createdAt?.toISOString() ?? new Date().toISOString(),
+      updatedAt: row.product.updatedAt?.toISOString() ?? new Date().toISOString(),
+    },
   };
 }

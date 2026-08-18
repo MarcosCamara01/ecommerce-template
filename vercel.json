@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/fulfillment",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/catalog-sync",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { CartProducts } from "@/components/cart";
 import { SVGLoadingIcon } from "@/components/ui/loader";
-import { getUser } from "@/lib/auth/server";
+import { getPrincipal } from "@/lib/identity";
 
 export async function generateMetadata() {
   return {
@@ -27,7 +27,7 @@ const CartPage = () => {
 };
 
 const CartContent = async () => {
-  const user = await getUser();
+  const user = await getPrincipal();
 
   if (!user) {
     return (

@@ -2,72 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { z } from "zod";
 
-import { stripe } from "@/lib/stripe";
-import { auth } from "@/utils/auth";
+import { IdentityError, requirePrincipalFromHeaders } from "@/lib/identity";
+import { retrieveOwnedCheckoutSession } from "@/lib/order-fulfillment/owned-checkout-session";
 
-const checkoutSessionQuerySchema = z.object({
+const querySchema = z.object({
   session_id: z.string().startsWith("cs_", "Invalid CheckoutSession ID"),
 });
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const authSession = await auth.api.getSession({ headers: req.headers });
-    if (!authSession?.user?.id) {
-      return NextResponse.json(
-        { statusCode: 401, message: "Unauthorized" },
-        { status: 401 },
-      );
-    }
-
-    const parsed = checkoutSessionQuerySchema.safeParse({
-      session_id: req.nextUrl.searchParams.get("session_id"),
+    const principal = await requirePrincipalFromHeaders(request.headers);
+    const query = querySchema.parse({
+      session_id: request.nextUrl.searchParams.get("session_id"),
     });
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          statusCode: 400,
-          message: "Invalid CheckoutSession ID",
-          details: parsed.error.flatten(),
-        },
-        { status: 400 },
-      );
-    }
-
-    const checkoutSession = await stripe.checkout.sessions.retrieve(
-      parsed.data.session_id,
-      {
-      expand: ["payment_intent"],
-      },
+    const session = await retrieveOwnedCheckoutSession(
+      principal,
+      query.session_id,
     );
-
-    if (checkoutSession.metadata?.userId !== authSession.user.id) {
-      return NextResponse.json(
-        { statusCode: 403, message: "Forbidden" },
-        { status: 403 },
-      );
+    if (!session) {
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
     }
-
-    return NextResponse.json(checkoutSession);
-  } catch (err) {
+    return NextResponse.json(session);
+  } catch (error) {
+    if (error instanceof IdentityError) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
     if (
-      err instanceof Stripe.errors.StripeError &&
-      (err.type === "StripeInvalidRequestError" ||
-        err.code === "resource_missing")
+      error instanceof Stripe.errors.StripeError &&
+      (error.type === "StripeInvalidRequestError" || error.code === "resource_missing")
     ) {
-      return NextResponse.json(
-        {
-          statusCode: 404,
-          message: err.message,
-        },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
     }
-
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ message: "Invalid session id" }, { status: 400 });
+    }
     return NextResponse.json(
-      {
-        statusCode: 500,
-        message: err instanceof Error ? err.message : "Unknown error",
-      },
+      { message: "Unable to retrieve checkout session" },
       { status: 500 },
     );
   }
