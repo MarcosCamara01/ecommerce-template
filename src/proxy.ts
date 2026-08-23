@@ -1,8 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { canonicalRequestRedirect } from "@/lib/app-origin";
 import { getPrincipalFromHeaders, hasCapability } from "@/lib/identity";
 
 export async function proxy(request: NextRequest) {
+  const canonicalRedirect = canonicalRequestRedirect(
+    request.nextUrl,
+    request.headers.get("host"),
+    request.headers.get("x-forwarded-proto")?.split(",", 1)[0] ?? null,
+  );
+  if (canonicalRedirect) return NextResponse.redirect(canonicalRedirect);
+
   const protectedRoutes = ["/orders", "/admin"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route),

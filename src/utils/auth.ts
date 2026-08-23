@@ -6,6 +6,7 @@ import { APIError } from "better-auth/api";
 import { admin } from "better-auth/plugins";
 import { sql } from "drizzle-orm";
 
+import { getCanonicalAppOrigin } from "@/lib/app-origin";
 import { db } from "@/lib/db/drizzle/connection";
 import {
   accounts,
@@ -34,15 +35,31 @@ const authDatabaseSchema = process.env.AUTH_DATABASE_LAYOUT === "public"
   ? "public"
   : "app_private";
 const authSchemaIdentifier = sql.identifier(authDatabaseSchema);
-const authBaseURL =
-  process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL;
-const authTrustedOrigins = Array.from(
-  new Set(
-    [process.env.BETTER_AUTH_URL, process.env.NEXT_PUBLIC_APP_URL].filter(
-      (origin): origin is string => Boolean(origin),
-    ),
-  ),
-);
+const authBaseURL = getCanonicalAppOrigin();
+const authTrustedOrigins = [authBaseURL];
+const googleAuthEnabled = process.env.GOOGLE_AUTH_ENABLED === "true";
+const googleAuthUiEnabled =
+  process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
+if (googleAuthEnabled !== googleAuthUiEnabled) {
+  throw new Error(
+    "GOOGLE_AUTH_ENABLED and NEXT_PUBLIC_GOOGLE_AUTH_ENABLED must match",
+  );
+}
+if (
+  googleAuthEnabled &&
+  (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET)
+) {
+  throw new Error("Enabled Google auth requires its client id and secret");
+}
+const googleSocialProvider =
+  googleAuthEnabled
+    ? {
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID!,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        },
+      }
+    : {};
 
 async function rejectUnverifiedProviderLink(userId: string) {
   const [user] = await db.execute<{ emailVerified: boolean }>(sql`
@@ -136,10 +153,5 @@ export const auth = betterAuth({
     },
   },
 
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
-  },
+  socialProviders: googleSocialProvider,
 });

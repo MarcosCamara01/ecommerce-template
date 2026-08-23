@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { safeLocalCallback } from "@/lib/auth/local-callback";
 
 export const useAuthMutation = () => {
   const router = useRouter();
@@ -10,14 +11,17 @@ export const useAuthMutation = () => {
     mutationFn: async ({
       email,
       password,
+      callbackURL,
     }: {
       email: string;
       password: string;
+      callbackURL?: string;
     }) => {
+      const destination = safeLocalCallback(callbackURL);
       const result = await authClient.signIn.email({
         email,
         password,
-        callbackURL: "/",
+        callbackURL: destination,
       });
 
       if (result.error) {
@@ -26,8 +30,8 @@ export const useAuthMutation = () => {
 
       return result;
     },
-    onSuccess: () => {
-      router.push("/");
+    onSuccess: (_, variables) => {
+      router.push(safeLocalCallback(variables.callbackURL));
       router.refresh();
     },
     onError: (error) => {
@@ -43,16 +47,19 @@ export const useAuthMutation = () => {
       email,
       password,
       name,
+      callbackURL,
     }: {
       email: string;
       password: string;
       name: string;
+      callbackURL?: string;
     }) => {
+      const destination = safeLocalCallback(callbackURL);
       const result = await authClient.signUp.email({
         email,
         password,
         name,
-        callbackURL: "/",
+        callbackURL: destination,
       });
 
       if (result.error) {
@@ -61,17 +68,21 @@ export const useAuthMutation = () => {
 
       return result;
     },
-    onSuccess: (result) => {
+    onSuccess: (result, variables) => {
+      const destination = safeLocalCallback(variables.callbackURL);
       // When email verification is required, sign-up does not open a session:
       // the account stays inert until the address is confirmed. Sending the
       // user to the home page would look like a silent no-op login.
       if (!result.data?.token) {
         toast.success("Check your email to confirm your address before signing in.");
-        router.push("/login");
+        const redirect = destination === "/"
+          ? ""
+          : `?redirect=${encodeURIComponent(destination)}`;
+        router.push(`/login${redirect}`);
         return;
       }
 
-      router.push("/");
+      router.push(destination);
       router.refresh();
     },
     onError: (error) => {
@@ -81,14 +92,15 @@ export const useAuthMutation = () => {
   });
 
   const signInWithGoogle = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ callbackURL }: { callbackURL?: string }) => {
+      const destination = safeLocalCallback(callbackURL);
       return await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: destination,
       });
     },
-    onSuccess: () => {
-      router.push("/");
+    onSuccess: (_, variables) => {
+      router.push(safeLocalCallback(variables.callbackURL));
       router.refresh();
     },
     onError: (error) => {
