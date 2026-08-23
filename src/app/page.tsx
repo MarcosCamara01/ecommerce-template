@@ -32,8 +32,8 @@ const AllProducts = async () => {
 
   return (
     <GridProducts>
-      {products.map((product) => (
-        <ProductItem key={product.id} product={product} />
+      {products.map((product, index) => (
+        <ProductItem key={product.id} product={product} priority={index === 0} />
       ))}
     </GridProducts>
   );

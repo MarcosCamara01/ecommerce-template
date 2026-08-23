@@ -89,7 +89,7 @@ export default function EditProfile({ manager }: { manager: Manager }) {
               />
             </div>
             <div className="grid items-center grid-cols-4 gap-4">
-              <Label htmlFor="Email" className="text-right">
+              <Label htmlFor="email" className="text-right">
                 Email
               </Label>
               <Input

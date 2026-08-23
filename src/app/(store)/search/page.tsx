@@ -18,8 +18,8 @@ async function SearchResults({ searchParams }: SearchProps) {
     <section className="pt-14">
       {filteredProducts.length > 0 ? (
         <GridProducts>
-          {filteredProducts.map((product) => (
-            <ProductItem key={product.id} product={product} />
+          {filteredProducts.map((product, index) => (
+            <ProductItem key={product.id} product={product} priority={index === 0} />
           ))}
         </GridProducts>
       ) : (

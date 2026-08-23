@@ -6,7 +6,7 @@ import {
   SingleProductSkeleton,
   SuspenseRandomProducts,
 } from "@/components/product";
-import { getAllProducts, getProduct } from "@/app/actions";
+import { getProduct } from "@/app/actions";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
@@ -14,19 +14,6 @@ type PageProps = {
   params: Promise<{ id: string; category: string }>;
   searchParams: Promise<{ variant: string | undefined }>;
 };
-
-export async function generateStaticParams() {
-  const products = await getAllProducts();
-
-  if (products.length === 0) {
-    return [{ category: "__empty__", id: "0" }];
-  }
-
-  return products.map((product) => ({
-    category: product.category,
-    id: String(product.id),
-  }));
-}
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;

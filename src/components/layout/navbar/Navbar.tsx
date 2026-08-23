@@ -11,6 +11,7 @@ import {
   SheetTrigger,
   SheetClose,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import { WishlistLink } from "./WishlistLink";
 import { CartLink } from "./CartLink";
@@ -47,8 +48,12 @@ export const Navbar = () => {
         {/* Mobile Menu Trigger */}
         <Sheet>
           <SheetTrigger asChild>
-            <button className="flex px-4 py-2 lg:hidden hover:opacity-75 transition-opacity">
-              <FiMenu size={24} />
+            <button
+              type="button"
+              aria-label="Open navigation menu"
+              className="flex px-4 py-2 lg:hidden hover:opacity-75 transition-opacity"
+            >
+              <FiMenu size={24} aria-hidden="true" />
             </button>
           </SheetTrigger>
 
@@ -57,6 +62,9 @@ export const Navbar = () => {
               {/* Header */}
               <div className="px-6 py-4 border-b border-border-primary">
                 <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Browse product collections and account actions.
+                </SheetDescription>
               </div>
 
               {/* Navigation Links */}
