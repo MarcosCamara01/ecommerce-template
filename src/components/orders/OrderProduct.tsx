@@ -16,6 +16,10 @@ interface OrderProductProps {
   quantity: OrderProductWithDetails["quantity"];
   unitAmount: OrderProductWithDetails["unitAmount"];
   currency: OrderProductWithDetails["currency"];
+  productName: OrderProductWithDetails["productName"];
+  variantColor: OrderProductWithDetails["variantColor"];
+  imageUrl: OrderProductWithDetails["imageUrl"];
+  priority?: boolean;
 }
 
 export const OrderProduct = async ({
@@ -24,40 +28,46 @@ export const OrderProduct = async ({
   quantity,
   unitAmount,
   currency,
+  productName,
+  variantColor,
+  imageUrl,
+  priority = false,
 }: OrderProductProps) => {
-  const { name, category, id, variants } = product;
+  const { category, id, variants } = product;
   const variant = variants[0];
   const productLink = orderProductLink({
     productId: id,
     category,
     productArchivedAt: product.archivedAt,
-    variantColor: variant.color,
+    variantColor,
     variantArchivedAt: variant.archivedAt,
   });
   const isArchived = productLink === null;
-  const blurDataURL = await getBlurDataURL(variant.images[0]);
+  const blurDataURL = await getBlurDataURL(imageUrl);
 
   return (
     <div className="flex flex-col justify-between overflow-hidden rounded-md border border-solid border-border-primary">
       {isArchived ? (
         <div>
           <ProductImage
-            image={variant.images[0]}
+            image={imageUrl}
             blurDataURL={blurDataURL}
-            name={name}
+            name={productName}
             width={280}
             height={425}
+            priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
           />
         </div>
       ) : (
         <Link href={productLink!} className="transition-all hover:scale-105">
         <ProductImage
-          image={variant.images[0]}
+          image={imageUrl}
           blurDataURL={blurDataURL}
-          name={name}
+          name={productName}
           width={280}
           height={425}
+          priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
         />
         </Link>
@@ -66,12 +76,12 @@ export const OrderProduct = async ({
         <div className="flex w-full justify-between">
           {isArchived ? (
             <div className="w-10/12">
-              <h2 className="truncate text-sm font-semibold">{name}</h2>
+              <h2 className="truncate text-sm font-semibold">{productName}</h2>
               <span className="text-xs text-color-tertiary">Archived item</span>
             </div>
           ) : (
             <Link href={productLink!} className="w-10/12">
-            <h2 className="truncate text-sm font-semibold">{name}</h2>
+            <h2 className="truncate text-sm font-semibold">{productName}</h2>
             </Link>
           )}
         </div>
@@ -82,7 +92,7 @@ export const OrderProduct = async ({
 
         <div className="flex sm:hidden">
           <div className="border-r pr-2.5 text-sm">{size}</div>
-          <div className="pl-2.5 text-sm">{variant.color}</div>
+          <div className="pl-2.5 text-sm">{variantColor}</div>
         </div>
 
         <div className="hidden items-center justify-between sm:flex">
@@ -96,7 +106,7 @@ export const OrderProduct = async ({
           </div>
           <div className="flex">
             <div className="border-r pr-2.5 text-sm">{size}</div>
-            <div className="pl-2.5 text-sm">{variant.color}</div>
+            <div className="pl-2.5 text-sm">{variantColor}</div>
           </div>
         </div>
       </div>

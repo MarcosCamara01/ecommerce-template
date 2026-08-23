@@ -9,6 +9,7 @@ import {
   orderProducts,
   productsItems,
   productsVariants,
+  OrderStatusZod,
 } from "../schema";
 import type {
   CreateOrderItemInput,
@@ -118,6 +119,7 @@ function transformOrderWithDetails(row: {
   userId: string;
   deliveryDate: Date;
   orderNumber: number;
+  status: string;
   createdAt: Date | null;
   updatedAt: Date | null;
   customerInfo: typeof customerInfo.$inferSelect | null;
@@ -137,6 +139,7 @@ function transformOrderWithDetails(row: {
     userId: row.userId,
     deliveryDate: row.deliveryDate.toISOString(),
     orderNumber: row.orderNumber,
+    status: OrderStatusZod.parse(row.status),
     createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
     updatedAt: row.updatedAt?.toISOString() ?? new Date().toISOString(),
     customerInfo: {

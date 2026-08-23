@@ -150,8 +150,13 @@ async function verifyCrossPrincipalOwnership(sql: ReturnType<typeof postgres>) {
   `;
   await sql`
     insert into app_private.order_products
-      (order_id, variant_id, quantity, size, unit_amount, currency, created_at, updated_at)
-    values (${orderId}, ${variant.id}, 1, 'M', 1000, 'eur', now(), now())
+      (order_id, variant_id, quantity, size, unit_amount, currency,
+       product_name, variant_color, image_url, created_at, updated_at)
+    values (
+      ${orderId}, ${variant.id}, 1, 'M', 1000, 'eur',
+      'Runtime Probe Product Ownership', 'Ownership Blue',
+      'https://example.test/ownership-variant.jpg', now(), now()
+    )
   `;
 
   const { dataAccess, DataAccessError } = await import("../../src/lib/data-access");
@@ -394,6 +399,9 @@ async function main() {
           priceId: runtimePriceId,
           unitAmount: 1000,
           currency: "eur",
+          productName: "Runtime Probe Product SMTP",
+          variantColor: "Runtime Blue",
+          imageUrl: "https://example.test/runtime.jpg",
         }])},
         now() + interval '30 minutes'
       )
@@ -436,6 +444,9 @@ async function main() {
           size: "M",
           unitAmount: 1000,
           currency: "eur",
+          productName: "Runtime Probe Product SMTP",
+          variantColor: "Runtime Blue",
+          imageUrl: "https://example.test/runtime.jpg",
         }],
       },
     );
@@ -480,6 +491,27 @@ async function main() {
         smtpEvidence.failed_emails === 2 &&
         smtpEvidence.completed_cleanups === 1,
       "SMTP failure did not preserve the committed order and independent effects",
+    );
+    const { dataAccess } = await import("../../src/lib/data-access");
+    const { createUserPrincipalForIdentityModule } = await import(
+      "../../src/lib/identity/principal-authority"
+    );
+    const { checkoutOutcomeFromRecord } = await import(
+      "../../src/lib/order-fulfillment/checkout-outcome"
+    );
+    const outcomeRecord = await dataAccess
+      .forUser(
+        createUserPrincipalForIdentityModule({ userId, role: "user" }),
+      )
+      .checkout.outcome(smtpSessionId);
+    assert(outcomeRecord, "Fulfilled checkout outcome was not visible to its owner");
+    const outcome = checkoutOutcomeFromRecord(outcomeRecord);
+    assert(
+      outcome.status === "fulfilled" &&
+        outcome.orderId === smtpOrderId &&
+        outcome.customerEmail === "delayed" &&
+        outcome.cartCleanup === "succeeded",
+      "Checkout outcome did not preserve fulfilled order and delayed email truth",
     );
     const Stripe = (await import("stripe")).default;
     const stripeVerifier = new Stripe("sk_test_runtime_probe");
@@ -559,6 +591,7 @@ async function main() {
     );
     console.log("Fulfillment concurrency and expired-lease evidence: PASS");
     console.log("Post-commit SMTP failure evidence: PASS");
+    console.log("Truthful checkout outcome evidence: PASS");
     console.log("Write-once checkout binding evidence: PASS");
     console.log("Authorized replay and audit evidence: PASS");
     console.log("Signed duplicate webhook evidence: PASS");

@@ -37,6 +37,16 @@ import {
   FulfillmentLeaseLostError,
   persistFailureUnlessLeaseLost,
 } from "./lease-race";
+import {
+  checkoutOutcomeFromRecord,
+  type CheckoutOutcome,
+} from "./checkout-outcome";
+
+export type {
+  CartCleanupOutcome,
+  CheckoutOutcome,
+  CustomerEmailOutcome,
+} from "./checkout-outcome";
 
 const LEASE_SECONDS = 60;
 
@@ -51,16 +61,30 @@ export async function registerStripeEvent(
 export async function requestFulfillment(
   value: UserPrincipal,
   checkoutSessionId: string,
-): Promise<void> {
+): Promise<CheckoutOutcome> {
   const principal = assertUserPrincipal(value);
   const session = await retrieveOwnedCheckoutSession(principal, checkoutSessionId);
   if (!session) {
     throw new FulfillmentFailure("session_not_owned", false, "Checkout session not found");
   }
-  if (session.status === "complete" && session.payment_status === "paid") {
-    const system = getOrderFulfillmentSystemPrincipal();
-    await dataAccess.forSystem(system).fulfillment.ensureWork(session.id);
+  if (session.status !== "complete" || session.payment_status !== "paid") {
+    throw new FulfillmentFailure(
+      "payment_not_final",
+      true,
+      "Checkout payment is not complete and paid",
+    );
   }
+  const system = getOrderFulfillmentSystemPrincipal();
+  await dataAccess.forSystem(system).fulfillment.ensureWork(session.id);
+  const record = await dataAccess.forUser(principal).checkout.outcome(session.id);
+  if (!record) {
+    throw new FulfillmentFailure(
+      "checkout_intent_missing",
+      false,
+      "No application-owned checkout intent matches the Stripe session",
+    );
+  }
+  return checkoutOutcomeFromRecord(record);
 }
 
 export async function runFulfillmentSweep(
@@ -226,6 +250,7 @@ async function processWork(
       Array.from(new Set(reconciled.map((item) => item.variantId))),
     );
     assertReferencedVariantsExist(reconciled, variants);
+    const variantsById = new Map(variants.map((variant) => [variant.id, variant]));
     const address = session.customer_details?.address;
     if (!address?.line1 || !address.city || !address.postal_code || !address.country) {
       throw new FulfillmentFailure(
@@ -254,13 +279,26 @@ async function processWork(
         totalPrice: session.amount_total,
         currency: session.currency,
       },
-      products: reconciled.map((item) => ({
-        variantId: item.variantId,
-        quantity: item.quantity,
-        size: item.size,
-        unitAmount: item.unitAmount,
-        currency: item.currency,
-      })),
+      products: reconciled.map((item) => {
+        const variant = variantsById.get(item.variantId);
+        if (!variant) {
+          throw new FulfillmentFailure(
+            "historical_catalog_identity_missing",
+            false,
+            `Durable checkout references missing variant ${item.variantId}`,
+          );
+        }
+        return {
+          variantId: item.variantId,
+          quantity: item.quantity,
+          size: item.size,
+          unitAmount: item.unitAmount,
+          currency: item.currency,
+          productName: item.productName ?? variant.product.name,
+          variantColor: item.variantColor ?? variant.color,
+          imageUrl: item.imageUrl ?? variant.images[0] ?? variant.product.img,
+        };
+      }),
     };
     const orderId = await access.fulfillment.completeWork(work, workerId, order);
     stripeLogger.info("Fulfillment committed", {

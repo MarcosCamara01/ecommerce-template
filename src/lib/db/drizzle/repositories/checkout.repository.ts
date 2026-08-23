@@ -10,6 +10,29 @@ import {
   type CheckoutIntentItem,
 } from "../schema";
 
+export type OwnedCheckoutOutcomeRecord = Readonly<{
+  workState: "pending" | "processing" | "succeeded" | "needs_attention" | null;
+  orderId: number | null;
+  customerEmailState:
+    | "pending"
+    | "processing"
+    | "succeeded"
+    | "needs_attention"
+    | null;
+  customerEmailLastErrorCode: string | null;
+  cartCleanupState:
+    | "pending"
+    | "processing"
+    | "succeeded"
+    | "needs_attention"
+    | null;
+}>;
+
+type RawOwnedCheckoutOutcomeRecord = Omit<
+  OwnedCheckoutOutcomeRecord,
+  "orderId"
+> & { orderId: string | null };
+
 async function bindCheckoutIntent(
   userId: string,
   intentId: string,
@@ -60,6 +83,41 @@ export const checkoutRepository = {
         eq(checkoutIntents.checkoutSessionId, checkoutSessionId),
       ),
     });
+  },
+
+  async findOwnedOutcome(
+    userId: string,
+    checkoutSessionId: string,
+  ): Promise<OwnedCheckoutOutcomeRecord | null> {
+    const rows = await db.execute<RawOwnedCheckoutOutcomeRecord>(sql`
+      select work.state as "workState",
+             work.order_id as "orderId",
+             customer_email.state as "customerEmailState",
+             customer_email.last_error_code as "customerEmailLastErrorCode",
+             cart_cleanup.state as "cartCleanupState"
+      from app_private.checkout_intents as intent
+      left join app_private.fulfillment_work as work
+        on work.checkout_session_id = intent.checkout_session_id
+      left join app_private.fulfillment_effects as customer_email
+        on customer_email.idempotency_key =
+          'work:' || work.id::text || ':email:customer'
+      left join app_private.fulfillment_effects as cart_cleanup
+        on cart_cleanup.idempotency_key =
+          'order:' || work.order_id::text || ':cart-cleanup'
+      where intent.user_id = ${userId}
+        and intent.checkout_session_id = ${checkoutSessionId}
+      limit 1
+    `);
+    const row = rows[0];
+    if (!row) return null;
+    const orderId = row.orderId === null ? null : Number(row.orderId);
+    if (
+      orderId !== null &&
+      (!Number.isSafeInteger(orderId) || orderId <= 0)
+    ) {
+      throw new Error("PostgreSQL returned an invalid fulfillment order id");
+    }
+    return { ...row, orderId };
   },
 
   async findBySession(intentId: string, checkoutSessionId: string) {

@@ -120,6 +120,20 @@
       "when": 1787043600000,
       "tag": "0016_migrator-schema-least-privilege",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1787127804658,
+      "tag": "0017_wakeful_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1787127839812,
+      "tag": "0018_faulty_sleeper",
+      "breakpoints": true
     }
   ]
 }

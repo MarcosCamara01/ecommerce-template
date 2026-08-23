@@ -6,6 +6,9 @@ export type CheckoutSnapshotItem = {
   priceId: string;
   unitAmount: number;
   currency: string;
+  productName?: string;
+  variantColor?: string;
+  imageUrl?: string;
 };
 
 export type ChargedLineItem = {
@@ -140,6 +143,16 @@ function assertValidSnapshot(snapshot: readonly CheckoutSnapshotItem[]) {
       throw permanentReconciliationFailure(
         "durable_snapshot_corrupt",
         "Durable checkout snapshot contains invalid item facts",
+      );
+    }
+    if (
+      (item.productName !== undefined && !item.productName.trim()) ||
+      (item.variantColor !== undefined && !item.variantColor.trim()) ||
+      (item.imageUrl !== undefined && !item.imageUrl.trim())
+    ) {
+      throw permanentReconciliationFailure(
+        "durable_snapshot_corrupt",
+        "Durable checkout snapshot contains invalid display facts",
       );
     }
   }

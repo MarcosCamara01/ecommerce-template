@@ -110,6 +110,18 @@ export const productsRepository = {
     return result ? transformVariant(result) : null;
   },
 
+  async findVariantWithProductByIdIncludingArchived(id: number) {
+    const result = await db.query.productsVariants.findFirst({
+      where: eq(productsVariants.id, id),
+      with: { product: true },
+    });
+    if (!result) return null;
+    return {
+      ...transformVariant(result),
+      product: transformProductBase(result.product),
+    };
+  },
+
   async findByCategory(
     category: ProductCategory,
   ): Promise<ProductWithVariants[]> {

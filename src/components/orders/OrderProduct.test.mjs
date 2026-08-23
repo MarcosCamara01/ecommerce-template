@@ -23,6 +23,12 @@ test("order cards render the immutable order-line price", async () => {
   assert.match(page, /archivedAt: variant\.archivedAt/);
   assert.match(component, /orderProductLink\(\{/);
   assert.match(component, /isArchived \?[\s\S]*?Archived item/);
+  assert.match(page, /productName: orderProduct\.productName/);
+  assert.match(page, /variantColor: orderProduct\.variantColor/);
+  assert.match(page, /imageUrl: orderProduct\.imageUrl/);
+  assert.match(component, /productName/);
+  assert.match(component, /variantColor/);
+  assert.match(component, /imageUrl/);
 });
 
 test("archived order items have no public catalog href", () => {

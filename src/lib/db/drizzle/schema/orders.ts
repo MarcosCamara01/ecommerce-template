@@ -43,6 +43,14 @@ export const InsertAddressSchema = z.object({
 
 export type Address = z.infer<typeof AddressSchema>;
 
+export const OrderStatusZod = z.enum([
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+]);
+
 export const orderItems = appPrivate.table(
   "order_items",
   {
@@ -50,6 +58,7 @@ export const orderItems = appPrivate.table(
     userId: text("user_id").notNull(),
     deliveryDate: timestamp("delivery_date", { withTimezone: true }).notNull(),
     orderNumber: bigint("order_number", { mode: "number" }).notNull().unique(),
+    status: text("status").notNull().default("confirmed"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -64,6 +73,10 @@ export const orderItems = appPrivate.table(
     index("idx_order_items_created_at").on(table.createdAt),
     index("idx_order_items_delivery_date").on(table.deliveryDate),
     index("idx_order_items_user_created").on(table.userId, table.createdAt),
+    check(
+      "order_status_valid",
+      sql`${table.status} in ('confirmed', 'processing', 'shipped', 'delivered', 'cancelled')`,
+    ),
   ],
 );
 
@@ -104,6 +117,9 @@ export const orderProducts = appPrivate.table(
     size: text("size").notNull(),
     unitAmount: bigint("unit_amount", { mode: "number" }).notNull(),
     currency: text("currency").notNull(),
+    productName: text("product_name").notNull(),
+    variantColor: text("variant_color").notNull(),
+    imageUrl: text("image_url").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -159,6 +175,7 @@ export const historicalOrderPriceEvidence = appPrivate.table(
 );
 
 export const selectOrderItemSchema = createSelectSchema(orderItems, {
+  status: OrderStatusZod,
   deliveryDate: z.coerce.string(),
   createdAt: z.coerce.string(),
   updatedAt: z.coerce.string(),
@@ -197,6 +214,9 @@ export const insertOrderProductSchema = createInsertSchema(orderProducts, {
   quantity: z.number().int().positive("Quantity must be greater than 0"),
   unitAmount: z.number().int().nonnegative(),
   currency: z.string().length(3),
+  productName: z.string().min(1),
+  variantColor: z.string().min(1),
+  imageUrl: z.string().min(1),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
 const variantWithProductSchema = selectVariantSchema.extend({
@@ -221,3 +241,4 @@ export type OrderProduct = z.infer<typeof selectOrderProductSchema>;
 export type InsertOrderProduct = z.infer<typeof insertOrderProductSchema>;
 export type OrderProductWithDetails = z.infer<typeof orderProductWithDetailsSchema>;
 export type OrderWithDetails = z.infer<typeof orderWithDetailsSchema>;
+export type OrderStatus = z.infer<typeof OrderStatusZod>;

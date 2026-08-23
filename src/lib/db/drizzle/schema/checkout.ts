@@ -17,6 +17,9 @@ export type CheckoutIntentItem = {
   priceId: string;
   unitAmount: number;
   currency: string;
+  productName?: string;
+  variantColor?: string;
+  imageUrl?: string;
 };
 
 export const checkoutIntents = appPrivate.table(

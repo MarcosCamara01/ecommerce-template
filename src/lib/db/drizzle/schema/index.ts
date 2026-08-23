@@ -65,6 +65,7 @@ export {
   historicalOrderPriceEvidence,
   AddressSchema,
   InsertAddressSchema,
+  OrderStatusZod,
   selectOrderItemSchema,
   insertOrderItemSchema,
   createOrderItemInputSchema,
@@ -84,6 +85,7 @@ export {
   type InsertOrderProduct,
   type OrderProductWithDetails,
   type OrderWithDetails,
+  type OrderStatus,
 } from "./orders";
 
 // Wishlist

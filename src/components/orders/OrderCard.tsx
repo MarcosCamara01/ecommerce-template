@@ -3,9 +3,9 @@ import Link from "next/link";
 /** UTILS */
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { formatPriceFromCents } from "@/utils/formatters";
 /** TYPES */
 import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
+import { orderViewModel } from "@/lib/orders/view-model";
 /** ICONS */
 import {
   HiOutlineShoppingBag,
@@ -18,16 +18,8 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ order }: OrderCardProps) {
-  const totalItems = order.orderProducts.reduce(
-    (total: number, product: { quantity: number }) => total + product.quantity,
-    0,
-  );
-
-  const totalPrice = formatPriceFromCents(order.customerInfo?.totalPrice || 0);
-
-  const deliveryDate = new Date(order.deliveryDate);
-  const orderDate = new Date(order.createdAt);
-  const isUpcoming = deliveryDate > new Date();
+  const { totalItems, totalPrice, deliveryDate, orderDate, status } =
+    orderViewModel(order);
 
   return (
     <Link
@@ -53,12 +45,10 @@ export function OrderCard({ order }: OrderCardProps) {
           <div
             className={cn(
               "rounded-full px-3 py-1 text-xs font-semibold",
-              isUpcoming
-                ? "bg-color-secondary/20 text-color-secondary"
-                : "bg-color-secondary/10 text-color-secondary",
+              status.className,
             )}
           >
-            {isUpcoming ? "In Transit" : "Delivered"}
+            {status.label}
           </div>
         </div>
 

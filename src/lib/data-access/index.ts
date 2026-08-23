@@ -44,6 +44,21 @@ const catalog = {
   random: (limit = 4) => productsRepository.findRandom(limit),
 };
 
+const fulfillmentSystemAccess = {
+  registerEvent: fulfillmentRepository.registerEvent,
+  ensureWork: fulfillmentRepository.ensureWork,
+  claimWork: fulfillmentRepository.claimWork,
+  completeWork: fulfillmentRepository.completeWork,
+  failWork: fulfillmentRepository.failWork,
+  claimEffect: fulfillmentRepository.claimEffect,
+  completeEffect: fulfillmentRepository.completeEffect,
+  splitLegacyBundledEmailEffect:
+    fulfillmentRepository.splitLegacyBundledEmailEffect,
+  completeCartCleanup: fulfillmentRepository.completeCartCleanup,
+  failEffect: fulfillmentRepository.failEffect,
+  findOrder: fulfillmentRepository.findOrder,
+};
+
 function forUser(value: Principal): UserDataAccess {
   const principal = assertUserPrincipal(value);
   const userId = principal.userId;
@@ -61,6 +76,8 @@ function forUser(value: Principal): UserDataAccess {
             checkoutSessionId,
           ),
         ),
+      outcome: (checkoutSessionId) =>
+        checkoutRepository.findOwnedOutcome(userId, checkoutSessionId),
     },
     cart: {
       list: () => cartRepository.findByUserId(userId),
@@ -132,14 +149,16 @@ function forCatalogManager(value: Principal) {
 function forSystem(value: SystemPrincipal) {
   assertSystemPrincipal(value, "order-fulfillment");
   return {
-    fulfillment: fulfillmentRepository,
+    fulfillment: fulfillmentSystemAccess,
     checkout: {
       resolve: (intentId: string, checkoutSessionId: string) =>
         checkoutRepository.findBySession(intentId, checkoutSessionId),
     },
     findVariants: async (ids: readonly number[]) => {
       const values = await Promise.all(
-        ids.map((id) => productsRepository.findVariantByIdIncludingArchived(id)),
+        ids.map((id) =>
+          productsRepository.findVariantWithProductByIdIncludingArchived(id),
+        ),
       );
       return values.filter((value): value is NonNullable<typeof value> => Boolean(value));
     },
@@ -185,6 +204,9 @@ export type UserDataAccess = {
       intentId: string,
       checkoutSessionId: string,
     ) => Promise<boolean>;
+    outcome: (
+      checkoutSessionId: string,
+    ) => ReturnType<typeof checkoutRepository.findOwnedOutcome>;
   };
   cart: {
     list: () => ReturnType<typeof cartRepository.findByUserId>;

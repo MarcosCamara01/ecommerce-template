@@ -3,6 +3,7 @@ import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
 /** UTILS */
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { orderViewModel } from "@/lib/orders/view-model";
 import { formatPriceFromCents } from "@/utils/formatters";
 /** ICONS */
 import {
@@ -19,16 +20,8 @@ interface OrderSummaryProps {
 }
 
 export function OrderSummary({ order }: OrderSummaryProps) {
-  const totalItems = order.orderProducts.reduce(
-    (total: number, product: { quantity: number }) => total + product.quantity,
-    0,
-  );
-
-  const totalPrice = formatPriceFromCents(order.customerInfo?.totalPrice || 0);
-
-  const deliveryDate = new Date(order.deliveryDate);
-  const orderDate = new Date(order.createdAt);
-  const isUpcoming = deliveryDate > new Date();
+  const { totalItems, totalPrice, deliveryDate, orderDate, status } =
+    orderViewModel(order);
 
   return (
     <div className="space-y-6">
@@ -38,12 +31,10 @@ export function OrderSummary({ order }: OrderSummaryProps) {
           <div
             className={cn(
               "rounded-full px-3 py-1 text-xs font-semibold",
-              isUpcoming
-                ? "bg-color-secondary/20 text-color-secondary"
-                : "bg-color-secondary/10 text-color-secondary",
+              status.className,
             )}
           >
-            {isUpcoming ? "In Transit" : "Delivered"}
+            {status.label}
           </div>
         </div>
 
@@ -56,7 +47,7 @@ export function OrderSummary({ order }: OrderSummaryProps) {
             <div
               className={cn(
                 "h-full bg-gradient-to-r from-color-secondary to-color-secondary transition-all duration-300",
-                isUpcoming ? "w-3/4" : "w-full",
+                status.progress,
               )}
             />
           </div>

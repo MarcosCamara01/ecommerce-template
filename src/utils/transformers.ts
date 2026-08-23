@@ -9,6 +9,7 @@ export function transformCartItemToOrderProduct(
   cartItem: CartItem,
   orderId: number,
   chargedPrice: { unitAmount: number; currency: string },
+  display: { productName: string; variantColor: string; imageUrl: string },
 ): OrderProduct {
   return {
     id: Math.random(),
@@ -18,6 +19,7 @@ export function transformCartItemToOrderProduct(
     size: cartItem.size,
     unitAmount: chargedPrice.unitAmount,
     currency: chargedPrice.currency,
+    ...display,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
