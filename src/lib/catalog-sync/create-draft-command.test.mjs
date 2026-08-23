@@ -34,6 +34,6 @@ test("legacy or malformed session values are never reused", () => {
 
 test("operator-attention responses retain the original command identity", async () => {
   const form = await readFile("src/components/admin/ProductForm.tsx", "utf8");
-  assert.doesNotMatch(form, /result\.retryable === false[\s\S]*?clearCreateCommand/);
-  assert.match(form, /result\.success &&[\s\S]*?!result\.accepted[\s\S]*?clearCreateCommand/);
+  assert.doesNotMatch(form, /result\.retryable === false[\s\S]*?createCommand\.clear/);
+  assert.match(form, /result\.success &&[\s\S]*?!result\.accepted[\s\S]*?createCommand\.clear/);
 });

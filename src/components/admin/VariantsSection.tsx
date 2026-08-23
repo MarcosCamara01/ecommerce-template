@@ -14,6 +14,8 @@ export type VariantsSectionRef = {
 
 interface VariantsSectionProps {
   initialVariants?: VariantFormData[];
+  errors?: Record<string, string[]>;
+  onFieldChange?: (field: string) => void;
 }
 
 interface VariantState {
@@ -22,7 +24,7 @@ interface VariantState {
 }
 
 export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionProps>(
-  ({ initialVariants }, ref) => {
+  ({ initialVariants, errors, onFieldChange }, ref) => {
   
   const createInitialState = (): VariantState[] => {
     if (initialVariants?.length) {
@@ -132,6 +134,8 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
           initialData={variant.data}
           onMoveUp={index > 0 ? () => moveVariant(index, "up") : undefined}
           onMoveDown={index < variants.length - 1 ? () => moveVariant(index, "down") : undefined}
+          errors={errors}
+          onFieldChange={onFieldChange}
         />
       ))}
 

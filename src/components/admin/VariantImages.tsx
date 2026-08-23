@@ -16,10 +16,12 @@ export type VariantImagesRef = {
 
 interface VariantImagesProps {
   initialImages?: string[];
+  error?: string;
+  onChange?: () => void;
 }
 
 export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
-  ({ initialImages }, ref) => {
+  ({ initialImages, error, onChange }, ref) => {
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>(initialImages || []);
@@ -47,6 +49,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
 
   const processFiles = (files: File[]) => {
     if (files.length > 0) {
+      onChange?.();
       const imageFiles = files.filter((file) => file.type.startsWith("image/"));
       setImages((prev) => [...prev, ...imageFiles]);
 
@@ -61,11 +64,13 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
   };
 
   const handleRemove = (index: number) => {
+    onChange?.();
     setImages((prev) => prev.filter((_, i) => i !== index));
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleRemoveExisting = (index: number) => {
+    onChange?.();
     const imageToRemove = existingImages[index];
     setRemovedExistingImages((prev) => [...prev, imageToRemove]);
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
@@ -106,12 +111,13 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
               />
               <Button
                 type="button"
+                aria-label={`Remove existing variant image ${index + 1}`}
                 variant="destructive"
                 size="icon"
                 className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
                 onClick={() => handleRemoveExisting(index)}
               >
-                <FiX className="h-3 w-3" />
+                <FiX className="h-3 w-3" aria-hidden="true" />
               </Button>
               <Badge
                 variant="outline"
@@ -138,12 +144,13 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
               />
               <Button
                 type="button"
+                aria-label={`Remove new variant image ${index + 1}`}
                 variant="destructive"
                 size="icon"
                 className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
                 onClick={() => handleRemove(index)}
               >
-                <FiX className="h-3 w-3" />
+                <FiX className="h-3 w-3" aria-hidden="true" />
               </Button>
               <Badge
                 variant="secondary"
@@ -200,6 +207,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
           {images.length > 0 && ` (${images.length} new)`}
         </p>
       )}
+      {error && <p className="text-sm font-medium text-red-400">{error}</p>}
     </div>
   );
   }

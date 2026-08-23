@@ -102,13 +102,13 @@ test("preparation recovery becomes operator-visible at the retry ceiling", () =>
 
 test("create persists a resumable command before uploading assets", async () => {
   const [routeSource, repositorySource, preparationRepositorySource] = await Promise.all([
-    readFile("src/app/api/admin/products/route.ts", "utf8"),
+    readFile("src/lib/catalog-sync/admin-mutations.ts", "utf8"),
     readFile("src/lib/data-access/catalog-sync.repository.ts", "utf8"),
     readFile("src/lib/data-access/catalog-preparation.repository.ts", "utf8"),
   ]);
   const postHandler = routeSource.slice(
-    routeSource.indexOf("async function postAuthorized"),
-    routeSource.indexOf("async function putAuthorized"),
+    routeSource.indexOf("async function createCatalogProduct"),
+    routeSource.indexOf("async function updateCatalogProduct"),
   );
   const preparation = repositorySource.slice(
     repositorySource.indexOf("async function prepareCreate"),
@@ -152,10 +152,10 @@ test("create persists a resumable command before uploading assets", async () => 
 });
 
 test("stale catalog preparations are completed or compensated by the sweep", async () => {
-  const [preparationRepositorySource, serviceSource, formSource] = await Promise.all([
+  const [preparationRepositorySource, serviceSource, commandHookSource] = await Promise.all([
     readFile("src/lib/data-access/catalog-preparation.repository.ts", "utf8"),
     readFile("src/lib/catalog-sync/service.ts", "utf8"),
-    readFile("src/components/admin/ProductForm.tsx", "utf8"),
+    readFile("src/hooks/product/useCatalogCreateCommand.ts", "utf8"),
   ]);
 
   assert.match(preparationRepositorySource, /async function claimStalePreparation/);
@@ -169,8 +169,8 @@ test("stale catalog preparations are completed or compensated by the sweep", asy
   assert.match(serviceSource, /\.\.\.recovered\.results/);
   assert.match(serviceSource, /Math\.floor\(boundedLimit \/ 2\)/);
   assert.match(serviceSource, /outcome: "cancelled"/);
-  assert.match(formSource, /sessionStorage\.setItem\(\s*CREATE_COMMAND_STORAGE_KEY/);
-  assert.match(formSource, /sessionStorage\.getItem\(CREATE_COMMAND_STORAGE_KEY/);
+  assert.match(commandHookSource, /sessionStorage\.setItem\(STORAGE_KEY/);
+  assert.match(commandHookSource, /sessionStorage\.getItem\(STORAGE_KEY/);
 });
 
 test("catalog replays append audit evidence and preserve preparation semantics", async () => {
@@ -224,6 +224,9 @@ test("update upload compensation reports cleanup failures without losing the ori
 test("admin catalog inputs expose neither Stripe ids nor a client cache action", async () => {
   const inputSurfaces = [
     "src/app/api/admin/products/route.ts",
+    "src/lib/catalog-sync/admin-mutations.ts",
+    "src/lib/catalog-sync/admin-input.ts",
+    "src/lib/catalog-sync/admin-storage.ts",
     "src/types/admin.ts",
     "src/components/admin/VariantForm.tsx",
     "src/components/admin/VariantsSection.tsx",

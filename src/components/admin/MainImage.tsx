@@ -16,10 +16,11 @@ export type MainImageRef = {
 interface MainImageProps {
   errors?: Record<string, string[]>;
   initialImageUrl?: string;
+  onFieldChange?: (field: string) => void;
 }
 
 export const MainImage = forwardRef<MainImageRef, MainImageProps>(
-  ({ errors, initialImageUrl }, ref) => {
+  ({ errors, initialImageUrl, onFieldChange }, ref) => {
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(initialImageUrl || null);
     const [hasNewImage, setHasNewImage] = useState(false);
@@ -47,6 +48,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
       if (selectedFile) {
         setFile(selectedFile);
         setHasNewImage(true);
+        onFieldChange?.("img");
         const reader = new FileReader();
         reader.onloadend = () => setPreview(reader.result as string);
         reader.readAsDataURL(selectedFile);
@@ -57,6 +59,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
       setFile(null);
       setPreview(null);
       setHasNewImage(false);
+      onFieldChange?.("img");
       if (inputRef.current) inputRef.current.value = "";
     };
 
@@ -92,6 +95,8 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
               : "border-border-secondary hover:border-color-tertiary",
             errors?.img && "border-red-500"
           )}
+          aria-invalid={Boolean(errors?.img)}
+          aria-describedby={errors?.img ? "main-image-error" : undefined}
         >
           {preview ? (
             <div className="p-6">
@@ -148,7 +153,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
           )}
         </div>
         {errors?.img && (
-          <p className="text-sm text-red-400 font-medium">{errors.img[0]}</p>
+          <p id="main-image-error" className="text-sm text-red-400 font-medium">{errors.img[0]}</p>
         )}
       </div>
     );

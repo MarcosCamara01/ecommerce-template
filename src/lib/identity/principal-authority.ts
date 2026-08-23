@@ -1,5 +1,10 @@
 export type Capability = "catalog:manage" | "fulfillment:manage";
-export type SystemPurpose = "order-fulfillment";
+export type SystemPurpose = "catalog-sync" | "order-fulfillment";
+
+type IdentityErrorCode =
+  | "authentication_required"
+  | "capability_denied"
+  | "invalid_principal";
 
 const principalBrand: unique symbol = Symbol("Principal");
 type PrincipalBrand = { readonly [principalBrand]: true };
@@ -20,10 +25,10 @@ export type Principal = UserPrincipal | SystemPrincipal;
 const principals = new WeakSet<object>();
 
 export class IdentityError extends Error {
-  readonly code: "authentication_required" | "capability_denied" | "invalid_principal";
+  readonly code: IdentityErrorCode;
 
   constructor(
-    code: "authentication_required" | "capability_denied" | "invalid_principal",
+    code: IdentityErrorCode,
     message: string,
   ) {
     super(message);
@@ -57,10 +62,18 @@ export function createUserPrincipalForIdentityModule(input: {
 }
 
 export function createSystemPrincipalForOrderFulfillment(): SystemPrincipal {
+  return createSystemPrincipal("order-fulfillment");
+}
+
+export function createSystemPrincipalForCatalogSync(): SystemPrincipal {
+  return createSystemPrincipal("catalog-sync");
+}
+
+function createSystemPrincipal(purpose: SystemPurpose): SystemPrincipal {
   const principal = Object.freeze({
     [principalBrand]: true as const,
     kind: "system" as const,
-    purpose: "order-fulfillment" as const,
+    purpose,
   });
   principals.add(principal);
   return principal;

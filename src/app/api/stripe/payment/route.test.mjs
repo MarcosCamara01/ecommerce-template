@@ -54,8 +54,8 @@ test("resolved checkout snapshots are bounded before intent persistence", async 
     variantId: index + 1000,
     size: "M",
     quantity: 1,
-    variant: { stripeId: `price_${index}` },
-    product: { price: 10 },
+    variant: { stripeId: `price_${index}`, color: "Black", images: ["https://example.test/item.jpg"] },
+    product: { price: 10, name: "Test product", img: "https://example.test/product.jpg" },
   }));
   const response = await loadRouteHarness({
     checkoutItemsResult,
@@ -73,8 +73,8 @@ test("Stripe aggregate charge limits are enforced before intent persistence", as
         variantId: 2,
         size: "M",
         quantity,
-        variant: { stripeId: "price_1" },
-        product: { price: 10 },
+        variant: { stripeId: "price_1", color: "Black", images: ["https://example.test/item.jpg"] },
+        product: { price: 10, name: "Test product", img: "https://example.test/product.jpg" },
       }],
       onCreateIntent: () => assert.fail("invalid aggregate was persisted"),
     }).POST(requestWith({ cartItemIds: [1] }));
@@ -91,6 +91,35 @@ test("Checkout Sessions carry the stable integration identifier", () => {
     source,
     /integration_identifier: STRIPE_INTEGRATION_IDENTIFIER/,
   );
+});
+
+test("checkout intent snapshots immutable product display facts", async () => {
+  let captured;
+  const response = await loadRouteHarness({
+    onCreateIntent: (snapshot) => {
+      captured = snapshot;
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.equal(response.status, 200);
+  assert.deepEqual(captured[0], {
+    cartItemId: 1,
+    variantId: 2,
+    size: "M",
+    quantity: 1,
+    priceId: "price_1",
+    unitAmount: 1000,
+    currency: "eur",
+    productName: "Test product",
+    variantColor: "Black",
+    imageUrl: "https://example.test/item.jpg",
+  });
+});
+
+test("Checkout return URLs use the configured canonical application origin", () => {
+  assert.match(source, /getCanonicalAppOrigin/);
+  assert.match(source, /success_url: `\$\{appOrigin\}\/result/);
+  assert.match(source, /cancel_url: `\$\{appOrigin\}\/cart`/);
+  assert.doesNotMatch(source, /request\.nextUrl\.origin/);
 });
 
 class IdentityError extends Error {
@@ -126,8 +155,8 @@ function loadRouteHarness({
           variantId: 2,
           size: "M",
           quantity: 1,
-          variant: { stripeId: "price_1" },
-          product: { price: 10 },
+          variant: { stripeId: "price_1", color: "Black", images: ["https://example.test/item.jpg"] },
+          product: { price: 10, name: "Test product", img: "https://example.test/product.jpg" },
         }];
       },
     },
@@ -146,6 +175,9 @@ function loadRouteHarness({
       },
     },
     zod: nativeRequire("zod"),
+    "@/lib/app-origin": {
+      getCanonicalAppOrigin: () => "https://shop.example.test",
+    },
     "@/lib/data-access": {
       DataAccessError,
       dataAccess: { forUser: () => userAccess },

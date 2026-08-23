@@ -13,17 +13,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
+import { FiArchive, FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
 import { BasicInfo, type BasicInfoRef } from "./BasicInfo";
 import { MainImage, type MainImageRef } from "./MainImage";
 import { VariantsSection, type VariantsSectionRef } from "./VariantsSection";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
-import {
-  selectCreateCommand,
-  serializeCreateCommand,
-  type StoredCreateCommand,
-} from "@/lib/catalog-sync/create-draft-command";
+import { useCatalogCreateCommand } from "@/hooks/product/useCatalogCreateCommand";
+import { encodeProductFormData } from "./product-form-data";
 
 export type { ProductFormData };
 
@@ -33,26 +30,7 @@ interface FormState {
   errors?: Record<string, string[]>;
   accepted?: boolean;
   operationId?: string;
-  retryable?: boolean;
 }
-
-const CREATE_COMMAND_STORAGE_KEY = "admin-product-create-command-id";
-
-const digest = async (value: string | ArrayBuffer) => {
-  const bytes = typeof value === "string" ? new TextEncoder().encode(value) : value;
-  const hash = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(hash), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
-};
-
-const fileFingerprint = async (file: File) => ({
-  name: file.name,
-  size: file.size,
-  type: file.type,
-  lastModified: file.lastModified,
-  contentHash: await digest(await file.arrayBuffer()),
-});
 
 interface ProductFormProps {
   mode: "create" | "edit";
@@ -69,6 +47,7 @@ export function ProductForm({
 }: ProductFormProps) {
   const { createAsync, updateAsync, isPending, isUpdatePending } =
     useProductMutation();
+  const createCommand = useCatalogCreateCommand();
   const [state, setState] = useState<FormState>({
     success: false,
     message: "",
@@ -78,19 +57,25 @@ export function ProductForm({
   const basicInfoRef = useRef<BasicInfoRef>(null!);
   const mainImageRef = useRef<MainImageRef>(null!);
   const variantsSectionRef = useRef<VariantsSectionRef>(null!);
-  const createCommandRef = useRef<StoredCreateCommand | null>(null);
-
-  const clearCreateCommand = () => {
-    createCommandRef.current = null;
-    sessionStorage.removeItem(CREATE_COMMAND_STORAGE_KEY);
-  };
-
   const isLoading = mode === "create" ? isPending : isUpdatePending;
+
+  const clearFieldError = (field: string) => {
+    setState((current) => {
+      if (!current.errors?.[field]) return current;
+      const errors = { ...current.errors };
+      delete errors[field];
+      const hasErrors = Object.keys(errors).length > 0;
+      return {
+        ...current,
+        errors: hasErrors ? errors : undefined,
+        message: hasErrors ? current.message : "",
+      };
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
       const basicInfo = {
         name: basicInfoRef.current.name,
         description: basicInfoRef.current.description,
@@ -112,54 +97,25 @@ export function ProductForm({
         removedImages: variant.removedImages,
       }));
 
-      if (mode === "edit" && initialData?.id) {
-        formData.append("id", initialData.id.toString());
-        if (restoreArchived) formData.append("restoreArchived", "true");
-      }
-      if (mode === "create") {
-        const fingerprint = await digest(JSON.stringify({
-          ...basicInfo,
-          mainImage: mainImage ? await fileFingerprint(mainImage) : null,
-          variants: await Promise.all(
-            variantsForSubmit.map(async (variant, index) => ({
-              ...variant,
-              newImages: await Promise.all(
-                (imagesData[`variant_${index}`] || []).map(fileFingerprint),
-              ),
-            })),
-          ),
-        }));
-        const stored = createCommandRef.current
-          ? serializeCreateCommand(createCommandRef.current)
-          : sessionStorage.getItem(CREATE_COMMAND_STORAGE_KEY);
-        const command = selectCreateCommand(
-          stored,
-          fingerprint,
-          () => crypto.randomUUID(),
-        );
-        createCommandRef.current = command;
-        sessionStorage.setItem(
-          CREATE_COMMAND_STORAGE_KEY,
-          serializeCreateCommand(command),
-        );
-        formData.append("commandId", command.id);
-      }
-
-      for (const [key, value] of Object.entries(basicInfo)) {
-        formData.append(key, value);
-      }
-      if (mainImage) {
-        formData.append("mainImage", mainImage);
-      } else if (mainImageRef.current.existingUrl) {
-        formData.append("existingMainImage", mainImageRef.current.existingUrl);
-      }
-      variantsData.forEach((_, index) => {
-        const variantImages = imagesData[`variant_${index}`] || [];
-        variantImages.forEach((image, imageIndex) => {
-          formData.append(`variant_${index}_image_${imageIndex}`, image);
-        });
+      const commandId = mode === "create"
+        ? await createCommand.prepare({
+            basicInfo,
+            mainImage,
+            variants: variantsForSubmit,
+            images: imagesData,
+          })
+        : undefined;
+      const formData = encodeProductFormData({
+        mode,
+        productId: initialData?.id,
+        restoreArchived,
+        commandId,
+        basicInfo,
+        mainImage,
+        existingMainImage: mainImageRef.current.existingUrl,
+        variants: variantsForSubmit,
+        images: imagesData,
       });
-      formData.append("variants", JSON.stringify(variantsForSubmit));
 
       const result =
         mode === "create"
@@ -172,7 +128,6 @@ export function ProductForm({
         errors: result.errors,
         accepted: result.accepted,
         operationId: result.operationId,
-        retryable: result.retryable,
       });
 
       if (
@@ -180,7 +135,7 @@ export function ProductForm({
         result.success &&
         !result.accepted
       ) {
-        clearCreateCommand();
+        createCommand.clear();
       }
       if (result.success && result.data && onSuccess) {
         onSuccess(result.data);
@@ -190,8 +145,7 @@ export function ProductForm({
         success: false,
         message: "An unexpected error occurred",
         errors: undefined,
-        operationId: createCommandRef.current?.id,
-        retryable: true,
+        operationId: createCommand.getCurrentId(),
       });
     }
   };
@@ -200,7 +154,7 @@ export function ProductForm({
     basicInfoRef.current.reset();
     mainImageRef.current.reset();
     variantsSectionRef.current.reset();
-    if (mode === "create") clearCreateCommand();
+    if (mode === "create") createCommand.clear();
     setState({ success: false, message: "", errors: undefined });
   };
 
@@ -208,9 +162,13 @@ export function ProductForm({
   const subtitle =
     mode === "create"
       ? "Add a new product with variants and images to your store"
-      : "Update product information, variants and images";
+      : restoreArchived
+        ? "Review this archived product and explicitly restore it to the storefront"
+        : "Update product information, variants and images";
   const submitButtonText =
-    mode === "create" ? "Create Product" : "Update Product";
+    mode === "create"
+      ? "Create Product"
+      : restoreArchived ? "Restore Product" : "Update Product";
 
   return (
     <form
@@ -226,6 +184,16 @@ export function ProductForm({
       </div>
 
       <Separator />
+
+      {restoreArchived && (
+        <Alert>
+          <FiArchive className="h-4 w-4" />
+          <AlertTitle>Archived Product</AlertTitle>
+          <AlertDescription>
+            Saving this form is an explicit restore action and will republish the durable product identity after catalog synchronization succeeds.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Alert Message */}
       {state.message && (
@@ -273,6 +241,7 @@ export function ProductForm({
             ref={basicInfoRef}
             errors={state.errors}
             initialData={initialData?.basicInfo}
+            onFieldChange={clearFieldError}
           />
         </CardContent>
       </Card>
@@ -297,6 +266,7 @@ export function ProductForm({
             ref={mainImageRef}
             errors={state.errors}
             initialImageUrl={initialData?.mainImageUrl}
+            onFieldChange={clearFieldError}
           />
         </CardContent>
       </Card>
@@ -320,6 +290,8 @@ export function ProductForm({
           <VariantsSection
             ref={variantsSectionRef}
             initialVariants={initialData?.variants}
+            errors={state.errors}
+            onFieldChange={clearFieldError}
           />
         </CardContent>
       </Card>

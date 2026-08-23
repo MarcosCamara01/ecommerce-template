@@ -13,10 +13,12 @@ export type VariantSizesRef = {
 
 interface VariantSizesProps {
   initialSizes?: ProductSize[];
+  error?: string;
+  onChange?: () => void;
 }
 
 export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
-  ({ initialSizes }, ref) => {
+  ({ initialSizes, error, onChange }, ref) => {
     const [selectedSizes, setSelectedSizes] = useState<ProductSize[]>(
       initialSizes || [],
     );
@@ -28,6 +30,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
     }));
 
     const toggleSize = (size: ProductSize) => {
+      onChange?.();
       setSelectedSizes((prev) =>
         prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size],
       );
@@ -42,6 +45,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
               <button
                 key={size}
                 type="button"
+                aria-pressed={isSelected}
                 onClick={() => toggleSize(size)}
                 className={cn(
                   "min-w-[48px] h-10 px-3 text-sm font-medium rounded-md border-2 transition-all duration-200",
@@ -68,6 +72,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
             </div>
           </div>
         )}
+        {error && <p className="text-sm font-medium text-red-400">{error}</p>}
       </div>
     );
   },

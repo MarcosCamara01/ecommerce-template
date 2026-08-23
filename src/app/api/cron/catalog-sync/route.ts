@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateProducts } from "@/lib/catalog-sync/revalidate";
 import { runCatalogSyncSweep } from "@/lib/catalog-sync/service";
+import { getCatalogSyncSystemPrincipal } from "@/lib/catalog-sync/system-principal";
+import { internalCredentialFailure } from "@/lib/http/internal-route";
 
 export async function GET(request: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return NextResponse.json({ error: "Cron is not configured" }, { status: 503 });
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const results = await runCatalogSyncSweep(10);
+  const credentialFailure = internalCredentialFailure(request.headers);
+  if (credentialFailure) return credentialFailure;
+  const systemPrincipal = getCatalogSyncSystemPrincipal();
+  const results = await runCatalogSyncSweep(systemPrincipal, { limit: 10 });
   const ids = Array.from(
     new Set(
       results

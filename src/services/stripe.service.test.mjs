@@ -112,14 +112,61 @@ test("customer ownership survives an account email change", async () => {
   assert.equal(fakeStripe.createdCustomers.length, 0);
 });
 
-function loadServiceHarness(fakeStripe) {
+test("paid checkout exposes durable fulfillment state instead of immediate success", async () => {
+  const session = {
+    id: "cs_paid",
+    status: "complete",
+    payment_status: "paid",
+    customer_details: { email: "buyer@example.test" },
+  };
+  const cases = [
+    [
+      { status: "fulfillment_pending" },
+      { status: "fulfillment_pending", session, outcome: { status: "fulfillment_pending" } },
+    ],
+    [
+      { status: "needs_attention" },
+      { status: "needs_attention", session, outcome: { status: "needs_attention" } },
+    ],
+    [
+      {
+        status: "fulfilled",
+        orderId: 42,
+        customerEmail: "queued",
+        cartCleanup: "succeeded",
+      },
+      {
+        status: "success",
+        session,
+        outcome: {
+          status: "fulfilled",
+          orderId: 42,
+          customerEmail: "queued",
+          cartCleanup: "succeeded",
+        },
+      },
+    ],
+  ];
+
+  for (const [outcome, expected] of cases) {
+    const service = loadServiceHarness(createFakeStripe(), { session, outcome });
+    assert.deepEqual(await service.fetchCheckoutData("cs_paid"), expected);
+  }
+});
+
+function loadServiceHarness(fakeStripe, { session = null, outcome } = {}) {
   class StripeError extends Error {}
   const modules = {
     "server-only": {},
-    "@/lib/identity": { getPrincipal: async () => null },
-    "@/lib/order-fulfillment": { requestFulfillment: async () => undefined },
+    "@/lib/identity": {
+      getPrincipal: async () =>
+        session ? { kind: "user", userId: "user-1", capabilities: [] } : null,
+    },
+    "@/lib/order-fulfillment": {
+      requestFulfillment: async () => outcome,
+    },
     "@/lib/order-fulfillment/owned-checkout-session": {
-      retrieveOwnedCheckoutSession: async () => null,
+      retrieveOwnedCheckoutSession: async () => session,
     },
     "@/lib/stripe": {
       stripe: fakeStripe,

@@ -37,10 +37,12 @@ interface VariantFormProps {
   initialData?: VariantFormData;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
+  errors?: Record<string, string[]>;
+  onFieldChange?: (field: string) => void;
 }
 
 export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
-  ({ index, onRemove, canRemove = true, initialData, onMoveUp, onMoveDown }, ref) => {
+  ({ index, onRemove, canRemove = true, initialData, onMoveUp, onMoveDown, errors, onFieldChange }, ref) => {
     const colorRef = useRef<HTMLInputElement>(null);
     const sizesRef = useRef<VariantSizesRef>(null!);
     const imagesRef = useRef<VariantImagesRef>(null!);
@@ -85,13 +87,14 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                   <TooltipTrigger asChild>
                     <Button
                       type="button"
+                      aria-label={`Move variant ${index + 1} up`}
                       variant="ghost"
                       size="icon"
                       onClick={onMoveUp}
                       disabled={!onMoveUp}
                       className="h-8 w-8 text-color-secondary hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      <FiChevronUp className="h-4 w-4" />
+                      <FiChevronUp className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -104,13 +107,14 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                   <TooltipTrigger asChild>
                     <Button
                       type="button"
+                      aria-label={`Move variant ${index + 1} down`}
                       variant="ghost"
                       size="icon"
                       onClick={onMoveDown}
                       disabled={!onMoveDown}
                       className="h-8 w-8 text-color-secondary hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      <FiChevronDown className="h-4 w-4" />
+                      <FiChevronDown className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -125,12 +129,13 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                     <TooltipTrigger asChild>
                       <Button
                         type="button"
+                        aria-label={`Remove variant ${index + 1}`}
                         variant="ghost"
                         size="icon"
                         onClick={onRemove}
                         className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                       >
-                        <FiTrash2 className="h-4 w-4" />
+                        <FiTrash2 className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -151,10 +156,18 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
             <Input
               id={`color-${index}`}
               ref={colorRef}
+              onChange={() => onFieldChange?.(`variants.${index}.color`)}
+              aria-invalid={Boolean(errors?.[`variants.${index}.color`])}
+              aria-describedby={errors?.[`variants.${index}.color`] ? `variant-${index}-color-error` : undefined}
               maxLength={CATALOG_VARIANT_COLOR_MAX_LENGTH}
               placeholder="e.g., Black, White, Red"
               className="h-10"
             />
+            {errors?.[`variants.${index}.color`] && (
+              <p id={`variant-${index}-color-error`} className="text-sm font-medium text-red-400">
+                {errors[`variants.${index}.color`][0]}
+              </p>
+            )}
           </div>
 
           {/* Sizes and Images in Accordion */}
@@ -164,7 +177,12 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                 <span className="text-sm font-medium text-color-secondary">Available Sizes</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
-                <VariantSizes ref={sizesRef} initialSizes={initialData?.sizes} />
+                <VariantSizes
+                  ref={sizesRef}
+                  initialSizes={initialData?.sizes}
+                  error={errors?.[`variants.${index}.sizes`]?.[0]}
+                  onChange={() => onFieldChange?.(`variants.${index}.sizes`)}
+                />
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="images" className="border border-border-primary rounded-lg px-4 mt-2 bg-bg-primary/50">
@@ -172,7 +190,12 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                 <span className="text-sm font-medium text-color-secondary">Variant Images</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
-                <VariantImages ref={imagesRef} initialImages={initialData?.images} />
+                <VariantImages
+                  ref={imagesRef}
+                  initialImages={initialData?.images}
+                  error={errors?.[`variants.${index}.images`]?.[0]}
+                  onChange={() => onFieldChange?.(`variants.${index}.images`)}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

@@ -55,6 +55,16 @@ class DataAccessError extends Error {
 
 function loadRouteHarness({ unauthenticated = false, serviceError } = {}) {
   const z = nativeRequire("zod");
+  const wishlist = {
+    add: async () => {
+      if (serviceError) throw serviceError;
+      return { id: 1 };
+    },
+    list: async () => [],
+    listWithDetails: async () => [],
+    remove: async () => true,
+    removeByProduct: async () => true,
+  };
   const modules = {
     "next/server": {
       NextResponse: {
@@ -62,7 +72,10 @@ function loadRouteHarness({ unauthenticated = false, serviceError } = {}) {
       },
     },
     zod: z,
-    "@/lib/data-access": { DataAccessError },
+    "@/lib/data-access": {
+      DataAccessError,
+      dataAccess: { forUser: () => ({ wishlist }) },
+    },
     "@/lib/db/drizzle/schema": {
       addToWishlistSchema: z.object({ productId: z.number().int().positive() }),
       selectWishlistItemSchema: z.object({}).passthrough(),
@@ -75,18 +88,41 @@ function loadRouteHarness({ unauthenticated = false, serviceError } = {}) {
         return { kind: "user", userId: "user-1" };
       },
     },
-    "@/services/wishlist.service": {
-      addToWishlist: async () => {
-        if (serviceError) throw serviceError;
-        return { id: 1 };
-      },
-      getWishlist: async () => [],
-      getWishlistWithDetails: async () => [],
-      removeFromWishlist: async () => true,
-      removeFromWishlistByProduct: async () => true,
-    },
+    "@/lib/http/user-route": userRouteModule(z),
   };
   return loadModule(modules);
+}
+
+function userRouteModule(z) {
+  class InvalidJsonBodyError extends Error {}
+  return {
+    readJsonBody: async (request) => {
+      try {
+        return await request.json();
+      } catch (error) {
+        if (error instanceof SyntaxError) throw new InvalidJsonBodyError();
+        throw error;
+      }
+    },
+    userRouteError: (error, options) => {
+      if (error instanceof IdentityError) {
+        return { body: { error: error.code }, status: 401 };
+      }
+      if (error instanceof DataAccessError && error.code === "not_found") {
+        return { body: { error: "Not found" }, status: 404 };
+      }
+      if (error instanceof z.ZodError) {
+        return {
+          body: { error: options.invalidPayloadMessage, details: error.flatten() },
+          status: 400,
+        };
+      }
+      if (error instanceof InvalidJsonBodyError) {
+        return { body: { error: options.invalidPayloadMessage }, status: 400 };
+      }
+      return { body: { error: "Internal server error" }, status: 500 };
+    },
+  };
 }
 
 function loadModule(modules) {

@@ -40,10 +40,11 @@ export interface BasicInfoInitialData {
 interface BasicInfoProps {
   errors?: Record<string, string[]>;
   initialData?: BasicInfoInitialData;
+  onFieldChange?: (field: string) => void;
 }
 
 export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
-  ({ errors, initialData }, ref) => {
+  ({ errors, initialData, onFieldChange }, ref) => {
     const [name, setName] = useState(initialData?.name || "");
     const [description, setDescription] = useState(
       initialData?.description || "",
@@ -80,7 +81,12 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             id="name"
             maxLength={CATALOG_PRODUCT_NAME_MAX_LENGTH}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              onFieldChange?.("name");
+            }}
+            aria-invalid={Boolean(errors?.name)}
+            aria-describedby={errors?.name ? "name-error" : undefined}
             placeholder="Enter product name"
             className={cn(
               "h-11",
@@ -88,7 +94,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             )}
           />
           {errors?.name && (
-            <p className="text-sm text-red-400 font-medium">{errors.name[0]}</p>
+            <p id="name-error" className="text-sm text-red-400 font-medium">{errors.name[0]}</p>
           )}
         </div>
 
@@ -103,7 +109,12 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
           <Textarea
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              onFieldChange?.("description");
+            }}
+            aria-invalid={Boolean(errors?.description)}
+            aria-describedby={errors?.description ? "description-error" : undefined}
             placeholder="Describe your product in detail..."
             className={cn(
               "min-h-[120px] resize-none",
@@ -112,7 +123,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             )}
           />
           {errors?.description && (
-            <p className="text-sm text-red-400 font-medium">
+            <p id="description-error" className="text-sm text-red-400 font-medium">
               {errors.description[0]}
             </p>
           )}
@@ -140,7 +151,12 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
                 max={STRIPE_EUR_MAX_CHARGE_CENTS / 100}
                 inputMode="decimal"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  onFieldChange?.("price");
+                }}
+                aria-invalid={Boolean(errors?.price)}
+                aria-describedby={errors?.price ? "price-error" : undefined}
                 placeholder="0.00"
                 className={cn(
                   "h-11 pl-8",
@@ -149,7 +165,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
               />
             </div>
             {errors?.price && (
-              <p className="text-sm text-red-400 font-medium">
+              <p id="price-error" className="text-sm text-red-400 font-medium">
                 {errors.price[0]}
               </p>
             )}
@@ -165,10 +181,15 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             </Label>
             <Select
               value={category}
-              onValueChange={(v) => setCategory(v as ProductCategory)}
+              onValueChange={(v) => {
+                setCategory(v as ProductCategory);
+                onFieldChange?.("category");
+              }}
             >
               <SelectTrigger
                 id="category"
+                aria-invalid={Boolean(errors?.category)}
+                aria-describedby={errors?.category ? "category-error" : undefined}
                 className={cn(
                   "h-11",
                   errors?.category &&
@@ -186,7 +207,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
               </SelectContent>
             </Select>
             {errors?.category && (
-              <p className="text-sm text-red-400 font-medium">
+              <p id="category-error" className="text-sm text-red-400 font-medium">
                 {errors.category[0]}
               </p>
             )}

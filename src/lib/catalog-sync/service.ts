@@ -4,7 +4,11 @@ import { randomUUID } from "node:crypto";
 
 import { dataAccess } from "@/lib/data-access";
 import { catalogSyncRepository } from "@/lib/data-access/catalog-sync.repository";
-import type { UserPrincipal } from "@/lib/identity";
+import {
+  assertSystemPrincipal,
+  type SystemPrincipal,
+  type UserPrincipal,
+} from "@/lib/identity";
 import { createStorageAdminClient } from "@/lib/storage/supabase";
 import { stripe, Stripe } from "@/lib/stripe";
 import { createCatalogSyncEngine } from "./engine";
@@ -163,7 +167,12 @@ async function recoverStaleCatalogPreparations(limit: number) {
   return { handled, results };
 }
 
-export async function runCatalogSyncSweep(limit = 10) {
+export async function runCatalogSyncSweep(
+  value: SystemPrincipal,
+  options: { limit?: number } = {},
+) {
+  assertSystemPrincipal(value, "catalog-sync");
+  const limit = options.limit ?? 10;
   const boundedLimit = Math.max(1, Math.min(limit, 25));
   const preparationBudget = boundedLimit === 1
     ? 1

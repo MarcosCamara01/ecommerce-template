@@ -86,3 +86,20 @@ test("catalog service receives no blanket database exemption", () => {
     ["src/lib/catalog-sync/service.ts"],
   );
 });
+
+test("catalog System Principal construction is owned by catalog sync", () => {
+  const factoryImport =
+    'import { getCatalogSyncSystemPrincipal } from "@/lib/catalog-sync/system-principal";';
+  assert.deepEqual(
+    findViolationsInSource({
+      importer: join(root, "src", "app", "api", "cron", "catalog-sync", "route.ts"),
+      source: factoryImport,
+      projectRoot: root,
+    }),
+    [],
+  );
+  assert.deepEqual(
+    findViolationsInSource({ importer, source: factoryImport, projectRoot: root }),
+    ["src/app/api/example/route.ts (Catalog System Principal factory import)"],
+  );
+});

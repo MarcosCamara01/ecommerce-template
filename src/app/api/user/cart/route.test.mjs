@@ -39,6 +39,19 @@ test("archived cart additions return 404", async () => {
   assert.deepEqual(response.body, { error: "Not found" });
 });
 
+test("cart and wishlist routes share HTTP behavior and call data access directly", async () => {
+  const wishlistSource = await readFile(
+    new URL("../wishlist/route.ts", import.meta.url),
+    "utf8",
+  );
+  for (const routeSource of [source, wishlistSource]) {
+    assert.match(routeSource, /dataAccess\.forUser\(principal\)/);
+    assert.match(routeSource, /readJsonBody/);
+    assert.match(routeSource, /userRouteError/);
+    assert.doesNotMatch(routeSource, /@\/services\/(?:cart|wishlist)\.service/);
+  }
+});
+
 class IdentityError extends Error {
   constructor(code) {
     super(code);
@@ -55,6 +68,17 @@ class DataAccessError extends Error {
 
 function loadRouteHarness({ unauthenticated = false, serviceError } = {}) {
   const z = nativeRequire("zod");
+  const cart = {
+    add: async () => {
+      if (serviceError) throw serviceError;
+      return { id: 1 };
+    },
+    clear: async () => undefined,
+    list: async () => [],
+    listWithDetails: async () => [],
+    remove: async () => true,
+    update: async () => ({ id: 1 }),
+  };
   const modules = {
     "next/server": {
       NextResponse: {
@@ -62,7 +86,10 @@ function loadRouteHarness({ unauthenticated = false, serviceError } = {}) {
       },
     },
     zod: z,
-    "@/lib/data-access": { DataAccessError },
+    "@/lib/data-access": {
+      DataAccessError,
+      dataAccess: { forUser: () => ({ cart }) },
+    },
     "@/lib/db/drizzle/schema": {
       addToCartSchema: z.object({
         variantId: z.number().int().positive(),
@@ -83,19 +110,41 @@ function loadRouteHarness({ unauthenticated = false, serviceError } = {}) {
         return { kind: "user", userId: "user-1" };
       },
     },
-    "@/services/cart.service": {
-      addToCart: async () => {
-        if (serviceError) throw serviceError;
-        return { id: 1 };
-      },
-      clearCart: async () => undefined,
-      getCart: async () => [],
-      getCartWithDetails: async () => [],
-      removeFromCart: async () => true,
-      updateCartItem: async () => ({ id: 1 }),
-    },
+    "@/lib/http/user-route": userRouteModule(z),
   };
   return loadModule(modules);
+}
+
+function userRouteModule(z) {
+  class InvalidJsonBodyError extends Error {}
+  return {
+    readJsonBody: async (request) => {
+      try {
+        return await request.json();
+      } catch (error) {
+        if (error instanceof SyntaxError) throw new InvalidJsonBodyError();
+        throw error;
+      }
+    },
+    userRouteError: (error, options) => {
+      if (error instanceof IdentityError) {
+        return { body: { error: error.code }, status: 401 };
+      }
+      if (error instanceof DataAccessError && error.code === "not_found") {
+        return { body: { error: "Not found" }, status: 404 };
+      }
+      if (error instanceof z.ZodError) {
+        return {
+          body: { error: options.invalidPayloadMessage, details: error.flatten() },
+          status: 400,
+        };
+      }
+      if (error instanceof InvalidJsonBodyError) {
+        return { body: { error: options.invalidPayloadMessage }, status: 400 };
+      }
+      return { body: { error: "Internal server error" }, status: 500 };
+    },
+  };
 }
 
 function loadModule(modules) {

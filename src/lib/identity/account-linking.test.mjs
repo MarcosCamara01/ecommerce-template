@@ -8,6 +8,8 @@ const authSource = await readFile(
 );
 
 test("credential and local-account linking both require verified email", () => {
+  assert.match(authSource, /import \{ getCanonicalAppOrigin \}/);
+  assert.match(authSource, /const authBaseURL = getCanonicalAppOrigin\(\)/);
   assert.match(authSource, /baseURL: authBaseURL/);
   assert.match(authSource, /trustedOrigins: authTrustedOrigins/);
   assert.match(

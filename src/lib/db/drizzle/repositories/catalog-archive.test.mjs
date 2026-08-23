@@ -157,7 +157,7 @@ test("public additions reject archives and admin restoration is explicit", async
   const [dataAccessSource, adminRouteSource, productsSource, adminPageSource, productServiceSource] = await Promise.all([
     readFile(new URL("../../../data-access/index.ts", import.meta.url), "utf8"),
     readFile(
-      new URL("../../../../app/api/admin/products/route.ts", import.meta.url),
+      new URL("../../../catalog-sync/admin-mutations.ts", import.meta.url),
       "utf8",
     ),
     readFile(new URL("./products.repository.ts", import.meta.url), "utf8"),
@@ -233,7 +233,7 @@ test("soft archive preserves storage assets for history and restoration", async 
   const [routeSource, repositorySource, modelSource, serviceSource, compensationSource] =
     await Promise.all([
       readFile(
-        new URL("../../../../app/api/admin/products/route.ts", import.meta.url),
+        new URL("../../../catalog-sync/admin-mutations.ts", import.meta.url),
         "utf8",
       ),
       readFile(
@@ -254,11 +254,11 @@ test("soft archive preserves storage assets for history and restoration", async 
       ),
     ]);
   const putHandler = routeSource.slice(
-    routeSource.indexOf("async function putAuthorized"),
-    routeSource.indexOf("async function deleteAuthorized"),
+    routeSource.indexOf("async function updateCatalogProduct"),
+    routeSource.indexOf("async function archiveCatalogProduct"),
   );
   const deleteHandler = routeSource.slice(
-    routeSource.indexOf("async function deleteAuthorized"),
+    routeSource.indexOf("async function archiveCatalogProduct"),
     routeSource.indexOf("export const POST"),
   );
 

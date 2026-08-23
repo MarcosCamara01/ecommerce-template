@@ -8,6 +8,9 @@ import {
 } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import type { CustomerEmailOutcome } from "@/lib/order-fulfillment";
+
+import { customerEmailMessage } from "./checkout-copy";
 
 export function SuccessHeader() {
   return (
@@ -41,7 +44,13 @@ export function OrderInfo() {
   );
 }
 
-export function EmailConfirmation({ email }: { email: string }) {
+export function EmailConfirmation({
+  email,
+  status,
+}: {
+  email: string;
+  status: CustomerEmailOutcome;
+}) {
   return (
     <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
       <h3 className="flex items-center gap-2 mb-4 text-lg font-bold">
@@ -54,8 +63,7 @@ export function EmailConfirmation({ email }: { email: string }) {
           <span className="font-medium break-all">{email}</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          A confirmation email has been sent to the address above with your
-          order details and receipt.
+          {customerEmailMessage(status)}
         </p>
       </div>
     </div>
@@ -114,11 +122,11 @@ function TimelineStep({ label, time, active }: { label: string; time: string; ac
   );
 }
 
-export function ActionButtons() {
+export function ActionButtons({ orderId }: { orderId: number }) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 justify-center">
       <Button asChild variant="outline" className="gap-2">
-        <Link href="/orders">
+        <Link href={`/orders/${orderId}`}>
           <HiOutlineShoppingBag className="w-4 h-4" />
           View Orders
         </Link>

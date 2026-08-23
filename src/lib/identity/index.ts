@@ -26,3 +26,9 @@ export {
 } from "./server";
 
 export type { AuthenticatedIdentity } from "./server";
+
+export {
+  InternalIdentityError,
+  internalIdentityErrorHttpStatus,
+  requireCronCredentialFromHeaders,
+} from "./internal-request";

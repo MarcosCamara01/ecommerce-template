@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { dataAccess, DataAccessError } from "@/lib/data-access";
+import { getCanonicalAppOrigin } from "@/lib/app-origin";
 import { catalogPriceCentsFromStoredDecimal } from "@/lib/catalog-sync/money";
 import { getIdentityFromHeaders, IdentityError } from "@/lib/identity";
 import { createCheckoutMetadata } from "@/lib/order-fulfillment/checkout-snapshot";
@@ -62,6 +63,9 @@ export async function POST(request: NextRequest) {
       priceId: item.variant.stripeId,
       unitAmount: catalogPriceCentsFromStoredDecimal(item.product.price),
       currency: "eur",
+      productName: item.product.name,
+      variantColor: item.variant.color,
+      imageUrl: item.variant.images[0] ?? item.product.img,
     }));
     if (stripeEurChargeTotal(snapshot) === null) {
       return NextResponse.json(
@@ -72,6 +76,7 @@ export async function POST(request: NextRequest) {
     const userData = dataAccess.forUser(principal);
     const intent = await userData.checkout.createIntent(snapshot);
     const lineItems = buildLineItems(cartItems);
+    const appOrigin = getCanonicalAppOrigin();
     const session = await stripe.checkout.sessions.create({
       integration_identifier: STRIPE_INTEGRATION_IDENTIFIER,
       customer: await getOrCreateStripeCustomer(principal, email),
@@ -82,8 +87,8 @@ export async function POST(request: NextRequest) {
       invoice_creation: { enabled: true },
       billing_address_collection: "required",
       phone_number_collection: { enabled: true },
-      success_url: `${request.nextUrl.origin}/result?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.nextUrl.origin}/cart`,
+      success_url: `${appOrigin}/result?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appOrigin}/cart`,
       automatic_tax: { enabled: false },
       metadata: createCheckoutMetadata(intent.id),
     });

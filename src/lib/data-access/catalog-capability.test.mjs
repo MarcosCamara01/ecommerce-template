@@ -51,8 +51,47 @@ test("catalog manager data access exposes reads but no direct product writes", (
   }
 });
 
+test("the fulfillment System Principal cannot reach operator replay", () => {
+  const { dataAccess } = loadDataAccessHarness();
+  const fulfillment = dataAccess.forSystem({
+    kind: "system",
+    purpose: "order-fulfillment",
+  }).fulfillment;
+
+  assert.equal("replayWork" in fulfillment, false);
+  assert.equal("replayEffect" in fulfillment, false);
+  assert.equal(typeof fulfillment.ensureWork, "function");
+  assert.equal(typeof fulfillment.claimWork, "function");
+});
+
+test("operator replay derives the audit identity from the User Principal", async () => {
+  const { dataAccess, replayInputs } = loadDataAccessHarness();
+  const operator = dataAccess.forFulfillmentOperator({
+    kind: "user",
+    userId: "operator-42",
+    capabilities: ["fulfillment:manage"],
+  });
+
+  await operator.replayWork("cs_paid", "Reviewed payment evidence");
+  await operator.replayEffect(7, "Retry customer receipt");
+
+  assert.deepEqual(replayInputs, [
+    {
+      checkoutSessionId: "cs_paid",
+      operatorUserId: "operator-42",
+      reason: "Reviewed payment evidence",
+    },
+    {
+      effectId: 7,
+      operatorUserId: "operator-42",
+      reason: "Retry customer receipt",
+    },
+  ]);
+});
+
 function loadDataAccessHarness() {
   const requestedCapabilities = [];
+  const replayInputs = [];
   const assertCapability = (principal, capability) => {
     requestedCapabilities.push(capability);
     if (!principal.capabilities.includes(capability)) {
@@ -61,6 +100,27 @@ function loadDataAccessHarness() {
     return principal;
   };
   const emptyRepository = {};
+  const fulfillmentRepository = {
+    registerEvent: async () => undefined,
+    ensureWork: async () => undefined,
+    replayWork: async (input) => {
+      replayInputs.push(input);
+      return true;
+    },
+    replayEffect: async (input) => {
+      replayInputs.push(input);
+      return true;
+    },
+    claimWork: async () => null,
+    completeWork: async () => 1,
+    failWork: async () => undefined,
+    claimEffect: async () => null,
+    completeEffect: async () => undefined,
+    splitLegacyBundledEmailEffect: async () => undefined,
+    completeCartCleanup: async () => undefined,
+    failEffect: async () => undefined,
+    findOrder: async () => null,
+  };
   const modules = {
     "server-only": {},
     "@/lib/identity": {
@@ -76,7 +136,7 @@ function loadDataAccessHarness() {
       checkoutRepository: emptyRepository,
     },
     "@/lib/db/drizzle/repositories/fulfillment.repository": {
-      fulfillmentRepository: emptyRepository,
+      fulfillmentRepository,
     },
     "@/lib/db/drizzle/repositories/orders.repository": {
       ordersRepository: emptyRepository,
@@ -106,5 +166,5 @@ function loadDataAccessHarness() {
     dataAccessModule,
     dataAccessModule.exports,
   );
-  return { ...dataAccessModule.exports, requestedCapabilities };
+  return { ...dataAccessModule.exports, requestedCapabilities, replayInputs };
 }

@@ -30,6 +30,8 @@ const PRINCIPAL_AUTHORITY_IMPORTERS = new Set([
   "src/lib/identity/core.test.mjs",
   "src/lib/identity/index.ts",
   "src/lib/identity/server.ts",
+  "src/lib/catalog-sync/system-principal.ts",
+  "src/lib/catalog-sync/system-principal.test.mjs",
   "src/lib/order-fulfillment/system-principal.ts",
   "src/lib/order-fulfillment/system-principal.test.mjs",
 ]);
@@ -38,6 +40,10 @@ const SYSTEM_PRINCIPAL_IMPORTERS = new Set([
   "src/app/api/stripe/webhooks/route.ts",
   "src/lib/order-fulfillment/index.ts",
   "src/lib/order-fulfillment/system-principal.test.mjs",
+]);
+const CATALOG_SYSTEM_PRINCIPAL_IMPORTERS = new Set([
+  "src/app/api/cron/catalog-sync/route.ts",
+  "src/lib/catalog-sync/system-principal.test.mjs",
 ]);
 
 const normalizePath = (value) => value.split(sep).join("/");
@@ -200,6 +206,14 @@ export function findViolationsInSource({
       !SYSTEM_PRINCIPAL_IMPORTERS.has(importerPath)
     ) {
       violations.push(`${importerPath} (System Principal factory import)`);
+    }
+    if (
+      targetModule === "src/lib/catalog-sync/system-principal" &&
+      !CATALOG_SYSTEM_PRINCIPAL_IMPORTERS.has(importerPath)
+    ) {
+      violations.push(
+        `${importerPath} (Catalog System Principal factory import)`,
+      );
     }
   }
   return [...new Set(violations)];

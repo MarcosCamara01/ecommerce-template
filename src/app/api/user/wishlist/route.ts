@@ -6,15 +6,9 @@ import {
   selectWishlistItemSchema,
   wishlistItemWithProductSchema,
 } from "@/lib/db/drizzle/schema";
-import { DataAccessError } from "@/lib/data-access";
-import { IdentityError, requirePrincipalFromHeaders } from "@/lib/identity";
-import {
-  addToWishlist,
-  getWishlist,
-  getWishlistWithDetails,
-  removeFromWishlist,
-  removeFromWishlistByProduct,
-} from "@/services/wishlist.service";
+import { dataAccess } from "@/lib/data-access";
+import { requirePrincipalFromHeaders } from "@/lib/identity";
+import { readJsonBody, userRouteError } from "@/lib/http/user-route";
 
 const deleteSchema = z
   .object({
@@ -28,77 +22,52 @@ const deleteSchema = z
 export async function GET(request: NextRequest) {
   try {
     const principal = await requirePrincipalFromHeaders(request.headers);
+    const wishlist = dataAccess.forUser(principal).wishlist;
     const details = request.nextUrl.searchParams.get("view") === "details";
     const items = details
       ? wishlistItemWithProductSchema
           .array()
-          .parse(await getWishlistWithDetails(principal))
-      : selectWishlistItemSchema.array().parse(await getWishlist(principal));
+          .parse(await wishlist.listWithDetails())
+      : selectWishlistItemSchema.array().parse(await wishlist.list());
     return NextResponse.json({ items });
   } catch (error) {
-    return routeError(error);
+    return wishlistRouteError(error);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const principal = await requirePrincipalFromHeaders(request.headers);
+    const wishlist = dataAccess.forUser(principal).wishlist;
     const input = addToWishlistSchema.parse(await readJsonBody(request));
     return NextResponse.json({
-      item: await addToWishlist(principal, input.productId),
+      item: await wishlist.add(input.productId),
     });
   } catch (error) {
-    return routeError(error);
+    return wishlistRouteError(error);
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
     const principal = await requirePrincipalFromHeaders(request.headers);
+    const wishlist = dataAccess.forUser(principal).wishlist;
     const input = deleteSchema.parse({
       itemId: request.nextUrl.searchParams.get("itemId") ?? undefined,
       productId: request.nextUrl.searchParams.get("productId") ?? undefined,
     });
     const removed = input.itemId
-      ? await removeFromWishlist(principal, input.itemId)
-      : await removeFromWishlistByProduct(principal, input.productId!);
+      ? await wishlist.remove(input.itemId)
+      : await wishlist.removeByProduct(input.productId!);
     if (!removed) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return routeError(error);
+    return wishlistRouteError(error);
   }
 }
 
-function routeError(error: unknown) {
-  if (error instanceof IdentityError) {
-    return NextResponse.json({ error: error.code }, { status: 401 });
-  }
-  if (error instanceof DataAccessError && error.code === "not_found") {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-  if (error instanceof z.ZodError) {
-    return NextResponse.json(
-      { error: "Invalid wishlist payload", details: error.flatten() },
-      { status: 400 },
-    );
-  }
-  if (error instanceof InvalidJsonBodyError) {
-    return NextResponse.json(
-      { error: "Invalid wishlist payload" },
-      { status: 400 },
-    );
-  }
-  console.error("Wishlist route failed", error);
-  return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-}
-
-class InvalidJsonBodyError extends Error {}
-
-async function readJsonBody(request: NextRequest): Promise<unknown> {
-  try {
-    return await request.json();
-  } catch (error) {
-    if (error instanceof SyntaxError) throw new InvalidJsonBodyError();
-    throw error;
-  }
-}
+const wishlistRouteError = (error: unknown) =>
+  userRouteError(error, {
+    invalidPayloadMessage: "Invalid wishlist payload",
+    logContext: "Wishlist",
+  });

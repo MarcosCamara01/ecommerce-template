@@ -3,7 +3,10 @@ import "server-only";
 import { createHash } from "node:crypto";
 
 import { getPrincipal, type UserPrincipal } from "@/lib/identity";
-import { requestFulfillment } from "@/lib/order-fulfillment";
+import {
+  requestFulfillment,
+  type CheckoutOutcome,
+} from "@/lib/order-fulfillment";
 import { retrieveOwnedCheckoutSession } from "@/lib/order-fulfillment/owned-checkout-session";
 import { stripe, Stripe } from "@/lib/stripe";
 import { stripeLogger } from "@/lib/stripe/logger";
@@ -56,6 +59,8 @@ export async function getOrCreateStripeCustomer(
 
 export type CheckoutStatus =
   | "success"
+  | "fulfillment_pending"
+  | "needs_attention"
   | "pending"
   | "expired"
   | "canceled"
@@ -66,6 +71,7 @@ export type CheckoutStatus =
 export interface CheckoutResult {
   status: CheckoutStatus;
   session?: Stripe.Checkout.Session;
+  outcome?: CheckoutOutcome;
   error?: string;
 }
 
@@ -79,8 +85,12 @@ export async function fetchCheckoutData(sessionId: string): Promise<CheckoutResu
     const session = await retrieveOwnedCheckoutSession(principal, sessionId);
     if (!session) return { status: "not_found" };
     if (session.status === "complete" && session.payment_status === "paid") {
-      await requestFulfillment(principal, session.id);
-      return { status: "success", session };
+      const outcome = await requestFulfillment(principal, session.id);
+      return {
+        status: outcome.status === "fulfilled" ? "success" : outcome.status,
+        session,
+        outcome,
+      };
     }
     if (session.status === "expired") return { status: "expired", session };
     if (session.status === "open") return { status: "pending", session };
