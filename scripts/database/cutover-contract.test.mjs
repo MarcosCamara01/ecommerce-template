@@ -34,6 +34,15 @@ test("schema constraint identifiers fit PostgreSQL's 63-byte limit", async () =>
   }
 });
 
+test("existing-database cutover backfills durable order status and display snapshots", async () => {
+  const cutover = await readFile("scripts/database/cutover-existing.sql", "utf8");
+  assert.match(cutover, /ADD COLUMN IF NOT EXISTS status text DEFAULT 'confirmed' NOT NULL/i);
+  assert.match(cutover, /ADD COLUMN IF NOT EXISTS product_name text/i);
+  assert.match(cutover, /SET product_name = product\.name[\s\S]+variant_color = variant\.color[\s\S]+image_url = coalesce\(variant\.images\[1\], product\.img\)/i);
+  assert.match(cutover, /Historical order display backfill is incomplete/i);
+  assert.match(cutover, /order_status_valid/i);
+});
+
 test("existing-database cutover materializes or structurally validates every canonical index", async () => {
   const contract = await loadSchemaContract();
   const cutover = await readFile(

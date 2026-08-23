@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "npm run verify:release && next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "node --test",
@@ -17,6 +18,7 @@
     "db:verify-hosted": "node scripts/database/verify-hosted-exposure.mjs",
     "db:mark-cutover": "tsx scripts/database/mark-migrations-applied.ts",
     "verify:architecture": "node scripts/verify-architecture.mjs",
+    "verify:release": "node scripts/release-readiness.mjs",
     "auth:bootstrap-admin": "tsx scripts/bootstrap-admin.ts",
     "db:studio": "tsx scripts/database/studio.ts",
     "db:pull": "tsx scripts/database/pull.ts"

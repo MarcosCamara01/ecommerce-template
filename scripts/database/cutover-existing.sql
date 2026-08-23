@@ -64,6 +64,46 @@ ALTER TABLE app_private.products_variants
 ALTER TABLE app_private.order_products
   ADD COLUMN IF NOT EXISTS unit_amount bigint,
   ADD COLUMN IF NOT EXISTS currency text;
+ALTER TABLE app_private.order_items
+  ADD COLUMN IF NOT EXISTS status text DEFAULT 'confirmed' NOT NULL;
+UPDATE app_private.order_items SET status = 'confirmed' WHERE status IS NULL;
+ALTER TABLE app_private.order_items ALTER COLUMN status SET DEFAULT 'confirmed';
+ALTER TABLE app_private.order_items ALTER COLUMN status SET NOT NULL;
+ALTER TABLE app_private.order_products
+  ADD COLUMN IF NOT EXISTS product_name text,
+  ADD COLUMN IF NOT EXISTS variant_color text,
+  ADD COLUMN IF NOT EXISTS image_url text;
+
+UPDATE app_private.order_products AS line
+SET product_name = product.name,
+    variant_color = variant.color,
+    image_url = coalesce(variant.images[1], product.img)
+FROM app_private.products_variants AS variant
+JOIN app_private.products_items AS product
+  ON product.id = variant.product_id
+WHERE line.variant_id = variant.id
+  AND (
+    line.product_name IS NULL
+    OR line.variant_color IS NULL
+    OR line.image_url IS NULL
+  );
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM app_private.order_products
+    WHERE product_name IS NULL
+       OR variant_color IS NULL
+       OR image_url IS NULL
+  ) THEN
+    RAISE EXCEPTION 'Historical order display backfill is incomplete';
+  END IF;
+END
+$$;
+ALTER TABLE app_private.order_products ALTER COLUMN product_name SET NOT NULL;
+ALTER TABLE app_private.order_products ALTER COLUMN variant_color SET NOT NULL;
+ALTER TABLE app_private.order_products ALTER COLUMN image_url SET NOT NULL;
 
 DO $$
 DECLARE historical_lines boolean;
@@ -208,6 +248,21 @@ BEGIN
   IF constraint_expression IS NULL THEN
     ALTER TABLE app_private.order_products
       ADD CONSTRAINT order_unit_amount_nonnegative CHECK (unit_amount >= 0);
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'order_status_valid'
+      AND conrelid = 'app_private.order_items'::regclass
+  ) THEN
+    ALTER TABLE app_private.order_items
+      ADD CONSTRAINT order_status_valid
+      CHECK (status IN ('confirmed', 'processing', 'shipped', 'delivered', 'cancelled'));
   END IF;
 END
 $$;

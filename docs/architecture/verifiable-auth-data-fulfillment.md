@@ -4,7 +4,7 @@ This document materializes Wayfinder map #22 and decisions #23 through #33.
 
 ## Identity
 
-`src/lib/identity` is the only request-credential boundary. It returns opaque runtime-marked User Principals, maps Better Auth's persisted `admin` role to `catalog:manage`, and exposes typed authentication/capability failures. The order-fulfillment module owns the only System Principal factory. UI role checks are advisory; data writes repeat the authoritative check.
+`src/lib/identity` is the only request-credential boundary. It returns opaque runtime-marked User Principals, maps Better Auth's persisted `admin` role to `catalog:manage`, and exposes typed authentication/capability failures. Each trusted internal workflow owns only its purpose-limited System Principal factory: order fulfillment owns `order-fulfillment`, and catalog synchronization owns `catalog-sync`. A Principal for one purpose is rejected by the other workflow. UI role checks are advisory; data writes repeat the authoritative check.
 
 The first administrator is promoted by stable Better Auth user id with `ADMIN_USER_ID npm run auth:bootstrap-admin`. Email addresses are not authorization keys.
 

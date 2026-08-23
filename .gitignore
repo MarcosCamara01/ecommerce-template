@@ -50,3 +50,6 @@ next-env.d.ts
 
 # private vulnerability reports / local artifacts (never commit: public repo)
 /reports/
+
+# local wayfinder scratch (broken encoding, never commit)
+map11.md

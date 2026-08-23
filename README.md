@@ -25,7 +25,17 @@ Modern ecommerce starter built with Next.js 16, React 19, App Router, Drizzle OR
 
     npm install
 
-2. Create .env.local from .env.example.
+2. Create .env.local from .env.example. Keep `NEXT_PUBLIC_APP_URL` and
+   `BETTER_AUTH_URL` on the same canonical origin. `APP_URL` is an optional
+   server-only override and, when set, must use that same origin.
+
+   Google sign-in is opt-in. Register the exact callback
+   `http://localhost:3000/api/auth/callback/google` (and the equivalent HTTPS
+   production callback) in Google Cloud, configure `GOOGLE_CLIENT_ID` and
+   `GOOGLE_CLIENT_SECRET`, then set both `GOOGLE_AUTH_ENABLED=true` and
+   `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true`. The server fails closed when the
+   flags differ. Keep both false until the callback is registered so neither
+   the UI nor the auth endpoint advertises a provider that cannot complete.
 
 3. Configure the database roles and URLs before applying migrations:
 
@@ -82,7 +92,12 @@ db:push is intentionally disabled. Generate a reviewed migration with db:generat
 - Use a public webhook URL for Stripe.
 - Apply npm run db:migrate before deploying application code that depends on a schema change.
 - Never use db:push in any environment.
-- Set both NEXT_PUBLIC_APP_URL and BETTER_AUTH_URL to the production origin.
+- Production builds run `npm run verify:release` and fail closed until
+  `RELEASE_CUTOVER_EVIDENCE`, `RELEASE_HOSTED_EXPOSURE_EVIDENCE`, and
+  `RELEASE_CREDENTIAL_ROTATION_EVIDENCE` reference the approved external
+  restore rehearsal, hosted exposure report, and credential-rotation audit.
+- Set NEXT_PUBLIC_APP_URL and BETTER_AUTH_URL to the same production origin. If
+  APP_URL is set as a server-only override, it must match them.
 
 ## License
 
