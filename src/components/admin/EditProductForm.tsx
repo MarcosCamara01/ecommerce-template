@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ProductForm } from "./ProductForm";
 import type { ProductWithVariants, ProductSize } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
+import { ArchiveProductButton } from "./ArchiveProductButton";
 
 interface EditProductFormProps {
   product: ProductWithVariants;
@@ -40,11 +41,14 @@ export function EditProductForm({
   };
 
   return (
-    <ProductForm
-      mode="edit"
-      initialData={mapProductToFormData(product)}
-      restoreArchived={restoreArchived}
-      onSuccess={handleSuccess}
-    />
+    <>
+      <ProductForm
+        mode="edit"
+        initialData={mapProductToFormData(product)}
+        restoreArchived={restoreArchived}
+        onSuccess={handleSuccess}
+      />
+      {!restoreArchived && <ArchiveProductButton productId={product.id} />}
+    </>
   );
 }
