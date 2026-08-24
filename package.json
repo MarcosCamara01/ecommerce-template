@@ -22,7 +22,10 @@
     "verify:release": "node scripts/release-readiness.mjs",
     "auth:bootstrap-admin": "tsx scripts/bootstrap-admin.ts",
     "db:studio": "tsx scripts/database/studio.ts",
-    "db:pull": "tsx scripts/database/pull.ts"
+    "db:pull": "tsx scripts/database/pull.ts",
+    "doctor": "react-doctor --verbose --scope full --blocking warning",
+    "doctor:staged": "react-doctor --staged --blocking warning --no-score",
+    "prepare": "husky"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.8",
@@ -90,7 +93,10 @@
     "emulate": "^0.9.0",
     "eslint": "9.39.1",
     "eslint-config-next": "16.3.2",
+    "eslint-plugin-react-hooks": "7.0.1",
+    "husky": "9.1.7",
     "portless": "^0.15.3",
+    "react-doctor": "0.9.12",
     "supabase": "2.115.0",
     "tsx": "4.23.12",
     "typescript": "5.9.3"
