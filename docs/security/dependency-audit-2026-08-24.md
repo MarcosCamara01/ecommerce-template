@@ -12,6 +12,12 @@ sin `npm audit fix`, sin cambiar de package manager y sin degradar paquetes, el
 resultado es 0 entradas. Se eliminaron las 19 entradas y los 43 advisories
 individuales del baseline.
 
+Un segundo pase sobre `npm audit` sin omitir devDependencies encontro 33
+entradas adicionales de tooling: 1 critical, 18 high, 11 moderate y 3 low.
+La mayoria procedia del CLI local `vercel@56.2.1`, que no estaba referenciado
+por ningun script ni import del repositorio. Tras retirarlo y actualizar cuatro
+transitivas compatibles de ESLint, el audit completo tambien queda en cero.
+
 Las dos causas que inicialmente requerian una decision adicional quedaron
 resueltas sin degradaciones:
 
@@ -154,6 +160,16 @@ Los cambios efectivos en dependencias son:
   `js-cookie@3.0.8`, `lodash@4.18.1`.
 - Renovacion dirigida del lock: `glob@10.5.0`, `minimatch@9.0.9`,
   `brace-expansion@2.1.4`, `picomatch@2.3.2`.
+- Eliminacion de la devDependency no utilizada `vercel@56.2.1`, retirando su
+  arbol de builders y el `tar@7.5.7` critical sin afectar `vercel.json` ni el
+  script `vercel-build`.
+- Actualizaciones compatibles del tooling ESLint: `@babel/core@7.29.7`,
+  `ajv@6.15.0`, `flatted@3.4.4` y `js-yaml@4.3.1`.
+- Alineacion de `eslint-config-next` y `@next/eslint-plugin-next` con Next.js
+  16.3.2.
+- Eliminacion de `@types/bcryptjs`; `bcryptjs@3.0.2` publica sus propios tipos.
+- Actualizacion de Browserslist a `caniuse-lite@1.0.30001809` y
+  `baseline-browser-mapping@2.11.18`, sin cambios en los navegadores objetivo.
 
 Archivos modificados por esta remediacion y su evidencia:
 
@@ -163,7 +179,7 @@ Archivos modificados por esta remediacion y su evidencia:
 
 ## Vulnerabilidades restantes
 
-No quedan vulnerabilidades en `npm audit --omit=dev`.
+No quedan vulnerabilidades en `npm audit`, incluyendo devDependencies.
 
 Se evaluo Drizzle Kit 1.0.0-rc.4, pero se rechazo porque importa
 `drizzle-orm/_relations`, una exportacion ausente en `drizzle-orm@0.45.2`, y npm
@@ -176,27 +192,38 @@ incompatible y su manifest declara `esbuild@^0.15.18`, tambien vulnerable.
 
 ## Estado final reproducido
 
-`npm audit --omit=dev --json` despues de los cambios: 0 critical, 0 high,
-0 moderate, 0 low, 0 total.
+Tanto `npm audit --omit=dev --json` como `npm audit --json` despues de los
+cambios: 0 critical, 0 high, 0 moderate, 0 low, 0 total.
 
 ## Validacion final
 
+- `npm ci`: exit 0; instalacion limpia de 670 paquetes.
 - `npm test`: exit 0; 287 tests, 287 pass, 0 fail.
 - `npm run typecheck`: exit 0.
 - `npm run lint`: exit 0.
 - `npm run verify:architecture`: exit 0; `Architecture boundary: PASS`.
+- `npm run verify:release`: exit 0; `Release evidence gate: PASS`.
+- `npx drizzle-kit check --config=drizzle.config.ts`: exit 0.
+- `npx react-doctor@0.9.12 --verbose --scope full`: exit 0; 100/100.
+- `npx update-browserslist-db@latest`: exit 0; base actualizada y sin cambios
+  en los navegadores objetivo.
 - `npm run build`: exit 0; Next.js 16.3.2 compilo y genero 36 paginas.
+- `npm audit`: exit 0; 0 vulnerabilidades incluyendo devDependencies.
 - `npm audit --omit=dev`: exit 0; 0 vulnerabilidades.
+- `npm ls --all`: exit 0; arbol de dependencias valido.
 - `git diff --check`: exit 0.
 
 Avisos no bloqueantes observados: los tests imprimen warnings preexistentes
 `MODULE_TYPELESS_PACKAGE_JSON` y un error simulado esperado; el build avisa de
-un lockfile padre fuera del repositorio y de datos Browserslist antiguos.
+un lockfile padre fuera del repositorio. El aviso de Browserslist antiguo ya no
+aparece despues de actualizar su base de datos.
 
 ## Fuentes primarias adicionales
 
 - [Next.js 16.2.11 security release](https://github.com/vercel/next.js/releases/tag/v16.2.11)
   y [Next.js 16.3.2](https://github.com/vercel/next.js/releases/tag/v16.3.2).
+- [Guia oficial de upgrades de Next.js](https://nextjs.org/docs/app/getting-started/upgrading)
+  y [update-browserslist-db](https://github.com/browserslist/update-db).
 - [Sharp advisory del mantenedor](https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj)
   y [Sharp 0.35.0](https://github.com/lovell/sharp/releases/tag/v0.35.0).
 - [PostCSS 8.5.23](https://github.com/postcss/postcss/releases/tag/8.5.23).
@@ -209,6 +236,12 @@ un lockfile padre fuera del repositorio y de datos Browserslist antiguos.
   junto con el [issue upstream #5481](https://github.com/drizzle-team/drizzle-orm/issues/5481).
 - [Overrides en la documentacion oficial de npm](https://docs.npmjs.com/files/package.json/#overrides)
   y [bug de lock existente npm/cli #4232](https://github.com/npm/cli/issues/4232).
+- [node-tar decompression DoS](https://github.com/advisories/GHSA-23hp-3jrh-7fpw)
+  y [node-tar recursion DoS](https://github.com/advisories/GHSA-r292-9mhp-454m).
+- [Babel Core file read](https://github.com/advisories/GHSA-4x5r-pxfx-6jf8),
+  [flatted prototype pollution](https://github.com/advisories/GHSA-rf6f-7fwh-wjgh),
+  [AJV ReDoS](https://github.com/advisories/GHSA-2g4f-4pwh-qvx6) y
+  [js-yaml quadratic CPU](https://github.com/advisories/GHSA-5p4m-2wfm-xmqj).
 - [defu 6.1.5](https://github.com/unjs/defu/releases/tag/v6.1.5),
   [Babel 7.26.10](https://github.com/babel/babel/releases/tag/v7.26.10),
   [Lodash 4.18.0](https://github.com/lodash/lodash/releases/tag/4.18.0),
