@@ -42,16 +42,16 @@ async function main() {
       returning id, role
     `;
     if (rows.length !== 1) {
-      throw new Error(`No Better Auth user found for ADMIN_USER_ID=${userId}`);
+      throw new Error("No Better Auth user found for ADMIN_USER_ID");
     }
-    console.log(`Admin bootstrap complete for stable user id ${rows[0].id}`);
+    console.log("Admin bootstrap complete");
   } finally {
     await sql`reset role`.catch(() => undefined);
     await sql.end();
   }
 }
 
-void main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
+void main().catch(() => {
+  console.error("Admin bootstrap failed");
   process.exitCode = 1;
 });

@@ -209,9 +209,14 @@ function createFakeStripe() {
     },
     customers: {
       search: async ({ query, limit }) => {
-        const userId = /metadata\['userId'\]:'((?:\\.|[^'])*)'/.exec(query)?.[1]
-          ?.replaceAll("\\'", "'")
-          .replaceAll("\\\\", "\\");
+        const prefix = "metadata['userId']:'";
+        const userId =
+          query.startsWith(prefix) && query.endsWith("'")
+            ? query
+                .slice(prefix.length, -1)
+                .replaceAll("\\'", "'")
+                .replaceAll("\\\\", "\\")
+            : undefined;
         return {
           data: customers
             .filter((customer) => customer.metadata?.userId === userId)
