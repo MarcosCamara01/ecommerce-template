@@ -44,8 +44,6 @@
     "@vercel/speed-insights": "^1.2.0",
     "ahooks": "^3.9.5",
     "autoprefixer": "^10.4.21",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
     "better-auth": "1.6.28",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -53,7 +51,6 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "0.45.2",
     "drizzle-zod": "^0.8.3",
-    "embla-carousel-react": "^8.6.0",
     "fuse.js": "^7.1.0",
     "geist": "^1.4.1",
     "next": "16.3.2",
@@ -62,7 +59,6 @@
     "postgres": "^3.4.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-error-boundary": "^5.0.0",
     "react-icons": "^5.5.0",
     "server-only": "0.0.1",
     "sonner": "^2.0.7",
@@ -82,7 +78,6 @@
     "lodash": "4.18.1"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
     "@types/nodemailer": "8.0.1",
     "@types/pg": "^8.15.5",
     "@types/react": "19.2.2",

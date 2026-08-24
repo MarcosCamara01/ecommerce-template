@@ -168,6 +168,9 @@ Los cambios efectivos en dependencias son:
 - Alineacion de `eslint-config-next` y `@next/eslint-plugin-next` con Next.js
   16.3.2.
 - Eliminacion de `@types/bcryptjs`; `bcryptjs@3.0.2` publica sus propios tipos.
+- Eliminacion posterior de `bcrypt`, `bcryptjs`, `@types/bcrypt`,
+  `embla-carousel-react` y `react-error-boundary` tras confirmar en Linux que
+  no tenian consumidores alcanzables en la aplicacion.
 - Actualizacion de Browserslist a `caniuse-lite@1.0.30001809` y
   `baseline-browser-mapping@2.11.18`, sin cambios en los navegadores objetivo.
 
