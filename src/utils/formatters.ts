@@ -5,6 +5,20 @@ const euroCurrencyFormatter = new Intl.NumberFormat("es-ES", {
   currency: "EUR",
 });
 
+const longDateFormatter = new Intl.DateTimeFormat("es-ES", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 export function formatPrice(price: number): string {
   return formatPriceFromCents(price);
 }
@@ -32,22 +46,12 @@ export function formatPriceFromMinorUnits(
 
 export function formatDate(date: string | Date): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateTimeFormat("es-ES", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(dateObj);
+  return longDateFormatter.format(dateObj);
 }
 
 export function formatDateTime(date: string | Date): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateTimeFormat("es-ES", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(dateObj);
+  return dateTimeFormatter.format(dateObj);
 }
 
 export function formatOrderNumber(orderNumber: number): string {

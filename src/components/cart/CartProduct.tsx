@@ -31,7 +31,7 @@ export const CartProduct = ({
 
   return (
     <div className="flex flex-col justify-between overflow-hidden rounded-md border border-solid border-border-primary">
-      <Link href={productLink} className="transition-all hover:scale-105">
+      <Link href={productLink} className="transition-transform hover:scale-105">
         <ProductImage
           image={variant.images[0]}
           name={name}

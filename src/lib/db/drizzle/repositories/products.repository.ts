@@ -2,11 +2,8 @@ import "server-only";
 
 import { and, eq, desc, isNotNull, isNull, sql } from "drizzle-orm";
 import { db } from "../connection";
-import {
-  catalogSyncOperations,
-  productsItems,
-  productsVariants,
-} from "../schema";
+import { catalogSyncOperations } from "../schema/catalog-sync";
+import { productsItems, productsVariants } from "../schema/products";
 import { restorableVariantIdsFromArchiveTarget } from "./catalog-archive";
 import type {
   ProductWithVariants,

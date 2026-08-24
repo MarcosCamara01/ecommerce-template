@@ -8,7 +8,7 @@ import {
   checkoutIntents,
   type CheckoutIntent,
   type CheckoutIntentItem,
-} from "../schema";
+} from "../schema/checkout";
 
 export type OwnedCheckoutOutcomeRecord = Readonly<{
   workState: "pending" | "processing" | "succeeded" | "needs_attention" | null;

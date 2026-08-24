@@ -28,6 +28,9 @@ export default function EditProfile({ manager }: { manager: Manager }) {
   const router = useRouter();
   const nameRef = useRef<HTMLInputElement>(null!);
 
+  // No React Query cache holds the user's name: it lives in the Better Auth
+  // session store, and router.refresh() re-renders the server components.
+  // react-doctor-disable-next-line react-doctor/query-mutation-missing-invalidation
   const { mutate: updateProfile, isPending } = useMutation({
     mutationFn: async () => {
       const response = await fetch("/api/auth/update-user", {
@@ -71,6 +74,9 @@ export default function EditProfile({ manager }: { manager: Manager }) {
           </DialogDescription>
         </DialogHeader>
         <form
+          // Loaded with `dynamic(..., { ssr: false })`: this dialog cannot render
+          // without JavaScript, so a server action would not enhance it. The
+          // matching react-doctor override lives in doctor.config.json.
           onSubmit={(e) => {
             e.preventDefault();
             updateProfile();

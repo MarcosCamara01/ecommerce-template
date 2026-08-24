@@ -24,7 +24,7 @@ export function OrderCard({ order }: OrderCardProps) {
   return (
     <Link
       href={`/orders/${order.id}`}
-      className="group relative overflow-hidden rounded-lg border border-solid border-border-primary bg-background-secondary transition-all duration-200 hover:border-border-secondary hover:shadow-lg"
+      className="group relative overflow-hidden rounded-lg border border-solid border-border-primary bg-background-secondary transition-[border-color,box-shadow] duration-200 hover:border-border-secondary hover:shadow-lg"
     >
       <div className="space-y-4 p-6">
         <div className="flex items-start justify-between">

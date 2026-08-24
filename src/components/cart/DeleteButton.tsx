@@ -26,7 +26,7 @@ export const DeleteButton = ({
       onClick={handleDelete}
       disabled={false}
       aria-label="Delete item"
-      className="transition-all hover:text-white disabled:opacity-50"
+      className="transition-[color,opacity] hover:text-white disabled:opacity-50"
     >
       <IoClose className="w-[18px] h-[18px] text-color-secondary" />
     </button>

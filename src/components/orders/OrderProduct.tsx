@@ -60,7 +60,7 @@ export const OrderProduct = async ({
           />
         </div>
       ) : (
-        <Link href={productLink!} className="transition-all hover:scale-105">
+        <Link href={productLink!} className="transition-transform hover:scale-105">
         <ProductImage
           image={imageUrl}
           blurDataURL={blurDataURL}

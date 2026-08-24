@@ -7,10 +7,9 @@ import {
   customerInfo,
   orderItems,
   orderProducts,
-  productsItems,
-  productsVariants,
   OrderStatusZod,
-} from "../schema";
+} from "../schema/orders";
+import { productsItems, productsVariants } from "../schema/products";
 import type {
   CreateOrderItemInput,
   InsertCustomerInfo,

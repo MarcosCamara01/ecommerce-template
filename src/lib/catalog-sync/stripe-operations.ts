@@ -25,6 +25,10 @@ export async function applyCatalogSyncToStripe(client: StripeCatalogClient, oper
     throw new Error("Catalog preparation must be activated before Stripe synchronization");
   }
   if (target.kind === "archive") {
+    // Sequential on purpose: each call renews the distributed lease through
+    // `heartbeat` and carries its own idempotency key. Parallel calls would
+    // starve the lease and risk Stripe rate limits.
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop
     for (const priceId of target.stripePriceIds) await archiveByPrice(client, operation.id, priceId, heartbeat);
     return { kind: "archive", archivedPriceIds: target.stripePriceIds };
   }
@@ -34,6 +38,8 @@ export async function applyCatalogSyncToStripe(client: StripeCatalogClient, oper
     const name = `${target.product.name} - ${variant.color}`;
     const amount = target.product.priceCents;
     if (!variant.stripePriceId) {
+      // Lease-renewing sequence: see the note on the archive loop above.
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop
       const product = await withLease(heartbeat, () => client.products.create({ name, description: target.product.description || undefined, images: variant.images.slice(0, 8), active: true, metadata }, { idempotencyKey: key(operation.id, `${variant.key}:product`) }));
       const price = await withLease(heartbeat, () => client.prices.create({ product: product.id, unit_amount: amount, currency: "eur", active: true, metadata: { catalog_sync_operation_id: operation.id, catalog_variant_key: variant.key } }, { idempotencyKey: key(operation.id, `${variant.key}:price`) }));
       results[variant.key] = { productId: product.id, priceId: price.id };
@@ -55,6 +61,8 @@ export async function applyCatalogSyncToStripe(client: StripeCatalogClient, oper
       results[variant.key] = { productId: product, priceId: replacement.id };
     }
   }
+  // Lease-renewing sequence: see the note on the archive loop above.
+  // react-doctor-disable-next-line react-doctor/async-await-in-loop
   for (const removed of target.removedVariants) await archiveByPrice(client, operation.id, removed.stripePriceId, heartbeat);
   return {
     kind: "upsert",

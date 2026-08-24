@@ -36,11 +36,13 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
       );
     };
 
+    const selectedSizeSet = new Set(selectedSizes);
+
     return (
       <div className="space-y-3 pb-2">
         <div className="flex flex-wrap gap-2">
           {ProductSizeZod.options.map((size) => {
-            const isSelected = selectedSizes.includes(size);
+            const isSelected = selectedSizeSet.has(size);
             return (
               <button
                 key={size}

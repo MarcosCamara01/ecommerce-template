@@ -30,17 +30,17 @@ const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
 });
 
+const linksData = [
+  { path: "/t-shirts", name: "T-SHIRTS" },
+  { path: "/pants", name: "PANTS" },
+  { path: "/sweatshirts", name: "SWEATSHIRTS" },
+];
+
 export const Navbar = () => {
   const { data: session, isPending } = useSession();
 
   const editProfileManager = useManager();
   const { signOut } = useAuthMutation();
-
-  const linksData = [
-    { path: "/t-shirts", name: "T-SHIRTS" },
-    { path: "/pants", name: "PANTS" },
-    { path: "/sweatshirts", name: "SWEATSHIRTS" },
-  ];
 
   return (
     <>
@@ -71,8 +71,8 @@ export const Navbar = () => {
               <nav className="flex-1 overflow-y-auto">
                 <ul className="flex flex-col gap-2 p-4">
                   {/* Category Links */}
-                  {linksData.map((link, index) => (
-                    <li key={index}>
+                  {linksData.map((link) => (
+                    <li key={link.path}>
                       <SheetClose asChild>
                         <Link
                           href={link.path}
@@ -192,7 +192,7 @@ export const Navbar = () => {
             <li className="flex items-center justify-center">
               <Link
                 href="/login"
-                className="w-24 h-9 text-sm flex items-center justify-center text-color-secondary transition-all hover:text-white font-medium"
+                className="w-24 h-9 text-sm flex items-center justify-center text-color-secondary transition-colors hover:text-white font-medium"
               >
                 Login
               </Link>

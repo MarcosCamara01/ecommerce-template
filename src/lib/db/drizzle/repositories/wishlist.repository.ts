@@ -3,7 +3,8 @@ import "server-only";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import { db } from "../connection";
-import { productsItems, productsVariants, wishlist } from "../schema";
+import { productsItems, productsVariants } from "../schema/products";
+import { wishlist } from "../schema/wishlist";
 import type { WishlistItem } from "@/lib/db/drizzle/schema";
 
 export const wishlistRepository = {

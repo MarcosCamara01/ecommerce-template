@@ -91,6 +91,9 @@ async function removePreparedImages(imageUrls: string[]) {
   const paths = Array.from(new Set(imageUrls.map(storagePathFromPublicUrl)));
   const bucket = createStorageAdminClient().storage.from(PRODUCT_IMAGES_BUCKET);
   for (let index = 0; index < paths.length; index += 1000) {
+    // The 1000-path chunking is the Storage API limit; firing every chunk at
+    // once is the failure mode this loop exists to avoid.
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop
     const { error } = await bucket.remove(paths.slice(index, index + 1000));
     if (error) throw error;
   }

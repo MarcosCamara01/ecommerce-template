@@ -365,9 +365,11 @@ async function enqueueUpsert(input: {
           images: variant.images,
         };
       }),
-      removedVariants: variants
-        .filter((variant) => archiveIds.has(variant.id))
-        .map((variant) => ({ variantId: variant.id, stripePriceId: variant.stripeId })),
+      removedVariants: variants.flatMap((variant) =>
+        archiveIds.has(variant.id)
+          ? [{ variantId: variant.id, stripePriceId: variant.stripeId }]
+          : [],
+      ),
       uploadedImageUrls: Array.from(uploads),
       priorSnapshot: snapshot(product, variants),
     };
@@ -470,6 +472,9 @@ async function finalize(operationId: string, workerId: string, now = new Date())
       for (const variant of operation.target.variants) {
         const stripeVariant = stripeResult.variants[variant.key];
         if (variant.variantId) {
+          // Inside db.transaction: concurrent statements on one Postgres
+          // connection are not safe, so these stay sequential.
+          // react-doctor-disable-next-line react-doctor/async-await-in-loop
           await tx.update(productsVariants).set({ stripeId: stripeVariant.priceId, color: variant.color, sizes: variant.sizes, images: variant.images, archivedAt: null, updatedAt: now })
             .where(and(eq(productsVariants.id, variant.variantId), eq(productsVariants.productId, operation.productId)));
         } else {

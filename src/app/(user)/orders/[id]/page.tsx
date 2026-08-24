@@ -55,7 +55,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
         </p>
         <Link
           href="/orders"
-          className="flex items-center gap-2 px-4 py-2 transition-all rounded-lg bg-background-secondary hover:bg-background-tertiary"
+          className="flex items-center gap-2 px-4 py-2 transition-colors rounded-lg bg-background-secondary hover:bg-background-tertiary"
         >
           <HiArrowLeft className="w-4 h-4" />
           Back to Orders

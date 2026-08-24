@@ -107,9 +107,10 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
   }));
 
   const addVariant = () => {
+    const key = nextKey.current++;
     setVariants((prev) => [
       ...prev,
-      { key: nextKey.current++, data: { color: "", sizes: [], images: [] } },
+      { key, data: { color: "", sizes: [], images: [] } },
     ]);
   };
 

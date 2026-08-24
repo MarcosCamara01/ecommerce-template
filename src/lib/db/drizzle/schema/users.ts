@@ -118,7 +118,7 @@ export const selectUserSchema = createSelectSchema(users, {
 
 export const insertUserSchema = createInsertSchema(users, {
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
 }).omit({ createdAt: true, updatedAt: true });
 
 export const updateUserSchema = selectUserSchema

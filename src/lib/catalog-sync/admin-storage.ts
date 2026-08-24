@@ -71,17 +71,31 @@ export async function buildVariants(
       index,
       variant.imageCount ?? 0,
     );
-    for (const file of variantFiles) {
-      const path = randomStoragePath(
-        "products/" + productId + "/variants/" + normalizeColor(variant.color),
-        file,
-      );
-      const url = await uploadImage(file, path);
-      if (!url) {
-        throw new Error("Error uploading image for variant " + variant.color);
+    const settled = await Promise.allSettled(
+      variantFiles.map((file) =>
+        uploadImage(
+          file,
+          randomStoragePath(
+            "products/" +
+              productId +
+              "/variants/" +
+              normalizeColor(variant.color),
+            file,
+          ),
+        ),
+      ),
+    );
+    // Record every object that did reach storage before reporting the failure:
+    // `uploads` is the compensation ledger, so a URL missing from it is an
+    // orphaned object nobody will ever clean up.
+    for (const result of settled) {
+      if (result.status === "fulfilled" && result.value) {
+        added.push(result.value);
+        uploads.push(result.value);
       }
-      added.push(url);
-      uploads.push(url);
+    }
+    if (added.length !== variantFiles.length) {
+      throw new Error("Error uploading image for variant " + variant.color);
     }
     const images = mergeVariantImageUrls(
       variant.id ? (variant.existingImages ?? []) : [],

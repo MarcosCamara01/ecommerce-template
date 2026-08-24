@@ -93,7 +93,7 @@ export const insertProductSchema = createInsertSchema(productsItems, {
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   price: z.coerce.number().positive("Price must be greater than 0"),
-  img: z.string().url("Must be a valid URL"),
+  img: z.url("Must be a valid URL"),
 }).omit({ id: true, archivedAt: true, createdAt: true, updatedAt: true });
 
 export const updateProductSchema = selectProductSchema

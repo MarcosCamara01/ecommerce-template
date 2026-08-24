@@ -106,12 +106,11 @@ export function planCatalogVariantMutation(
   });
 
   return {
-    archiveIds: existing
-      .filter(
-        (variant) =>
-          variant.archivedAt === null && !retainedIds.has(variant.id),
-      )
-      .map((variant) => variant.id),
+    archiveIds: existing.flatMap((variant) =>
+      variant.archivedAt === null && !retainedIds.has(variant.id)
+        ? [variant.id]
+        : [],
+    ),
     mutations,
   };
 }

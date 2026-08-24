@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -6,6 +6,15 @@ import { safeLocalCallback } from "@/lib/auth/local-callback";
 
 export const useAuthMutation = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // Every cached query is keyed by user id, and the client never refetches on
+  // its own (refetchOnMount/Focus/Reconnect are all off). An identity change
+  // must therefore drop the whole cache, or the next session reads the
+  // previous one's cart and wishlist.
+  const resetIdentityCache = () => {
+    queryClient.clear();
+  };
 
   const signIn = useMutation({
     mutationFn: async ({
@@ -31,6 +40,7 @@ export const useAuthMutation = () => {
       return result;
     },
     onSuccess: (_, variables) => {
+      resetIdentityCache();
       router.push(safeLocalCallback(variables.callbackURL));
       router.refresh();
     },
@@ -69,6 +79,7 @@ export const useAuthMutation = () => {
       return result;
     },
     onSuccess: (result, variables) => {
+      resetIdentityCache();
       const destination = safeLocalCallback(variables.callbackURL);
       // When email verification is required, sign-up does not open a session:
       // the account stays inert until the address is confirmed. Sending the
@@ -100,6 +111,7 @@ export const useAuthMutation = () => {
       });
     },
     onSuccess: (_, variables) => {
+      resetIdentityCache();
       router.push(safeLocalCallback(variables.callbackURL));
       router.refresh();
     },
@@ -114,6 +126,7 @@ export const useAuthMutation = () => {
       await authClient.signOut();
     },
     onSuccess: () => {
+      resetIdentityCache();
       router.push("/");
       router.refresh();
     },

@@ -374,6 +374,8 @@ BEGIN
     'products_variants', 'cart_items', 'wishlist', 'order_items',
     'customer_info', 'order_products'
   ] LOOP
+    -- RLS is moot here: app_private is unreachable by any client role. See
+    -- .react-doctor/false-positives.md and the override in doctor.config.json.
     EXECUTE format('ALTER TABLE app_private.%I DISABLE ROW LEVEL SECURITY', object_name);
     EXECUTE format('ALTER TABLE app_private.%I NO FORCE ROW LEVEL SECURITY', object_name);
     EXECUTE format('ALTER TABLE app_private.%I OWNER TO app_owner', object_name);

@@ -4,6 +4,7 @@ import type {
   Product,
   ProductVariant,
 } from "@/lib/db/drizzle/schema";
+import { formatPriceFromCents } from "./formatters";
 
 export function transformCartItemToOrderProduct(
   cartItem: CartItem,
@@ -30,10 +31,7 @@ export function transformProductPrice(
 ): Product & { priceFormatted: string } {
   return {
     ...product,
-    priceFormatted: new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
-    }).format(product.price / 100),
+    priceFormatted: formatPriceFromCents(product.price),
   };
 }
 

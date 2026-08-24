@@ -43,7 +43,7 @@ const OrdersContent = async () => {
         <h2 className="mb-6 text-4xl font-bold">NO ORDERS YET</h2>
         <p className="mb-4 text-lg">To view your orders you must be logged in.</p>
         <Link
-          className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-background-tertiary hover:border-[#454545]"
+          className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-colors hover:bg-background-tertiary hover:border-[#454545]"
           href="/login"
         >
           Login
@@ -71,13 +71,13 @@ const Orders = async () => {
         </p>
         <div className="flex gap-4">
           <Link
-            className="flex font-medium items-center bg-background-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-all hover:bg-background-tertiary"
+            className="flex font-medium items-center bg-background-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-background-tertiary"
             href="/"
           >
             Go Home
           </Link>
           <Link
-            className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-all hover:bg-border-secondary text-background-primary"
+            className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-border-secondary text-background-primary"
             href="/orders"
           >
             Retry
@@ -99,7 +99,7 @@ const Orders = async () => {
           everything for you!
         </p>
         <Link
-          className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-all hover:bg-border-secondary text-background-primary"
+          className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-border-secondary text-background-primary"
           href="/"
         >
           Start Shopping

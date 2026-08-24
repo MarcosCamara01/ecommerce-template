@@ -9,13 +9,10 @@ export async function GET(request: NextRequest) {
   if (credentialFailure) return credentialFailure;
   const systemPrincipal = getCatalogSyncSystemPrincipal();
   const results = await runCatalogSyncSweep(systemPrincipal, { limit: 10 });
-  const ids = Array.from(
-    new Set(
-      results
-        .filter((item) => item.outcome === "succeeded")
-        .map((item) => item.productId),
-    ),
-  );
-  await Promise.all(ids.map(revalidateProducts));
+  const ids = new Set<number>();
+  for (const item of results) {
+    if (item.outcome === "succeeded") ids.add(item.productId);
+  }
+  await Promise.all(Array.from(ids, revalidateProducts));
   return NextResponse.json({ processed: results.length, results });
 }

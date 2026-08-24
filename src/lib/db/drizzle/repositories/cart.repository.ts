@@ -5,7 +5,8 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { remainingCartQuantity } from "@/lib/cart/remaining-quantity";
 
 import { db, type DatabaseTransaction } from "../connection";
-import { cartItems, productsItems, productsVariants } from "../schema";
+import { cartItems } from "../schema/cart";
+import { productsItems, productsVariants } from "../schema/products";
 import type {
   CartItem,
   AddToCartInput,
@@ -180,6 +181,9 @@ export async function consumePurchasedInTransaction(
     if (currentQuantity === undefined) continue;
     const remaining = remainingCartQuantity(currentQuantity, purchase.quantity);
     if (remaining === null) {
+      // Inside db.transaction: concurrent statements on one Postgres connection
+      // are not safe, so these stay sequential.
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop
       await tx
         .delete(cartItems)
         .where(

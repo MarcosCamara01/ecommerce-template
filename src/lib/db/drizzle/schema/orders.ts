@@ -197,7 +197,7 @@ export const selectCustomerInfoSchema = createSelectSchema(customerInfo, {
 });
 
 export const insertCustomerInfoSchema = createInsertSchema(customerInfo, {
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   name: z.string().min(1, "Name is required"),
   address: InsertAddressSchema,
   totalPrice: z.number().int().positive("Total price must be greater than 0"),

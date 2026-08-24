@@ -11,7 +11,7 @@ import {
   stripeEventReceipts,
   type FulfillmentEffectRow,
   type FulfillmentWorkRow,
-} from "../schema";
+} from "../schema/fulfillment";
 import {
   createCompleteOrderInTransaction,
   ordersRepository,
@@ -56,6 +56,10 @@ export const fulfillmentRepository = {
       if (Number.isNaN(paymentConfirmedAt.getTime())) {
         throw new Error("PostgreSQL returned an invalid confirmation timestamp");
       }
+      // Not a deferrable read: this insert is the idempotency and audit ledger
+      // for *every* Stripe event, so it must run before the guard below that
+      // returns early for non-checkout event types.
+      // react-doctor-disable-next-line react-doctor/async-defer-await
       const [insertedReceipt] = await tx
         .insert(stripeEventReceipts)
         .values({
@@ -64,6 +68,9 @@ export const fulfillmentRepository = {
           objectId: "id" in event.data.object ? event.data.object.id : null,
           stripeCreatedAt: new Date(event.created * 1000),
           receivedAt: paymentConfirmedAt,
+          // JSON normalisation for a jsonb column, not a clone for mutation:
+          // structuredClone would keep Date/Map/Set, which serialise differently.
+          // react-doctor-disable-next-line react-doctor/no-json-parse-stringify-clone
           payload: JSON.parse(JSON.stringify(event)) as Record<string, unknown>,
         })
         .onConflictDoNothing({ target: stripeEventReceipts.eventId })

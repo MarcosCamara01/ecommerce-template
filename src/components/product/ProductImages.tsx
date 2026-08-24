@@ -34,7 +34,7 @@ export const ProductImages = async ({
       {selectedVariant.images.map((image, index) => (
         <div
           className="relative min-w-full snap-start overflow-hidden lg:min-w-0"
-          key={`${image}-${index}`}
+          key={image}
         >
           <ProductImage
             image={image}

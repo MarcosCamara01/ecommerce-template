@@ -49,7 +49,9 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
     const [description, setDescription] = useState(
       initialData?.description || "",
     );
-    const [price, setPrice] = useState(initialData?.price?.toString() || "");
+    const [price, setPrice] = useState(
+      () => initialData?.price?.toString() || "",
+    );
     const [category, setCategory] = useState<ProductCategory | "">(
       initialData?.category || "",
     );

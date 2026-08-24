@@ -38,7 +38,7 @@ const WishlistContent = async () => {
           wishlist.
         </p>
         <Link
-          className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-all hover:border-[#454545] hover:bg-background-tertiary"
+          className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-colors hover:border-[#454545] hover:bg-background-tertiary"
           href="/login"
         >
           Login

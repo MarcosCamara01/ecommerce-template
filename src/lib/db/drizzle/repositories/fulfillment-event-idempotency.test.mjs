@@ -348,7 +348,7 @@ function loadRepositoryHarness(options = {}) {
     },
     "@/lib/db/drizzle/connection": { db },
     "../connection": { db },
-    "../schema": {
+    "../schema/fulfillment": {
       fulfillmentEffects,
       fulfillmentReplayAudit,
       fulfillmentWork,

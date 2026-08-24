@@ -41,10 +41,9 @@ function getEmailConfig() {
     "EMAIL_SERVER_USER",
     "NEXT_PUBLIC_EMAIL_USERNAME",
   ]);
-  const pass = getFirstEnvValue([
-    "EMAIL_SERVER_PASSWORD",
-    "NEXT_PUBLIC_EMAIL_PASSWORD",
-  ], false);
+  // Never fall back to a NEXT_PUBLIC_* name here: Next.js inlines those into
+  // the client bundle, which would publish the SMTP password to every visitor.
+  const pass = getFirstEnvValue(["EMAIL_SERVER_PASSWORD"], false);
   const from = getFirstEnvValue([
     "EMAIL_FROM",
     "EMAIL_SERVER_USER",

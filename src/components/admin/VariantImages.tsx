@@ -101,7 +101,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
       {existingImages.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
           {existingImages.map((imageUrl, index) => (
-            <div key={`existing-${index}`} className="relative group">
+            <div key={imageUrl} className="relative group">
               <Image
                 src={imageUrl}
                 alt={`Existing ${index + 1}`}
@@ -134,7 +134,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
       {previews.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
           {previews.map((preview, index) => (
-            <div key={`new-${index}`} className="relative group">
+            <div key={preview} className="relative group">
               <Image
                 src={preview}
                 alt={`Preview ${index + 1}`}

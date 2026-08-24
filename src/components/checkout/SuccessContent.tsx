@@ -88,8 +88,8 @@ export function DeliveryTimeline() {
       <div className="relative pl-6 space-y-4">
         <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-border-primary" />
 
-        {TIMELINE_STEPS.map((step, index) => (
-          <TimelineStep key={index} {...step} />
+        {TIMELINE_STEPS.map((step) => (
+          <TimelineStep key={step.label} {...step} />
         ))}
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { FiArchive } from "react-icons/fi";
 import { toast } from "sonner";
@@ -17,10 +17,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import LoadingButton from "@/components/ui/loadingButton";
+import { CART_QUERY_KEYS } from "@/hooks/cart/keys";
 import { archiveProduct } from "@/hooks/product/mutations/productMutations";
+import { WISHLIST_QUERY_KEYS } from "@/hooks/wishlist/keys";
+import { useSession } from "@/lib/auth/client";
 
 export function ArchiveProductButton({ productId }: { productId: number }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
   const archive = useMutation({
     mutationFn: async () => {
       const result = await archiveProduct(productId);
@@ -28,6 +34,17 @@ export function ArchiveProductButton({ productId }: { productId: number }) {
       return result;
     },
     onSuccess: (result) => {
+      // Archiving drops the product from carts and wishlists server-side, and
+      // both caches embed the full product row. router.refresh() only reaches
+      // the server components, so the query cache has to be invalidated too.
+      if (userId) {
+        void queryClient.invalidateQueries({
+          queryKey: CART_QUERY_KEYS.cartList(userId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: WISHLIST_QUERY_KEYS.wishlistList(userId),
+        });
+      }
       toast.success(
         result.accepted
           ? "Product archive recorded and synchronizing"
