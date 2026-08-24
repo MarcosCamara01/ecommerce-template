@@ -34,7 +34,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@supabase/supabase-js": "^2.49.4",
+    "@supabase/supabase-js": "2.50.0",
     "@tanstack/react-query": "^5.75.1",
     "@vercel/analytics": "^1.5.0",
     "@vercel/kv": "^3.0.0",
@@ -53,8 +53,8 @@
     "embla-carousel-react": "^8.6.0",
     "fuse.js": "^7.1.0",
     "geist": "^1.4.1",
-    "next": "^16.2.10",
-    "nodemailer": "^7.0.10",
+    "next": "16.3.2",
+    "nodemailer": "9.0.5",
     "pg": "^8.16.3",
     "postgres": "^3.4.7",
     "react": "^19.2.0",
@@ -69,10 +69,19 @@
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.1.12"
   },
+  "overrides": {
+    "@babel/runtime": "7.26.10",
+    "@esbuild-kit/core-utils@3.3.2": {
+      "esbuild": "0.25.12"
+    },
+    "defu": "6.1.5",
+    "js-cookie": "3.0.8",
+    "lodash": "4.18.1"
+  },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^3.0.0",
-    "@types/nodemailer": "^7.0.4",
+    "@types/nodemailer": "8.0.1",
     "@types/pg": "^8.15.5",
     "@types/react": "19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -84,7 +93,7 @@
     "eslint-config-next": "16.0.1",
     "portless": "^0.15.3",
     "supabase": "2.115.0",
-    "tsx": "^4.20.6",
+    "tsx": "4.23.12",
     "typescript": "5.9.3",
     "vercel": "^56.2.1"
   }
