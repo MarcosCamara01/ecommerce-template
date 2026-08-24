@@ -6,7 +6,7 @@ import {
   SingleProductSkeleton,
   SuspenseRandomProducts,
 } from "@/components/product";
-import { getAllProducts, getProduct } from "@/app/actions";
+import { getProduct } from "@/app/actions";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
@@ -15,23 +15,14 @@ type PageProps = {
   searchParams: Promise<{ variant: string | undefined }>;
 };
 
-export async function generateStaticParams() {
-  const products = await getAllProducts();
-
-  return products.map((product) => ({
-    category: product.category,
-    id: String(product.id),
-  }));
-}
-
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   const productId = Number(id);
 
   if (!Number.isInteger(productId) || productId <= 0) {
     return {
-      title: "Product | Ecommerce Template",
-      description: "Explore the latest product details at Ecommerce Template.",
+      title: "Producto | INCOFER",
+      description: "Conocé los productos disponibles en INCOFER.",
     };
   }
 
@@ -39,13 +30,13 @@ export async function generateMetadata({ params }: PageProps) {
 
   if (!product) {
     return {
-      title: "Product not found | Ecommerce Template",
-      description: "The requested product is not available.",
+      title: "Producto no encontrado | INCOFER",
+      description: "El producto solicitado no está disponible.",
     };
   }
 
   return {
-    title: `${capitalizeFirstLetter(product.name)} | Ecommerce Template`,
+    title: `${capitalizeFirstLetter(product.name)} | INCOFER`,
     description: product.description,
   };
 }
