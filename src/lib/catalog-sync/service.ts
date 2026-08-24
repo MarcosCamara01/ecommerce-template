@@ -11,8 +11,12 @@ import {
 } from "@/lib/identity";
 import { createStorageAdminClient } from "@/lib/storage/supabase";
 import { stripe, Stripe } from "@/lib/stripe";
+import { externalErrorFacts } from "@/lib/external/error-facts";
 import { createCatalogSyncEngine } from "./engine";
-import { CatalogSyncError } from "./model";
+import {
+  CatalogSyncError,
+  type CatalogSyncState,
+} from "./model";
 import { applyCatalogSyncToStripe } from "./stripe-operations";
 import { isCatalogPreparationComplete } from "./preparation-state";
 import { runPreparationCancellation } from "./preparation-cancellation";
@@ -26,7 +30,7 @@ type CatalogPreparationSweepResult =
   | {
       operationId: string;
       productId: number;
-      state: string;
+      state: CatalogSyncState;
       outcome: "cancelled" | "needs_attention" | "retry_scheduled";
     };
 
@@ -34,15 +38,16 @@ const engine = createCatalogSyncEngine({
   repository: catalogSyncRepository,
   applyStripe: (operation, heartbeat) => applyCatalogSyncToStripe(stripe, operation, heartbeat),
   classify(error) {
+    const facts = externalErrorFacts(error);
     const stripeError = error instanceof Stripe.errors.StripeError;
-    const databaseCode = typeof error === "object" && error !== null && "code" in error ? String(error.code) : null;
+    const databaseCode = facts.code;
     const retryable = error instanceof CatalogSyncError ? false : stripeError
       ? ["StripeAPIError", "StripeConnectionError", "StripeRateLimitError", "StripeIdempotencyError"].includes(error.type)
       : !(databaseCode && ["23502", "23503", "23505", "23514", "22P02"].includes(databaseCode));
     return {
       retryable,
       code: error instanceof CatalogSyncError ? error.code : stripeError ? error.type : databaseCode ?? "unknown_error",
-      detail: error instanceof Error ? error.message : "Unknown catalog sync error",
+      detail: facts.detail,
     };
   },
 });

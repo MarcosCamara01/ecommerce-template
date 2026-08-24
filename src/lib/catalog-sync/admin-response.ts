@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { CatalogSyncError } from "./model";
+import { CatalogSyncError, type CatalogSyncState } from "./model";
+import type { CatalogSyncResult } from "./engine";
 import { fieldErrorsFromZod } from "./admin-errors";
 
 export const validation = (error: z.ZodError) =>
@@ -23,7 +24,11 @@ export const domainError = (error: CatalogSyncError, retryable?: boolean) =>
     },
   );
 
-export function queued(operationId: string, state: string, message: string) {
+export function queued(
+  operationId: string,
+  state: CatalogSyncState,
+  message: string,
+) {
   return NextResponse.json(
     {
       success: true,
@@ -37,11 +42,9 @@ export function queued(operationId: string, state: string, message: string) {
   );
 }
 
-export function pending(result: {
-  operationId: string;
-  state: string;
-  outcome: string;
-}) {
+export function pending(
+  result: Pick<CatalogSyncResult, "operationId" | "state" | "outcome">,
+) {
   if (result.outcome === "needs_attention") {
     return NextResponse.json(
       {

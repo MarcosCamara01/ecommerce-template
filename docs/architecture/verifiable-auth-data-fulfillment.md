@@ -1,6 +1,10 @@
 # Verifiable identity, data, and fulfillment architecture
 
-This document materializes Wayfinder map #22 and decisions #23 through #33.
+This document materializes Wayfinder map #22 and decisions #23 through #33 for
+identity, data, fulfillment, and deployment. The catalog-synchronization section
+records a later implementation follow-up; it is not presented as scope granted by
+map #22, whose exclusions still apply. Promote that section to its own tracker spec
+before treating the combined branch as one approved delivery unit.
 
 ## Identity
 
@@ -42,4 +46,11 @@ becomes `cancelled` only after every planned object has been removed.
 
 ## Deployment
 
-Drizzle owns the canonical schema and migration history. Better Auth CLI output is advisory only. Production/shared `db:push` is disabled. The exact empty-database, existing-database, role, cutover, rollback, and evidence procedures live under `scripts/database` and `docs/runbooks`.
+Drizzle owns the canonical schema and migration history. Drizzle Kit is the only
+migration generator; `scripts/database/migrate.ts` is the role-aware runner over
+Drizzle's official ORM migrator and the same generated journal. The wrapper first
+proves `app_migrator` cannot run private DDL directly, then assumes `app_owner` on
+the same database session before applying migrations. Better Auth CLI output is
+advisory only. Production/shared `db:push` is disabled. The exact empty-database,
+existing-database, role, cutover, rollback, and evidence procedures live under
+`scripts/database` and `docs/runbooks`.

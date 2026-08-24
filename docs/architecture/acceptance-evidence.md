@@ -9,7 +9,7 @@ Every row is pass/fail. Source inspection alone is not runtime evidence.
 | Unit behavior | `npm test` | Principal fabrication, snapshot reconciliation, price authority, and retry classification tests pass. |
 | Empty database | `npm run db:migrate` on a disposable empty database | One baseline creates every auth, catalog, order, and fulfillment object in `app_private`. |
 | Restored database | Rehearse `cutover-existing.sql` on a disposable restore | Migration commits with row counts and foreign keys preserved; pre-mark certification proves the checkout-binding body, owner, `SECURITY DEFINER`, fixed search path, and exact ACL. |
-| Hosted schema exposure | Run `npm run db:verify-hosted` against Supabase Management API | Effective `db_schema` exactly matches the versioned allowlist and excludes `public` and `app_private`. |
+| Hosted schema exposure | Run `npm run db:apply-hosted` for the explicit `SUPABASE_PROJECT_REF` | The lockfile-pinned CLI applies `supabase/config.toml`, then the Management API verifier proves effective `db_schema` matches the versioned allowlist and excludes `public` and `app_private`. |
 | Runtime role | `npm run db:verify` using `app_runtime` | Required DML succeeds; DDL and public application-table access are denied; webhook receipts expose only the idempotency-key column, never payloads. |
 | Owner role | Catalog query over `pg_class` | Every private table and sequence is owned by `app_owner`. |
 | RLS | Catalog query over `pg_class.relrowsecurity` and `pg_policy` | No private table has RLS enabled and no legacy policy remains. |

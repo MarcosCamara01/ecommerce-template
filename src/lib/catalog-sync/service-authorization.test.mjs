@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import test from "node:test";
 
 import ts from "typescript";
+import { externalErrorFacts } from "../external/error-facts.ts";
 
 const nativeRequire = createRequire(import.meta.url);
 const source = await readFile(new URL("./service.ts", import.meta.url), "utf8");
@@ -65,6 +66,7 @@ function loadServiceHarness({ withEvidence = false } = {}) {
       stripe: {},
       Stripe: { errors: { StripeError } },
     },
+    "@/lib/external/error-facts": { externalErrorFacts },
     "./engine": {
       createCatalogSyncEngine: () => ({
         processById: async () => ({ outcome: "busy" }),

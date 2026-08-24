@@ -6,11 +6,20 @@ import {
   assertReferencedVariantsExist,
   reconcileChargedItems,
 } from "./checkout-snapshot.ts";
+import { ExistingOrderMismatchError } from "../orders/existing-order-idempotency.ts";
 
 test("typed permanent failures never retry", () => {
   const result = classifyFulfillmentError(
     new FulfillmentFailure("catalog_mismatch", false, "catalog mismatch"),
   );
+  assert.equal(result.retryable, false);
+  assert.equal(retryAt(1, result.retryable), null);
+});
+
+test("an existing order mismatch requires operator attention immediately", () => {
+  const result = classifyFulfillmentError(new ExistingOrderMismatchError());
+
+  assert.equal(result.code, "existing_order_mismatch");
   assert.equal(result.retryable, false);
   assert.equal(retryAt(1, result.retryable), null);
 });

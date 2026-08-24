@@ -331,10 +331,18 @@ test("migrator reaches private DDL only by assuming app_owner", async () => {
   assert.match(migrateScript, /__migrator_direct_ddl_probe/);
   assert.match(migrateScript, /session_user !== "app_migrator"/);
   assert.match(migrateScript, /error\.code !== "42501"/);
+  assert.match(
+    migrateScript,
+    /drizzle-orm\/postgres-js\/migrator/,
+  );
   assert.match(bootstrap, /app_owner must not be a member of other roles/);
   assert.ok(
     migrateScript.indexOf("assertDirectMigratorDdlIsDenied") <
       migrateScript.indexOf("set role app_owner"),
+  );
+  assert.ok(
+    migrateScript.indexOf("set role app_owner") <
+      migrateScript.indexOf("await migrate"),
   );
 });
 

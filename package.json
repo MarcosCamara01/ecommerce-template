@@ -15,6 +15,7 @@
     "db:push": "node scripts/database/forbid-db-push.mjs",
     "db:verify": "tsx scripts/database/verify.ts",
     "db:verify-concurrency": "node --conditions=react-server --import tsx scripts/database/verify-fulfillment-concurrency.ts",
+    "db:apply-hosted": "node scripts/database/apply-hosted-exposure.mjs",
     "db:verify-hosted": "node scripts/database/verify-hosted-exposure.mjs",
     "db:mark-cutover": "tsx scripts/database/mark-migrations-applied.ts",
     "verify:architecture": "node scripts/verify-architecture.mjs",
@@ -82,6 +83,7 @@
     "eslint": "9.39.1",
     "eslint-config-next": "16.0.1",
     "portless": "^0.15.3",
+    "supabase": "2.115.0",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
     "vercel": "^56.2.1"

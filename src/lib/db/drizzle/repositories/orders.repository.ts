@@ -16,6 +16,10 @@ import type {
   InsertOrderProduct,
   OrderWithDetails,
 } from "@/lib/db/drizzle/schema";
+import {
+  ExistingOrderMismatchError,
+  assertExistingOrderMatchesFulfillment,
+} from "@/lib/orders/existing-order-idempotency";
 
 const ORDER_NUMBER_LOCK_NAMESPACE = 42_001;
 const ORDER_NUMBER_LOCK_RESOURCE = 1;
@@ -76,7 +80,32 @@ export async function createCompleteOrderInTransaction(
   const existing = await tx.query.customerInfo.findFirst({
     where: eq(customerInfo.stripeOrderId, input.customer.stripeOrderId),
   });
-  if (existing) return existing.orderId;
+  if (existing) {
+    const existingOrder = await tx.query.orderItems.findFirst({
+      where: eq(orderItems.id, existing.orderId),
+      with: { orderProducts: true },
+    });
+    if (!existingOrder) {
+      throw new ExistingOrderMismatchError();
+    }
+    assertExistingOrderMatchesFulfillment(
+      {
+        userId: existingOrder.userId,
+        stripeSessionId: existing.stripeOrderId,
+        totalPrice: existing.totalPrice,
+        currency: existing.currency,
+        products: existingOrder.orderProducts,
+      },
+      {
+        userId: input.order.userId,
+        stripeSessionId: input.customer.stripeOrderId,
+        totalPrice: input.customer.totalPrice,
+        currency: input.customer.currency,
+        products: input.products,
+      },
+    );
+    return existing.orderId;
+  }
 
   await tx.execute(
     sql`select pg_advisory_xact_lock(${ORDER_NUMBER_LOCK_NAMESPACE}, ${ORDER_NUMBER_LOCK_RESOURCE})`,

@@ -6,7 +6,10 @@ import { z } from "zod";
 
 import { compensateUploadedCatalogImages } from "@/lib/catalog-sync/create-compensation";
 import { planCatalogCreateCommand } from "@/lib/catalog-sync/create-command";
-import { CatalogSyncError } from "@/lib/catalog-sync/model";
+import {
+  CatalogSyncError,
+  type CatalogSyncState,
+} from "@/lib/catalog-sync/model";
 import { readVariantImageFiles } from "@/lib/catalog-sync/input-validation";
 import { revalidateProducts } from "@/lib/catalog-sync/revalidate";
 import { createCatalogSyncManager } from "@/lib/catalog-sync/service";
@@ -32,7 +35,10 @@ import {
 } from "@/lib/catalog-sync/admin-response";
 import type { UserPrincipal } from "@/lib/identity";
 
-type DurableCatalogMutation = { operationId: string; state: string };
+type DurableCatalogMutation = {
+  operationId: string;
+  state: CatalogSyncState;
+};
 
 async function finalizeCatalogMutation(input: {
   manager: ReturnType<typeof createCatalogSyncManager>;

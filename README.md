@@ -75,16 +75,25 @@ The complete list is maintained in .env.example. The database variables above in
     npm run db:generate
     npm run db:migrate
     npm run db:verify
+    npm run db:apply-hosted
     npm run db:verify-hosted
     npm run db:mark-cutover
     npm run db:studio
     npm run db:pull
 
-`db:studio` and `db:pull` verify the `app_migrator` session and assume
-`app_owner` only for their Drizzle Kit subprocess; do not put `role=` in
-`MIGRATION_DATABASE_URL`.
+`db:generate` uses the pinned Drizzle Kit. `db:migrate` uses the official Drizzle
+ORM migrator through a role-aware wrapper so authentication as `app_migrator`,
+the direct-DDL denial probe, `SET ROLE app_owner`, and migration application all
+happen in the required order. `db:studio` and `db:pull` verify the
+`app_migrator` session and assume `app_owner` only for their Drizzle Kit
+subprocess; do not put `role=` in `MIGRATION_DATABASE_URL`.
 
 db:push is intentionally disabled. Generate a reviewed migration with db:generate, apply it with db:migrate, and use the cutover runbook for an already populated database.
+
+`db:apply-hosted` uses the lockfile-pinned Supabase CLI to push
+`supabase/config.toml` to the explicit `SUPABASE_PROJECT_REF`, then runs the
+Management API verifier. It requires `SUPABASE_ACCESS_TOKEN`; use an operator
+token with only the project configuration access needed for this step.
 
 ## Deployment Notes
 

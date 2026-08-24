@@ -1,4 +1,4 @@
-import type { CatalogSyncTarget } from "./model";
+import type { CatalogSyncState, CatalogSyncTarget } from "./model";
 import { CATALOG_SYNC_MAX_ATTEMPTS } from "./state-machine.ts";
 
 export const CATALOG_PREPARATION_LEASE_MS = 15 * 60 * 1000;
@@ -35,7 +35,7 @@ export function catalogPreparationFailureTransition(
 }
 
 export function shouldCompensateRejectedPreparedUpload(
-  state: string | null | undefined,
+  state: CatalogSyncState | null | undefined,
 ): boolean {
   return state === "cancelling" || state === "cancelled";
 }

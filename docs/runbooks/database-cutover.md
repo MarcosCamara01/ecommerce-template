@@ -17,7 +17,10 @@ window, a tested restore point, and human review of the captured evidence.
 - `MIGRATION_DATABASE_URL` authenticates as `app_migrator`; `npm run db:migrate` verifies
   that identity and assumes `app_owner` for the migration session.
 - `VERIFY_DATABASE_URL` authenticates as `app_runtime`.
-- Drizzle migrations are the only forward schema mechanism. `npm run db:push` is disabled.
+- Drizzle Kit is the only migration generator. The role-aware `db:migrate`
+  wrapper applies its journal through the official Drizzle ORM migrator only
+  after authenticating as `app_migrator`, proving direct private DDL is denied,
+  and assuming `app_owner` on that same session. `npm run db:push` is disabled.
 - The hosted PostgREST/Data API remains disabled, or exposes an empty schema.
 - `AUTH_DATABASE_LAYOUT=public` is a temporary compatibility mode used only while all
   non-authentication application traffic is paused.
@@ -41,8 +44,11 @@ The script never removes unexpected role memberships automatically.
 4. Set the immutable Better Auth user id in `ADMIN_USER_ID`, then run
    `npx tsx scripts/bootstrap-admin.ts`.
 5. Run `npm run db:verify` and retain the complete output as release evidence.
-6. Run `npm run db:verify-hosted` with a read-only Supabase Management API token and
-   retain the exact allowlist result before accepting traffic.
+6. Set `SUPABASE_PROJECT_REF` to the reviewed target and run
+   `npm run db:apply-hosted` with a Supabase Management API token permitted to
+   update that project's configuration. The lockfile-pinned CLI applies
+   `supabase/config.toml`; the same command then verifies the effective allowlist.
+   Retain the exact result before accepting traffic.
 
 ## Existing database cutover
 
@@ -108,7 +114,8 @@ archive, and drop the table without granting access to runtime roles.
     `CONFIRM_DATABASE_CUTOVER=MARK_MIGRATIONS_APPLIED` and run
     `npm run db:mark-cutover` with `MIGRATION_DATABASE_URL`. This records the reviewed
     canonical migrations without executing them over the converted schema.
-14. Run `npm run db:verify-hosted` and retain its Management API result, then re-enable
+14. Reconfirm `SUPABASE_PROJECT_REF`, run `npm run db:apply-hosted`, and retain
+    its post-apply Management API verification result. Only then re-enable
     Stripe webhook delivery and cron and reopen application traffic.
 
 ## Rollback boundary
