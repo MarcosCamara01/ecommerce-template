@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Verify architecture
+        run: npm run verify:architecture
+      - name: Verify release gate behavior
+        run: npm run verify:release
+      - name: Check Drizzle schema
+        run: npx --no-install drizzle-kit check --config=drizzle.config.ts
+        env:
+          MIGRATION_DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+      - name: Build without privileged services
+        run: npm run build
+        env:
+          APP_URL: http://localhost:3000
+          BETTER_AUTH_SECRET: ci-only-placeholder-not-a-real-secret
+          BETTER_AUTH_URL: http://localhost:3000
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+          GOOGLE_AUTH_ENABLED: "false"
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: "false"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-only-placeholder
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_TELEMETRY_DISABLED: "1"
+          STRIPE_SECRET_KEY: ci-only-placeholder
+          SUPABASE_SERVICE_ROLE_KEY: ci-only-placeholder
+      - name: Audit all dependencies
+        run: npm audit --audit-level=low
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=low
+      - name: Validate dependency tree
+        run: npm ls --all
+      - name: Check pull request diff
+        if: github.event_name == 'pull_request'
+        run: git diff --check "origin/${BASE_REF}...HEAD"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+      - name: Check pushed commit diff
+        if: github.event_name == 'push'
+        run: |
+          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            EMPTY_TREE=$(git hash-object -t tree /dev/null)
+            git diff --check "$EMPTY_TREE...$GITHUB_SHA"
+          else
+            git diff --check "$BEFORE_SHA...$GITHUB_SHA"
+          fi
+        env:
+          BEFORE_SHA: ${{ github.event.before }}

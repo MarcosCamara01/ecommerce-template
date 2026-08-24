@@ -1,0 +1,6 @@
+# Every change requires review from the repository owner.
+* @MarcosCamara01
+
+# Keep repository governance and automation explicitly owner-controlled.
+/.github/CODEOWNERS @MarcosCamara01
+/.github/workflows/ @MarcosCamara01
