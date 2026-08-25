@@ -3,6 +3,15 @@ type ApplicationEnvironment = Readonly<Record<string, string | undefined>>;
 export function getCanonicalAppOrigin(
   environment: ApplicationEnvironment = process.env,
 ): string {
+  if (environment.VERCEL_ENV === "preview") {
+    const previewHost =
+      environment.VERCEL_BRANCH_URL?.trim() || environment.VERCEL_URL?.trim();
+    if (!previewHost) {
+      throw new Error("A canonical application origin is required for Vercel Preview");
+    }
+    return parseApplicationOrigin(`https://${previewHost}`);
+  }
+
   const configured = [
     environment.APP_URL,
     environment.BETTER_AUTH_URL,

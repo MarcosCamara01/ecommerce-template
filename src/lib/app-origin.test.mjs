@@ -17,6 +17,47 @@ test("canonical origin accepts a matching server-only application URL", () => {
   );
 });
 
+test("preview origin prefers the concrete branch URL over production configuration", () => {
+  assert.equal(
+    getCanonicalAppOrigin({
+      VERCEL_ENV: "preview",
+      VERCEL_BRANCH_URL: "feature-auth.example.vercel.app",
+      VERCEL_URL: "deployment.example.vercel.app",
+      APP_URL: "https://shop.example.test",
+      BETTER_AUTH_URL: "https://shop.example.test",
+      NEXT_PUBLIC_APP_URL: "https://shop.example.test",
+    }),
+    "https://feature-auth.example.vercel.app",
+  );
+});
+
+test("preview origin falls back to the concrete deployment URL", () => {
+  assert.equal(
+    getCanonicalAppOrigin({
+      VERCEL_ENV: "preview",
+      VERCEL_URL: "deployment.example.vercel.app",
+      APP_URL: "https://shop.example.test",
+      BETTER_AUTH_URL: "https://shop.example.test",
+      NEXT_PUBLIC_APP_URL: "https://shop.example.test",
+    }),
+    "https://deployment.example.vercel.app",
+  );
+});
+
+test("production ignores preview hosts and keeps its configured origin", () => {
+  assert.equal(
+    getCanonicalAppOrigin({
+      VERCEL_ENV: "production",
+      VERCEL_BRANCH_URL: "feature-auth.example.vercel.app",
+      VERCEL_URL: "deployment.example.vercel.app",
+      APP_URL: "https://shop.example.test",
+      BETTER_AUTH_URL: "https://shop.example.test",
+      NEXT_PUBLIC_APP_URL: "https://shop.example.test",
+    }),
+    "https://shop.example.test",
+  );
+});
+
 test("canonical origin rejects divergent configured application origins", () => {
   assert.throws(
     () => getCanonicalAppOrigin({
@@ -47,6 +88,27 @@ test("canonical origin rejects missing or non-origin values", () => {
     { APP_URL: "https://shop.example.test/store" },
     { APP_URL: "https://shop.example.test?tenant=one" },
     { APP_URL: "https://shop.example.test#checkout" },
+  ]) {
+    assert.throws(() => getCanonicalAppOrigin(environment), /application origin/i);
+  }
+});
+
+test("preview origin fails closed for missing or invalid deployment hosts", () => {
+  for (const environment of [
+    {
+      VERCEL_ENV: "preview",
+      APP_URL: "https://shop.example.test",
+      BETTER_AUTH_URL: "https://shop.example.test",
+      NEXT_PUBLIC_APP_URL: "https://shop.example.test",
+    },
+    {
+      VERCEL_ENV: "preview",
+      VERCEL_BRANCH_URL: "feature.example.vercel.app/path",
+    },
+    {
+      VERCEL_ENV: "preview",
+      VERCEL_URL: "https://deployment.example.vercel.app",
+    },
   ]) {
     assert.throws(() => getCanonicalAppOrigin(environment), /application origin/i);
   }
