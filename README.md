@@ -64,6 +64,12 @@ Modern ecommerce starter built with Next.js 16, React 19, App Router, Drizzle OR
 
 The complete list is maintained in .env.example. The database variables above intentionally use separate credentials so application runtime access cannot run migrations.
 
+Email delivery is disabled unless `EMAIL_SERVER_HOST` names an explicit SMTP
+transport. A configured host requires a valid port, user, password, sender, and
+contact recipient; partial configuration fails before Nodemailer creates a
+transport. Gmail can be used explicitly with its SMTP host, but credentials
+alone never enable Gmail service fallback.
+
 ## Scripts
 
     npm run dev

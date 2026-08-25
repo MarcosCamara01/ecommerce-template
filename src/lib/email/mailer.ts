@@ -58,15 +58,28 @@ function getEmailConfig() {
     "NEXT_PUBLIC_EMAIL_USERNAME",
   ]);
 
-  if (!user || !pass || !from || !contactTo) {
+  if (!host) {
     throw new Error(
-      "Email is not configured. Set EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_FROM, and EMAIL_CONTACT_TO/ADMIN_EMAIL.",
+      "Email is disabled. Set EMAIL_SERVER_HOST to enable an explicit SMTP transport.",
+    );
+  }
+  if (
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65_535 ||
+    !user ||
+    !pass ||
+    !from ||
+    !contactTo
+  ) {
+    throw new Error(
+      "Email configuration is incomplete or invalid. Set a valid EMAIL_SERVER_PORT, EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_FROM, and EMAIL_CONTACT_TO/ADMIN_EMAIL.",
     );
   }
 
   return {
     host,
-    port: Number.isFinite(port) && port > 0 ? port : 587,
+    port,
     user,
     pass,
     from,
@@ -96,23 +109,15 @@ function getTransporter() {
 
   const config = getEmailConfig();
 
-  transporter = config.host
-    ? nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.port === 465,
-        auth: {
-          user: config.user,
-          pass: config.pass,
-        },
-      })
-    : nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: config.user,
-          pass: config.pass,
-        },
-      });
+  transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.port === 465,
+    auth: {
+      user: config.user,
+      pass: config.pass,
+    },
+  });
 
   return transporter;
 }
