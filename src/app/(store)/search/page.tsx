@@ -23,9 +23,9 @@ async function SearchResults({ searchParams }: SearchProps) {
           ))}
         </GridProducts>
       ) : (
-        <h3 className="text-sm text-center">
+        <h2 className="text-sm text-center">
           No products found for &quot;{q}&quot;
-        </h3>
+        </h2>
       )}
     </section>
   );
@@ -33,8 +33,11 @@ async function SearchResults({ searchParams }: SearchProps) {
 
 export default function Search(props: SearchProps) {
   return (
-    <Suspense fallback={<section className="pt-14" />}>
-      <SearchResults searchParams={props.searchParams} />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Search products</h1>
+      <Suspense fallback={<section className="pt-14" />}>
+        <SearchResults searchParams={props.searchParams} />
+      </Suspense>
+    </>
   );
 }

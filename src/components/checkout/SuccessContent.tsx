@@ -17,7 +17,7 @@ export function SuccessHeader() {
     <div className="p-6 border border-solid rounded-lg bg-background-secondary border-border-primary">
       <div className="flex items-center gap-3 mb-3">
         <HiOutlineCheckCircle className="w-8 h-8" />
-        <h1 className="text-2xl font-bold sm:text-3xl">Payment Successful!</h1>
+        <h2 className="text-2xl font-bold sm:text-3xl">Payment Successful!</h2>
       </div>
       <p className="text-sm text-muted-foreground">
         Thank you for your purchase. Your order has been confirmed and will be
@@ -30,10 +30,10 @@ export function SuccessHeader() {
 export function OrderInfo() {
   return (
     <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
-      <h3 className="flex items-center gap-2 mb-4 text-lg font-bold">
+      <h2 className="flex items-center gap-2 mb-4 text-lg font-bold">
         <HiOutlineShoppingBag className="w-5 h-5" />
         Order Information
-      </h3>
+      </h2>
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">Status</span>
         <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-500">
@@ -53,10 +53,10 @@ export function EmailConfirmation({
 }) {
   return (
     <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
-      <h3 className="flex items-center gap-2 mb-4 text-lg font-bold">
+      <h2 className="flex items-center gap-2 mb-4 text-lg font-bold">
         <HiOutlineMail className="w-5 h-5" />
         Email Confirmation
-      </h3>
+      </h2>
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm">
           <HiOutlineMail className="w-4 h-4 text-muted-foreground" />
@@ -80,10 +80,10 @@ const TIMELINE_STEPS = [
 export function DeliveryTimeline() {
   return (
     <div className="p-4 border border-solid rounded-lg bg-background-secondary border-border-primary">
-      <h3 className="flex items-center gap-2 mb-4 text-lg font-bold">
+      <h2 className="flex items-center gap-2 mb-4 text-lg font-bold">
         <HiOutlineTruck className="w-5 h-5" />
         Delivery Timeline
-      </h3>
+      </h2>
 
       <div className="relative pl-6 space-y-4">
         <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-border-primary" />

@@ -43,6 +43,29 @@ test("icon-only controls expose accessible names and sheet descriptions", async 
   assert.match(variant, /aria-label=\{`Remove variant \$\{index \+ 1\}`\}/);
 });
 
+test("profile dialog coordinates menu teardown and restores visible focus", async () => {
+  const [navbar, userMenu, editProfile] = await Promise.all([
+    source("src/components/layout/navbar/Navbar.tsx"),
+    source("src/components/layout/navbar/UserMenu.tsx"),
+    source("src/components/layout/navbar/EditProfile.tsx"),
+  ]);
+
+  assert.match(userMenu, /onCloseAutoFocus=\{\(event\) =>/);
+  assert.match(userMenu, /skipCloseAutoFocusRef\.current/);
+  assert.match(userMenu, /event\.preventDefault\(\)/);
+  assert.match(userMenu, /queueMicrotask\(onEditProfile\)/);
+  assert.match(userMenu, /onSelect=\{\(\) =>/);
+  assert.doesNotMatch(userMenu, /manager\.open|onClick=\{manager\.open\}/);
+  assert.match(navbar, /mobileMenuTriggerRef/);
+  assert.match(navbar, /profileReturnFocusRef/);
+  assert.match(navbar, /onCloseAutoFocus=\{\(event\) =>/);
+  assert.match(navbar, /queueMicrotask\(editProfileManager\.open\)/);
+  assert.match(editProfile, /onOpenAutoFocus=\{\(event\) =>/);
+  assert.match(editProfile, /nameRef\.current\?\.focus\(\)/);
+  assert.match(editProfile, /onCloseAutoFocus=\{\(event\) =>/);
+  assert.match(editProfile, /returnFocusRef\.current/);
+});
+
 test("empty categories and footer links provide real recovery paths", async () => {
   const [category, footer] = await Promise.all([
     source("src/app/(store)/[category]/page.tsx"),
@@ -62,6 +85,77 @@ test("product images use one responsive render tree", async () => {
   );
   assert.doesNotMatch(images, /quality=\{90\}/);
   assert.match(images, /priority=\{index === 0\}/);
+});
+
+test("primary routes keep exactly one accessible heading across data states", async () => {
+  const files = {
+    home: "src/app/page.tsx",
+    search: "src/app/(store)/search/page.tsx",
+    cartPage: "src/app/(user)/cart/page.tsx",
+    cartContent: "src/components/cart/CartProducts.tsx",
+    wishlistPage: "src/app/(user)/wishlist/page.tsx",
+    wishlistContent: "src/components/wishlist/WishlistProducts.tsx",
+    orders: "src/app/(user)/orders/page.tsx",
+    orderDetails: "src/app/(user)/orders/[id]/page.tsx",
+    product: "src/components/product/SingleProduct.tsx",
+    error: "src/app/error.tsx",
+  };
+  const entries = await Promise.all(
+    Object.entries(files).map(async ([name, path]) => [name, await source(path)]),
+  );
+  const sources = Object.fromEntries(entries);
+  const h1Count = (value) => (value.match(/<h1\b/g) ?? []).length;
+
+  for (const name of [
+    "home",
+    "search",
+    "cartPage",
+    "wishlistPage",
+    "orders",
+    "orderDetails",
+    "product",
+    "error",
+  ]) {
+    assert.equal(h1Count(sources[name]), 1, `${name} must own one h1`);
+  }
+  assert.equal(h1Count(sources.cartContent), 0);
+  assert.equal(h1Count(sources.wishlistContent), 0);
+  assert.match(sources.product, /<h1 className="sr-only">\{product\.name\}<\/h1>/);
+  assert.doesNotMatch(sources.search, /<h3[^>]*>\s*No products found/);
+});
+
+test("remaining route shells and result states preserve heading hierarchy", async () => {
+  const files = {
+    category: "src/app/(store)/[category]/page.tsx",
+    result: "src/app/(user)/result/page.tsx",
+    success: "src/components/checkout/SuccessContent.tsx",
+    status: "src/components/checkout/StatusContent.tsx",
+    noSession: "src/components/checkout/NoSessionError.tsx",
+    auth: "src/components/auth/AuthShell.tsx",
+    help: "src/app/(store)/help/[topic]/page.tsx",
+    admin: "src/components/admin/ProductForm.tsx",
+    notFound: "src/app/not-found.tsx",
+    productInfo: "src/components/product/ProductInfo.tsx",
+    accordion: "src/components/ui/accordion.tsx",
+  };
+  const entries = await Promise.all(
+    Object.entries(files).map(async ([name, path]) => [name, await source(path)]),
+  );
+  const sources = Object.fromEntries(entries);
+  const h1Count = (value) => (value.match(/<h1\b/g) ?? []).length;
+
+  for (const name of ["category", "result", "auth", "help", "admin", "notFound"]) {
+    assert.equal(h1Count(sources[name]), 1, `${name} must own one h1`);
+  }
+  for (const name of ["success", "status", "noSession"]) {
+    assert.equal(h1Count(sources[name]), 0, `${name} must use the result route h1`);
+  }
+  assert.doesNotMatch(sources.success, /<h3\b/);
+  assert.equal(
+    (sources.productInfo.match(/headingLevel=\{2\}/g) ?? []).length,
+    3,
+  );
+  assert.match(sources.accordion, /<AccordionPrimitive\.Header asChild>/);
 });
 
 test("product editing exposes archive and explicit restore controls", async () => {

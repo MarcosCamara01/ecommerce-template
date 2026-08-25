@@ -34,7 +34,7 @@ export const WishlistProducts = () => {
 
   return (
     <div className="flex h-[calc(100vh-91px)] w-full flex-col items-center justify-center gap-2 px-4">
-      <h1 className="mb-6 text-4xl font-bold">YOUR WISHLIST IS EMPTY</h1>
+      <h2 className="mb-6 text-4xl font-bold">YOUR WISHLIST IS EMPTY</h2>
       <p className="mb-4 text-lg">
         When you have added something to your wishlist, it will appear here.
         Want to get started?

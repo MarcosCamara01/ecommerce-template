@@ -14,15 +14,18 @@ export async function generateMetadata() {
 
 const WishlistPage = () => {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-          <SVGLoadingIcon height={30} width={30} />
-        </div>
-      }
-    >
-      <WishlistContent />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Wishlist</h1>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-[calc(100vh-91px)]">
+            <SVGLoadingIcon height={30} width={30} />
+          </div>
+        }
+      >
+        <WishlistContent />
+      </Suspense>
+    </>
   );
 };
 
@@ -32,7 +35,7 @@ const WishlistContent = async () => {
   if (!user) {
     return (
       <div className="flex h-[calc(100vh-91px)] w-full flex-col items-center justify-center gap-2 px-4">
-        <h1 className="mb-6 text-4xl font-bold">YOUR WISHLIST IS EMPTY</h1>
+        <h2 className="mb-6 text-4xl font-bold">YOUR WISHLIST IS EMPTY</h2>
         <p className="mb-4 text-lg">
           Not registered? You must be in order to save your products in the
           wishlist.

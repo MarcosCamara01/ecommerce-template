@@ -92,6 +92,7 @@ async function DynamicCheckoutContent({
 export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
     <section className="px-6 py-12 sm:px-8">
+      <h1 className="sr-only">Purchase result</h1>
       <Suspense fallback={<ResultSkeleton />}>
         <DynamicCheckoutContent searchParams={searchParams} />
       </Suspense>

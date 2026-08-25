@@ -36,9 +36,12 @@ async function DynamicOrderContent({
 
 const OrderDetails = async ({ params }: Props) => {
   return (
-    <Suspense fallback={<OrderDetailsSkeleton items={6} />}>
-      <DynamicOrderContent params={params} />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Order details</h1>
+      <Suspense fallback={<OrderDetailsSkeleton items={6} />}>
+        <DynamicOrderContent params={params} />
+      </Suspense>
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import {
 const Home = async () => {
   return (
     <section className="pt-14">
+      <h1 className="sr-only">All products</h1>
       <Suspense fallback={<ProductsSkeleton items={18} />}>
         <AllProducts />
       </Suspense>

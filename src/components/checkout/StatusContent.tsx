@@ -98,7 +98,7 @@ export function StatusContent({ status, sessionId, error }: StatusContentProps) 
       <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-6">
         <div className="mb-3 flex items-center gap-3">
           <Icon className={`h-8 w-8 ${config.iconColor}`} />
-          <h1 className="text-2xl font-bold sm:text-3xl">{config.title}</h1>
+          <h2 className="text-2xl font-bold sm:text-3xl">{config.title}</h2>
         </div>
         <p className="text-sm text-muted-foreground">{config.message}</p>
         {error && (

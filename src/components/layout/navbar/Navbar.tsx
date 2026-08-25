@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
+import { useRef } from "react";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 /** ICONS */
 import { FiUser, FiMenu, FiCreditCard } from "react-icons/fi";
@@ -41,6 +42,10 @@ export const Navbar = () => {
 
   const editProfileManager = useManager();
   const { signOut } = useAuthMutation();
+  const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const accountTriggerRef = useRef<HTMLButtonElement>(null);
+  const profileReturnFocusRef = useRef<HTMLElement | null>(null);
+  const skipMobileMenuCloseAutoFocusRef = useRef(false);
 
   return (
     <>
@@ -49,6 +54,7 @@ export const Navbar = () => {
         <Sheet>
           <SheetTrigger asChild>
             <button
+              ref={mobileMenuTriggerRef}
               type="button"
               aria-label="Open navigation menu"
               className="flex px-4 py-2 lg:hidden hover:opacity-75 transition-opacity"
@@ -57,7 +63,16 @@ export const Navbar = () => {
             </button>
           </SheetTrigger>
 
-          <SheetContent side="left" className="w-full sm:w-80 p-0">
+          <SheetContent
+            side="left"
+            className="w-full sm:w-80 p-0"
+            onCloseAutoFocus={(event) => {
+              if (!skipMobileMenuCloseAutoFocusRef.current) return;
+              event.preventDefault();
+              skipMobileMenuCloseAutoFocusRef.current = false;
+              queueMicrotask(editProfileManager.open);
+            }}
+          >
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="px-6 py-4 border-b border-border-primary">
@@ -134,7 +149,12 @@ export const Navbar = () => {
                       <li>
                         <SheetClose asChild>
                           <button
-                            onClick={editProfileManager.open}
+                            type="button"
+                            onClick={() => {
+                              skipMobileMenuCloseAutoFocusRef.current = true;
+                              profileReturnFocusRef.current =
+                                mobileMenuTriggerRef.current;
+                            }}
                             className="flex items-center w-full px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
                           >
                             <FiUser className="mr-2" size={16} />
@@ -186,7 +206,13 @@ export const Navbar = () => {
             </li>
           ) : session?.user ? (
             <li className="items-center justify-center hidden lg:flex">
-              <UserMenu manager={editProfileManager} />
+              <UserMenu
+                triggerRef={accountTriggerRef}
+                onEditProfile={() => {
+                  profileReturnFocusRef.current = accountTriggerRef.current;
+                  editProfileManager.open();
+                }}
+              />
             </li>
           ) : (
             <li className="flex items-center justify-center">
@@ -217,7 +243,10 @@ export const Navbar = () => {
         </ul>
       </header>
 
-      <EditProfile manager={editProfileManager} />
+      <EditProfile
+        manager={editProfileManager}
+        returnFocusRef={profileReturnFocusRef}
+      />
     </>
   );
 };

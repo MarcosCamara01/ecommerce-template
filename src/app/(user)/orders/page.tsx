@@ -18,15 +18,18 @@ export async function generateMetadata() {
  */
 const UserOrders = () => {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-          <SVGLoadingIcon height={30} width={30} />
-        </div>
-      }
-    >
-      <OrdersContent />
-    </Suspense>
+    <>
+      <h1 className="sr-only">My orders</h1>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-[calc(100vh-91px)]">
+            <SVGLoadingIcon height={30} width={30} />
+          </div>
+        }
+      >
+        <OrdersContent />
+      </Suspense>
+    </>
   );
 };
 
@@ -111,7 +114,7 @@ const Orders = async () => {
   return (
     <div className="pt-12 pb-20">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">My Orders</h1>
+        <h2 className="text-3xl font-bold mb-2">My Orders</h2>
         <p className="text-muted-foreground">
           View and track all your orders in one place
         </p>

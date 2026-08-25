@@ -65,6 +65,7 @@ async function DynamicCategoryContent({
 const CategoryPage = async ({ params }: Props) => {
   return (
     <section className="pt-14">
+      <h1 className="sr-only">Product collection</h1>
       <Suspense fallback={<ProductsSkeleton items={6} />}>
         <DynamicCategoryContent params={params} />
       </Suspense>
@@ -83,9 +84,9 @@ const CategoryProducts = async ({
   if (products.length === 0) {
     return (
       <div className="mx-auto flex min-h-[45vh] max-w-xl flex-col items-center justify-center gap-4 px-6 text-center">
-        <h1 className="text-2xl font-bold text-pretty">
+        <h2 className="text-2xl font-bold text-pretty">
           No products available in {categoryName}
-        </h1>
+        </h2>
         <p className="text-color-secondary">
           This collection is empty right now. Browse the full catalog for other products.
         </p>
@@ -100,14 +101,11 @@ const CategoryProducts = async ({
   }
 
   return (
-    <>
-      <h1 className="sr-only">{categoryName}</h1>
-      <GridProducts>
-        {products.map((product, index) => (
-          <ProductItem key={product.id} product={product} priority={index === 0} />
-        ))}
-      </GridProducts>
-    </>
+    <GridProducts>
+      {products.map((product, index) => (
+        <ProductItem key={product.id} product={product} priority={index === 0} />
+      ))}
+    </GridProducts>
   );
 };
 
