@@ -56,7 +56,7 @@
     "next": "16.3.2",
     "nodemailer": "9.0.5",
     "pg": "^8.16.3",
-    "postgres": "^3.4.7",
+    "postgres": "^3.4.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
