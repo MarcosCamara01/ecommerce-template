@@ -9,6 +9,7 @@ import {
 import { getProduct } from "@/app/actions";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
+import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
 type PageProps = {
   params: Promise<{ id: string; category: string }>;
@@ -17,9 +18,9 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
-  const productId = Number(id);
+  const productId = parsePositiveIntegerId(id);
 
-  if (!Number.isInteger(productId) || productId <= 0) {
+  if (productId === null) {
     return {
       title: "Product | Ecommerce Template",
       description: "Explore the latest product details at Ecommerce Template.",
@@ -50,9 +51,9 @@ async function DynamicProductContent({
 }) {
   const [{ id, category }, sp] = await Promise.all([params, searchParams]);
   const selectedVariantColor = pickFirst(sp, "variant");
-  const productId = Number(id);
+  const productId = parsePositiveIntegerId(id);
 
-  if (!Number.isInteger(productId) || productId <= 0) {
+  if (productId === null) {
     notFound();
   }
 

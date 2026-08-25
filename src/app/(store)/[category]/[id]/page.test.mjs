@@ -7,5 +7,5 @@ test("product params remain runtime data and never require the catalog during bu
   assert.doesNotMatch(source, /generateStaticParams/);
   assert.match(source, /<Suspense fallback=\{<SingleProductSkeleton \/>\}>/);
   assert.match(source, /<DynamicProductContent params=\{params\} searchParams=\{searchParams\} \/>/);
-  assert.match(source, /productId <= 0[\s\S]*?notFound\(\)/);
+  assert.match(source, /parsePositiveIntegerId\(id\)[\s\S]*?notFound\(\)/);
 });

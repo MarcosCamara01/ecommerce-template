@@ -13,6 +13,7 @@ import { HiArrowLeft } from "react-icons/hi";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
 export async function generateMetadata() {
   return {
@@ -46,7 +47,8 @@ const OrderDetails = async ({ params }: Props) => {
 };
 
 const OrderProducts = async ({ id }: { id: string }) => {
-  const order = await getOrder(Number(id));
+  const orderId = parsePositiveIntegerId(id);
+  const order = orderId === null ? null : await getOrder(orderId);
 
   if (!order) {
     return (
