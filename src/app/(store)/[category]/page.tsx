@@ -47,11 +47,7 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-async function DynamicCategoryContent({
-  params,
-}: {
-  params: Promise<{ category: string }>;
-}) {
+const CategoryPage = async ({ params }: Props) => {
   const { category } = await params;
   const parsedCategory = ProductCategoryZod.safeParse(category);
 
@@ -59,15 +55,13 @@ async function DynamicCategoryContent({
     notFound();
   }
 
-  return <CategoryProducts category={parsedCategory.data} />;
-}
+  const categoryName = capitalizeFirstLetter(parsedCategory.data);
 
-const CategoryPage = async ({ params }: Props) => {
   return (
     <section className="pt-14">
-      <h1 className="sr-only">Product collection</h1>
+      <h1 className="sr-only">{categoryName} products</h1>
       <Suspense fallback={<ProductsSkeleton items={6} />}>
-        <DynamicCategoryContent params={params} />
+        <CategoryProducts category={parsedCategory.data} />
       </Suspense>
     </section>
   );

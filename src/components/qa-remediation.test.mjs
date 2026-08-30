@@ -158,6 +158,20 @@ test("remaining route shells and result states preserve heading hierarchy", asyn
   assert.match(sources.accordion, /<AccordionPrimitive\.Header asChild>/);
 });
 
+test("category routes identify the current collection in their accessible heading", async () => {
+  const category = await source("src/app/(store)/[category]/page.tsx");
+
+  assert.doesNotMatch(category, />Product collection<\/h1>/);
+  assert.match(
+    category,
+    /const categoryName = capitalizeFirstLetter\(parsedCategory\.data\)/,
+  );
+  assert.match(
+    category,
+    /<h1 className="sr-only">\{categoryName\} products<\/h1>/,
+  );
+});
+
 test("product editing exposes archive and explicit restore controls", async () => {
   const [edit, form, mutations] = await Promise.all([
     source("src/components/admin/EditProductForm.tsx"),
