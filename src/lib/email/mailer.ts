@@ -36,26 +36,17 @@ function getFirstEnvValue(keys: string[], trim = true) {
 
 function getEmailConfig() {
   const host = process.env.EMAIL_SERVER_HOST?.trim();
-  const port = Number(process.env.EMAIL_SERVER_PORT ?? "587");
-  const user = getFirstEnvValue([
-    "EMAIL_SERVER_USER",
-    "NEXT_PUBLIC_EMAIL_USERNAME",
-  ]);
+  const portValue = process.env.EMAIL_SERVER_PORT?.trim();
+  const port = portValue ? Number(portValue) : Number.NaN;
+  const user = process.env.EMAIL_SERVER_USER?.trim();
   // Never fall back to a NEXT_PUBLIC_* name here: Next.js inlines those into
   // the client bundle, which would publish the SMTP password to every visitor.
-  const pass = getFirstEnvValue(["EMAIL_SERVER_PASSWORD"], false);
-  const from = getFirstEnvValue([
-    "EMAIL_FROM",
-    "EMAIL_SERVER_USER",
-    "NEXT_PUBLIC_EMAIL_USERNAME",
-  ]);
+  const rawPassword = process.env.EMAIL_SERVER_PASSWORD;
+  const pass = rawPassword?.trim() ? rawPassword : undefined;
+  const from = process.env.EMAIL_FROM?.trim();
   const contactTo = getFirstEnvValue([
     "EMAIL_CONTACT_TO",
     "ADMIN_EMAIL",
-    "NEXT_PUBLIC_PERSONAL_EMAIL",
-    "EMAIL_FROM",
-    "EMAIL_SERVER_USER",
-    "NEXT_PUBLIC_EMAIL_USERNAME",
   ]);
 
   if (!host) {

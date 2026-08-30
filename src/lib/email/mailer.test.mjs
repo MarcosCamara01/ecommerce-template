@@ -48,19 +48,65 @@ test("residual Gmail credentials cannot enable delivery without a host", async (
   assert.equal(harness.messages.length, 0);
 });
 
-test("partial SMTP credentials fail before a transport is created", async () => {
-  for (const environment of [
-    { EMAIL_SERVER_HOST: "smtp.example.test" },
-    {
-      ...completeConfig,
-      EMAIL_SERVER_PASSWORD: "",
-    },
-    {
-      ...completeConfig,
-      EMAIL_SERVER_PORT: "not-a-port",
-    },
-  ]) {
+test("host and credentials alone cannot enable delivery", async () => {
+  const harness = loadMailerHarness({
+    EMAIL_SERVER_HOST: "smtp.example.test",
+    EMAIL_SERVER_USER: "mailer@example.test",
+    EMAIL_SERVER_PASSWORD: "test-password",
+  });
+
+  await assert.rejects(
+    harness.sendMail(messageFixture()),
+    /email configuration is incomplete or invalid/i,
+  );
+  assert.equal(harness.transportOptions.length, 0);
+  assert.equal(harness.messages.length, 0);
+});
+
+for (const requiredVariable of [
+  "EMAIL_SERVER_PORT",
+  "EMAIL_SERVER_USER",
+  "EMAIL_SERVER_PASSWORD",
+  "EMAIL_FROM",
+  "EMAIL_CONTACT_TO",
+]) {
+  test(`missing ${requiredVariable} fails before a transport is created`, async () => {
+    const environment = { ...completeConfig };
+    delete environment[requiredVariable];
     const harness = loadMailerHarness(environment);
+
+    await assert.rejects(
+      harness.sendMail(messageFixture()),
+      /email configuration is incomplete or invalid/i,
+    );
+    assert.equal(harness.transportOptions.length, 0);
+    assert.equal(harness.messages.length, 0);
+  });
+}
+
+test("legacy public email variables cannot replace the SMTP user", async () => {
+  const environment = {
+    ...completeConfig,
+    EMAIL_SERVER_USER: "",
+    NEXT_PUBLIC_EMAIL_USERNAME: "legacy@example.test",
+  };
+  const harness = loadMailerHarness(environment);
+
+  await assert.rejects(
+    harness.sendMail(messageFixture()),
+    /email configuration is incomplete or invalid/i,
+  );
+  assert.equal(harness.transportOptions.length, 0);
+  assert.equal(harness.messages.length, 0);
+});
+
+test("invalid SMTP ports fail before a transport is created", async () => {
+  for (const port of ["not-a-port", "0", "65536"]) {
+    const harness = loadMailerHarness({
+      ...completeConfig,
+      EMAIL_SERVER_PORT: port,
+    });
+
     await assert.rejects(
       harness.sendMail(messageFixture()),
       /email configuration is incomplete or invalid/i,
@@ -68,6 +114,21 @@ test("partial SMTP credentials fail before a transport is created", async () => 
     assert.equal(harness.transportOptions.length, 0);
     assert.equal(harness.messages.length, 0);
   }
+});
+
+test("ADMIN_EMAIL can explicitly provide the contact recipient", async () => {
+  const environment = {
+    ...completeConfig,
+    EMAIL_CONTACT_TO: "",
+    ADMIN_EMAIL: "admin@example.test",
+  };
+  const harness = loadMailerHarness(environment);
+
+  await harness.sendMail(messageFixture());
+
+  assert.equal(harness.getContactEmailAddress(), "admin@example.test");
+  assert.equal(harness.transportOptions.length, 1);
+  assert.equal(harness.messages.length, 1);
 });
 
 test("complete Gmail SMTP configuration is explicit and supported", async () => {
