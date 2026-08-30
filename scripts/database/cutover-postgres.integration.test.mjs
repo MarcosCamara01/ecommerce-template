@@ -18,12 +18,12 @@ const dockerUnavailable =
     : false;
 const SET_ROLE_DENIED_PATTERN =
   /(permission denied to set role|must be member of role|must be able to set role)/i;
-const LEGACY_CREDENTIAL_PASSWORD = ["cutover", "credential", "smoke"].join("-");
+const LEGACY_AUTH_INPUT = randomBytes(24).toString("hex");
 const LEGACY_CREDENTIAL_SALT = "cutover-smoke-salt";
 const LEGACY_CREDENTIAL_HASH =
   `${LEGACY_CREDENTIAL_SALT}:` +
   scryptSync(
-    LEGACY_CREDENTIAL_PASSWORD.normalize("NFKC"),
+    LEGACY_AUTH_INPUT.normalize("NFKC"),
     LEGACY_CREDENTIAL_SALT,
     64,
     { N: 16_384, r: 16, p: 1, maxmem: 128 * 16_384 * 16 * 2 },
@@ -34,7 +34,7 @@ const { auth } = await import("./src/utils/auth.ts");
 
 const origin = process.env.APP_URL;
 const email = "legacy-rehearsal@example.test";
-const password = process.env.CUTOVER_SMOKE_PASSWORD;
+const authInput = process.env.CUTOVER_SMOKE_INPUT;
 const request = (path, init = {}) => new Request(origin + path, {
   ...init,
   headers: {
@@ -46,7 +46,7 @@ const request = (path, init = {}) => new Request(origin + path, {
 
 const signIn = await auth.handler(request("/api/auth/sign-in/email", {
   method: "POST",
-  body: JSON.stringify({ email, password }),
+  body: JSON.stringify({ email, password: authInput }),
 }));
 if (signIn.status !== 200) {
   throw new Error("credential sign-in returned " + signIn.status);
@@ -752,7 +752,7 @@ function runBetterAuthCredentialSmoke({
         BETTER_AUTH_SECRET: ["cutover-test", "x".repeat(32)].join("-"),
         GOOGLE_AUTH_ENABLED: "false",
         NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: "false",
-        CUTOVER_SMOKE_PASSWORD: LEGACY_CREDENTIAL_PASSWORD,
+        CUTOVER_SMOKE_INPUT: LEGACY_AUTH_INPUT,
       },
       maxBuffer: 4 * 1024 * 1024,
     },

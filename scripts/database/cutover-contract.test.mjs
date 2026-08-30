@@ -770,6 +770,22 @@ test("bootstrap scopes temporary owner access to one transaction", async () => {
   assert.ok(commit > temporaryRevoke, "the cleanup must precede commit");
 });
 
+test("cutover auth smoke generates its input only at runtime", async () => {
+  const integration = await readFile(
+    "scripts/database/cutover-postgres.integration.test.mjs",
+    "utf8",
+  );
+
+  assert.match(
+    integration,
+    /const LEGACY_AUTH_INPUT\s*=\s*randomBytes\(24\)\.toString\("hex"\)/,
+  );
+  assert.doesNotMatch(
+    integration,
+    /\["cutover", "credential", "smoke"\]/,
+  );
+});
+
 test("app_owner verification distinguishes administration from usable membership", async () => {
   const verify = await readFile("scripts/database/verify.ts", "utf8");
 

@@ -54,9 +54,9 @@ uploads, and Stripe Test fulfillment all pass locally.
 The pull request is still **not merge-ready**. The current Preview database
 does not contain the required `app_private` schema, environment isolation is
 not demonstrated, cron and release evidence variables are absent, GitGuardian
-still needs a test-credential classification, and a trusted review approval is
-missing. Those are external release controls, not reasons to weaken the code or
-to mutate production autonomously.
+still needs three test-credential classifications, and a trusted review
+approval is missing. Those are external release controls, not reasons to weaken
+the code or to mutate production autonomously.
 
 ## Local quality gate
 
@@ -306,41 +306,56 @@ Reference: [Vercel cron jobs](https://vercel.com/docs/cron-jobs).
 
 ## GitHub and security checks
 
-At published commit `e8b65eb`, the following completed successfully:
+At final published commit
+`5f6993c3d9beb248e58234f5faef4ded234ae93c`, the following completed
+successfully:
 
 - CI quality.
 - Dependency Review.
 - React Doctor.
 - CodeQL.
-- Vercel deployment and Preview comments.
+- Vercel deployment and Preview comments. GitHub deployment `6172305559`
+  points to that exact SHA, and Vercel deployment
+  `dpl_EziMsXazQVMjnyA8nW62HVBRyoGx` is `READY` at
+  `https://ecommerce-template-2ukbusezm.vercel.app`.
 
 All 9 GitHub review threads are resolved. Seven were outdated discussions about
 symbols removed by an earlier commit; each was checked before resolution.
 
-GitGuardian remains the only historical security-check failure. Incident
-`36729768`, occurrence `294301259`, detected a synthetic Better Auth secret in
-a test fixture introduced by commit `e83a6ed`. The value was test-only, never a
-deployed credential. The current test constructs the value at runtime, and the
-new diff also generates its cutover password hash at runtime, so future tips do
-not add either scanner pattern. Gitleaks reports no finding in the added lines.
+GitGuardian is the only failed check. Its final scan found three test-only
+incidents across the 30 pull-request commits:
 
-GitGuardian still scans commit history. Without rewriting reviewed history, an
-authenticated GitGuardian workspace member must classify the occurrence as
-`Ignore` → `Test credential` and rerun the check. No GitGuardian session or API
-token was available, and a force-push was deliberately rejected as a
+- `36729768`, occurrence `294301259`: a synthetic Better Auth secret in commit
+  `e83a6ed`.
+- `36730798`, occurrence `294306229`: the deterministic local Better Auth smoke
+  input declaration in commit `caaef9c`.
+- `36730799`, occurrence `294306230`: the same local smoke input used to derive
+  its deterministic scrypt fixture hash in commit `caaef9c`.
+
+None can authenticate to an external service or was deployed as a credential.
+The current Better Auth secret and hash are constructed at runtime. A local
+post-push follow-up also generates the smoke input from `randomBytes(24)` on
+every run and includes a regression that forbids a deterministic replacement.
+Gitleaks reports no finding in the added lines, but GitGuardian scans the
+complete commit history and therefore continues to report all three.
+
+Without rewriting reviewed history, an authenticated GitGuardian workspace
+member must classify all three as `Ignore` → `Test credential`, or use the
+GitHub check action `Skip: test credential` if workspace managers enable skip
+actions, then rerun the check. No GitGuardian session, API token, or enabled
+check-run action was available. A force-push was deliberately rejected as a
 disproportionate fix.
 
-The new commits require their own post-push CI and GitHub-sourced Vercel
-deployment. Publication evidence belongs to the final handoff because adding it
-to this file would itself create another unverified commit.
+Reference:
+[GitGuardian pull-request checks](https://docs.gitguardian.com/internal-monitoring/prevent/detect-secrets-in-real-time-in-github).
 
 ## Remaining merge blockers
 
 The following work requires a maintainer, an approved hosted operation, or a
 capability unavailable to this environment:
 
-1. Classify GitGuardian incident `36729768` as a test credential and rerun the
-   check.
+1. Classify GitGuardian incidents `36729768`, `36730798`, and `36730799` as test
+   credentials and rerun the check.
 2. Provision or select isolated Preview and Production databases and secrets.
    Do not reuse one credential set across environments without an explicit
    reviewed decision.
