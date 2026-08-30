@@ -17,6 +17,12 @@ unless a section explicitly records it.
 The detailed test evidence is in the
 [T3 browser QA report](./2026-08-24-pr-40-t3-browser-qa.md).
 
+Update on 2026-08-31: the
+[autonomous readiness report](./2026-08-31-pr-40-autonomous-readiness.md)
+supersedes this file's publication anchors, incomplete-coverage list, and
+remaining release checklist. The original findings and incidents below remain
+as historical evidence.
+
 ## Contents
 
 - [Confirmed application and PR defects](#confirmed-application-and-pr-defects)

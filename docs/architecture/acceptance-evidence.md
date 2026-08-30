@@ -28,7 +28,8 @@ Every row is pass/fail. Source inspection alone is not runtime evidence.
 
 Store environment-bound outputs with deployment evidence; do not commit credentials, connection strings, or webhook payload PII.
 
-Latest local evidence:
-[`evidence/2026-08-19-findings-remediation.md`](evidence/2026-08-19-findings-remediation.md).
-The earlier full local workflow remains recorded in
-[`evidence/2026-08-18-local-e2e.md`](evidence/2026-08-18-local-e2e.md).
+Latest autonomous readiness evidence:
+[`evidence/2026-08-31-pr-40-autonomous-readiness.md`](evidence/2026-08-31-pr-40-autonomous-readiness.md).
+Earlier full local workflows remain recorded in
+[`evidence/2026-08-19-findings-remediation.md`](evidence/2026-08-19-findings-remediation.md)
+and [`evidence/2026-08-18-local-e2e.md`](evidence/2026-08-18-local-e2e.md).
