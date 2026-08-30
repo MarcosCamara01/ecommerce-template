@@ -98,8 +98,11 @@ db:push is intentionally disabled. Generate a reviewed migration with db:generat
 
 `db:apply-hosted` uses the lockfile-pinned Supabase CLI to push
 `supabase/config.toml` to the explicit `SUPABASE_PROJECT_REF`, then runs the
-Management API verifier. It requires `SUPABASE_ACCESS_TOKEN`; use an operator
-token with only the project configuration access needed for this step.
+Management API and read-only Storage verifier. It requires
+`SUPABASE_ACCESS_TOKEN` for project configuration and
+`SUPABASE_SERVICE_ROLE_KEY` for the exact `product-images` bucket check. The
+service-role key is withheld from the CLI config-push subprocess and is used
+only by the verifier; use credentials scoped to the reviewed target.
 
 ## Deployment Notes
 

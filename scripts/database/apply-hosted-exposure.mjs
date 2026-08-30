@@ -30,12 +30,25 @@ function runProcess(executable, args, options) {
 function requiredEnvironment(environment) {
   const accessToken = environment.SUPABASE_ACCESS_TOKEN?.trim();
   const projectRef = environment.SUPABASE_PROJECT_REF?.trim();
-  if (!accessToken || !projectRef) {
+  const serviceRoleKey = environment.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!accessToken || !projectRef || !serviceRoleKey) {
     throw new Error(
-      "SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF are required",
+      "SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, and " +
+        "SUPABASE_SERVICE_ROLE_KEY are required",
+    );
+  }
+  if (!/^[a-z0-9]{20}$/.test(projectRef)) {
+    throw new Error(
+      "SUPABASE_PROJECT_REF must be a 20-character lowercase project reference",
     );
   }
   return { projectRef };
+}
+
+function environmentWithoutServiceRole(environment) {
+  const configPushEnvironment = { ...environment };
+  delete configPushEnvironment.SUPABASE_SERVICE_ROLE_KEY;
+  return configPushEnvironment;
 }
 
 export async function applyHostedExposureConfiguration({
@@ -69,7 +82,10 @@ export async function applyHostedExposureConfiguration({
       projectRef,
       "--yes",
     ],
-    { environment, projectRoot },
+    {
+      environment: environmentWithoutServiceRole(environment),
+      projectRoot,
+    },
   );
   await verifyExposure({ environment, projectRoot });
 }

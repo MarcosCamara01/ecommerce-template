@@ -183,6 +183,57 @@ test("product editing exposes archive and explicit restore controls", async () =
   assert.match(mutations, /export async function archiveProduct/);
 });
 
+test("admin image pickers reject files outside the catalog upload contract", async () => {
+  const [mainImage, variantImages] = await Promise.all([
+    source("src/components/admin/MainImage.tsx"),
+    source("src/components/admin/VariantImages.tsx"),
+  ]);
+
+  for (const picker of [mainImage, variantImages]) {
+    assert.match(picker, /CATALOG_IMAGE_ACCEPT/);
+    assert.match(picker, /CATALOG_IMAGE_HELP_TEXT/);
+    assert.match(picker, /catalogImageFileErrors/);
+    assert.match(picker, /accept=\{CATALOG_IMAGE_ACCEPT\}/);
+    assert.match(picker, /role="alert"/);
+    assert.match(picker, /aria-live="polite"/);
+    assert.match(picker, /aria-invalid=\{Boolean\(displayedError\)\}/);
+    assert.match(picker, /aria-describedby=\{displayedError \? errorId : undefined\}/);
+    assert.match(
+      picker,
+      /type="file"[\s\S]{0,500}aria-invalid=\{Boolean\(displayedError\)\}/,
+    );
+    assert.doesNotMatch(picker, /accept="image\/\*"/);
+    assert.doesNotMatch(picker, /type\.startsWith\("image\/"\)/);
+  }
+  assert.match(mainImage, /fileAttemptRef/);
+  assert.match(mainImage, /attempt !== fileAttemptRef\.current/);
+  assert.match(variantImages, /processingQueueRef/);
+  assert.match(variantImages, /pairImagePreviews/);
+  assert.match(variantImages, /group-focus-within:opacity-100/);
+});
+
+test("product submission enforces the aggregate Vercel upload budget", async () => {
+  const [contract, createCommand, productForm, storage] = await Promise.all([
+    source("src/lib/catalog-sync/image-file-contract.ts"),
+    source("src/lib/catalog-sync/create-command.ts"),
+    source("src/components/admin/ProductForm.tsx"),
+    source("src/lib/catalog-sync/admin-storage.ts"),
+  ]);
+
+  assert.match(contract, /CATALOG_IMAGE_BATCH_MAX_BYTES/);
+  assert.match(contract, /3 \* 1024 \* 1024/);
+  assert.match(contract, /detectedCatalogImageMimeType/);
+  for (const uploadPath of [createCommand, storage]) {
+    assert.match(uploadPath, /catalogImageExtension/);
+    assert.doesNotMatch(uploadPath, /file\.name[\s\S]*?split\("\."\)/);
+  }
+  assert.match(productForm, /catalogImageBatchErrors/);
+  assert.ok(
+    productForm.lastIndexOf("catalogImageBatchErrors") <
+      productForm.indexOf("createCommand.prepare"),
+  );
+});
+
 test("Google OAuth is opt-in and documents its exact callback", async () => {
   const [login, auth, env, readme] = await Promise.all([
     source("src/app/(auth)/login/page.tsx"),

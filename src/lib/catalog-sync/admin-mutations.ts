@@ -14,7 +14,12 @@ import {
   CatalogSyncError,
   type CatalogSyncState,
 } from "@/lib/catalog-sync/model";
-import { readVariantImageFiles } from "@/lib/catalog-sync/input-validation";
+import {
+  readVariantImageFiles,
+  validateCatalogImageBatch,
+  validateCatalogImageFile,
+  validateCatalogImageFiles,
+} from "@/lib/catalog-sync/input-validation";
 import { revalidateProducts } from "@/lib/catalog-sync/revalidate";
 import { createCatalogSyncManager } from "@/lib/catalog-sync/service";
 import { shouldCompensateRejectedPreparedUpload } from "@/lib/catalog-sync/preparation-state";
@@ -82,20 +87,36 @@ export async function createCatalogProduct(
     if (!(mainImage instanceof File) || !mainImage.size) {
       throw mainImageRequiredError();
     }
+    await validateCatalogImageFile(mainImage, ["img"]);
     const variantsInput = parseVariants(form.get("variants"));
+    const variantsWithFiles = variantsInput.map((variant, variantIndex) => {
+      const files = readVariantImageFiles(
+        form,
+        variantIndex,
+        variant.imageCount ?? 0,
+      );
+      if (!files.length) {
+        throw variantImageRequiredError(variantIndex, variant.color);
+      }
+      return { variant, variantIndex, files };
+    });
+    await validateCatalogImageFiles(
+      variantsWithFiles.flatMap(({ files, variantIndex }) =>
+        files.map((file) => ({
+          file,
+          path: ["variants", variantIndex, "images"],
+        })),
+      ),
+    );
+    validateCatalogImageBatch([
+      mainImage,
+      ...variantsWithFiles.flatMap(({ files }) => files),
+    ]);
     const planned = await planCatalogCreateCommand({
       commandId,
       product,
       mainImage,
-      variants: variantsInput.map((variant, variantIndex) => {
-        const files = readVariantImageFiles(
-          form,
-          variantIndex,
-          variant.imageCount ?? 0,
-        );
-        if (!files.length) {
-          throw variantImageRequiredError(variantIndex, variant.color);
-        }
+      variants: variantsWithFiles.map(({ variant, files }) => {
         return {
           id: variant.id,
           color: variant.color,
@@ -284,6 +305,30 @@ export async function updateCatalogProduct(
       price: form.get("price"),
       category: form.get("category"),
     });
+    const variantsInput = parseVariants(form.get("variants"));
+    const main = form.get("mainImage");
+    const variantFiles = variantsInput.map((variant, variantIndex) =>
+      readVariantImageFiles(
+        form,
+        variantIndex,
+        variant.imageCount ?? 0,
+      ),
+    );
+    if (main instanceof File && main.size) {
+      await validateCatalogImageFile(main, ["img"]);
+    }
+    await validateCatalogImageFiles(
+      variantFiles.flatMap((files, variantIndex) =>
+        files.map((file) => ({
+          file,
+          path: ["variants", variantIndex, "images"],
+        })),
+      ),
+    );
+    validateCatalogImageBatch([
+      ...(main instanceof File && main.size ? [main] : []),
+      ...variantFiles.flat(),
+    ]);
     const existing = restoreArchived
       ? await manager.findArchivedByIdForRestoration(id)
       : await manager.findByIdIncludingArchived(id);
@@ -305,7 +350,6 @@ export async function updateCatalogProduct(
       form.get("existingMainImage")
         ? String(form.get("existingMainImage"))
         : existing.img;
-    const main = form.get("mainImage");
     if (main instanceof File && main.size) {
       const uploaded = await uploadImage(
         main,
@@ -317,7 +361,7 @@ export async function updateCatalogProduct(
     }
     const variants = await buildVariants(
       form,
-      parseVariants(form.get("variants")),
+      variantsInput,
       id,
       uploads,
     );

@@ -7,6 +7,7 @@ import {
 } from "./input-validation";
 import { removeStorageObjectOrThrow } from "./storage-compensation";
 import type { CatalogVariantInput } from "./admin-input";
+import { catalogImageExtension } from "./image-file-contract";
 import { variantImageRequiredError } from "./admin-errors";
 import { createStorageAdminClient } from "@/lib/storage/supabase";
 
@@ -18,17 +19,8 @@ const normalizeColor = (color: string) =>
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "");
 
-function imageExtension(file: File) {
-  const extension = file.name
-    .split(".")
-    .pop()
-    ?.toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-  return extension || "bin";
-}
-
 export function randomStoragePath(prefix: string, file: File) {
-  return prefix + "/" + randomUUID() + "." + imageExtension(file);
+  return prefix + "/" + randomUUID() + "." + catalogImageExtension(file);
 }
 
 export function publicImageUrl(path: string) {

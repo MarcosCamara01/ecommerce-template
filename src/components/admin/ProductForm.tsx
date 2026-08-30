@@ -21,6 +21,7 @@ import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
 import { useCatalogCreateCommand } from "@/hooks/product/useCatalogCreateCommand";
 import { encodeProductFormData } from "./product-form-data";
+import { catalogImageBatchErrors } from "@/lib/catalog-sync/image-file-contract";
 
 export type { ProductFormData };
 
@@ -96,6 +97,18 @@ export function ProductForm({
         existingImages: variant.existingImages,
         removedImages: variant.removedImages,
       }));
+      const [imageBatchError] = catalogImageBatchErrors([
+        ...(mainImage ? [mainImage] : []),
+        ...Object.values(imagesData).flat(),
+      ]);
+      if (imageBatchError) {
+        setState({
+          success: false,
+          message: imageBatchError,
+          errors: { images: [imageBatchError] },
+        });
+        return;
+      }
 
       const commandId = mode === "create"
         ? await createCommand.prepare({

@@ -25,12 +25,27 @@ window, a tested restore point, and human review of the captured evidence.
 - `AUTH_DATABASE_LAYOUT=public` is a temporary compatibility mode used only while all
   non-authentication application traffic is paused.
 
-`bootstrap-roles.sql` deliberately aborts if any role other than `app_migrator` is a
-direct or transitive member of `app_owner`, if another role can inherit through
-`app_migrator`, or if `app_migrator` has `ADMIN OPTION`. Treat that as a privilege incident:
-inspect `pg_auth_members`, revoke the unexpected membership at the level where it was
-granted, confirm the intended path is only `app_migrator -> app_owner`, and rerun bootstrap.
-The script never removes unexpected role memberships automatically.
+`bootstrap-roles.sql` deliberately aborts if any role other than
+`app_migrator` can inherit or `SET ROLE` through `app_owner`, if another role
+can reach it through `app_migrator`, or if a direct membership has
+non-canonical options. PostgreSQL 17 automatically gives a non-superuser
+`CREATEROLE` actor an administrative grant on each role it creates. For the
+database-owner/bootstrap actor (the Supabase `postgres` actor), the only
+accepted exception is that exact bootstrap-superuser grant: `ADMIN TRUE`,
+`INHERIT FALSE`, and `SET FALSE`. It permits role administration but grants no
+access to `app_owner`. Treat every other membership, including an exact-shaped
+grant to a substituted actor, as a privilege incident: inspect
+`pg_auth_members`, revoke the unexpected membership at the level where it was
+granted, confirm the only usable path is `app_migrator -> app_owner`, and rerun
+bootstrap. The script never removes unexpected role memberships automatically.
+
+The bootstrap runs in one explicit transaction. It temporarily grants its actor
+usable membership in `app_owner` and `app_migrator` only while establishing
+owner ACLs, then revokes the actor's own grants before commit. Any error rolls
+the whole transaction back, so temporary data access is never retained.
+PostgreSQL 15 keeps the original single-membership contract; PostgreSQL 16 and
+later additionally audit per-grant `ADMIN`, `INHERIT`, `SET`, and grantor
+metadata.
 
 ## Fresh database
 
@@ -44,11 +59,15 @@ The script never removes unexpected role memberships automatically.
 4. Set the immutable Better Auth user id in `ADMIN_USER_ID`, then run
    `npx tsx scripts/bootstrap-admin.ts`.
 5. Run `npm run db:verify` and retain the complete output as release evidence.
-6. Set `SUPABASE_PROJECT_REF` to the reviewed target and run
-   `npm run db:apply-hosted` with a Supabase Management API token permitted to
+6. Set `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, and
+   `SUPABASE_SERVICE_ROLE_KEY` for the same reviewed target, then run
+   `npm run db:apply-hosted`. The Management API token must be permitted to
    update that project's configuration. The lockfile-pinned CLI applies
-   `supabase/config.toml`; the same command then verifies the effective allowlist.
-   Retain the exact result before accepting traffic.
+   `supabase/config.toml`; the same command then verifies the effective Data API
+   allowlist and uses the read-only Storage bucket endpoint to require the
+   public `product-images` bucket, its 5 MiB limit, and its exact JPEG, PNG, and
+   WebP allowlist. Retain the exact result before accepting traffic; the command
+   verifier never prints the service-role key or an error response body.
 
 ## Existing database cutover
 
@@ -59,6 +78,39 @@ The script never removes unexpected role memberships automatically.
    current administrator user id.
 3. Execute this entire runbook against the restore, including authentication smoke tests,
    fulfillment retry tests, the database verifier, and rollback rehearsal.
+   The repository gate runs the complete fixture, credential
+   sign-in/session/sign-out smoke, exact authentication-field fingerprint,
+   idempotent rerun, and evidence-failure rollback suite on PostgreSQL 17
+   through `npm test`, then repeats the same cutover suite on PostgreSQL 15
+   with:
+
+   ```sh
+   CUTOVER_TEST_POSTGRES_IMAGE=postgres:15 \
+     node --test scripts/database/cutover-postgres.integration.test.mjs
+   ```
+
+   To reproduce the PostgreSQL 17 half explicitly, replace the image value with
+   `postgres:17`. Missing, incomplete, and conflicting price evidence must each
+   abort with every legacy authentication, catalog, cart, wishlist, and order
+   fingerprint unchanged.
+
+   As the exact cutover actor, also prove the ownership-transfer capability
+   without retaining a role change:
+
+   ```sql
+   BEGIN;
+   SET LOCAL ROLE app_owner;
+   RESET ROLE;
+   ROLLBACK;
+   ```
+
+   An administration-only membership with `SET FALSE` is insufficient. The
+   PostgreSQL 17 integration test proves that this case fails closed and leaves
+   the legacy schema and historical fingerprint intact. If the preflight fails,
+   stop: do not add a persistent `app_owner` membership. Prepare and review a
+   transactionally bounded capability plan that revokes the actor before
+   `db:verify`.
+
 4. Review the resulting evidence and schedule the production maintenance window.
 5. Prepare a build of this release. It supports the temporary public Better Auth layout and
    the final private layout through `AUTH_DATABASE_LAYOUT`; do not split those modes into
@@ -68,9 +120,11 @@ The script never removes unexpected role memberships automatically.
 
 Use one **same legacy-owner/cutover actor** for evidence preparation and the first cutover:
 the database-administrator login that currently owns every legacy public application table
-and can transfer those objects to `app_owner`. Do not change roles or users between steps 4,
-5, and 8. The temporary evidence table remains owned by this actor so it can populate, read,
-archive, and drop the table without granting access to runtime roles.
+and can transfer those objects to `app_owner`, including the ability to
+`SET ROLE app_owner`. Role administration without the `SET` capability does not
+satisfy this requirement. Do not change roles or users between steps 4, 5, and
+8. The temporary evidence table remains owned by this actor so it can populate,
+read, archive, and drop the table without granting access to runtime roles.
 
 1. Disable every source of application writes, including web traffic, background jobs,
    Stripe webhook delivery, cron fulfillment, and operator tools. Keep the pause active
@@ -114,8 +168,9 @@ archive, and drop the table without granting access to runtime roles.
     `CONFIRM_DATABASE_CUTOVER=MARK_MIGRATIONS_APPLIED` and run
     `npm run db:mark-cutover` with `MIGRATION_DATABASE_URL`. This records the reviewed
     canonical migrations without executing them over the converted schema.
-14. Reconfirm `SUPABASE_PROJECT_REF`, run `npm run db:apply-hosted`, and retain
-    its post-apply Management API verification result. Only then re-enable
+14. Reconfirm `SUPABASE_PROJECT_REF` and the target associated with
+    `SUPABASE_SERVICE_ROLE_KEY`, run `npm run db:apply-hosted`, and retain its
+    post-apply Data API and Storage verification result. Only then re-enable
     Stripe webhook delivery and cron and reopen application traffic.
 
 ## Rollback boundary

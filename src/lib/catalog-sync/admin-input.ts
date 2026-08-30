@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  catalogProductDescriptionSchema,
   catalogProductNameSchema,
   catalogVariantColorSchema,
   catalogVariantImageCountSchema,
@@ -13,7 +14,7 @@ export const commandIdSchema = z.uuid();
 export const productFormSchema = z
   .object({
     name: catalogProductNameSchema,
-    description: z.string().trim().min(1),
+    description: catalogProductDescriptionSchema,
     price: z.string().trim().transform((value, context) => {
       const cents = parseCatalogPriceCents(value);
       if (cents === null) {

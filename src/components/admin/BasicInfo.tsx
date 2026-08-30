@@ -14,7 +14,10 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { ProductCategory } from "@/lib/db/drizzle/schema";
 import { STRIPE_EUR_MAX_CHARGE_CENTS } from "@/lib/stripe/amount-limits";
-import { CATALOG_PRODUCT_NAME_MAX_LENGTH } from "@/lib/catalog-sync/input-validation";
+import {
+  CATALOG_PRODUCT_DESCRIPTION_MAX_LENGTH,
+  CATALOG_PRODUCT_NAME_MAX_LENGTH,
+} from "@/lib/catalog-sync/input-validation";
 
 const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: "t-shirts", label: "T-Shirts" },
@@ -110,6 +113,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
           </Label>
           <Textarea
             id="description"
+            maxLength={CATALOG_PRODUCT_DESCRIPTION_MAX_LENGTH}
             value={description}
             onChange={(e) => {
               setDescription(e.target.value);

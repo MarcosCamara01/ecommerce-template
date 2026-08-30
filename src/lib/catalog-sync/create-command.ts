@@ -14,6 +14,7 @@ import {
 import type {
   ProductSize,
 } from "../db/drizzle/schema";
+import { catalogImageExtension } from "./image-file-contract";
 
 export type CatalogCreateUpload = {
   file: File;
@@ -35,15 +36,6 @@ type PlanCatalogCreateCommandInput = {
   variants: CatalogCreateVariantInput[];
   publicUrlForPath: (path: string) => string;
 };
-
-function imageExtension(file: File) {
-  const extension = file.name
-    .split(".")
-    .pop()
-    ?.toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-  return extension || "bin";
-}
 
 function createUpload(
   file: File,
@@ -88,7 +80,7 @@ export async function planCatalogCreateCommand(
 
   const mainUpload = createUpload(
     input.mainImage,
-    `products/${input.commandId}/main.${imageExtension(input.mainImage)}`,
+    `products/${input.commandId}/main.${catalogImageExtension(input.mainImage)}`,
     input.publicUrlForPath,
   );
   const uploads = [mainUpload];
@@ -103,7 +95,7 @@ export async function planCatalogCreateCommand(
       const images = variant.files.map((file, imageIndex) => {
         const upload = createUpload(
           file,
-          `products/${input.commandId}/variants/${variantIndex}/image-${imageIndex}.${imageExtension(file)}`,
+          `products/${input.commandId}/variants/${variantIndex}/image-${imageIndex}.${catalogImageExtension(file)}`,
           input.publicUrlForPath,
         );
         uploads.push(upload);
