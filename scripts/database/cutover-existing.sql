@@ -48,6 +48,64 @@ BEGIN
 END
 $$;
 
+-- The public-schema foreign key allowed a principal deletion to cascade into
+-- historical orders. Preserve those orders by replacing that legacy action
+-- with the private-schema contract. A canonical rerun leaves it untouched.
+DO $$
+DECLARE order_user_fk_is_canonical boolean;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM pg_constraint constraint_row
+    WHERE constraint_row.conname = 'order_items_user_id_fkey'
+      AND constraint_row.conrelid = 'app_private.order_items'::regclass
+      AND constraint_row.contype = 'f'
+      AND constraint_row.confrelid = 'app_private."user"'::regclass
+      AND constraint_row.conkey = ARRAY[
+        (
+          SELECT attribute.attnum
+          FROM pg_attribute attribute
+          WHERE attribute.attrelid = 'app_private.order_items'::regclass
+            AND attribute.attname = 'user_id'
+            AND NOT attribute.attisdropped
+        )
+      ]::smallint[]
+      AND constraint_row.confkey = ARRAY[
+        (
+          SELECT attribute.attnum
+          FROM pg_attribute attribute
+          WHERE attribute.attrelid = 'app_private."user"'::regclass
+            AND attribute.attname = 'id'
+            AND NOT attribute.attisdropped
+        )
+      ]::smallint[]
+      AND constraint_row.confdeltype = 'r'
+      AND constraint_row.confupdtype = 'c'
+      AND constraint_row.confmatchtype = 's'
+      AND constraint_row.convalidated
+      AND NOT constraint_row.condeferrable
+      AND NOT constraint_row.condeferred
+  ) INTO order_user_fk_is_canonical;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_constraint constraint_row
+    WHERE constraint_row.conname = 'order_items_user_id_fkey'
+      AND constraint_row.conrelid = 'app_private.order_items'::regclass
+  ) AND NOT order_user_fk_is_canonical THEN
+    ALTER TABLE app_private.order_items
+      DROP CONSTRAINT order_items_user_id_fkey;
+  END IF;
+
+  IF NOT order_user_fk_is_canonical THEN
+    ALTER TABLE app_private.order_items
+      ADD CONSTRAINT order_items_user_id_fkey
+      FOREIGN KEY (user_id) REFERENCES app_private."user"(id)
+      ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END
+$$;
+
 ALTER TABLE app_private."user"
   ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user',
   ADD COLUMN IF NOT EXISTS banned boolean NOT NULL DEFAULT false,
@@ -822,7 +880,7 @@ BEGIN
         OR actual_index.has_no_expressions IS DISTINCT FROM true
         OR actual_index.total_attributes IS DISTINCT FROM cardinality(expected_index.columns)
         OR actual_index.key_attributes IS DISTINCT FROM cardinality(expected_index.columns)
-        OR actual_index.columns IS DISTINCT FROM expected_index.columns
+        OR actual_index.columns::text[] IS DISTINCT FROM expected_index.columns
         OR actual_index.has_default_options IS DISTINCT FROM true
         OR actual_index.has_default_opclasses IS DISTINCT FROM true
         OR actual_index.has_default_collations IS DISTINCT FROM true

@@ -30,6 +30,10 @@ jobs:
         run: npm ci
       - name: Test
         run: npm test
+      - name: Rehearse existing-database cutover on PostgreSQL 15
+        run: node --test scripts/database/cutover-postgres.integration.test.mjs
+        env:
+          CUTOVER_TEST_POSTGRES_IMAGE: postgres:15
       - name: Typecheck
         run: npm run typecheck
       - name: Lint

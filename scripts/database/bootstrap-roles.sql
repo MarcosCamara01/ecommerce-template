@@ -1,6 +1,8 @@
 -- Run once with the external Supabase/Postgres owner credential.
 -- Passwords are intentionally not accepted or stored in this file.
 
+BEGIN;
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_owner') THEN
@@ -36,38 +38,90 @@ $$;
 
 DO $$
 DECLARE unexpected_members text;
+DECLARE server_version integer := current_setting('server_version_num')::integer;
 BEGIN
-  WITH RECURSIVE prospective_app_owner_members(member_oid) AS (
-    SELECT membership.member
-    FROM pg_auth_members membership
-    JOIN pg_roles granted_role ON granted_role.oid = membership.roleid
-    WHERE granted_role.rolname IN ('app_owner', 'app_migrator')
+  IF server_version >= 160000 THEN
+    WITH RECURSIVE prospective_app_owner_members(member_oid) AS (
+      SELECT membership.member
+      FROM pg_auth_members membership
+      JOIN pg_roles granted_role ON granted_role.oid = membership.roleid
+      WHERE granted_role.rolname IN ('app_owner', 'app_migrator')
+        AND (membership.inherit_option OR membership.set_option)
 
-    UNION
+      UNION
 
-    SELECT membership.member
-    FROM pg_auth_members membership
-    JOIN prospective_app_owner_members parent
-      ON membership.roleid = parent.member_oid
-  ), membership_violations AS (
-    SELECT member_role.rolname AS violation
-    FROM prospective_app_owner_members prospective
-    JOIN pg_roles member_role ON member_role.oid = prospective.member_oid
-    WHERE member_role.rolname <> 'app_migrator'
+      SELECT membership.member
+      FROM pg_auth_members membership
+      JOIN prospective_app_owner_members parent
+        ON membership.roleid = parent.member_oid
+      WHERE membership.inherit_option OR membership.set_option
+    ), membership_violations AS (
+      SELECT member_role.rolname AS violation
+      FROM prospective_app_owner_members prospective
+      JOIN pg_roles member_role ON member_role.oid = prospective.member_oid
+      WHERE member_role.rolname <> 'app_migrator'
 
-    UNION
+      UNION
 
-    SELECT 'app_migrator WITH ADMIN OPTION'
-    FROM pg_auth_members membership
-    JOIN pg_roles granted_role ON granted_role.oid = membership.roleid
-    JOIN pg_roles member_role ON member_role.oid = membership.member
-    WHERE granted_role.rolname = 'app_owner'
-      AND member_role.rolname = 'app_migrator'
-      AND membership.admin_option
-  )
-  SELECT string_agg(violation, ', ' ORDER BY violation)
-  INTO unexpected_members
-  FROM membership_violations;
+      SELECT format(
+        '%I is a non-canonical member of %I',
+        member_role.rolname,
+        granted_role.rolname
+      )
+      FROM pg_auth_members membership
+      JOIN pg_roles granted_role ON granted_role.oid = membership.roleid
+      JOIN pg_roles member_role ON member_role.oid = membership.member
+      JOIN pg_roles grantor_role ON grantor_role.oid = membership.grantor
+      WHERE granted_role.rolname IN ('app_owner', 'app_migrator')
+        AND NOT (
+          granted_role.rolname = 'app_owner'
+          AND member_role.rolname = 'app_migrator'
+          AND NOT membership.admin_option
+        )
+        AND NOT (
+          member_role.rolname = current_user
+          AND grantor_role.rolsuper
+          AND membership.admin_option
+          AND NOT membership.inherit_option
+          AND NOT membership.set_option
+        )
+    )
+    SELECT string_agg(violation, ', ' ORDER BY violation)
+    INTO unexpected_members
+    FROM membership_violations;
+  ELSE
+    WITH RECURSIVE prospective_app_owner_members(member_oid) AS (
+      SELECT membership.member
+      FROM pg_auth_members membership
+      JOIN pg_roles granted_role ON granted_role.oid = membership.roleid
+      WHERE granted_role.rolname IN ('app_owner', 'app_migrator')
+
+      UNION
+
+      SELECT membership.member
+      FROM pg_auth_members membership
+      JOIN prospective_app_owner_members parent
+        ON membership.roleid = parent.member_oid
+    ), membership_violations AS (
+      SELECT member_role.rolname AS violation
+      FROM prospective_app_owner_members prospective
+      JOIN pg_roles member_role ON member_role.oid = prospective.member_oid
+      WHERE member_role.rolname <> 'app_migrator'
+
+      UNION
+
+      SELECT 'app_migrator WITH ADMIN OPTION'
+      FROM pg_auth_members membership
+      JOIN pg_roles granted_role ON granted_role.oid = membership.roleid
+      JOIN pg_roles member_role ON member_role.oid = membership.member
+      WHERE granted_role.rolname = 'app_owner'
+        AND member_role.rolname = 'app_migrator'
+        AND membership.admin_option
+    )
+    SELECT string_agg(violation, ', ' ORDER BY violation)
+    INTO unexpected_members
+    FROM membership_violations;
+  END IF;
 
   IF unexpected_members IS NOT NULL THEN
     RAISE EXCEPTION
@@ -79,6 +133,21 @@ $$;
 
 REVOKE app_owner FROM app_migrator;
 GRANT app_owner TO app_migrator;
+DO $$
+BEGIN
+  IF current_setting('server_version_num')::integer >= 160000 THEN
+    EXECUTE format(
+      'GRANT app_owner, app_migrator TO %I WITH SET TRUE, INHERIT TRUE, ADMIN FALSE',
+      current_user
+    );
+  ELSE
+    EXECUTE format(
+      'GRANT app_owner, app_migrator TO %I',
+      current_user
+    );
+  END IF;
+END
+$$;
 CREATE SCHEMA IF NOT EXISTS app_private AUTHORIZATION app_owner;
 ALTER SCHEMA app_private OWNER TO app_owner;
 CREATE SCHEMA IF NOT EXISTS drizzle AUTHORIZATION app_owner;
@@ -240,3 +309,22 @@ BEGIN
   END LOOP;
 END
 $$;
+
+DO $$
+BEGIN
+  IF current_setting('server_version_num')::integer >= 160000 THEN
+    EXECUTE format(
+      'REVOKE app_owner, app_migrator FROM %I GRANTED BY %I',
+      current_user,
+      current_user
+    );
+  ELSE
+    EXECUTE format(
+      'REVOKE app_owner, app_migrator FROM %I',
+      current_user
+    );
+  END IF;
+END
+$$;
+
+COMMIT;

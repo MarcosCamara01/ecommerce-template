@@ -71,41 +71,112 @@ async function main() {
       "application roles have no elevated attributes",
     );
 
-    const directAppOwnerMembers = await sql`
-      select member_role.rolname as member_name,
-             membership.admin_option
-      from pg_auth_members membership
-      join pg_roles granted_role on granted_role.oid = membership.roleid
-      join pg_roles member_role on member_role.oid = membership.member
-      where granted_role.rolname = 'app_owner'
-      order by member_role.rolname
+    const [databaseFacts] = await sql`
+      select current_setting('server_version_num')::integer as version,
+             pg_get_userbyid(database_row.datdba) as owner_name
+      from pg_database database_row
+      where database_row.datname = current_database()
     `;
+    const hasPerGrantMembershipOptions = databaseFacts.version >= 160000;
+    const directAppOwnerMembers = hasPerGrantMembershipOptions
+      ? await sql`
+          select member_role.rolname as member_name,
+                 member_role.rolcreaterole as member_can_create_roles,
+                 membership.admin_option,
+                 membership.inherit_option,
+                 membership.set_option,
+                 grantor_role.rolsuper as grantor_is_superuser
+          from pg_auth_members membership
+          join pg_roles granted_role on granted_role.oid = membership.roleid
+          join pg_roles member_role on member_role.oid = membership.member
+          join pg_roles grantor_role on grantor_role.oid = membership.grantor
+          where granted_role.rolname = 'app_owner'
+          order by member_role.rolname
+        `
+      : await sql`
+          select member_role.rolname as member_name,
+                 member_role.rolcreaterole as member_can_create_roles,
+                 membership.admin_option,
+                 false as inherit_option,
+                 false as set_option,
+                 grantor_role.rolsuper as grantor_is_superuser
+          from pg_auth_members membership
+          join pg_roles granted_role on granted_role.oid = membership.roleid
+          join pg_roles member_role on member_role.oid = membership.member
+          join pg_roles grantor_role on grantor_role.oid = membership.grantor
+          where granted_role.rolname = 'app_owner'
+          order by member_role.rolname
+        `;
+    const canonicalAppOwnerMembers = directAppOwnerMembers.filter(
+      (membership) =>
+        membership.member_name === "app_migrator" &&
+        membership.admin_option === false &&
+        (!hasPerGrantMembershipOptions ||
+          (membership.inherit_option === false &&
+            membership.set_option === true)),
+    );
+    const creatorAdministrativeMembers = directAppOwnerMembers.filter(
+      (membership) =>
+        hasPerGrantMembershipOptions &&
+        membership.member_name === databaseFacts.owner_name &&
+        membership.member_can_create_roles === true &&
+        membership.grantor_is_superuser === true &&
+        membership.admin_option === true &&
+        membership.inherit_option === false &&
+        membership.set_option === false,
+    );
     check(
-      directAppOwnerMembers.length === 1 &&
-        directAppOwnerMembers[0].member_name === "app_migrator" &&
-        directAppOwnerMembers[0].admin_option === false,
-      "app_owner has exactly app_migrator as a non-admin member",
+      canonicalAppOwnerMembers.length === 1 &&
+        creatorAdministrativeMembers.length <= 1 &&
+        directAppOwnerMembers.length ===
+          canonicalAppOwnerMembers.length +
+            creatorAdministrativeMembers.length,
+      "app_owner has only the migrator and optional database-owner creator administration",
     );
 
-    const unexpectedAppOwnerMembers = await sql`
-      with recursive app_owner_members(member_oid) as (
-        select membership.member
-        from pg_auth_members membership
-        join pg_roles granted_role on granted_role.oid = membership.roleid
-        where granted_role.rolname = 'app_owner'
+    const unexpectedAppOwnerMembers = hasPerGrantMembershipOptions
+      ? await sql`
+          with recursive app_owner_members(member_oid) as (
+            select membership.member
+            from pg_auth_members membership
+            join pg_roles granted_role on granted_role.oid = membership.roleid
+            where granted_role.rolname = 'app_owner'
+              and (membership.inherit_option or membership.set_option)
 
-        union
+            union
 
-        select membership.member
-        from pg_auth_members membership
-        join app_owner_members parent on membership.roleid = parent.member_oid
-      )
-      select member_role.rolname as member_name
-      from app_owner_members membership
-      join pg_roles member_role on member_role.oid = membership.member_oid
-      where member_role.rolname <> 'app_migrator'
-      order by member_role.rolname
-    `;
+            select membership.member
+            from pg_auth_members membership
+            join app_owner_members parent
+              on membership.roleid = parent.member_oid
+            where membership.inherit_option or membership.set_option
+          )
+          select member_role.rolname as member_name
+          from app_owner_members membership
+          join pg_roles member_role on member_role.oid = membership.member_oid
+          where member_role.rolname <> 'app_migrator'
+          order by member_role.rolname
+        `
+      : await sql`
+          with recursive app_owner_members(member_oid) as (
+            select membership.member
+            from pg_auth_members membership
+            join pg_roles granted_role on granted_role.oid = membership.roleid
+            where granted_role.rolname = 'app_owner'
+
+            union
+
+            select membership.member
+            from pg_auth_members membership
+            join app_owner_members parent
+              on membership.roleid = parent.member_oid
+          )
+          select member_role.rolname as member_name
+          from app_owner_members membership
+          join pg_roles member_role on member_role.oid = membership.member_oid
+          where member_role.rolname <> 'app_migrator'
+          order by member_role.rolname
+        `;
     check(
       unexpectedAppOwnerMembers.length === 0,
       `no other role can reach app_owner membership${

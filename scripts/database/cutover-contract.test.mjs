@@ -724,7 +724,7 @@ test("default function ACL verification accepts only the canonical owner-only ro
   );
 });
 
-test("bootstrap rejects unexpected direct or transitive app_owner members", async () => {
+test("bootstrap accepts only PostgreSQL's exact creator administration grant", async () => {
   const bootstrap = await readFile("scripts/database/bootstrap-roles.sql", "utf8");
   const membershipGuard = bootstrap.indexOf(
     "WITH RECURSIVE prospective_app_owner_members",
@@ -740,19 +740,62 @@ test("bootstrap rejects unexpected direct or transitive app_owner members", asyn
     bootstrap,
     /granted_role\.rolname IN \('app_owner', 'app_migrator'\)/i,
   );
+  assert.match(bootstrap, /member_role\.rolname\s*=\s*current_user/i);
+  assert.match(bootstrap, /grantor_role\.rolsuper/i);
+  assert.match(bootstrap, /membership\.admin_option/i);
+  assert.match(bootstrap, /NOT membership\.inherit_option/i);
+  assert.match(bootstrap, /NOT membership\.set_option/i);
+  assert.match(
+    bootstrap,
+    /membership\.inherit_option\s+OR\s+membership\.set_option/i,
+  );
   assert.match(bootstrap, /member_role\.rolname <> 'app_migrator'/i);
-  assert.match(bootstrap, /app_migrator WITH ADMIN OPTION/i);
   assert.match(bootstrap, /Unexpected app_owner membership detected/i);
 });
 
-test("app_owner verification requires the canonical direct member and no reachable extras", async () => {
+test("bootstrap scopes temporary owner access to one transaction", async () => {
+  const bootstrap = await readFile("scripts/database/bootstrap-roles.sql", "utf8");
+  const transaction = bootstrap.indexOf("\nBEGIN;\n");
+  const temporaryGrant = bootstrap.indexOf(
+    "GRANT app_owner, app_migrator TO %I WITH SET TRUE, INHERIT TRUE, ADMIN FALSE",
+  );
+  const temporaryRevoke = bootstrap.indexOf(
+    "REVOKE app_owner, app_migrator FROM %I GRANTED BY %I",
+  );
+  const commit = bootstrap.lastIndexOf("\nCOMMIT;");
+
+  assert.ok(transaction >= 0, "bootstrap must start an explicit transaction");
+  assert.ok(temporaryGrant > transaction, "temporary SET access must be granted in the transaction");
+  assert.ok(temporaryRevoke > temporaryGrant, "the actor's own grant must be revoked");
+  assert.ok(commit > temporaryRevoke, "the cleanup must precede commit");
+});
+
+test("app_owner verification distinguishes administration from usable membership", async () => {
   const verify = await readFile("scripts/database/verify.ts", "utf8");
 
+  assert.match(verify, /membership\.inherit_option/i);
+  assert.match(verify, /membership\.set_option/i);
+  assert.match(verify, /grantor_role\.rolsuper/i);
   assert.match(
     verify,
-    /directAppOwnerMembers\.length === 1[\s\S]+member_name === "app_migrator"[\s\S]+admin_option === false/i,
+    /canonicalAppOwnerMembers[\s\S]+member_name === "app_migrator"[\s\S]+admin_option === false/i,
   );
+  assert.match(
+    verify,
+    /canonicalAppOwnerMembers[\s\S]+!hasPerGrantMembershipOptions[\s\S]+inherit_option === false[\s\S]+set_option === true/i,
+  );
+  assert.match(verify, /canonicalAppOwnerMembers\.length === 1/i);
+  assert.match(verify, /creatorAdministrativeMembers\.length <= 1/i);
+  assert.match(
+    verify,
+    /membership\.member_name === databaseFacts\.owner_name/i,
+  );
+  assert.match(verify, /member_can_create_roles === true/i);
   assert.match(verify, /with recursive app_owner_members\(member_oid\)/i);
+  assert.match(
+    verify,
+    /membership\.inherit_option\s+or\s+membership\.set_option/i,
+  );
   assert.match(verify, /member_role\.rolname <> 'app_migrator'/i);
   assert.match(verify, /unexpectedAppOwnerMembers\.length === 0/i);
 });
