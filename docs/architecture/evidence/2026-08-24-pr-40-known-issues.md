@@ -2,13 +2,17 @@
 
 This document inventories the defects, operational incidents, environment
 limitations, and remaining QA gaps found while testing pull request
-[`#40`](https://github.com/MarcosCamara01/ecommerce-template/pull/40) at commit
+[`#40`](https://github.com/MarcosCamara01/ecommerce-template/pull/40). The
+original audit baseline was
 `1358ce0624039d88c1c80f65b19bcc50fe47ea0f`.
 
-A local follow-up on 2026-08-25 remediated the confirmed code defects and closed
-the locally isolatable coverage. The changes were reproduced and committed on
-`t3code/pr-40-audit-fixes`; nothing was pushed, deployed, or changed in a hosted
-system, so publication-bound evidence remains open.
+A follow-up on 2026-08-25 produced six remediation commits. That stack was first
+published to `feat/verifiable-auth-catalog-fulfillment` at
+`3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`. A second local follow-up on
+2026-08-30 produced four code commits, ending at
+`d3304ef00fe222b9cf195f95bad6bd791b3916af`; the documentation-only commit that
+records them follows that code tip. Publication-bound evidence remains open
+unless a section explicitly records it.
 
 The detailed test evidence is in the
 [T3 browser QA report](./2026-08-24-pr-40-t3-browser-qa.md).
@@ -17,11 +21,11 @@ The detailed test evidence is in the
 
 - [Confirmed application and PR defects](#confirmed-application-and-pr-defects)
 - [Resolved runtime diagnostics](#resolved-runtime-diagnostics)
-- [Deployment and release verification gaps](#deployment-and-release-verification-gaps)
+- [Deployment evidence and remaining release gaps](#deployment-evidence-and-remaining-release-gaps)
 - [Test-environment limitations and incidents](#test-environment-limitations-and-incidents)
 - [Incomplete coverage](#incomplete-coverage)
 - [Recommended remediation order](#recommended-remediation-order)
-- [Repository safety state](#repository-safety-state)
+- [Repository safety state and revision anchors](#repository-safety-state-and-revision-anchors)
 
 ## Confirmed application and PR defects
 
@@ -29,7 +33,8 @@ The detailed test evidence is in the
 
 Severity: P1 accessibility.
 
-Status: resolved and verified locally on 2026-08-25.
+Status: initial defect remediated on 2026-08-25; category-heading follow-up
+verified locally on 2026-08-30.
 
 - Home has product-card `h2` elements but no route-level `h1`.
 - Search has no route-level `h1`; its no-results message starts at `h3`.
@@ -48,7 +53,12 @@ render paths.
 Resolution: stable route-shell headings cover loading, empty, non-empty, and
 error branches. Product detail exposes one product-name `h1` outside responsive
 subtrees, and its accordion headings no longer skip a level. Source contracts,
-the full suite, and T3 accessibility trees passed in desktop and mobile.
+the full suite, and T3 accessibility trees passed in desktop and mobile. A
+subsequent review found that every category still used the generic `Product
+collection` heading. The 2026-08-30 follow-up now derives `<Category> products`
+from the validated route category while keeping the product query inside
+Suspense. Its 12 focused contracts, typecheck, lint, and build passed, and all
+three category routes retained Partial Prerendering.
 
 ### ISSUE-002 — Profile dialog leaves focus inside hidden page content
 
@@ -111,7 +121,9 @@ origin was added.
 
 Severity: P1 operational safety.
 
-Status: resolved and verified without network access on 2026-08-25.
+Status: the first remediation was incomplete; a 2026-08-30 working-tree
+follow-up is verified without network access and awaits final integrated
+validation plus an immutable commit.
 
 The mailer can fall back to Gmail service mode when `EMAIL_SERVER_HOST` is
 absent but Gmail credentials remain in the process environment. The first
@@ -130,11 +142,16 @@ No credential or provider configuration was changed during the incident. The
 server was restarted with every email-related variable removed immediately
 after discovery.
 
-Resolution: `EMAIL_SERVER_HOST` is now the explicit enablement boundary. Missing
-host, partial configuration, and residual Gmail credentials fail before
-Nodemailer creates a transport. Gmail remains supported through an explicit
-Gmail SMTP host. The historical two-message incident remains part of the record;
-no follow-up email was sent.
+Resolution: commit `09625ab` made `EMAIL_SERVER_HOST` the enablement boundary
+and removed the implicit Gmail service mode, but it still defaulted the port,
+sender, and recipient. The 2026-08-30 follow-up removes those fallbacks. An
+enabled transport now requires explicit host, port, user, password, sender, and
+contact recipient; `ADMIN_EMAIL` is an accepted explicit contact recipient.
+Missing values, residual public usernames, and invalid ports fail before
+Nodemailer creates a transport. All 14 focused mailer tests passed with an
+in-memory double and no network access. Complete generic and Gmail SMTP
+configurations remain supported. The historical two-message incident remains
+part of the record; no follow-up email was sent.
 
 ### ISSUE-005 — Invalid order identifiers reached PostgreSQL
 
@@ -168,6 +185,12 @@ disabled-email effects, and a query after the 20-second idle timeout reconnected
 without warning. The timer did not originate in Next.js `after()`, Stripe,
 application retries, or application date arithmetic.
 
+Test durability follow-up: the 2026-08-30 working tree replaces a source-text
+assertion against Postgres internals in `node_modules` with a manifest and
+lockfile minimum-version contract. The focused test passes without depending on
+the driver's private file layout; the traced reconnect run above remains the
+behavioral evidence.
+
 ### DIAG-002 — Repeated fixture image produced an LCP warning
 
 Status: confirmed as a fixture-only diagnostic on 2026-08-25; no product-image
@@ -184,19 +207,22 @@ repeat on the remediation branch logged only an unused-preload warning after an
 immediate route transition, not the original LCP diagnostic. The database
 fixture was restored to `/main-image.webp` after each test.
 
-## Deployment and release verification gaps
+## Deployment evidence and remaining release gaps
 
-### DEP-GAP-001 — Historical Vercel failure has not been superseded
+### DEP-GAP-001 — Historical Vercel failure was superseded
 
 The previous Vercel check failed while the project lacked the plan needed for
-two five-minute cron jobs. The project is now on Pro, but a new GitHub-sourced
-deployment must still prove recovery.
+two five-minute cron jobs. On 2026-08-27, Vercel completed Preview deployment
+`6127491975` successfully from GitHub commit
+`3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`, superseding that historical
+failure. Any later follow-up commit still requires its own Vercel rerun.
 
-### DEP-GAP-002 — GitHub deployment identity is unverified
+### DEP-GAP-002 — GitHub deployment identity was verified
 
-The successful local Vercel deployment was built from an uncommitted working
-tree. It does not prove that a deployment originating from the PR commit becomes
-READY.
+The READY Preview deployment above names the exact pushed PR commit rather than
+an uncommitted local working tree. This closes the original identity gap for
+`3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`; it does not pre-certify later
+working-tree changes.
 
 ### DEP-GAP-003 — Preview authentication and cron execution are unverified
 
@@ -289,9 +315,18 @@ remains a tool limitation rather than a confirmed defect.
 
 ## Incomplete coverage
 
-All locally isolatable cases in the original inventory passed or produced the
-remediated order-ID defect. These items remain blocked or external; they are not
-new confirmed defects:
+The first remediation tip left ADM-002 blocked even though field-level create
+validation is locally isolatable. A 2026-08-30 follow-up corrected that
+classification and behavior: missing main and final variant images now return
+the field keys consumed by the form before planning, persistence, or upload.
+Multipart payloads that declare an image but omit it or provide an empty file
+also report `variants.<index>.images`, rather than an unused `imageCount` field.
+The focused regression passed 16 of 16 tests, and the shared full suite passed
+314 of 314 tests. All locally isolatable cases in the original inventory now
+pass or produced a remediated defect.
+
+These items still require an external adapter, hosted evidence, or a browser
+capability; they are not new confirmed defects:
 
 - Complete product create/update synchronization with isolated Storage.
 - Verification-link navigation, rendered-message inspection, and delivery in an
@@ -299,29 +334,37 @@ new confirmed defects:
 - Reduced-motion emulation in the collaborative T3 browser.
 - Completed Klarna, Bancontact, EPS, and Apple Pay transactions. These methods
   appeared dynamically in Checkout but were not taken through completion.
-- GitHub-sourced Vercel READY status.
+- A new GitHub-sourced Vercel READY status for any later follow-up commit.
 - Preview authentication after the origin fix.
 - Hosted cron execution and final release evidence.
 
 ## Recommended remediation order
 
-1. Review the six local commits and their total diff against the PR head.
-2. Push only under a separate explicit authorization.
-3. Verify GitHub quality, dependency-review, React Doctor, CodeQL, GitGuardian,
-   and a GitHub-sourced Vercel READY deployment for the pushed commit.
+1. Review the follow-up working-tree diff against the first published
+   remediation tip.
+2. Commit and push any follow-up only under their separate explicit
+   authorizations.
+3. Re-run GitHub quality, dependency-review, React Doctor, CodeQL, GitGuardian,
+   and GitHub-sourced Vercel verification for the resulting published commit.
 4. Verify Better Auth and both authenticated cron endpoints on the exact Preview
    host without adding wildcard trusted origins.
 5. Complete isolated SMTP, Storage, migration/restore, hosted exposure,
    credential-rotation, and cutover evidence before any merge decision.
 
-## Repository safety state
+## Repository safety state and revision anchors
 
-- Worktree:
-  `/Users/marcospenelascamara/.t3/worktrees/ecommerce-template/t3code-982bdeaf`
-- Branch: `t3code/pr-40-audit-fixes`.
-- Tested HEAD: `1358ce0624039d88c1c80f65b19bcc50fe47ea0f`.
-- The remediation is organized as five code commits followed by one evidence
-  commit; the final tree is expected to be clean.
-- Do not discard or mix them with unrelated changes.
-- Local commits were authorized for this branch. No push, deployment, external
-  credential change, or PR merge is authorized by this document.
+- Working branch: `t3code/pr-40-audit-fixes`.
+- Original audit baseline:
+  `1358ce0624039d88c1c80f65b19bcc50fe47ea0f`.
+- First published remediation tip:
+  `3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`.
+- The first published remediation stack contains five code commits followed by
+  one evidence commit.
+- Second local follow-up code tip:
+  `d3304ef00fe222b9cf195f95bad6bd791b3916af`.
+- The second follow-up contains four code commits; the evidence-only commit that
+  contains this document follows them and changes no runtime behavior.
+- Do not discard the follow-up or mix it with unrelated changes.
+- Publication of the first remediation stack is historical. This document does
+  not authorize another commit, push, deployment, external credential change,
+  or PR merge.

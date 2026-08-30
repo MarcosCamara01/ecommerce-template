@@ -1,13 +1,17 @@
 # PR 40 local T3 browser QA — 2026-08-24
 
 This document defines and records browser testing for pull request
-[`#40`](https://github.com/MarcosCamara01/ecommerce-template/pull/40) at commit
+[`#40`](https://github.com/MarcosCamara01/ecommerce-template/pull/40). The
+original audit baseline was
 `1358ce0624039d88c1c80f65b19bcc50fe47ea0f`.
 
-A local remediation follow-up was completed on 2026-08-25 and reproduced as
-local commits on `t3code/pr-40-audit-fixes`, without a push, deployment, or
-hosted-data mutation. This report keeps the original findings and adds the
-evidence produced by that follow-up.
+A local remediation follow-up produced six commits on
+`t3code/pr-40-audit-fixes` on 2026-08-25. That stack was later published to the
+PR branch at `3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`. This report keeps the
+original findings and adds the evidence produced by that follow-up. A second
+local code follow-up completed on 2026-08-30 at
+`d3304ef00fe222b9cf195f95bad6bd791b3916af`; the documentation-only commit that
+records it follows that code tip.
 
 Legend: `[ ]` pending, `[x]` passed, `[!]` defect, and `[-]` blocked or not
 applicable to the disposable local environment.
@@ -15,8 +19,12 @@ applicable to the disposable local environment.
 ## Scope and safety boundary
 
 - Remediation branch: `t3code/pr-40-audit-fixes`.
-- PR head under test: `feat/verifiable-auth-catalog-fulfillment` at the base
-  commit recorded above.
+- Original PR head under audit:
+  `1358ce0624039d88c1c80f65b19bcc50fe47ea0f`.
+- First published remediation tip:
+  `3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`.
+- Second local follow-up code tip:
+  `d3304ef00fe222b9cf195f95bad6bd791b3916af`.
 - Base: `master`.
 - PR state at the start of testing: open, draft, and blocked from merging.
 - Change size: 361 files, 79,952 additions, and 19,522 deletions.
@@ -28,9 +36,9 @@ applicable to the disposable local environment.
   request to test Stripe deeply authorized test-mode Stripe writes only.
 - Hosted Supabase, live-mode Stripe, production data, credentials, and Vercel
   configuration must not be changed by this run.
-- Local remediation commits are authorized. No push, deployment, migration of a
-  hosted database, cron execution against a hosted target, or PR merge is
-  authorized.
+- The first remediation stack was published after the local run. This report
+  does not authorize another push, deployment, migration of a hosted database,
+  cron execution against a hosted target, or PR merge.
 
 ## Planned local environment
 
@@ -49,8 +57,12 @@ applicable to the disposable local environment.
 
 ### Environment and startup
 
-- [x] **ENV-001 P0 — Exact source revision.** Local branch, remote PR head, and
-  tested commit are identical; the worktree contains only this evidence file.
+- [x] **ENV-001 P0 — Historical source capture.** At the start of the audit,
+  the local branch, remote PR head, and tested commit all resolved to
+  `1358ce0624039d88c1c80f65b19bcc50fe47ea0f`; the worktree contained only the
+  evidence file. This records the initial state and does not claim that those
+  refs remain equal. The first remediation stack was subsequently published at
+  `3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`.
 - [x] **ENV-002 P0 — Isolated dependencies.** PostgreSQL is loopback-only;
   Stripe credentials are test-mode keys and every inspected Stripe object has
   `livemode: false`.
@@ -63,8 +75,10 @@ applicable to the disposable local environment.
 - [x] **ENV-006 P1 — Diagnostics capture.** Unexpected console errors, failed
   requests, and server-side 5xx responses are recorded with their route.
 - [x] **ENV-007 P0 — Email isolation.** Email remains disabled without an
-  explicit SMTP host; partial and residual Gmail credentials fail before a
-  transport is created, and no configuration test opens a network connection.
+  explicit SMTP host; enabled delivery requires explicit port, user, password,
+  sender, and contact recipient. Partial and residual Gmail credentials fail
+  before a transport is created, and no configuration test opens a network
+  connection.
 
 ### Global navigation and routing
 
@@ -243,7 +257,7 @@ applicable to the disposable local environment.
 
 - [x] **ADM-001 P0 — Authorization before parsing.** Anonymous and normal-user
   admin calls fail before accepting or parsing mutation data.
-- [-] **ADM-002 P1 — Create validation.** Missing product fields, main image,
+- [x] **ADM-002 P1 — Create validation.** Missing product fields, main image,
   variant color, size, price, and final variant image receive field-level errors.
 - [x] **ADM-003 P1 — Error clearing.** Correcting a field removes its stale error
   without requiring another unrelated mutation.
@@ -299,10 +313,13 @@ applicable to the disposable local environment.
 
 ### PR and deployment follow-up
 
-- [ ] **DEP-001 P0 — Vercel rerun.** A new GitHub-sourced Vercel check is required
-  after the Pro plan change; the old failed status is not evidence of recovery.
-- [ ] **DEP-002 P0 — GitHub deployment identity.** The ready deployment must name
-  PR 40's commit, not an uncommitted local working tree.
+- [x] **DEP-001 P0 — Vercel rerun.** Vercel successfully completed GitHub
+  Preview deployment `6127491975` on 2026-08-27, superseding the historical
+  Hobby-plan cron failure for the first remediation tip.
+- [x] **DEP-002 P0 — GitHub deployment identity.** The READY deployment names
+  the exact pushed PR commit
+  `3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`, not an uncommitted local tree.
+  Any later follow-up commit still requires its own rerun.
 - [ ] **DEP-003 P0 — Preview auth origin.** Better Auth callbacks and trusted origin
   must resolve to the exact Preview host while production remains fail-closed.
   Local resolution tests pass; the published Preview run remains pending.
@@ -316,11 +333,11 @@ applicable to the disposable local environment.
 ### Outcome
 
 - Total planned checks: 116.
-- Passed: 106.
+- Passed: 109.
 - Defect markers: 0. Five local defects are retained below with their
   remediation evidence rather than erased from the history.
-- Blocked by an intentionally isolated adapter or missing browser capability: 5.
-- Still pending and requiring hosted or deployment evidence: 5.
+- Blocked by an intentionally isolated adapter or missing browser capability: 4.
+- Still pending and requiring hosted or deployment evidence: 3.
 - External services changed: Stripe Test mode plus the mailer incident below.
   Three Products and four Prices were created and then archived; one disposable
   Customer was created and then deleted. Successful test Sessions and payments
@@ -337,8 +354,11 @@ applicable to the disposable local environment.
 
 ### Environment evidence
 
-- Local branch, `origin` branch, and PR head all resolved to
-  `1358ce0624039d88c1c80f65b19bcc50fe47ea0f` before testing.
+- Historical source capture: the local branch, `origin` branch, and PR head all
+  resolved to `1358ce0624039d88c1c80f65b19bcc50fe47ea0f` before the original
+  audit. This statement does not describe their current equality. The first
+  published remediation tip is
+  `3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`.
 - PostgreSQL 17 ran in a disposable Docker container on `127.0.0.1:55432`.
 - The repository role bootstrap and all 19 Drizzle migrations completed.
 - `npm run db:verify` passed every role, ownership, ACL, schema, grant,
@@ -351,34 +371,34 @@ applicable to the disposable local environment.
   variable were removed from that server process after the mailer isolation
   issue described below was discovered.
 - T3 Code exercised desktop at 1440 by 900 and mobile at 390 by 844.
-- Initial browser recording:
-  `/Users/marcospenelascamara/.t3/userdata/browser-artifacts/browser-recording-mt7lie3f.mp4`.
-- Stripe Test browser recording:
-  `/Users/marcospenelascamara/.t3/userdata/browser-artifacts/browser-recording-mt7n4ggz.mp4`.
-- Distinct-image diagnostic recording:
-  `/Users/marcospenelascamara/.t3/userdata/browser-artifacts/browser-recording-mt8y7cfz.mp4`.
-- Local coverage and regression recording:
-  `/Users/marcospenelascamara/.t3/userdata/browser-artifacts/browser-recording-mt8yqymg.mp4`.
-- Final production-build recording:
-  `/Users/marcospenelascamara/.t3/userdata/browser-artifacts/browser-recording-mt8z492b.mp4`.
+- Initial browser recording: `browser-recording-mt7lie3f.mp4`.
+- Stripe Test browser recording: `browser-recording-mt7n4ggz.mp4`.
+- Distinct-image diagnostic recording: `browser-recording-mt8y7cfz.mp4`.
+- Local coverage and regression recording: `browser-recording-mt8yqymg.mp4`.
+- Final production-build recording: `browser-recording-mt8z492b.mp4`.
 - Remediation-branch headings and focus recording:
-  `/Users/marcospenelascamara/.t3/userdata/browser-artifacts/browser-recording-mt95wk1p.mp4`.
+  `browser-recording-mt95wk1p.mp4`.
 - Remediation-branch distinct-image recording:
-  `/Users/marcospenelascamara/.t3/userdata/browser-artifacts/browser-recording-mt95wfpu.mp4`.
+  `browser-recording-mt95wfpu.mp4`.
+
+These names identify local T3 Code artifacts. The recordings are not versioned
+in this repository and GitHub reviewers cannot access them until they are
+published or attached to a review-accessible location.
 
 ### Follow-up remediation evidence — 2026-08-25
 
 - Vercel Preview origin regressions cover branch URL preference, deployment URL
   fallback, divergent Production configuration, strict Production equality,
   and invalid or incomplete Preview configuration.
-- Mailer tests replace Nodemailer with an in-memory double. Disabled, partial,
-  residual Gmail, explicit Gmail SMTP, and generic SMTP configurations make no
-  external connection; disabled fulfillment keeps the order confirmed and
-  reports delayed email truthfully.
+- Mailer tests replace Nodemailer with an in-memory double. The first
+  remediation disabled implicit Gmail service mode and covered several partial
+  configurations, but a later review found remaining port, sender, and
+  recipient fallbacks. See the 2026-08-30 follow-up below.
 - Heading contracts cover every route shell and dynamic state. T3 accessibility
   trees at 1440 by 900 and 390 by 844 exposed exactly one level-one heading for
   Home, Search, Cart, Wishlist, Orders, order detail, product detail, errors,
-  authentication, help, admin, and Checkout result states.
+  authentication, help, admin, and Checkout result states. A later review found
+  the category heading text was generic; see the 2026-08-30 follow-up below.
 - Profile-dialog pointer and keyboard runs on desktop and mobile kept focus on
   the Name input while open, closed with Escape, and returned focus to Account
   or Open navigation menu. The `Blocked aria-hidden` count did not increase.
@@ -405,7 +425,47 @@ applicable to the disposable local environment.
   paths returned expected 404s outside Vercel, and the restored repeated image
   fixture produced the already-classified unused-preload warning.
 
-### Final local validation
+### Follow-up local-commit evidence — 2026-08-30
+
+This evidence applies to the four local code commits after `3e79c37…`, ending
+at immutable code tip `d3304ef00fe222b9cf195f95bad6bd791b3916af`. The
+documentation-only commit that contains this record follows that code tip:
+
+- SMTP delivery now requires explicit host, port, user, password, sender, and
+  contact recipient. `ADMIN_EMAIL` remains an accepted explicit recipient.
+  Host plus credentials alone, each missing required value, residual public
+  usernames, and invalid ports fail before transport creation. Complete Gmail
+  and generic SMTP configurations still pass. All 14 focused mailer tests use
+  an in-memory double and passed without network access.
+- Category pages derive the accessible `<Category> products` heading from the
+  validated route category while retaining the product query under Suspense.
+  All 12 focused source contracts, typecheck, lint, and build passed; T-shirts,
+  Pants, and Sweatshirts retained Partial Prerendering. A production-runtime
+  T3 Code check exposed exactly one `h1` on each route with the respective text
+  `T-shirts products`, `Pants products`, and `Sweatshirts products`, without an
+  application error.
+- Missing main images return `errors.img`, and missing final variant images
+  return `errors["variants.<index>.images"]`. Both validations run before
+  catalog planning, persistence, or file upload. A declared multipart image
+  that is omitted or empty uses that same UI-consumed field path. The focused
+  admin-validation regression passed 16 of 16 tests.
+- The Postgres dependency regression now checks the declared and locked minimum
+  fixed version rather than reading private driver source from `node_modules`.
+  Its focused test passed.
+- The shared full suite passed 314 of 314 tests. Typecheck, lint, the
+  architecture boundary check, the local/non-Production release gate, the
+  Drizzle schema check, Markdown lint, and `git diff --check` also passed. A
+  production build generated all 36 static/PPR pages with only loopback or
+  deliberately unreachable fixtures. React Doctor scanned 327 files at
+  100/100 with no issues, and both dependency audits found zero
+  vulnerabilities.
+- The run used no hosted Storage object or other external service.
+
+### Validation of the first remediation tip
+
+The following results apply to the tree first published at
+`3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`; they do not certify later
+uncommitted working-tree changes.
 
 - `npm test`: 303 passed, 0 failed.
 - `npm run typecheck`: passed.
@@ -450,7 +510,10 @@ Resolution verified 2026-08-25: stable route-shell headings now remain outside
 dynamic empty/non-empty branches, product detail exposes one responsive-safe
 product-name `h1`, and the product accordions use level-two headings. Source
 contracts, TypeScript, the full test suite, and T3 accessibility trees passed in
-desktop and mobile.
+desktop and mobile. A later review found that category pages still shared the
+generic `Product collection` heading. The 2026-08-30 follow-up derives
+`<Category> products` from the validated route while preserving Suspense and
+Partial Prerendering; its 12 focused contracts and build passed.
 
 #### QA-T3-002 — Profile dialog hides the element that retains focus
 
@@ -518,10 +581,14 @@ Severity: P1 operational safety defect.
 The historical mailer incident below showed that residual credentials could
 activate Nodemailer's Gmail service mode without `EMAIL_SERVER_HOST`.
 
-Resolution verified 2026-08-25: email is disabled unless an explicit SMTP host
-is configured. Invalid or partial configuration fails before transport creation,
-and Gmail remains available only through an explicit Gmail SMTP host. The
-incident and its two accepted messages remain documented below.
+The first remediation removed implicit Gmail service mode but still defaulted
+the port, sender, and recipient. The 2026-08-30 follow-up requires explicit
+host, port, user, password, sender, and contact recipient before transport
+creation; `ADMIN_EMAIL` is an accepted explicit recipient. Fourteen focused
+tests cover every missing value, residual public usernames, invalid ports, and
+complete Gmail and generic SMTP configurations without opening a network
+connection. The incident and its two accepted messages remain documented
+below.
 
 #### QA-T3-005 — Fractional and text order IDs reached PostgreSQL
 
@@ -564,9 +631,10 @@ Order Not Found response as other invalid and foreign IDs.
 - Stable-ID admin bootstrap worked. Anonymous routes redirected to Login and a
   normal user was denied before admin UI or replay payload parsing.
 - Create-form field validation, stale-error clearing, main-image validation,
-  variant color/size validation, variant add/reorder/remove state, reset, edit
-  preload, archive cancellation, archive confirmation, cache invalidation,
-  historical-order preservation, and explicit restore worked locally.
+  variant color/size/final-image validation, variant add/reorder/remove state,
+  reset, edit preload, archive cancellation, archive confirmation, cache
+  invalidation, historical-order preservation, and explicit restore worked
+  locally.
 - Missing and bad cron bearer credentials returned 401. The loopback secret
   returned 200 for both sweeps with zero queued work.
 - Replay routes returned 401 anonymously, 403 for a normal user, and 400 for
@@ -693,9 +761,10 @@ a transport. No follow-up email was sent.
   disposable PostgreSQL. Verification-link navigation and sandbox mail receipt
   remain blocked.
 - Supabase Storage was intentionally absent. No hosted object was uploaded or
-  removed. Validation reached main image, product fields, variant color, and
-  variant sizes; full create/update and final variant-image behavior remain
-  blocked without a loopback Storage adapter.
+  removed. Field-level validation reached main image, product fields, variant
+  color, variant sizes, and missing final variant images without an adapter.
+  Full create/update upload and deletion behavior remains blocked without a
+  loopback Storage adapter.
 - The first T3 navigation used `localhost` while the browser reached the port as
   `127.0.0.1`, causing a redirect loop and Next.js dev-origin 403 responses.
   Binding both the server and canonical origin to `127.0.0.1` resolved the
@@ -710,15 +779,18 @@ a transport. No follow-up email was sent.
 - T3 Code could emulate light and dark appearance but exposed no
   `prefers-reduced-motion` control. Reduced-motion behavior remains blocked by
   that browser-tool capability and was not converted into a speculative change.
-- Vercel deployment, GitHub-sourced READY status, Preview authentication,
-  hosted Supabase exposure, restore/cutover rehearsal, credential rotation,
-  and SMTP sandbox delivery were not executed. Real Stripe test-mode payment
-  is now covered; live-mode payment remains intentionally out of scope.
+- Vercel deployment and GitHub-sourced READY identity were verified for
+  `3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`. Preview authentication, hosted
+  Supabase exposure, restore/cutover rehearsal, credential rotation, and SMTP
+  sandbox delivery were not executed. Real Stripe test-mode payment is now
+  covered; live-mode payment remains intentionally out of scope. The second
+  follow-up stack needs a fresh GitHub-sourced deployment check after push.
 
 ### Merge decision
 
-Do not merge from this evidence alone. The local defects QA-T3-001 through
-QA-T3-005 are remediated in local commits, but a separately authorized push must
-precede GitHub CI and GitHub-sourced Vercel verification. Preview authentication,
-cron acceptance, migration/restore rehearsal, hosted exposure, credential
-rotation, SMTP sandbox delivery, and cutover evidence remain mandatory.
+Do not merge from this evidence alone. The first remediation stack for
+QA-T3-001 through QA-T3-005 was published at
+`3e79c37f5c5fb59bd1fbc96f5e0d76ea7ffdf0d3`. Any later correction still needs
+its own authorized commit and push followed by CI. Preview authentication, cron
+acceptance, migration/restore rehearsal, hosted exposure, credential rotation,
+SMTP sandbox delivery, and cutover evidence remain mandatory.
