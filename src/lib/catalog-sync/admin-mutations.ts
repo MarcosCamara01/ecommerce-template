@@ -7,6 +7,10 @@ import { z } from "zod";
 import { compensateUploadedCatalogImages } from "@/lib/catalog-sync/create-compensation";
 import { planCatalogCreateCommand } from "@/lib/catalog-sync/create-command";
 import {
+  mainImageRequiredError,
+  variantImageRequiredError,
+} from "@/lib/catalog-sync/admin-errors";
+import {
   CatalogSyncError,
   type CatalogSyncState,
 } from "@/lib/catalog-sync/model";
@@ -76,23 +80,29 @@ export async function createCatalogProduct(
     const commandId = commandIdSchema.parse(form.get("commandId"));
     const mainImage = form.get("mainImage");
     if (!(mainImage instanceof File) || !mainImage.size) {
-      throw new CatalogSyncError("invalid_target", "Main image is required");
+      throw mainImageRequiredError();
     }
     const variantsInput = parseVariants(form.get("variants"));
     const planned = await planCatalogCreateCommand({
       commandId,
       product,
       mainImage,
-      variants: variantsInput.map((variant, variantIndex) => ({
-        id: variant.id,
-        color: variant.color,
-        sizes: variant.sizes,
-        files: readVariantImageFiles(
+      variants: variantsInput.map((variant, variantIndex) => {
+        const files = readVariantImageFiles(
           form,
           variantIndex,
           variant.imageCount ?? 0,
-        ),
-      })),
+        );
+        if (!files.length) {
+          throw variantImageRequiredError(variantIndex, variant.color);
+        }
+        return {
+          id: variant.id,
+          color: variant.color,
+          sizes: variant.sizes,
+          files,
+        };
+      }),
       publicUrlForPath: publicImageUrl,
     });
     let operation = await manager.prepareCreate({

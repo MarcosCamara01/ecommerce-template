@@ -39,7 +39,7 @@ export function readVariantImageFiles(
       throw new z.ZodError([{
         code: "custom",
         message: "Variant image files do not match imageCount",
-        path: ["variants", variantIndex, "imageCount"],
+        path: ["variants", variantIndex, "images"],
       }]);
     }
     files.push(value);
@@ -48,7 +48,7 @@ export function readVariantImageFiles(
     throw new z.ZodError([{
       code: "custom",
       message: "Variant image files do not match imageCount",
-      path: ["variants", variantIndex, "imageCount"],
+      path: ["variants", variantIndex, "images"],
     }]);
   }
   return files;

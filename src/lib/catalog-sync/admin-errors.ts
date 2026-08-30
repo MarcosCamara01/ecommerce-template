@@ -9,6 +9,16 @@ export function fieldErrorsFromZod(error: z.ZodError) {
   return errors;
 }
 
+export function mainImageRequiredError() {
+  return new z.ZodError([
+    {
+      code: "custom",
+      path: ["img"],
+      message: "Main image is required",
+    },
+  ]);
+}
+
 export function variantImageRequiredError(index: number, color: string) {
   return new z.ZodError([
     {

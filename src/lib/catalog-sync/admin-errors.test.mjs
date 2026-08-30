@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import {
   fieldErrorsFromZod,
+  mainImageRequiredError,
   variantImageRequiredError,
 } from "./admin-errors.ts";
 
@@ -26,5 +27,11 @@ test("missing final variant image is a field validation error", () => {
   const error = variantImageRequiredError(2, "Blue");
   assert.deepEqual(fieldErrorsFromZod(error), {
     "variants.2.images": ["Variant Blue must include an image"],
+  });
+});
+
+test("missing main image uses the field consumed by the admin form", () => {
+  assert.deepEqual(fieldErrorsFromZod(mainImageRequiredError()), {
+    img: ["Main image is required"],
   });
 });
