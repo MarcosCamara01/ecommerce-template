@@ -1,14 +1,6 @@
 import "server-only";
 
 import nodemailer from "nodemailer";
-import { z } from "zod";
-
-const contactEmailSchema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  email: z.string().trim().email("A valid email is required"),
-  subject: z.string().trim().min(1, "Subject is required"),
-  message: z.string().trim().min(1, "Message is required"),
-});
 
 type MailOptions = {
   to: string | string[];
@@ -136,28 +128,4 @@ export async function sendMail({
   });
 }
 
-export async function sendContactEmail(input: z.infer<typeof contactEmailSchema>) {
-  const safeName = escapeHtml(input.name);
-  const safeEmail = escapeHtml(input.email);
-  const safeSubject = escapeHtml(input.subject);
-  const safeMessage = escapeHtml(input.message).replaceAll("\n", "<br />");
-
-  await sendMail({
-    to: getContactEmailAddress(),
-    subject: `[Contact] ${input.subject.trim()}`,
-    replyTo: input.email,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
-        <h2 style="color: #111827;">New contact message</h2>
-        <p><strong>Name:</strong> ${safeName}</p>
-        <p><strong>Email:</strong> ${safeEmail}</p>
-        <p><strong>Subject:</strong> ${safeSubject}</p>
-        <div style="margin-top: 24px; padding: 16px; background-color: #f3f4f6; border-radius: 8px;">
-          ${safeMessage}
-        </div>
-      </div>
-    `,
-  });
-}
-
-export { contactEmailSchema, escapeHtml };
+export { escapeHtml };
