@@ -1,5 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/utils/auth";
+import {
+  NOT_FOUND_INTERNAL_PATH,
+  pathShould404,
+} from "@/lib/routing/unknown-path";
 
 export async function proxy(request: NextRequest) {
   // Check for session cookie (better-auth uses 'better-auth.session_token' by default)
@@ -40,6 +44,14 @@ export async function proxy(request: NextRequest) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
+  }
+
+  // Dynamic [category] would otherwise render unknown slugs as a streamed 200.
+  // Rewrite to an unmatched path so Next.js not-found handling can return 404.
+  if (pathShould404(request.nextUrl.pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = NOT_FOUND_INTERNAL_PATH;
+    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next();

@@ -20,11 +20,7 @@ interface Props {
 }
 
 export function generateStaticParams() {
-  return [
-    { category: "t-shirts" },
-    { category: "pants" },
-    { category: "sweatshirts" },
-  ];
+  return ProductCategoryZod.options.map((category) => ({ category }));
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -46,26 +42,19 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-async function DynamicCategoryContent({
-  params,
-}: {
-  params: Promise<{ category: string }>;
-}) {
+const CategoryPage = async ({ params }: Props) => {
   const { category } = await params;
   const parsedCategory = ProductCategoryZod.safeParse(category);
 
+  // Call notFound() before Suspense so the response can still be HTTP 404.
   if (!parsedCategory.success) {
     notFound();
   }
 
-  return <CategoryProducts category={parsedCategory.data} />;
-}
-
-const CategoryPage = async ({ params }: Props) => {
   return (
     <section className="pt-14">
       <Suspense fallback={<ProductsSkeleton items={6} />}>
-        <DynamicCategoryContent params={params} />
+        <CategoryProducts category={parsedCategory.data} />
       </Suspense>
     </section>
   );

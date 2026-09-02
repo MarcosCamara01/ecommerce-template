@@ -7,6 +7,7 @@ import {
   SuspenseRandomProducts,
 } from "@/components/product";
 import { getAllProducts, getProduct } from "@/app/actions";
+import { ProductCategoryZod } from "@/lib/db/drizzle/schema";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 
@@ -17,6 +18,12 @@ type PageProps = {
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
+
+  if (products.length === 0) {
+    // Cache Components rejects an empty result. Use 0, not 1: product ids
+    // are bigserial starting at 1, and productId <= 0 404s before Suspense.
+    return [{ category: ProductCategoryZod.options[0], id: "0" }];
+  }
 
   return products.map((product) => ({
     category: product.category,
@@ -51,19 +58,16 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 async function DynamicProductContent({
-  params,
+  productId,
+  category,
   searchParams,
 }: {
-  params: Promise<{ id: string; category: string }>;
+  productId: number;
+  category: string;
   searchParams: Promise<{ variant: string | undefined }>;
 }) {
-  const [{ id, category }, sp] = await Promise.all([params, searchParams]);
+  const sp = await searchParams;
   const selectedVariantColor = pickFirst(sp, "variant");
-  const productId = Number(id);
-
-  if (!Number.isInteger(productId) || productId <= 0) {
-    notFound();
-  }
 
   return (
     <>
@@ -78,10 +82,26 @@ async function DynamicProductContent({
 }
 
 export default async function ProductPage({ params, searchParams }: PageProps) {
+  const { id, category } = await params;
+  const productId = Number(id);
+
+  // URL-known checks must run before Suspense so missing routes can be HTTP 404.
+  if (
+    !ProductCategoryZod.safeParse(category).success ||
+    !Number.isInteger(productId) ||
+    productId <= 0
+  ) {
+    notFound();
+  }
+
   return (
     <section className="pt-14">
       <Suspense fallback={<SingleProductSkeleton />}>
-        <DynamicProductContent params={params} searchParams={searchParams} />
+        <DynamicProductContent
+          productId={productId}
+          category={category}
+          searchParams={searchParams}
+        />
       </Suspense>
     </section>
   );
