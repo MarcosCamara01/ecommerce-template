@@ -1,5 +1,5 @@
 import { getUserOrders } from "./action";
-import { getUser } from "@/lib/auth/server";
+import { getPrincipal } from "@/lib/identity";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SVGLoadingIcon } from "@/components/ui/loader";
@@ -18,15 +18,18 @@ export async function generateMetadata() {
  */
 const UserOrders = () => {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-          <SVGLoadingIcon height={30} width={30} />
-        </div>
-      }
-    >
-      <OrdersContent />
-    </Suspense>
+    <>
+      <h1 className="sr-only">My orders</h1>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-[calc(100vh-91px)]">
+            <SVGLoadingIcon height={30} width={30} />
+          </div>
+        }
+      >
+        <OrdersContent />
+      </Suspense>
+    </>
   );
 };
 
@@ -35,7 +38,7 @@ const UserOrders = () => {
  * This streams at request time (uses headers() via getUser)
  */
 const OrdersContent = async () => {
-  const user = await getUser();
+  const user = await getPrincipal();
 
   if (!user) {
     return (
@@ -43,7 +46,7 @@ const OrdersContent = async () => {
         <h2 className="mb-6 text-4xl font-bold">NO ORDERS YET</h2>
         <p className="mb-4 text-lg">To view your orders you must be logged in.</p>
         <Link
-          className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-all hover:bg-background-tertiary hover:border-[#454545]"
+          className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-colors hover:bg-background-tertiary hover:border-[#454545]"
           href="/login"
         >
           Login
@@ -71,13 +74,13 @@ const Orders = async () => {
         </p>
         <div className="flex gap-4">
           <Link
-            className="flex font-medium items-center bg-background-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-all hover:bg-background-tertiary"
+            className="flex font-medium items-center bg-background-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-background-tertiary"
             href="/"
           >
             Go Home
           </Link>
           <Link
-            className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-all hover:bg-border-secondary text-background-primary"
+            className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-border-secondary text-background-primary"
             href="/orders"
           >
             Retry
@@ -99,7 +102,7 @@ const Orders = async () => {
           everything for you!
         </p>
         <Link
-          className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-all hover:bg-border-secondary text-background-primary"
+          className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-border-secondary text-background-primary"
           href="/"
         >
           Start Shopping
@@ -111,7 +114,7 @@ const Orders = async () => {
   return (
     <div className="pt-12 pb-20">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">My Orders</h1>
+        <h2 className="text-3xl font-bold mb-2">My Orders</h2>
         <p className="text-muted-foreground">
           View and track all your orders in one place
         </p>

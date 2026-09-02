@@ -1,0 +1,61 @@
+name: Bug report
+description: Report a reproducible problem in the project
+title: "[Bug]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the project. Do not include secrets, access tokens, private customer data, or unredacted production logs. Report security vulnerabilities privately through the repository Security page instead.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect instead?
+      placeholder: Describe the problem and its impact.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide the smallest reliable sequence that reproduces the problem.
+      placeholder: |
+        1. Start the app with ...
+        2. Navigate to ...
+        3. Perform ...
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Revision
+      description: Commit SHA, branch, release, or deployment where this occurred.
+      placeholder: e.g. 0123456789abcdef or master
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Node.js version, browser, and relevant service modes without credentials.
+      placeholder: Windows 11, Node.js 24.x, Chrome 140, Stripe test mode
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Add minimal logs, screenshots, or traces after removing sensitive information.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched for an existing issue describing the same problem.
+          required: true
+        - label: I removed secrets and private data from this report.
+          required: true
+        - label: This is not a vulnerability report that should be disclosed privately.
+          required: true

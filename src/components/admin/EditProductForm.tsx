@@ -2,12 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { ProductForm } from "./ProductForm";
-import { revalidateProducts } from "@/app/actions";
 import type { ProductWithVariants, ProductSize } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
+import { ArchiveProductButton } from "./ArchiveProductButton";
 
 interface EditProductFormProps {
   product: ProductWithVariants;
+  restoreArchived?: boolean;
 }
 
 function mapProductToFormData(product: ProductWithVariants): ProductFormData {
@@ -23,26 +24,31 @@ function mapProductToFormData(product: ProductWithVariants): ProductFormData {
     variants: product.variants.map((variant) => ({
       id: variant.id,
       color: variant.color,
-      stripeId: variant.stripeId,
       sizes: variant.sizes as ProductSize[],
       images: variant.images,
     })),
   };
 }
 
-export function EditProductForm({ product }: EditProductFormProps) {
+export function EditProductForm({
+  product,
+  restoreArchived = false,
+}: EditProductFormProps) {
   const router = useRouter();
 
-  const handleSuccess = async (updatedProduct: ProductWithVariants) => {
-    await revalidateProducts(updatedProduct.id);
+  const handleSuccess = () => {
     router.push("/");
   };
 
   return (
-    <ProductForm
-      mode="edit"
-      initialData={mapProductToFormData(product)}
-      onSuccess={handleSuccess}
-    />
+    <>
+      <ProductForm
+        mode="edit"
+        initialData={mapProductToFormData(product)}
+        restoreArchived={restoreArchived}
+        onSuccess={handleSuccess}
+      />
+      {!restoreArchived && <ArchiveProductButton productId={product.id} />}
+    </>
   );
 }

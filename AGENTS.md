@@ -33,8 +33,8 @@ the tracker today. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. Neither exists yet;
-`/domain-modeling` creates them lazily. See `docs/agents/domain.md`.
+Single-context: the root `CONTEXT.md` is authoritative. `docs/adr/` is created lazily
+by `/domain-modeling` when an ADR is needed. See `docs/agents/domain.md`.
 
 ## Where the skills live
 

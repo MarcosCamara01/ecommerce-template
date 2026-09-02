@@ -1,0 +1,9 @@
+[api]
+enabled = false
+schemas = []
+extra_search_path = []
+
+[storage.buckets.product-images]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]

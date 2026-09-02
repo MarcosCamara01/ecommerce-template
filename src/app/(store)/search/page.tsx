@@ -18,14 +18,14 @@ async function SearchResults({ searchParams }: SearchProps) {
     <section className="pt-14">
       {filteredProducts.length > 0 ? (
         <GridProducts>
-          {filteredProducts.map((product) => (
-            <ProductItem key={product.id} product={product} />
+          {filteredProducts.map((product, index) => (
+            <ProductItem key={product.id} product={product} priority={index === 0} />
           ))}
         </GridProducts>
       ) : (
-        <h3 className="text-sm text-center">
+        <h2 className="text-sm text-center">
           No products found for &quot;{q}&quot;
-        </h3>
+        </h2>
       )}
     </section>
   );
@@ -33,8 +33,11 @@ async function SearchResults({ searchParams }: SearchProps) {
 
 export default function Search(props: SearchProps) {
   return (
-    <Suspense fallback={<section className="pt-14" />}>
-      <SearchResults searchParams={props.searchParams} />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Search products</h1>
+      <Suspense fallback={<section className="pt-14" />}>
+        <SearchResults searchParams={props.searchParams} />
+      </Suspense>
+    </>
   );
 }

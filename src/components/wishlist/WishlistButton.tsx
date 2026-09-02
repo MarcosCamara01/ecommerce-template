@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 /** FUNCTIONALITY */
 import { useWishlist } from "@/hooks/wishlist";
 import { useThrottleFn } from "ahooks";
@@ -16,7 +17,14 @@ interface WishlistButtonProps {
   productId: ProductWithVariants["id"];
 }
 
+const subscribeToHydration = () => () => undefined;
+
 const WishlistButton = ({ productId }: WishlistButtonProps) => {
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
   const { isInWishlist, isLoading } = useWishlist();
   const { remove: removeFromWishlist, add: addToWishlist } =
     useWishlistMutation();
@@ -36,7 +44,7 @@ const WishlistButton = ({ productId }: WishlistButtonProps) => {
     },
   );
 
-  if (isLoading) {
+  if (!isHydrated || isLoading) {
     return (
       <div className="p-2">
         <Skeleton className="h-4 w-4 rounded-full" />

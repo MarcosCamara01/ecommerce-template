@@ -1,19 +1,18 @@
+import { parsePositiveIntegerId } from "./positive-integer-id.ts";
+
 /**
  * Paths that `[category]` / `[category]/[id]` would otherwise swallow.
  * Keep in sync with ProductCategoryZod in schema/products.ts.
  */
 const PRODUCT_CATEGORY_SLUGS = new Set(["t-shirts", "pants", "sweatshirts"]);
 
-const KNOWN_ROOT_SEGMENTS = new Set([
+const ROOT_ONLY_SEGMENTS = new Set([
   "login",
   "register",
   "search",
   "cart",
   "wishlist",
-  "orders",
   "result",
-  "admin",
-  "api",
 ]);
 
 /**
@@ -35,13 +34,29 @@ export function pathShould404(pathname: string): boolean {
 
   const [first, ...rest] = segments;
 
-  if (KNOWN_ROOT_SEGMENTS.has(first)) {
-    return false;
+  if (PRODUCT_CATEGORY_SLUGS.has(first)) {
+    if (rest.length === 0) return false;
+    // Invalid ids must be rejected before the dynamic route streams a 200.
+    return rest.length > 1 || parsePositiveIntegerId(rest[0]) === null;
   }
 
-  if (PRODUCT_CATEGORY_SLUGS.has(first)) {
-    // /t-shirts and /t-shirts/:id are real routes; anything deeper is not.
-    return rest.length > 1;
+  if (ROOT_ONLY_SEGMENTS.has(first)) {
+    return rest.length > 0;
+  }
+
+  if (first === "orders") {
+    if (rest.length === 0) return false;
+    return rest.length > 1 || parsePositiveIntegerId(rest[0]) === null;
+  }
+
+  if (first === "api" || first === "admin") {
+    // Their real descendants have at least three URL segments. A two-segment
+    // miss would otherwise fall through to `[category]/[id]`.
+    return rest.length === 1;
+  }
+
+  if (first === "help") {
+    return false;
   }
 
   return true;

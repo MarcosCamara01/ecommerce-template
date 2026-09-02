@@ -23,17 +23,23 @@ export const Sizes = forwardRef(
   ({ productSizes, compact = false }: SizesProps, ref: Ref<SizesRef>) => {
     const availableSizes = new Set(productSizes);
 
-    const [selectedSize, setSelectedSize] = useState<ProductSize>(
-      productSizes[0],
-    );
+    // Only what the user actually picked is state. Switching colour swaps
+    // `productSizes` without remounting, so copying the prop into state would
+    // keep a size the new variant does not stock — and the ref below is what
+    // AddToCart submits.
+    const [pickedSize, setPickedSize] = useState<ProductSize | null>(null);
+    const activeSize =
+      pickedSize !== null && availableSizes.has(pickedSize)
+        ? pickedSize
+        : productSizes[0];
 
     useImperativeHandle(ref, () => ({
-      selectedSize,
+      selectedSize: activeSize,
     }));
 
     const handleSizeClick = (size: ProductSize) => {
       if (availableSizes.has(size)) {
-        setSelectedSize(size);
+        setPickedSize(size);
       }
     };
 
@@ -54,7 +60,7 @@ export const Sizes = forwardRef(
               className={cn(
                 "flex items-center justify-center border border-solid border-border-primary disabled:opacity-50 disabled:cursor-not-allowed bg-background-primary rounded transition-colors hover:border-border-secondary",
                 {
-                  "bg-white text-black": selectedSize === size && isAvailable,
+                  "bg-white text-black": activeSize === size && isAvailable,
                   "px-1 py-1.5 text-xs": !compact,
                   "min-w-[3rem] px-2.5 py-1.5 text-[10px]": compact,
                 },

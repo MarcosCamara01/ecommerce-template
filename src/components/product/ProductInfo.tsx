@@ -9,7 +9,9 @@ export const ProductInfo = () => {
   return (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
-        <AccordionTrigger className="text-sm">COMPOSITION</AccordionTrigger>
+        <AccordionTrigger headingLevel={2} className="text-sm">
+          COMPOSITION
+        </AccordionTrigger>
         <AccordionContent>
           <p>
             We work with monitoring programmes to ensure compliance with our
@@ -20,7 +22,9 @@ export const ProductInfo = () => {
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-2">
-        <AccordionTrigger className="text-sm">CARE</AccordionTrigger>
+        <AccordionTrigger headingLevel={2} className="text-sm">
+          CARE
+        </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-2">
           <p> Caring for your clothes is caring for the environment.</p>
           <p>
@@ -32,7 +36,9 @@ export const ProductInfo = () => {
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-3">
-        <AccordionTrigger className="text-sm">ORIGIN</AccordionTrigger>
+        <AccordionTrigger headingLevel={2} className="text-sm">
+          ORIGIN
+        </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-2">
           <p>
             We work with our suppliers, workers, unions and international

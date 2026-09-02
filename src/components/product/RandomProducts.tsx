@@ -4,7 +4,7 @@ import { ProductItem } from "../products/ProductItem";
 import { ProductsSkeleton } from "../products/ProductsSkeleton";
 import { Suspense } from "react";
 
-export const RandomProducts = async ({
+const RandomProducts = async ({
   productIdToExclude,
   showTitle = true,
 }: {

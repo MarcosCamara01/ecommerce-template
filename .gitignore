@@ -35,6 +35,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Supabase CLI local link/version state
+/supabase/.temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -50,3 +53,6 @@ next-env.d.ts
 
 # private vulnerability reports / local artifacts (never commit: public repo)
 /reports/
+
+# local wayfinder scratch (broken encoding, never commit)
+map11.md

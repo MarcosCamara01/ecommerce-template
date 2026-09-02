@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/drizzle/schema";
 
 import { Button } from "@/components/ui/button";
+import { useHydrated } from "@/hooks/useHydrated";
 
 import { Colors } from "./Colors";
 import { Sizes, type SizesRef } from "./Sizes";
@@ -21,7 +22,8 @@ interface BaseAddToCartProps {
 }
 
 function useAddToCartAction(selectedVariant?: ProductVariant) {
-  const { add: addToCart } = useCartMutation();
+  const { add: addToCart, isAdding } = useCartMutation();
+  const isHydrated = useHydrated();
   const sizesRef = useRef<SizesRef>(null!);
 
   const { run: throttledAddToCart } = useThrottleFn(
@@ -39,7 +41,9 @@ function useAddToCartAction(selectedVariant?: ProductVariant) {
   return {
     sizesRef,
     throttledAddToCart,
-    isDisabled: !selectedVariant,
+    isDisabled: !isHydrated || !selectedVariant || isAdding,
+    isHydrated,
+    isAdding,
   };
 }
 
@@ -47,7 +51,7 @@ export function AddToCart({
   product,
   selectedVariant,
 }: BaseAddToCartProps) {
-  const { sizesRef, throttledAddToCart, isDisabled } =
+  const { sizesRef, throttledAddToCart, isDisabled, isHydrated, isAdding } =
     useAddToCartAction(selectedVariant);
 
   return (
@@ -62,13 +66,13 @@ export function AddToCart({
 
       <div className="border-t border-solid border-border-primary">
         <Button
-          type="submit"
+          type="button"
           variant="default"
-          disabled={isDisabled}
+          disabled={!isHydrated || isDisabled}
           onClick={() => throttledAddToCart()}
           className="w-full rounded-none bg-background-secondary p-2 text-13 transition duration-150 ease hover:bg-background-tertiary"
         >
-          Add to cart
+          {isAdding ? "Adding…" : "Add to cart"}
         </Button>
       </div>
     </>
@@ -79,7 +83,7 @@ export function MobileAddToCart({
   product,
   selectedVariant,
 }: BaseAddToCartProps) {
-  const { sizesRef, throttledAddToCart, isDisabled } =
+  const { sizesRef, throttledAddToCart, isDisabled, isHydrated, isAdding } =
     useAddToCartAction(selectedVariant);
 
   return (
@@ -98,13 +102,13 @@ export function MobileAddToCart({
       </div>
 
       <Button
-        type="submit"
+        type="button"
         variant="default"
-        disabled={isDisabled}
+        disabled={!isHydrated || isDisabled}
         onClick={() => throttledAddToCart()}
         className="w-full rounded-md bg-white py-3 text-sm font-medium text-black transition-colors hover:bg-gray-100"
       >
-        Add to cart
+        {isAdding ? "Adding…" : "Add to cart"}
       </Button>
     </div>
   );

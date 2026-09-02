@@ -3,7 +3,7 @@
 export default function Error({ reset }: { reset: () => void }) {
   return (
     <div className="mx-auto my-4 flex max-w-xl flex-col rounded-lg border border-solid border-border-primary bg-background-secondary p-8 md:p-12">
-      <h2 className="text-xl font-bold">Something went wrong</h2>
+      <h1 className="text-xl font-bold">Something went wrong</h1>
       <p className="my-2 text-muted-foreground">
         There was an issue with our storefront. This could be a temporary issue,
         please try your action again.

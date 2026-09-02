@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import type { CheckoutStatus } from "@/services/stripe.service";
 
 import { AutoRefreshStatus } from "./AutoRefreshStatus";
+import { checkoutStatusCopy } from "./checkout-copy";
 
 type NonSuccessCheckoutStatus = Exclude<CheckoutStatus, "success">;
 
@@ -49,6 +50,18 @@ const STATUS_CONFIG: Record<
     message: "Your payment is being processed. This page will update automatically.",
     showRetry: false,
   },
+  fulfillment_pending: {
+    icon: HiOutlineClock,
+    iconColor: "text-blue-500",
+    ...checkoutStatusCopy("fulfillment_pending"),
+    showRetry: false,
+  },
+  needs_attention: {
+    icon: HiOutlineExclamation,
+    iconColor: "text-yellow-500",
+    ...checkoutStatusCopy("needs_attention"),
+    showRetry: false,
+  },
   failed: {
     icon: HiOutlineXCircle,
     iconColor: "text-red-500",
@@ -78,12 +91,14 @@ export function StatusContent({ status, sessionId, error }: StatusContentProps) 
 
   return (
     <>
-      <AutoRefreshStatus active={status === "pending"} />
+      <AutoRefreshStatus
+        active={status === "pending" || status === "fulfillment_pending"}
+      />
 
       <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-6">
         <div className="mb-3 flex items-center gap-3">
           <Icon className={`h-8 w-8 ${config.iconColor}`} />
-          <h1 className="text-2xl font-bold sm:text-3xl">{config.title}</h1>
+          <h2 className="text-2xl font-bold sm:text-3xl">{config.title}</h2>
         </div>
         <p className="text-sm text-muted-foreground">{config.message}</p>
         {error && (
