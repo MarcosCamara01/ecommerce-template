@@ -20,7 +20,7 @@ const KNOWN_ROOT_SEGMENTS = new Set([
  * Unmatched 3-segment path so Next.js serves not-found.tsx with HTTP 404.
  * `[category]` is 1 segment and `[category]/[id]` is 2, so this never hits them.
  */
-export const NOT_FOUND_INTERNAL_PATH = "/__/not-found/fallback";
+export const NOT_FOUND_INTERNAL_PATH = "/internal/not-found/fallback";
 
 export function pathShould404(pathname: string): boolean {
   if (pathname === NOT_FOUND_INTERNAL_PATH) {

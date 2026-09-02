@@ -41,6 +41,7 @@ describe("pathShould404", () => {
       "/foo/bar",
       "/t-shirts/1/extra",
       "/robots.txt",
+      "/__/not-found/fallback",
     ]) {
       assert.equal(pathShould404(pathname), true, pathname);
     }

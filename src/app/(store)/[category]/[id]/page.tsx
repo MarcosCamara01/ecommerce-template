@@ -19,6 +19,11 @@ type PageProps = {
 export async function generateStaticParams() {
   const products = await getAllProducts();
 
+  if (products.length === 0) {
+    // Cache Components rejects an empty result and fails the whole build.
+    return [{ category: ProductCategoryZod.options[0], id: "1" }];
+  }
+
   return products.map((product) => ({
     category: product.category,
     id: String(product.id),
