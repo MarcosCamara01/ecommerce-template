@@ -7,6 +7,7 @@ import {
   SuspenseRandomProducts,
 } from "@/components/product";
 import { getProduct } from "@/app/actions";
+import { ProductCategoryZod } from "@/lib/db/drizzle/schema";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
 import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
@@ -53,7 +54,10 @@ async function DynamicProductContent({
   const selectedVariantColor = pickFirst(sp, "variant");
   const productId = parsePositiveIntegerId(id);
 
-  if (productId === null) {
+  if (
+    !ProductCategoryZod.safeParse(category).success ||
+    productId === null
+  ) {
     notFound();
   }
 

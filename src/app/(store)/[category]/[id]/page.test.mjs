@@ -6,6 +6,12 @@ test("product params remain runtime data and never require the catalog during bu
   const source = await readFile(new URL("./page.tsx", import.meta.url), "utf8");
   assert.doesNotMatch(source, /generateStaticParams/);
   assert.match(source, /<Suspense fallback=\{<SingleProductSkeleton \/>\}>/);
-  assert.match(source, /<DynamicProductContent params=\{params\} searchParams=\{searchParams\} \/>/);
-  assert.match(source, /parsePositiveIntegerId\(id\)[\s\S]*?notFound\(\)/);
+  assert.match(
+    source,
+    /<DynamicProductContent params=\{params\} searchParams=\{searchParams\} \/>/,
+  );
+  assert.match(
+    source,
+    /parsePositiveIntegerId\(id\)[\s\S]*?ProductCategoryZod\.safeParse\(category\)\.success[\s\S]*?notFound\(\)/,
+  );
 });

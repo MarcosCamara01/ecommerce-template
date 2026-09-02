@@ -21,11 +21,7 @@ interface Props {
 }
 
 export function generateStaticParams() {
-  return [
-    { category: "t-shirts" },
-    { category: "pants" },
-    { category: "sweatshirts" },
-  ];
+  return ProductCategoryZod.options.map((category) => ({ category }));
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -51,12 +47,12 @@ const CategoryPage = async ({ params }: Props) => {
   const { category } = await params;
   const parsedCategory = ProductCategoryZod.safeParse(category);
 
+  // Call notFound() before Suspense so the response can still be HTTP 404.
   if (!parsedCategory.success) {
     notFound();
   }
 
   const categoryName = capitalizeFirstLetter(parsedCategory.data);
-
   return (
     <section className="pt-14">
       <h1 className="sr-only">{categoryName} products</h1>
