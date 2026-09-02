@@ -29,6 +29,7 @@ jobs:
 
   deploy-preview:
     name: deploy-preview
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -41,14 +42,6 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Require VERCEL_TOKEN
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          if [ -z "$VERCEL_TOKEN" ]; then
-            echo "VERCEL_TOKEN is not set. The Vercel Git integration fails instantly on Cursor GitHub App pushes, so this workflow needs a Vercel token to publish a preview URL."
-            exit 1
-          fi
       - name: Install locked dependencies
         run: npm ci
       - name: Install Vercel CLI
