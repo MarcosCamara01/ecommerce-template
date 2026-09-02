@@ -20,8 +20,9 @@ export async function generateStaticParams() {
   const products = await getAllProducts();
 
   if (products.length === 0) {
-    // Cache Components rejects an empty result and fails the whole build.
-    return [{ category: ProductCategoryZod.options[0], id: "1" }];
+    // Cache Components rejects an empty result. Use 0, not 1: product ids
+    // are bigserial starting at 1, and productId <= 0 404s before Suspense.
+    return [{ category: ProductCategoryZod.options[0], id: "0" }];
   }
 
   return products.map((product) => ({
