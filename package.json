@@ -80,7 +80,7 @@
   "devDependencies": {
     "@types/nodemailer": "8.0.1",
     "@types/pg": "^8.15.5",
-    "@types/react": "19.2.2",
+    "@types/react": "19.2.18",
     "@types/react-dom": "^19.2.2",
     "agent-browser": "^0.32.1",
     "drizzle-kit": "0.31.10",
