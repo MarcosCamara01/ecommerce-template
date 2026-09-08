@@ -9,6 +9,7 @@ import {
 const Home = async () => {
   return (
     <section className="pt-14">
+      <h1 className="sr-only">All products</h1>
       <Suspense fallback={<ProductsSkeleton items={18} />}>
         <AllProducts />
       </Suspense>
@@ -32,8 +33,8 @@ const AllProducts = async () => {
 
   return (
     <GridProducts>
-      {products.map((product) => (
-        <ProductItem key={product.id} product={product} />
+      {products.map((product, index) => (
+        <ProductItem key={product.id} product={product} priority={index === 0} />
       ))}
     </GridProducts>
   );

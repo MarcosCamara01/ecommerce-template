@@ -1,6 +1,9 @@
 // Users
 export {
   users,
+  sessions,
+  accounts,
+  verifications,
   selectUserSchema,
   insertUserSchema,
   updateUserSchema,
@@ -59,8 +62,10 @@ export {
   orderItems,
   customerInfo,
   orderProducts,
+  historicalOrderPriceEvidence,
   AddressSchema,
   InsertAddressSchema,
+  OrderStatusZod,
   selectOrderItemSchema,
   insertOrderItemSchema,
   createOrderItemInputSchema,
@@ -80,6 +85,7 @@ export {
   type InsertOrderProduct,
   type OrderProductWithDetails,
   type OrderWithDetails,
+  type OrderStatus,
 } from "./orders";
 
 // Wishlist
@@ -95,9 +101,40 @@ export {
   type WishlistItemWithProduct,
 } from "./wishlist";
 
+export {
+  checkoutIntents,
+  type CheckoutIntent,
+  type CheckoutIntentItem,
+} from "./checkout";
+
+export {
+  fulfillmentStateEnum,
+  fulfillmentEffectKindEnum,
+  fulfillmentEffectStateEnum,
+  stripeEventReceipts,
+  fulfillmentWork,
+  fulfillmentEffects,
+  fulfillmentReplayAudit,
+  type FulfillmentWorkRow,
+  type FulfillmentEffectRow,
+  type FulfillmentReplayAuditRow,
+} from "./fulfillment";
+
+export {
+  catalogSyncActionEnum,
+  catalogSyncStateEnum,
+  catalogSyncOperations,
+  catalogSyncReplayAudit,
+  type CatalogSyncOperation,
+  type CatalogSyncReplayAudit,
+} from "./catalog-sync";
+
 // Relations
 export {
   usersRelations,
+  sessionsRelations,
+  accountsRelations,
+  checkoutIntentsRelations,
   productsItemsRelations,
   productsVariantsRelations,
   cartItemsRelations,
@@ -105,4 +142,6 @@ export {
   customerInfoRelations,
   orderProductsRelations,
   wishlistRelations,
+  fulfillmentWorkRelations,
+  fulfillmentEffectsRelations,
 } from "./relations";

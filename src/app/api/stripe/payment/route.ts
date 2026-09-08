@@ -1,125 +1,121 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+
+import { dataAccess, DataAccessError } from "@/lib/data-access";
+import { getCanonicalAppOrigin } from "@/lib/app-origin";
+import { catalogPriceCentsFromStoredDecimal } from "@/lib/catalog-sync/money";
+import { getIdentityFromHeaders, IdentityError } from "@/lib/identity";
+import { createCheckoutMetadata } from "@/lib/order-fulfillment/checkout-snapshot";
 import { stripe } from "@/lib/stripe";
 import { buildLineItems } from "@/lib/stripe/line-items";
 import { stripeLogger } from "@/lib/stripe/logger";
+import { stripeEurChargeTotal } from "@/lib/stripe/amount-limits";
 import { getOrCreateStripeCustomer } from "@/services/stripe.service";
-import { auth } from "@/utils/auth";
-import { cartRepository } from "@/lib/db/drizzle/repositories/cart.repository";
 
 const SESSION_EXPIRY_MINUTES = 30;
-
+const MAX_CHECKOUT_ITEMS = 100;
+const STRIPE_INTEGRATION_IDENTIFIER = "ecommerce_template_qxmdkztr";
 const checkoutRequestSchema = z.object({
-  cartItemIds: z.array(z.number()).min(1, "Cart is empty"),
+  cartItemIds: z
+    .array(z.number().int().positive())
+    .min(1, "Cart is empty")
+    .max(MAX_CHECKOUT_ITEMS, "Cart has too many items"),
 });
 
 export async function POST(request: NextRequest) {
   try {
-    const authSession = await auth.api.getSession({ headers: request.headers });
-
-    if (!authSession?.user?.id) {
-      return NextResponse.json(
-        { statusCode: 401, message: "Unauthorized" },
-        { status: 401 },
-      );
+    const identity = await getIdentityFromHeaders(request.headers);
+    if (!identity) {
+      throw new IdentityError("authentication_required", "Authentication is required");
     }
-
-    const userId = authSession.user.id;
-    const userEmail = authSession.user.email;
-
-    let body: unknown;
-
+    const { principal, email } = identity;
+    let payload: unknown;
     try {
-      body = await request.json();
-    } catch {
+      payload = await request.json();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return NextResponse.json(
+          { statusCode: 400, message: "Invalid JSON body" },
+          { status: 400 },
+        );
+      }
+      throw error;
+    }
+    const body = checkoutRequestSchema.parse(payload);
+    const cartItems = await dataAccess
+      .forUser(principal)
+      .cart.checkoutItems(body.cartItemIds);
+    const distinctResolvedIds = new Set(cartItems.map((item) => item.id));
+    if (
+      cartItems.length > MAX_CHECKOUT_ITEMS ||
+      distinctResolvedIds.size !== cartItems.length
+    ) {
       return NextResponse.json(
-        { statusCode: 400, message: "Invalid JSON body" },
+        { statusCode: 400, message: "Invalid checkout request" },
         { status: 400 },
       );
     }
-
-    const parsedBody = checkoutRequestSchema.safeParse(body);
-    if (!parsedBody.success) {
+    const snapshot = cartItems.map((item) => ({
+      cartItemId: item.id,
+      variantId: item.variantId,
+      size: item.size,
+      quantity: item.quantity,
+      priceId: item.variant.stripeId,
+      unitAmount: catalogPriceCentsFromStoredDecimal(item.product.price),
+      currency: "eur",
+      productName: item.product.name,
+      variantColor: item.variant.color,
+      imageUrl: item.variant.images[0] ?? item.product.img,
+    }));
+    if (stripeEurChargeTotal(snapshot) === null) {
       return NextResponse.json(
-        {
-          statusCode: 400,
-          message: "Invalid checkout payload",
-          details: parsedBody.error.flatten(),
-        },
+        { statusCode: 400, message: "Invalid checkout request" },
         { status: 400 },
       );
     }
-
-    const { cartItemIds } = parsedBody.data;
-
-    const userCartItems = await cartRepository.findByUserIdWithDetails(userId);
-
-    const cartItemsList = userCartItems.filter((item) =>
-      cartItemIds.includes(item.id),
-    );
-
-    if (cartItemsList.length === 0) {
-      return NextResponse.json(
-        { statusCode: 400, message: "No valid cart items found" },
-        { status: 400 },
-      );
-    }
-
-    if (cartItemsList.length !== cartItemIds.length) {
-      stripeLogger.warn("Some cart items not found or unauthorized", {
-        details: {
-          requestedIds: cartItemIds,
-          foundIds: cartItemsList.map((item) => item.id),
-        },
-      });
-    }
-
-    const lineItemsList = buildLineItems(cartItemsList);
-
-    const customerId = userEmail
-      ? await getOrCreateStripeCustomer(userId, userEmail)
-      : undefined;
-
-    const expiresAt =
-      Math.floor(Date.now() / 1000) + SESSION_EXPIRY_MINUTES * 60;
-    const origin = request.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL;
-
+    const userData = dataAccess.forUser(principal);
+    const intent = await userData.checkout.createIntent(snapshot);
+    const lineItems = buildLineItems(cartItems);
+    const appOrigin = getCanonicalAppOrigin();
     const session = await stripe.checkout.sessions.create({
-      ...(customerId && { customer: customerId }),
-      ...(!customerId && userEmail && { customer_email: userEmail }),
-      line_items: lineItemsList,
+      integration_identifier: STRIPE_INTEGRATION_IDENTIFIER,
+      customer: await getOrCreateStripeCustomer(principal, email),
+      line_items: lineItems,
       mode: "payment",
-      expires_at: expiresAt,
+      expires_at:
+        Math.floor(Date.now() / 1000) + SESSION_EXPIRY_MINUTES * 60,
       invoice_creation: { enabled: true },
       billing_address_collection: "required",
       phone_number_collection: { enabled: true },
-      success_url: `${origin}/result?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/cart`,
+      success_url: `${appOrigin}/result?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appOrigin}/cart`,
       automatic_tax: { enabled: false },
-      metadata: {
-        userId,
-        cartItemIds: cartItemIds.join(","),
-      },
+      metadata: createCheckoutMetadata(intent.id),
     });
-
-    if (!session.url) {
-      throw new Error("Stripe checkout session URL is missing");
+    if (!session.url) throw new Error("Stripe checkout session URL is missing");
+    try {
+      await userData.checkout.bindIntent(intent.id, session.id);
+    } catch (error) {
+      await stripe.checkout.sessions.expire(session.id).catch(() => undefined);
+      throw error;
     }
-
-    stripeLogger.info("Checkout session created", {
-      sessionId: session.id,
-      details: { userId, itemCount: cartItemsList.length },
-    });
-
-    return NextResponse.json({ url: session.url }, { status: 200 });
+    return NextResponse.json({ url: session.url });
   } catch (error) {
     stripeLogger.error("Failed to create checkout session", error);
+    const status =
+      error instanceof DataAccessError && error.code === "not_found" ? 400 :
+      error instanceof z.ZodError ? 400 :
+      error instanceof IdentityError ? 401 : 500;
     return NextResponse.json(
       {
-        statusCode: 500,
-        message: error instanceof Error ? error.message : "Unknown error",
+        statusCode: status,
+        message: status === 500
+          ? "Checkout failed"
+          : status === 401
+            ? "Unauthorized"
+            : "Invalid checkout request",
       },
-      { status: 500 },
+      { status },
     );
   }
 }

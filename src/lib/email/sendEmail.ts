@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
+import type { OrderEmailDelivery } from "@/lib/order-fulfillment/email-effect";
 
 import { escapeHtml, getContactEmailAddress, sendMail } from "./mailer";
 
@@ -41,8 +42,8 @@ function formatOrderEmail(orderDetails: OrderDetails): string {
   const deliveryDate = formatOrderDate(orderDetails.deliveryDate);
 
   const productsHtml = orderDetails.orderProducts
-    .map(({ quantity, size, variant }) => {
-      const unitPrice = variant.product.price;
+    .map(({ quantity, size, unitAmount, variant }) => {
+      const unitPrice = unitAmount / 100;
 
       return `
         <tr>
@@ -156,7 +157,7 @@ function formatOwnerEmail(orderDetails: OrderDetails): string {
   `;
 }
 
-async function sendCustomerEmail(orderDetails: OrderDetails) {
+async function sendCustomerEmail(orderDetails: OrderDetails, messageId: string) {
   if (!orderDetails.customerInfo.email) {
     console.warn("Skipping customer email: missing customer email address");
     return;
@@ -166,29 +167,43 @@ async function sendCustomerEmail(orderDetails: OrderDetails) {
     to: orderDetails.customerInfo.email,
     subject: "Order Confirmation - Purchase Receipt",
     html: formatOrderEmail(orderDetails),
+    messageId,
   });
 }
 
-async function sendOwnerEmail(orderDetails: OrderDetails) {
+async function sendOwnerEmail(orderDetails: OrderDetails, messageId: string) {
   await sendMail({
     to: getContactEmailAddress(),
     subject: `New Order #${orderDetails.orderNumber}`,
     replyTo: orderDetails.customerInfo.email || undefined,
     html: formatOwnerEmail(orderDetails),
+    messageId,
   });
 }
 
-export const sendEmail = async (orderDetails: OrderDetails) => {
-  const results = await Promise.allSettled([
-    sendCustomerEmail(orderDetails),
-    sendOwnerEmail(orderDetails),
-  ]);
-
-  for (const result of results) {
-    if (result.status === "rejected") {
-      console.error("Error sending order email:", result.reason);
-    }
+/**
+ * Sends one externally visible message for one durable fulfillment effect.
+ *
+ * The stable Message-ID helps downstream deduplication, but SMTP remains an
+ * at-least-once boundary: a crash after SMTP acceptance and before durable
+ * effect completion can cause this same message to be retried.
+ */
+export const sendEmail = async (
+  orderDetails: OrderDetails,
+  delivery: OrderEmailDelivery,
+  idempotencyKey: string,
+) => {
+  const stableId = idempotencyKey.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const messageId = `<${stableId}@ecommerce-template.local>`;
+  if (delivery === "customer") {
+    await sendCustomerEmail(orderDetails, messageId);
+    return;
   }
+  if (delivery === "owner") {
+    await sendOwnerEmail(orderDetails, messageId);
+    return;
+  }
+  throw new Error(`Unsupported order email delivery: ${String(delivery)}`);
 };
 
 export type { OrderDetails };

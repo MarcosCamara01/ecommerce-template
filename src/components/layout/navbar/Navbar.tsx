@@ -11,6 +11,7 @@ import {
   SheetTrigger,
   SheetClose,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import { WishlistLink } from "./WishlistLink";
 import { CartLink } from "./CartLink";
@@ -20,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
+import { useRef } from "react";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 /** ICONS */
 import { FiUser, FiMenu, FiCreditCard } from "react-icons/fi";
@@ -29,17 +31,21 @@ const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
 });
 
+const linksData = [
+  { path: "/t-shirts", name: "T-SHIRTS" },
+  { path: "/pants", name: "PANTS" },
+  { path: "/sweatshirts", name: "SWEATSHIRTS" },
+];
+
 export const Navbar = () => {
   const { data: session, isPending } = useSession();
 
   const editProfileManager = useManager();
   const { signOut } = useAuthMutation();
-
-  const linksData = [
-    { path: "/t-shirts", name: "T-SHIRTS" },
-    { path: "/pants", name: "PANTS" },
-    { path: "/sweatshirts", name: "SWEATSHIRTS" },
-  ];
+  const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const accountTriggerRef = useRef<HTMLButtonElement>(null);
+  const profileReturnFocusRef = useRef<HTMLElement | null>(null);
+  const skipMobileMenuCloseAutoFocusRef = useRef(false);
 
   return (
     <>
@@ -47,24 +53,41 @@ export const Navbar = () => {
         {/* Mobile Menu Trigger */}
         <Sheet>
           <SheetTrigger asChild>
-            <button className="flex px-4 py-2 lg:hidden hover:opacity-75 transition-opacity">
-              <FiMenu size={24} />
+            <button
+              ref={mobileMenuTriggerRef}
+              type="button"
+              aria-label="Open navigation menu"
+              className="flex px-4 py-2 lg:hidden hover:opacity-75 transition-opacity"
+            >
+              <FiMenu size={24} aria-hidden="true" />
             </button>
           </SheetTrigger>
 
-          <SheetContent side="left" className="w-full sm:w-80 p-0">
+          <SheetContent
+            side="left"
+            className="w-full sm:w-80 p-0"
+            onCloseAutoFocus={(event) => {
+              if (!skipMobileMenuCloseAutoFocusRef.current) return;
+              event.preventDefault();
+              skipMobileMenuCloseAutoFocusRef.current = false;
+              queueMicrotask(editProfileManager.open);
+            }}
+          >
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="px-6 py-4 border-b border-border-primary">
                 <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Browse product collections and account actions.
+                </SheetDescription>
               </div>
 
               {/* Navigation Links */}
               <nav className="flex-1 overflow-y-auto">
                 <ul className="flex flex-col gap-2 p-4">
                   {/* Category Links */}
-                  {linksData.map((link, index) => (
-                    <li key={index}>
+                  {linksData.map((link) => (
+                    <li key={link.path}>
                       <SheetClose asChild>
                         <Link
                           href={link.path}
@@ -126,7 +149,12 @@ export const Navbar = () => {
                       <li>
                         <SheetClose asChild>
                           <button
-                            onClick={editProfileManager.open}
+                            type="button"
+                            onClick={() => {
+                              skipMobileMenuCloseAutoFocusRef.current = true;
+                              profileReturnFocusRef.current =
+                                mobileMenuTriggerRef.current;
+                            }}
                             className="flex items-center w-full px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
                           >
                             <FiUser className="mr-2" size={16} />
@@ -178,13 +206,19 @@ export const Navbar = () => {
             </li>
           ) : session?.user ? (
             <li className="items-center justify-center hidden lg:flex">
-              <UserMenu manager={editProfileManager} />
+              <UserMenu
+                triggerRef={accountTriggerRef}
+                onEditProfile={() => {
+                  profileReturnFocusRef.current = accountTriggerRef.current;
+                  editProfileManager.open();
+                }}
+              />
             </li>
           ) : (
             <li className="flex items-center justify-center">
               <Link
                 href="/login"
-                className="w-24 h-9 text-sm flex items-center justify-center text-color-secondary transition-all hover:text-white font-medium"
+                className="w-24 h-9 text-sm flex items-center justify-center text-color-secondary transition-colors hover:text-white font-medium"
               >
                 Login
               </Link>
@@ -209,7 +243,10 @@ export const Navbar = () => {
         </ul>
       </header>
 
-      <EditProfile manager={editProfileManager} />
+      <EditProfile
+        manager={editProfileManager}
+        returnFocusRef={profileReturnFocusRef}
+      />
     </>
   );
 };

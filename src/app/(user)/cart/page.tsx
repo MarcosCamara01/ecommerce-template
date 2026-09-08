@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { CartProducts } from "@/components/cart";
 import { SVGLoadingIcon } from "@/components/ui/loader";
-import { getUser } from "@/lib/auth/server";
+import { getPrincipal } from "@/lib/identity";
 
 export async function generateMetadata() {
   return {
@@ -14,31 +14,34 @@ export async function generateMetadata() {
 
 const CartPage = () => {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-          <SVGLoadingIcon height={30} width={30} />
-        </div>
-      }
-    >
-      <CartContent />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Shopping cart</h1>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center h-[calc(100vh-91px)]">
+            <SVGLoadingIcon height={30} width={30} />
+          </div>
+        }
+      >
+        <CartContent />
+      </Suspense>
+    </>
   );
 };
 
 const CartContent = async () => {
-  const user = await getUser();
+  const user = await getPrincipal();
 
   if (!user) {
     return (
       <div className="flex h-[calc(100vh-91px)] w-full flex-col items-center justify-center gap-2 px-4">
-        <h1 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h1>
+        <h2 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h2>
         <p className="mb-4 text-lg">
           Not registered? You must be in order to save your products in the
           shopping cart.
         </p>
         <Link
-          className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-all hover:border-[#454545] hover:bg-background-tertiary"
+          className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-colors hover:border-[#454545] hover:bg-background-tertiary"
           href="/login"
         >
           Login

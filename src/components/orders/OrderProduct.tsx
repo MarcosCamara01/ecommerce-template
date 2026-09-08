@@ -6,50 +6,93 @@ import type {
   OrderProductWithDetails,
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
-import { formatPriceFromEuros } from "@/utils/formatters";
+import { formatPriceFromMinorUnits } from "@/utils/formatters";
 import { getBlurDataURL } from "@/lib/images/blur.server";
+import { orderProductLink } from "./order-product-link";
 
 interface OrderProductProps {
   product: ProductWithVariants;
   size: OrderProductWithDetails["size"];
   quantity: OrderProductWithDetails["quantity"];
+  unitAmount: OrderProductWithDetails["unitAmount"];
+  currency: OrderProductWithDetails["currency"];
+  productName: OrderProductWithDetails["productName"];
+  variantColor: OrderProductWithDetails["variantColor"];
+  imageUrl: OrderProductWithDetails["imageUrl"];
+  priority?: boolean;
 }
 
 export const OrderProduct = async ({
   product,
   size,
   quantity,
+  unitAmount,
+  currency,
+  productName,
+  variantColor,
+  imageUrl,
+  priority = false,
 }: OrderProductProps) => {
-  const { name, price, category, id, variants } = product;
+  const { category, id, variants } = product;
   const variant = variants[0];
-  const blurDataURL = await getBlurDataURL(variant.images[0]);
-
-  const productLink = `/${category}/${id}?variant=${variant.color}`;
+  const productLink = orderProductLink({
+    productId: id,
+    category,
+    productArchivedAt: product.archivedAt,
+    variantColor,
+    variantArchivedAt: variant.archivedAt,
+  });
+  const isArchived = productLink === null;
+  const blurDataURL = await getBlurDataURL(imageUrl);
 
   return (
     <div className="flex flex-col justify-between overflow-hidden rounded-md border border-solid border-border-primary">
-      <Link href={productLink} className="transition-all hover:scale-105">
+      {isArchived ? (
+        <div>
+          <ProductImage
+            image={imageUrl}
+            blurDataURL={blurDataURL}
+            name={productName}
+            width={280}
+            height={425}
+            priority={priority}
+            sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
+          />
+        </div>
+      ) : (
+        <Link href={productLink!} className="transition-transform hover:scale-105">
         <ProductImage
-          image={variant.images[0]}
+          image={imageUrl}
           blurDataURL={blurDataURL}
-          name={name}
+          name={productName}
           width={280}
           height={425}
+          priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
         />
-      </Link>
+        </Link>
+      )}
       <div className="z-10 flex flex-col justify-between gap-2.5 bg-background-secondary p-3.5">
         <div className="flex w-full justify-between">
-          <Link href={productLink} className="w-10/12">
-            <h2 className="truncate text-sm font-semibold">{name}</h2>
-          </Link>
+          {isArchived ? (
+            <div className="w-10/12">
+              <h2 className="truncate text-sm font-semibold">{productName}</h2>
+              <span className="text-xs text-color-tertiary">Archived item</span>
+            </div>
+          ) : (
+            <Link href={productLink!} className="w-10/12">
+            <h2 className="truncate text-sm font-semibold">{productName}</h2>
+            </Link>
+          )}
         </div>
 
-        <div className="text-sm">{formatPriceFromEuros(price)}</div>
+        <div className="text-sm">
+          {formatPriceFromMinorUnits(unitAmount, currency)}
+        </div>
 
         <div className="flex sm:hidden">
           <div className="border-r pr-2.5 text-sm">{size}</div>
-          <div className="pl-2.5 text-sm">{variant.color}</div>
+          <div className="pl-2.5 text-sm">{variantColor}</div>
         </div>
 
         <div className="hidden items-center justify-between sm:flex">
@@ -63,7 +106,7 @@ export const OrderProduct = async ({
           </div>
           <div className="flex">
             <div className="border-r pr-2.5 text-sm">{size}</div>
-            <div className="pl-2.5 text-sm">{variant.color}</div>
+            <div className="pl-2.5 text-sm">{variantColor}</div>
           </div>
         </div>
       </div>

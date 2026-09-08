@@ -6,11 +6,13 @@ import {
   ResultSkeleton,
   NoSessionError,
   StatusContent,
+  AutoRefreshStatus,
   SuccessHeader,
   OrderInfo,
   EmailConfirmation,
   DeliveryTimeline,
   ActionButtons,
+  FulfilledCheckoutSync,
 } from "@/components/checkout";
 
 export async function generateMetadata() {
@@ -38,16 +40,32 @@ async function CheckoutResult({ sessionId }: { sessionId: string }) {
   }
 
   const { session } = result;
+  const { outcome } = result;
+
+  if (!outcome || outcome.status !== "fulfilled") {
+    return (
+      <StatusContent
+        status="error"
+        sessionId={sessionId}
+        error="Fulfillment state is unavailable"
+      />
+    );
+  }
 
   return (
     <>
+      <AutoRefreshStatus active={outcome.cartCleanup === "pending"} />
+      <FulfilledCheckoutSync cartCleanup={outcome.cartCleanup} />
       <SuccessHeader />
       <OrderInfo />
       {session?.customer_details?.email && (
-        <EmailConfirmation email={session.customer_details.email} />
+        <EmailConfirmation
+          email={session.customer_details.email}
+          status={outcome.customerEmail}
+        />
       )}
       <DeliveryTimeline />
-      <ActionButtons />
+      <ActionButtons orderId={outcome.orderId} />
     </>
   );
 }
@@ -74,6 +92,7 @@ async function DynamicCheckoutContent({
 export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
     <section className="px-6 py-12 sm:px-8">
+      <h1 className="sr-only">Purchase result</h1>
       <Suspense fallback={<ResultSkeleton />}>
         <DynamicCheckoutContent searchParams={searchParams} />
       </Suspense>

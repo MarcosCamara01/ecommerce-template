@@ -33,6 +33,8 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           name={props.name || "password"}
         />
         <button
+          aria-label={showPassword ? "Hide password" : "Show password"}
+          aria-pressed={showPassword}
           className="flex w-11 shrink-0 items-center justify-center border-l border-border-primary bg-background-primary text-color-secondary transition-colors duration-150 hover:bg-background-tertiary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           onClick={(e) => {
             e.preventDefault();
@@ -42,9 +44,9 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           disabled={props.disabled}
         >
           {showPassword ? (
-            <AiOutlineEye size={16} />
+            <AiOutlineEye size={16} aria-hidden="true" />
           ) : (
-            <AiOutlineEyeInvisible size={16} />
+            <AiOutlineEyeInvisible size={16} aria-hidden="true" />
           )}
         </button>
       </div>

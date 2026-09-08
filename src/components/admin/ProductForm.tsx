@@ -13,12 +13,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
+import { FiArchive, FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
 import { BasicInfo, type BasicInfoRef } from "./BasicInfo";
 import { MainImage, type MainImageRef } from "./MainImage";
 import { VariantsSection, type VariantsSectionRef } from "./VariantsSection";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
+import { useCatalogCreateCommand } from "@/hooks/product/useCatalogCreateCommand";
+import { encodeProductFormData } from "./product-form-data";
+import { catalogImageBatchErrors } from "@/lib/catalog-sync/image-file-contract";
 
 export type { ProductFormData };
 
@@ -26,21 +29,26 @@ interface FormState {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
+  accepted?: boolean;
+  operationId?: string;
 }
 
 interface ProductFormProps {
   mode: "create" | "edit";
   initialData?: ProductFormData;
+  restoreArchived?: boolean;
   onSuccess?: (product: ProductWithVariants) => void;
 }
 
 export function ProductForm({
   mode,
   initialData,
+  restoreArchived = false,
   onSuccess,
 }: ProductFormProps) {
   const { createAsync, updateAsync, isPending, isUpdatePending } =
     useProductMutation();
+  const createCommand = useCatalogCreateCommand();
   const [state, setState] = useState<FormState>({
     success: false,
     message: "",
@@ -50,58 +58,78 @@ export function ProductForm({
   const basicInfoRef = useRef<BasicInfoRef>(null!);
   const mainImageRef = useRef<MainImageRef>(null!);
   const variantsSectionRef = useRef<VariantsSectionRef>(null!);
-
   const isLoading = mode === "create" ? isPending : isUpdatePending;
+
+  const clearFieldError = (field: string) => {
+    setState((current) => {
+      if (!current.errors?.[field]) return current;
+      const errors = { ...current.errors };
+      delete errors[field];
+      const hasErrors = Object.keys(errors).length > 0;
+      return {
+        ...current,
+        errors: hasErrors ? errors : undefined,
+        message: hasErrors ? current.message : "",
+      };
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const formData = new FormData();
-
-    if (mode === "edit" && initialData?.id) {
-      formData.append("id", initialData.id.toString());
-    }
-
-    formData.append("name", basicInfoRef.current.name);
-    formData.append("description", basicInfoRef.current.description);
-    formData.append("price", basicInfoRef.current.price);
-    formData.append("category", basicInfoRef.current.category);
-
-    // Handle main image
-    if (mainImageRef.current.hasNewImage && mainImageRef.current.file) {
-      formData.append("mainImage", mainImageRef.current.file);
-    } else if (mainImageRef.current.existingUrl) {
-      formData.append("existingMainImage", mainImageRef.current.existingUrl);
-    }
-
-    const variantsData = variantsSectionRef.current.getVariants();
-    const imagesData = variantsSectionRef.current.getImages();
-
-    variantsData.forEach((variant, index) => {
-      const variantImages = imagesData[`variant_${index}`] || [];
-      variantImages.forEach((image, imgIndex) => {
-        formData.append(`variant_${index}_image_${imgIndex}`, image);
-      });
-      formData.append(
-        `variant_${index}_imageCount`,
-        variantImages.length.toString(),
-      );
-    });
-
-    // Include variant data with existing images info for edit mode
-    const variantsForSubmit = variantsData.map((v) => ({
-      id: v.id,
-      color: v.color,
-      stripe_id: v.stripe_id,
-      sizes: v.sizes,
-      imageCount: v.imageCount,
-      existingImages: v.existingImages,
-      removedImages: v.removedImages,
-    }));
-
-    formData.append("variants", JSON.stringify(variantsForSubmit));
-
     try {
+      const basicInfo = {
+        name: basicInfoRef.current.name,
+        description: basicInfoRef.current.description,
+        price: basicInfoRef.current.price,
+        category: basicInfoRef.current.category,
+      };
+      const mainImage =
+        mainImageRef.current.hasNewImage && mainImageRef.current.file
+          ? mainImageRef.current.file
+          : null;
+      const variantsData = variantsSectionRef.current.getVariants();
+      const imagesData = variantsSectionRef.current.getImages();
+      const variantsForSubmit = variantsData.map((variant) => ({
+        id: variant.id,
+        color: variant.color,
+        sizes: variant.sizes,
+        imageCount: variant.imageCount,
+        existingImages: variant.existingImages,
+        removedImages: variant.removedImages,
+      }));
+      const [imageBatchError] = catalogImageBatchErrors([
+        ...(mainImage ? [mainImage] : []),
+        ...Object.values(imagesData).flat(),
+      ]);
+      if (imageBatchError) {
+        setState({
+          success: false,
+          message: imageBatchError,
+          errors: { images: [imageBatchError] },
+        });
+        return;
+      }
+
+      const commandId = mode === "create"
+        ? await createCommand.prepare({
+            basicInfo,
+            mainImage,
+            variants: variantsForSubmit,
+            images: imagesData,
+          })
+        : undefined;
+      const formData = encodeProductFormData({
+        mode,
+        productId: initialData?.id,
+        restoreArchived,
+        commandId,
+        basicInfo,
+        mainImage,
+        existingMainImage: mainImageRef.current.existingUrl,
+        variants: variantsForSubmit,
+        images: imagesData,
+      });
+
       const result =
         mode === "create"
           ? await createAsync(formData)
@@ -111,8 +139,17 @@ export function ProductForm({
         success: result.success,
         message: result.message,
         errors: result.errors,
+        accepted: result.accepted,
+        operationId: result.operationId,
       });
 
+      if (
+        mode === "create" &&
+        result.success &&
+        !result.accepted
+      ) {
+        createCommand.clear();
+      }
       if (result.success && result.data && onSuccess) {
         onSuccess(result.data);
       }
@@ -121,6 +158,7 @@ export function ProductForm({
         success: false,
         message: "An unexpected error occurred",
         errors: undefined,
+        operationId: createCommand.getCurrentId(),
       });
     }
   };
@@ -129,6 +167,7 @@ export function ProductForm({
     basicInfoRef.current.reset();
     mainImageRef.current.reset();
     variantsSectionRef.current.reset();
+    if (mode === "create") createCommand.clear();
     setState({ success: false, message: "", errors: undefined });
   };
 
@@ -136,9 +175,13 @@ export function ProductForm({
   const subtitle =
     mode === "create"
       ? "Add a new product with variants and images to your store"
-      : "Update product information, variants and images";
+      : restoreArchived
+        ? "Review this archived product and explicitly restore it to the storefront"
+        : "Update product information, variants and images";
   const submitButtonText =
-    mode === "create" ? "Create Product" : "Update Product";
+    mode === "create"
+      ? "Create Product"
+      : restoreArchived ? "Restore Product" : "Update Product";
 
   return (
     <form
@@ -155,6 +198,16 @@ export function ProductForm({
 
       <Separator />
 
+      {restoreArchived && (
+        <Alert>
+          <FiArchive className="h-4 w-4" />
+          <AlertTitle>Archived Product</AlertTitle>
+          <AlertDescription>
+            Saving this form is an explicit restore action and will republish the durable product identity after catalog synchronization succeeds.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Alert Message */}
       {state.message && (
         <Alert variant={state.success ? "success" : "destructive"}>
@@ -163,8 +216,21 @@ export function ProductForm({
           ) : (
             <FiX className="h-4 w-4" />
           )}
-          <AlertTitle>{state.success ? "Success" : "Error"}</AlertTitle>
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertTitle>
+            {state.success
+              ? state.accepted
+                ? "Synchronization pending"
+                : "Success"
+              : "Error"}
+          </AlertTitle>
+          <AlertDescription>
+            {state.message}
+            {state.operationId && (
+              <span className="mt-2 block font-mono text-xs">
+                Operation: {state.operationId}
+              </span>
+            )}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -188,6 +254,7 @@ export function ProductForm({
             ref={basicInfoRef}
             errors={state.errors}
             initialData={initialData?.basicInfo}
+            onFieldChange={clearFieldError}
           />
         </CardContent>
       </Card>
@@ -212,6 +279,7 @@ export function ProductForm({
             ref={mainImageRef}
             errors={state.errors}
             initialImageUrl={initialData?.mainImageUrl}
+            onFieldChange={clearFieldError}
           />
         </CardContent>
       </Card>
@@ -235,6 +303,8 @@ export function ProductForm({
           <VariantsSection
             ref={variantsSectionRef}
             initialVariants={initialData?.variants}
+            errors={state.errors}
+            onFieldChange={clearFieldError}
           />
         </CardContent>
       </Card>

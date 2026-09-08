@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a focused product or developer-experience improvement
+title: "[Feature]: "
+labels: []
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What concrete user or contributor problem should be solved?
+      placeholder: Describe the current limitation and who it affects.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the observable behavior, not only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds or smaller approaches have you considered?
+  - type: textarea
+    id: risks
+    attributes:
+      label: Security and operational impact
+      description: Note any authentication, database, payment, email, hosting, migration, or compatibility implications.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched for an existing request covering this outcome.
+          required: true
+        - label: I have not included secrets or private customer data.
+          required: true

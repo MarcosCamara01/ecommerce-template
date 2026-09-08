@@ -2,7 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useRef, type RefObject } from "react";
 import { toast } from "sonner";
 
 import {
@@ -23,20 +23,33 @@ type UpdateProfileResponse = {
   error?: string;
 };
 
-export default function EditProfile({ manager }: { manager: Manager }) {
+export default function EditProfile({
+  manager,
+  returnFocusRef,
+}: {
+  manager: Manager;
+  returnFocusRef: RefObject<HTMLElement | null>;
+}) {
   const { data: session } = useSession();
   const router = useRouter();
-  const nameRef = useRef<HTMLInputElement>(null!);
+  const nameRef = useRef<HTMLInputElement>(null);
 
+  // No React Query cache holds the user's name: it lives in the Better Auth
+  // session store, and router.refresh() re-renders the server components.
+  // react-doctor-disable-next-line react-doctor/query-mutation-missing-invalidation
   const { mutate: updateProfile, isPending } = useMutation({
     mutationFn: async () => {
+      const name = nameRef.current?.value;
+      if (name === undefined) {
+        throw new Error("Profile form is unavailable");
+      }
       const response = await fetch("/api/auth/update-user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: nameRef.current.value,
+          name,
         }),
       });
 
@@ -63,7 +76,26 @@ export default function EditProfile({ manager }: { manager: Manager }) {
 
   return (
     <Dialog open={manager.active} onOpenChange={manager.set}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          nameRef.current?.focus();
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          const returnTarget = returnFocusRef.current;
+          returnFocusRef.current = null;
+          queueMicrotask(() => {
+            if (
+              returnTarget?.isConnected &&
+              returnTarget.getClientRects().length > 0
+            ) {
+              returnTarget.focus();
+            }
+          });
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
@@ -71,6 +103,9 @@ export default function EditProfile({ manager }: { manager: Manager }) {
           </DialogDescription>
         </DialogHeader>
         <form
+          // Loaded with `dynamic(..., { ssr: false })`: this dialog cannot render
+          // without JavaScript, so a server action would not enhance it. The
+          // matching react-doctor override lives in doctor.config.json.
           onSubmit={(e) => {
             e.preventDefault();
             updateProfile();
@@ -89,7 +124,7 @@ export default function EditProfile({ manager }: { manager: Manager }) {
               />
             </div>
             <div className="grid items-center grid-cols-4 gap-4">
-              <Label htmlFor="Email" className="text-right">
+              <Label htmlFor="email" className="text-right">
                 Email
               </Label>
               <Input

@@ -31,17 +31,17 @@ export const Footer = () => {
           <h2 className="my-3 text-sm font-medium">Assistance</h2>
           <ul className="grid grid-cols-2">
             <li className={liStyles}>
-              <Link href="#" className={linkStyles}>
+              <Link href="/help/size-guide" className={linkStyles}>
                 Size guide
               </Link>
             </li>
             <li className={liStyles}>
-              <Link href="#" className={linkStyles}>
+              <Link href="/help/delivery" className={linkStyles}>
                 Delivery
               </Link>
             </li>
             <li className={liStyles}>
-              <Link href="#" className={linkStyles}>
+              <Link href="/help/returns" className={linkStyles}>
                 Returns and refunds
               </Link>
             </li>
@@ -54,6 +54,7 @@ export const Footer = () => {
               <Link
                 href="https://marcoscamara.com"
                 target="_blank"
+                rel="noopener noreferrer"
                 className={linkStyles}
               >
                 Portfolio
@@ -63,6 +64,7 @@ export const Footer = () => {
               <Link
                 href="https://www.linkedin.com/in/marcospenelascamara/"
                 target="_blank"
+                rel="noopener noreferrer"
                 className={linkStyles}
               >
                 LinkedIn
@@ -72,6 +74,7 @@ export const Footer = () => {
               <Link
                 href="https://github.com/MarcosCamara01"
                 target="_blank"
+                rel="noopener noreferrer"
                 className={linkStyles}
               >
                 GitHub
@@ -81,6 +84,7 @@ export const Footer = () => {
               <Link
                 href="https://medium.com/@marcoscamara"
                 target="_blank"
+                rel="noopener noreferrer"
                 className={linkStyles}
               >
                 Medium

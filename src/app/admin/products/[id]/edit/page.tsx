@@ -1,32 +1,45 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { EditProductForm } from "@/components/admin";
-import { getProductById } from "@/services/products.service";
+import { requireCapability } from "@/lib/identity";
+import {
+  getArchivedProductForRestoration,
+  getProductByIdForManager,
+} from "@/services/products.service";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ restore?: string }>;
 }
 
 async function DynamicEditProductContent({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ restore?: string }>;
 }) {
   const { id } = await params;
+  const { restore } = await searchParams;
   const productId = parseInt(id, 10);
 
   if (isNaN(productId)) {
     notFound();
   }
 
-  const product = await getProductById(productId);
+  const principal = await requireCapability("catalog:manage");
+  const product = restore === "1"
+    ? await getArchivedProductForRestoration(principal, productId)
+    : await getProductByIdForManager(principal, productId);
 
   if (!product) {
     notFound();
   }
 
-  return <EditProductForm product={product} />;
+  return (
+    <EditProductForm product={product} restoreArchived={restore === "1"} />
+  );
 }
 
 function EditProductSkeleton() {
@@ -45,10 +58,11 @@ function EditProductSkeleton() {
 
 export default async function EditProductPage({
   params,
+  searchParams,
 }: EditProductPageProps) {
   return (
     <Suspense fallback={<EditProductSkeleton />}>
-      <DynamicEditProductContent params={params} />
+      <DynamicEditProductContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }

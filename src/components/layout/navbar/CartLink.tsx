@@ -24,7 +24,7 @@ export const CartLink = () => {
     <Link
       href="/cart"
       aria-label="Products saved in the shopping cart"
-      className="text-sm py-3 px-3 rounded-md transition-all text-color-tertiary hover:bg-background-tertiary relative"
+      className="text-sm py-3 px-3 rounded-md transition-colors text-color-tertiary hover:bg-background-tertiary relative"
     >
       <FiShoppingCart size={16} />
       <span className="flex text-xs size-5 items-center bg-[#0072F5] font-medium text-color-tertiary justify-center absolute rounded-full top-[-3px] right-[-3px]">

@@ -78,8 +78,9 @@ export const useWishlistMutation = () => {
         WISHLIST_QUERY_KEYS.wishlistList(userId),
         (old = { items: [] }) => ({
           items: old.items
-            .filter((i) => i.id !== tempItem.id)
-            .filter((i) => i.productId !== data.productId)
+            .filter(
+              (i) => i.id !== tempItem.id && i.productId !== data.productId,
+            )
             .concat(data),
         }),
       );

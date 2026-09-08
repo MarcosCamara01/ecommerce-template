@@ -55,7 +55,7 @@ export const ButtonCheckout = ({ cartItemIds }: ButtonCheckoutProps) => {
   return (
     <LoadingButton
       onClick={() => buyProducts()}
-      className="w-full rounded-none bg-background-secondary p-2.5 h-full transition-all hover:bg-background-tertiary"
+      className="w-full rounded-none bg-background-secondary p-2.5 h-full transition-colors hover:bg-background-tertiary"
       loading={isPending}
       disabled={cartItemIds.length === 0}
     >

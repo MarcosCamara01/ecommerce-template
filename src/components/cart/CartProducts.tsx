@@ -61,13 +61,13 @@ export const CartProducts = () => {
 
   return (
     <div className="flex h-[calc(100vh-91px)] w-full flex-col items-center justify-center gap-2 px-4">
-      <h1 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h1>
+      <h2 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h2>
       <p className="mb-4 text-lg">
         When you have added something to your cart, it will appear here. Want to
         get started?
       </p>
       <Link
-        className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-all hover:border-[#454545] hover:bg-background-tertiary"
+        className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-colors hover:border-[#454545] hover:bg-background-tertiary"
         href="/"
       >
         Start

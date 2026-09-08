@@ -1,21 +1,11 @@
 import Link from "next/link";
 import { FiEdit2 } from "react-icons/fi";
+
 import { Button } from "@/components/ui/button";
-import { getSession } from "@/lib/auth/server";
+import { getPrincipal, hasCapability } from "@/lib/identity";
 
-interface EditProductButtonProps {
-  productId: number;
-}
-
-export async function EditProductButton({ productId }: EditProductButtonProps) {
-  const session = await getSession();
-  const adminEmail = process.env.ADMIN_EMAIL;
-
-  // Only show button if user is authenticated and is admin
-  if (!session?.user || !adminEmail || session.user.email !== adminEmail) {
-    return null;
-  }
-
+export async function EditProductButton({ productId }: { productId: number }) {
+  if (!hasCapability(await getPrincipal(), "catalog:manage")) return null;
   return (
     <Link href={`/admin/products/${productId}/edit`}>
       <Button
