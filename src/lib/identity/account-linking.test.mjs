@@ -7,15 +7,20 @@ const authSource = await readFile(
   "utf8",
 );
 
-test("credential and local-account linking both require verified email", () => {
+test("credential sign-in does not wait for email delivery", () => {
   assert.match(authSource, /import \{ getCanonicalAppOrigin \}/);
   assert.match(authSource, /const authBaseURL = getCanonicalAppOrigin\(\)/);
   assert.match(authSource, /baseURL: authBaseURL/);
   assert.match(authSource, /trustedOrigins: authTrustedOrigins/);
   assert.match(
     authSource,
-    /emailAndPassword:\s*\{[\s\S]*?requireEmailVerification:\s*true/,
+    /emailAndPassword:\s*\{[\s\S]*?requireEmailVerification:\s*false/,
   );
+  assert.match(
+    authSource,
+    /emailVerification:\s*\{[\s\S]*?sendOnSignUp:\s*false[\s\S]*?sendOnSignIn:\s*false/,
+  );
+  assert.doesNotMatch(authSource, /sendVerificationEmail/);
   assert.match(
     authSource,
     /accountLinking:\s*\{[\s\S]*?requireLocalEmailVerified:\s*true/,

@@ -12,10 +12,9 @@ before treating the combined branch as one approved delivery unit.
 
 The first administrator is promoted by stable Better Auth user id with `ADMIN_USER_ID npm run auth:bootstrap-admin`. Email addresses are not authorization keys.
 
-Credential sign-in requires email verification, linking another provider requires the
-existing local account to be verified, and an unverified session never becomes an
-application Principal. OAuth callbacks never reclaim or rewrite an unverified credential
-registration.
+Credential sign-in does not wait for a verification email. Linking another provider
+still requires the existing local account to be verified, and OAuth callbacks never
+reclaim or rewrite an unverified credential registration.
 
 ## Data
 

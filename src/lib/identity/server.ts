@@ -20,11 +20,7 @@ export async function getIdentityFromHeaders(
   requestHeaders: Headers,
 ): Promise<AuthenticatedIdentity | null> {
   const session = await auth.api.getSession({ headers: requestHeaders });
-  if (
-    !session?.user?.id ||
-    !session.user.email ||
-    session.user.emailVerified !== true
-  ) return null;
+  if (!session?.user?.id || !session.user.email) return null;
   return Object.freeze({
     principal: createUserPrincipalForIdentityModule({
       userId: session.user.id,
