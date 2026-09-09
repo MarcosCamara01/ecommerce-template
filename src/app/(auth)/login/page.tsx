@@ -29,7 +29,6 @@ function LoginContent() {
   const nativeError = searchParams.get("error")
     ? "Invalid email or password"
     : null;
-  const notice = searchParams.get("notice");
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,11 +63,6 @@ function LoginContent() {
       >
         <input type="hidden" name="mode" value="sign-in" />
         <input type="hidden" name="callbackURL" value={callbackURL} />
-        {notice === "check-email" && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 text-sm text-emerald-200">
-            Check your email to confirm your address before signing in.
-          </div>
-        )}
         {error && (
           <div className="flex items-start gap-2.5 rounded-xl border border-[#4a1f23] bg-[#1a0b0d] px-3.5 py-2.5 text-[#ff8d92]">
             <MdError className="mt-0.5 shrink-0" size={16} />

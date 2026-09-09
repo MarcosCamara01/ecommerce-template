@@ -89,7 +89,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
       ...coreFields,
       ...additionalFields,
@@ -102,32 +102,8 @@ export const auth = betterAuth({
   },
 
   emailVerification: {
-    sendOnSignUp: true,
-    sendOnSignIn: true,
-    autoSignInAfterVerification: true,
-    expiresIn: 60 * 60,
-    sendVerificationEmail: async ({ user, url }) => {
-      const { sendMail, escapeHtml } = await import("@/lib/email/mailer");
-      try {
-        await sendMail({
-          to: user.email,
-          subject: "Verify your email address",
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
-              <h2 style="color: #111827;">Confirm your email</h2>
-              <p>Hi ${escapeHtml(user.name)}, please confirm this address to activate your account.</p>
-              <p style="margin: 24px 0;"><a href="${url}" style="background-color: #111827; color: #ffffff; padding: 12px 20px; border-radius: 8px; text-decoration: none;">Verify email</a></p>
-              <p style="color: #6b7280; font-size: 14px;">This link expires in 1 hour. If you did not create an account, you can ignore this email.</p>
-            </div>
-          `,
-        });
-      } catch (error) {
-        console.error(
-          "[auth] failed to send verification email:",
-          error instanceof Error ? error.message : error,
-        );
-      }
-    },
+    sendOnSignUp: false,
+    sendOnSignIn: false,
   },
 
   account: {

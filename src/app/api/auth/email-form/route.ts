@@ -67,8 +67,5 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return redirectWithCookies(
-    mode === "sign-up" ? "/login?notice=check-email" : callbackURL,
-    upstream,
-  );
+  return redirectWithCookies(callbackURL, upstream);
 }
