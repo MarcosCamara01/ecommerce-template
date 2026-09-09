@@ -53,8 +53,8 @@
     "drizzle-zod": "^0.8.3",
     "fuse.js": "^7.1.0",
     "geist": "^1.4.1",
-    "next": "16.3.2",
-    "nodemailer": "9.0.5",
+    "next": "16.3.4",
+    "nodemailer": "9.1.1",
     "pg": "^8.16.3",
     "postgres": "^3.4.9",
     "react": "^19.2.0",
@@ -75,7 +75,9 @@
     },
     "defu": "6.1.5",
     "js-cookie": "3.0.8",
-    "lodash": "4.18.1"
+    "js-yaml": "4.3.2",
+    "lodash": "4.18.1",
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@types/nodemailer": "8.0.1",
@@ -86,7 +88,7 @@
     "drizzle-kit": "0.31.10",
     "emulate": "^0.9.0",
     "eslint": "9.39.1",
-    "eslint-config-next": "16.3.2",
+    "eslint-config-next": "16.3.4",
     "eslint-plugin-react-hooks": "7.0.1",
     "husky": "9.1.7",
     "portless": "^0.15.3",
