@@ -51,6 +51,9 @@ next-env.d.ts
 # under it are already tracked. The previous `.agents/` entry here silently
 # hid every newly installed skill from `git status`.
 
+# leftover from skills CLI installing to every detected agent
+/agent/
+
 # private vulnerability reports / local artifacts (never commit: public repo)
 /reports/
 

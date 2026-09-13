@@ -9,15 +9,38 @@ Reviewed against react-doctor 0.9.12, full scope.
 
 Each rejection below is suppressed so the score reflects the verified state. Eleven
 are `// react-doctor-disable-next-line` comments sitting on the occurrence itself; the
-two that cannot carry one — a `.sql` file, and a JSX anchor that lands on the directive
-line — are per-file, per-rule entries in `doctor.config.json`. Both rules still run
-everywhere else in the repo.
+three that cannot carry one — a `.sql` file, a JSX anchor that lands on the directive
+line, and a JSON manifest — are per-file, per-rule entries in `doctor.config.json`.
+Those rules still run everywhere else in the repo.
 
 To see the raw findings again, scan with inline disables neutralised:
 
 ```bash
 npx react-doctor@0.9.12 --verbose --scope full   # add: respectInlineDisables:false in config
 ```
+
+## `socket/low-supply-chain-score` — `package.json:96`
+
+`supabase@2.115.0` (devDependency, official CLI) scored 0/100 on Socket's supply-chain
+axis. Other axes were vulnerability 100, maintenance 98, quality 100, license 100.
+
+**Predicate:** the 0 is a withdrawn malware false positive, not a live compromise of
+this pin. Socket still cites GHSA-x96m-c5fj-q75c / MAL-2026-5187.
+
+**Evidence:**
+
+- [GHSA-x96m-c5fj-q75c](https://github.com/advisories/GHSA-x96m-c5fj-q75c) is marked
+  **Withdrawn** (2026-06-04): "the malware detection was a false positive." The only
+  version it ever named was `2.105.0-beta.9`, not `2.115.0`.
+- [OSV MAL-2026-5187](https://osv.dev/vulnerability/MAL-2026-5187) is likewise
+  withdrawn. The sha256 Socket prints
+  (`aa2bdcc065a6d4c2b1512f8b68fed22618050c0435c12890c74a2f1405c62093`) is the
+  withdrawn ghsa-malware record.
+- The CLI is invoked from `scripts/database/apply-hosted-exposure.mjs` as
+  `node_modules/supabase/dist/supabase.js`. It is not a runtime storefront dependency.
+- `npm audit --audit-level=low` in `quality` still covers this package.
+
+Do not set `supplyChain.enabled: false`. Production direct deps stay scored.
 
 ## `supabase-rls-policy-risk` — `scripts/database/cutover-existing.sql:377`
 

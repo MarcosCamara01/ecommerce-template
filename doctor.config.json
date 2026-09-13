@@ -9,6 +9,10 @@
       {
         "files": ["src/components/layout/navbar/EditProfile.tsx"],
         "rules": ["react-doctor/no-prevent-default"]
+      },
+      {
+        "files": ["package.json"],
+        "rules": ["socket/low-supply-chain-score"]
       }
     ]
   }
