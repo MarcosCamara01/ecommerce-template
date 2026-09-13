@@ -1,0 +1,1 @@
+ALTER TYPE "app_private"."catalog_sync_state" ADD VALUE 'cancelling' BEFORE 'pending';

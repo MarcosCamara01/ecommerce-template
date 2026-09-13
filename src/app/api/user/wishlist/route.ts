@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+
 import {
   addToWishlistSchema,
   selectWishlistItemSchema,
   wishlistItemWithProductSchema,
 } from "@/lib/db/drizzle/schema";
-import { getUser } from "@/lib/auth/server";
-import {
-  addToWishlist,
-  getWishlist,
-  getWishlistWithDetails,
-  removeFromWishlist,
-  removeFromWishlistByProduct,
-} from "@/services/wishlist.service";
+import { dataAccess } from "@/lib/data-access";
+import { requirePrincipalFromHeaders } from "@/lib/identity";
+import { readJsonBody, userRouteError } from "@/lib/http/user-route";
 
-const deleteWishlistItemSchema = z
+const deleteSchema = z
   .object({
     itemId: z.coerce.number().int().positive().optional(),
     productId: z.coerce.number().int().positive().optional(),
@@ -25,95 +21,53 @@ const deleteWishlistItemSchema = z
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUser();
-    if (!user) return NextResponse.json({ items: [] });
-
-    const view = request.nextUrl.searchParams.get("view");
-    const items =
-      view === "details"
-        ? wishlistItemWithProductSchema
-            .array()
-            .parse(await getWishlistWithDetails(user.id))
-        : selectWishlistItemSchema.array().parse(await getWishlist(user.id));
-
+    const principal = await requirePrincipalFromHeaders(request.headers);
+    const wishlist = dataAccess.forUser(principal).wishlist;
+    const details = request.nextUrl.searchParams.get("view") === "details";
+    const items = details
+      ? wishlistItemWithProductSchema
+          .array()
+          .parse(await wishlist.listWithDetails())
+      : selectWishlistItemSchema.array().parse(await wishlist.list());
     return NextResponse.json({ items });
   } catch (error) {
-    console.error("Error getting wishlist items:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return wishlistRouteError(error);
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const user = await getUser();
-    if (!user)
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
-    const parsed = addToWishlistSchema.safeParse(await req.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid wishlist item", details: parsed.error.flatten() },
-        { status: 400 },
-      );
-    }
-
-    const item = await addToWishlist(user.id, parsed.data.productId);
-
-    if (!item) {
-      const items = await getWishlist(user.id);
-      const existingItem = items.find(
-        (wishlistItem) => wishlistItem.productId === parsed.data.productId,
-      );
-      return NextResponse.json({ item: existingItem });
-    }
-
-    return NextResponse.json({ item });
-  } catch (error) {
-    console.error("Error adding to wishlist:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  try {
-    const user = await getUser();
-    if (!user)
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
-    const parsed = deleteWishlistItemSchema.safeParse({
-      itemId: req.nextUrl.searchParams.get("itemId") ?? undefined,
-      productId: req.nextUrl.searchParams.get("productId") ?? undefined,
+    const principal = await requirePrincipalFromHeaders(request.headers);
+    const wishlist = dataAccess.forUser(principal).wishlist;
+    const input = addToWishlistSchema.parse(await readJsonBody(request));
+    return NextResponse.json({
+      item: await wishlist.add(input.productId),
     });
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid wishlist identifier", details: parsed.error.flatten() },
-        { status: 400 },
-      );
-    }
+  } catch (error) {
+    return wishlistRouteError(error);
+  }
+}
 
-    const deleted = parsed.data.itemId
-      ? await removeFromWishlist(user.id, parsed.data.itemId)
-      : await removeFromWishlistByProduct(user.id, parsed.data.productId!);
-
-    if (!deleted) {
-      return NextResponse.json(
-        { error: "Wishlist item not found" },
-        { status: 404 },
-      );
-    }
-
+export async function DELETE(request: NextRequest) {
+  try {
+    const principal = await requirePrincipalFromHeaders(request.headers);
+    const wishlist = dataAccess.forUser(principal).wishlist;
+    const input = deleteSchema.parse({
+      itemId: request.nextUrl.searchParams.get("itemId") ?? undefined,
+      productId: request.nextUrl.searchParams.get("productId") ?? undefined,
+    });
+    const removed = input.itemId
+      ? await wishlist.remove(input.itemId)
+      : await wishlist.removeByProduct(input.productId!);
+    if (!removed) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Error deleting from wishlist:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return wishlistRouteError(error);
   }
 }
+
+const wishlistRouteError = (error: unknown) =>
+  userRouteError(error, {
+    invalidPayloadMessage: "Invalid wishlist payload",
+    logContext: "Wishlist",
+  });

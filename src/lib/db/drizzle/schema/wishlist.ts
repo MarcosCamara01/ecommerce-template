@@ -1,21 +1,20 @@
 import { z } from "zod";
-import { sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import {
-  pgTable,
   bigserial,
   text,
   bigint,
   timestamp,
   unique,
   index,
-  pgPolicy,
   foreignKey,
 } from "drizzle-orm/pg-core";
+
+import { appPrivate } from "./namespace";
 import { users } from "./users";
 import { productWithVariantsSchema, productsItems } from "./products";
 
-export const wishlist = pgTable(
+export const wishlist = appPrivate.table(
   "wishlist",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -40,28 +39,9 @@ export const wishlist = pgTable(
     index("idx_wishlist_product_id").on(table.productId),
     index("idx_wishlist_updated_at").on(table.updatedAt),
     index("idx_wishlist_user_product").on(table.userId, table.productId),
-    pgPolicy("Users can view own wishlist items", {
-      as: "permissive",
-      for: "select",
-      to: "public",
-      using: sql`app.current_user_id() = user_id`,
-    }),
-    pgPolicy("Users can insert own wishlist items", {
-      as: "permissive",
-      for: "insert",
-      to: "public",
-      withCheck: sql`app.current_user_id() = user_id`,
-    }),
-    pgPolicy("Users can delete own wishlist items", {
-      as: "permissive",
-      for: "delete",
-      to: "public",
-      using: sql`app.current_user_id() = user_id`,
-    }),
-  ]
-).enableRLS();
+  ],
+);
 
-// Zod Schemas
 export const selectWishlistItemSchema = createSelectSchema(wishlist, {
   createdAt: z.coerce.string(),
   updatedAt: z.coerce.string(),
@@ -79,10 +59,7 @@ export const wishlistItemWithProductSchema = selectWishlistItemSchema.extend({
   product: productWithVariantsSchema,
 });
 
-// Types
 export type WishlistItem = z.infer<typeof selectWishlistItemSchema>;
 export type InsertWishlistItem = z.infer<typeof insertWishlistItemSchema>;
 export type AddToWishlistInput = z.infer<typeof addToWishlistSchema>;
-export type WishlistItemWithProduct = z.infer<
-  typeof wishlistItemWithProductSchema
->;
+export type WishlistItemWithProduct = z.infer<typeof wishlistItemWithProductSchema>;

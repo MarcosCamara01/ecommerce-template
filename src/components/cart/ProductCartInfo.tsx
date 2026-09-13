@@ -60,7 +60,7 @@ export const ProductCartInfo = ({
       <div className="flex items-center justify-between sm:hidden">
         <div className="flex bg-background-primary w-min">
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
             onClick={throttledDecrease}
             disabled={false}
             aria-label="Decrease quantity"
@@ -74,7 +74,7 @@ export const ProductCartInfo = ({
             {quantity}
           </span>
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
             onClick={throttledIncrease}
             disabled={false}
             aria-label="Increase quantity"
@@ -86,7 +86,7 @@ export const ProductCartInfo = ({
       <div className="items-center justify-between hidden sm:flex">
         <div className="flex bg-background-primary w-min">
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
             onClick={throttledDecrease}
             disabled={false}
             aria-label="Decrease quantity"
@@ -100,7 +100,7 @@ export const ProductCartInfo = ({
             {quantity}
           </span>
           <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-all hover:text-white border-border-primary disabled:opacity-50"
+            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
             onClick={throttledIncrease}
             disabled={false}
             aria-label="Increase quantity"

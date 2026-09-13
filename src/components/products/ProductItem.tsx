@@ -11,9 +11,10 @@ const WishlistButton = dynamic(() => import("../wishlist/WishlistButton"));
 
 interface ProductItemProps {
   product: ProductWithVariants;
+  priority?: boolean;
 }
 
-export const ProductItem = ({ product }: ProductItemProps) => {
+export const ProductItem = ({ product, priority = false }: ProductItemProps) => {
   const { name, id, img, price, category, variants } = product;
 
   const productLink = `/${category}/${id}?variant=${variants[0].color}`;
@@ -26,6 +27,7 @@ export const ProductItem = ({ product }: ProductItemProps) => {
           name={name}
           width={280}
           height={425}
+          priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
         />
       </Link>

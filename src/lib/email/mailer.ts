@@ -1,20 +1,13 @@
 import "server-only";
 
 import nodemailer from "nodemailer";
-import { z } from "zod";
-
-const contactEmailSchema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  email: z.string().trim().email("A valid email is required"),
-  subject: z.string().trim().min(1, "Subject is required"),
-  message: z.string().trim().min(1, "Message is required"),
-});
 
 type MailOptions = {
   to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
+  messageId?: string;
 };
 
 function getFirstEnvValue(keys: string[], trim = true) {
@@ -35,38 +28,41 @@ function getFirstEnvValue(keys: string[], trim = true) {
 
 function getEmailConfig() {
   const host = process.env.EMAIL_SERVER_HOST?.trim();
-  const port = Number(process.env.EMAIL_SERVER_PORT ?? "587");
-  const user = getFirstEnvValue([
-    "EMAIL_SERVER_USER",
-    "NEXT_PUBLIC_EMAIL_USERNAME",
-  ]);
-  const pass = getFirstEnvValue([
-    "EMAIL_SERVER_PASSWORD",
-    "NEXT_PUBLIC_EMAIL_PASSWORD",
-  ], false);
-  const from = getFirstEnvValue([
-    "EMAIL_FROM",
-    "EMAIL_SERVER_USER",
-    "NEXT_PUBLIC_EMAIL_USERNAME",
-  ]);
+  const portValue = process.env.EMAIL_SERVER_PORT?.trim();
+  const port = portValue ? Number(portValue) : Number.NaN;
+  const user = process.env.EMAIL_SERVER_USER?.trim();
+  // Never fall back to a NEXT_PUBLIC_* name here: Next.js inlines those into
+  // the client bundle, which would publish the SMTP password to every visitor.
+  const rawPassword = process.env.EMAIL_SERVER_PASSWORD;
+  const pass = rawPassword?.trim() ? rawPassword : undefined;
+  const from = process.env.EMAIL_FROM?.trim();
   const contactTo = getFirstEnvValue([
     "EMAIL_CONTACT_TO",
     "ADMIN_EMAIL",
-    "NEXT_PUBLIC_PERSONAL_EMAIL",
-    "EMAIL_FROM",
-    "EMAIL_SERVER_USER",
-    "NEXT_PUBLIC_EMAIL_USERNAME",
   ]);
 
-  if (!user || !pass || !from || !contactTo) {
+  if (!host) {
     throw new Error(
-      "Email is not configured. Set EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_FROM, and EMAIL_CONTACT_TO/ADMIN_EMAIL.",
+      "Email is disabled. Set EMAIL_SERVER_HOST to enable an explicit SMTP transport.",
+    );
+  }
+  if (
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65_535 ||
+    !user ||
+    !pass ||
+    !from ||
+    !contactTo
+  ) {
+    throw new Error(
+      "Email configuration is incomplete or invalid. Set a valid EMAIL_SERVER_PORT, EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_FROM, and EMAIL_CONTACT_TO/ADMIN_EMAIL.",
     );
   }
 
   return {
     host,
-    port: Number.isFinite(port) && port > 0 ? port : 587,
+    port,
     user,
     pass,
     from,
@@ -96,23 +92,15 @@ function getTransporter() {
 
   const config = getEmailConfig();
 
-  transporter = config.host
-    ? nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.port === 465,
-        auth: {
-          user: config.user,
-          pass: config.pass,
-        },
-      })
-    : nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: config.user,
-          pass: config.pass,
-        },
-      });
+  transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.port === 465,
+    auth: {
+      user: config.user,
+      pass: config.pass,
+    },
+  });
 
   return transporter;
 }
@@ -121,7 +109,13 @@ export function getContactEmailAddress() {
   return getEmailConfig().contactTo;
 }
 
-export async function sendMail({ to, subject, html, replyTo }: MailOptions) {
+export async function sendMail({
+  to,
+  subject,
+  html,
+  replyTo,
+  messageId,
+}: MailOptions) {
   const config = getEmailConfig();
 
   await getTransporter().sendMail({
@@ -130,31 +124,8 @@ export async function sendMail({ to, subject, html, replyTo }: MailOptions) {
     subject,
     html,
     ...(replyTo ? { replyTo } : {}),
+    ...(messageId ? { messageId } : {}),
   });
 }
 
-export async function sendContactEmail(input: z.infer<typeof contactEmailSchema>) {
-  const safeName = escapeHtml(input.name);
-  const safeEmail = escapeHtml(input.email);
-  const safeSubject = escapeHtml(input.subject);
-  const safeMessage = escapeHtml(input.message).replaceAll("\n", "<br />");
-
-  await sendMail({
-    to: getContactEmailAddress(),
-    subject: `[Contact] ${input.subject.trim()}`,
-    replyTo: input.email,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
-        <h2 style="color: #111827;">New contact message</h2>
-        <p><strong>Name:</strong> ${safeName}</p>
-        <p><strong>Email:</strong> ${safeEmail}</p>
-        <p><strong>Subject:</strong> ${safeSubject}</p>
-        <div style="margin-top: 24px; padding: 16px; background-color: #f3f4f6; border-radius: 8px;">
-          ${safeMessage}
-        </div>
-      </div>
-    `,
-  });
-}
-
-export { contactEmailSchema, escapeHtml };
+export { escapeHtml };

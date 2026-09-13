@@ -1,51 +1,24 @@
 "use server";
 
-import { getUser } from "@/lib/auth/server";
-import { ordersRepository } from "@/lib/db/drizzle/repositories";
+import { dataAccess } from "@/lib/data-access";
+import { requirePrincipal } from "@/lib/identity";
 import {
   orderWithDetailsSchema,
   type OrderItem,
   type OrderWithDetails,
 } from "@/lib/db/drizzle/schema";
 
-export const getUserOrders = async (): Promise<OrderWithDetails[] | null> => {
-  try {
-    const user = await getUser();
-    const userId = user?.id;
+export async function getUserOrders(): Promise<OrderWithDetails[]> {
+  const principal = await requirePrincipal();
+  return orderWithDetailsSchema
+    .array()
+    .parse(await dataAccess.forUser(principal).orders.list());
+}
 
-    if (!userId) {
-      return null;
-    }
-
-    const orders = await ordersRepository.findByUserId(userId);
-    return orderWithDetailsSchema.array().parse(orders);
-  } catch (error) {
-    console.error("Unexpected error fetching orders:", error);
-    return null;
-  }
-};
-
-export const getOrder = async (
+export async function getOrder(
   orderId: OrderItem["id"],
-): Promise<OrderWithDetails | null> => {
-  try {
-    const user = await getUser();
-    const userId = user?.id;
-
-    if (!userId) {
-      return null;
-    }
-
-    const order = await ordersRepository.findById(orderId);
-
-    if (!order || order.userId !== userId) {
-      return null;
-    }
-
-    return orderWithDetailsSchema.parse(order);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Error fetching order:", errorMessage);
-    return null;
-  }
-};
+): Promise<OrderWithDetails | null> {
+  const principal = await requirePrincipal();
+  const order = await dataAccess.forUser(principal).orders.find(orderId);
+  return order ? orderWithDetailsSchema.parse(order) : null;
+}

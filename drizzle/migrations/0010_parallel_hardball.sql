@@ -1,0 +1,3 @@
+ALTER TYPE "app_private"."catalog_sync_state" ADD VALUE 'cancelled';--> statement-breakpoint
+ALTER TABLE "app_private"."catalog_sync_operations" DROP CONSTRAINT "catalog_sync_terminal_check";--> statement-breakpoint
+ALTER TABLE "app_private"."catalog_sync_operations" ADD CONSTRAINT "catalog_sync_terminal_check" CHECK (("app_private"."catalog_sync_operations"."state"::text in ('succeeded', 'cancelled')) = ("app_private"."catalog_sync_operations"."active_product_id" is null));

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://react.doctor/schema/config.json",
+  "ignore": {
+    "overrides": [
+      {
+        "files": ["scripts/database/cutover-existing.sql"],
+        "rules": ["react-doctor/supabase-rls-policy-risk"]
+      },
+      {
+        "files": ["src/components/layout/navbar/EditProfile.tsx"],
+        "rules": ["react-doctor/no-prevent-default"]
+      }
+    ]
+  }
+}

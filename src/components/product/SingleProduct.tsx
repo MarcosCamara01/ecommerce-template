@@ -51,6 +51,7 @@ export const SingleProduct = async ({
 
   return (
     <>
+      <h1 className="sr-only">{product.name}</h1>
       <div className="flex flex-col lg:flex-row lg:gap-6 xl:gap-8">
         <div className="w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%]">
           <ProductImages name={product.name} selectedVariant={selectedVariant} />
@@ -61,7 +62,7 @@ export const SingleProduct = async ({
             <div className="w-full overflow-hidden rounded border border-solid border-border-primary bg-background-secondary">
               <div className="flex flex-col justify-between gap-3 border-b border-solid border-border-primary p-5">
                 <div className="flex items-start justify-between gap-2">
-                  <h1 className="text-lg font-semibold">{product.name}</h1>
+                  <h2 className="text-lg font-semibold">{product.name}</h2>
                   <EditProductButton productId={product.id} />
                 </div>
                 <span className="text-base font-medium">

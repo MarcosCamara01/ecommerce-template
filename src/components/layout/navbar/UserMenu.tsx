@@ -15,21 +15,28 @@ import Link from "next/link";
 /** FUNCTIONALITY */
 import { useSession } from "@/lib/auth/client";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-/** TYPES */
-import type { Manager } from "@/hooks/useManager";
+import { useRef, type RefObject } from "react";
 /** ICONS */
 import { FiUser, FiShoppingBag } from "react-icons/fi";
 import { RiLogoutBoxLine } from "react-icons/ri";
 
-export function UserMenu({ manager }: { manager: Manager }) {
+export function UserMenu({
+  triggerRef,
+  onEditProfile,
+}: {
+  triggerRef: RefObject<HTMLButtonElement | null>;
+  onEditProfile: () => void;
+}) {
   const { data: session, isPending } = useSession();
   const { signOut } = useAuthMutation();
   const userName = session?.user?.name?.split(" ")[0] || "Usuario";
+  const skipCloseAutoFocusRef = useRef(false);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          ref={triggerRef}
           title={userName}
           className="w-24 h-9 text-sm px-4 py-2 font-medium transition-colors text-color-secondary hover:text-color-tertiary line-clamp-1 break-all overflow-hidden"
         >
@@ -37,19 +44,27 @@ export function UserMenu({ manager }: { manager: Manager }) {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-48">
+      <DropdownMenuContent
+        className="w-48"
+        onCloseAutoFocus={(event) => {
+          if (!skipCloseAutoFocusRef.current) return;
+          event.preventDefault();
+          skipCloseAutoFocusRef.current = false;
+          queueMicrotask(onEditProfile);
+        }}
+      >
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <button
-              onClick={manager.open}
-              className="flex items-center gap-2 w-full cursor-pointer"
-            >
-              <FiUser size={16} />
-              <span>Edit profile</span>
-            </button>
+          <DropdownMenuItem
+            onSelect={() => {
+              skipCloseAutoFocusRef.current = true;
+            }}
+            className="flex w-full cursor-pointer items-center gap-2"
+          >
+            <FiUser size={16} />
+            <span>Edit profile</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>

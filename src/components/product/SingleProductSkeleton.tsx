@@ -46,7 +46,7 @@ export const SingleProductSkeleton = () => (
   </>
 );
 
-export const ButtonsSkeleton = () => (
+const ButtonsSkeleton = () => (
   <>
     <div className="p-5">
       <div className="grid grid-cols-4 gap-2.5 justify-center">
@@ -69,7 +69,7 @@ export const ButtonsSkeleton = () => (
   </>
 );
 
-export const MobileButtonsSkeleton = () => (
+const MobileButtonsSkeleton = () => (
   <div className="flex flex-col gap-3">
     <div className="flex items-center gap-3">
       <div className="flex-1 grid grid-cols-6 gap-1.5">

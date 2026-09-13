@@ -13,16 +13,15 @@ export type BasicInfoData = Pick<
 // Derived from ProductVariant - form state representation
 export type VariantFormData = Pick<
   ProductVariant,
-  "color" | "stripeId" | "sizes" | "images"
+  "color" | "sizes" | "images"
 > & {
   id?: ProductVariant["id"];
 };
 
-// Variant data for form submission (snake_case for API, includes UI state)
+// Variant data for form submission, including UI image state.
 export interface VariantSubmitData {
   id?: ProductVariant["id"];
   color: ProductVariant["color"];
-  stripe_id: ProductVariant["stripeId"];
   sizes: ProductVariant["sizes"];
   imageCount: number;
   existingImages: string[];
@@ -41,6 +40,10 @@ export interface ProductApiResponse {
   message: string;
   errors?: Record<string, string[]>;
   data?: ProductWithVariants;
+  accepted?: boolean;
+  operationId?: string;
+  syncState?: string;
+  retryable?: boolean;
 }
 
 // Alias for clarity in API routes

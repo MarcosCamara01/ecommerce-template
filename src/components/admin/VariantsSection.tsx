@@ -14,6 +14,8 @@ export type VariantsSectionRef = {
 
 interface VariantsSectionProps {
   initialVariants?: VariantFormData[];
+  errors?: Record<string, string[]>;
+  onFieldChange?: (field: string) => void;
 }
 
 interface VariantState {
@@ -22,7 +24,7 @@ interface VariantState {
 }
 
 export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionProps>(
-  ({ initialVariants }, ref) => {
+  ({ initialVariants, errors, onFieldChange }, ref) => {
   
   const createInitialState = (): VariantState[] => {
     if (initialVariants?.length) {
@@ -31,7 +33,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
         data: v,
       }));
     }
-    return [{ key: 0, data: { color: "", stripeId: "", sizes: [], images: [] } }];
+    return [{ key: 0, data: { color: "", sizes: [], images: [] } }];
   };
 
   const [variants, setVariants] = useState<VariantState[]>(createInitialState);
@@ -49,7 +51,6 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
           data: {
             id: currentData.id,
             color: currentData.color,
-            stripeId: currentData.stripe_id,
             sizes: currentData.sizes,
             images: currentData.existingImages,
           },
@@ -80,7 +81,6 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
         return (
           variantRef?.getData() || {
             color: "",
-            stripe_id: "",
             sizes: [],
             imageCount: 0,
             existingImages: [],
@@ -107,9 +107,10 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
   }));
 
   const addVariant = () => {
+    const key = nextKey.current++;
     setVariants((prev) => [
       ...prev,
-      { key: nextKey.current++, data: { color: "", stripeId: "", sizes: [], images: [] } },
+      { key, data: { color: "", sizes: [], images: [] } },
     ]);
   };
 
@@ -134,6 +135,8 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
           initialData={variant.data}
           onMoveUp={index > 0 ? () => moveVariant(index, "up") : undefined}
           onMoveDown={index < variants.length - 1 ? () => moveVariant(index, "down") : undefined}
+          errors={errors}
+          onFieldChange={onFieldChange}
         />
       ))}
 

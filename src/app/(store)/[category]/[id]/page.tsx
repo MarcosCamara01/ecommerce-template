@@ -6,29 +6,22 @@ import {
   SingleProductSkeleton,
   SuspenseRandomProducts,
 } from "@/components/product";
-import { getAllProducts, getProduct } from "@/app/actions";
+import { getProduct } from "@/app/actions";
+import { ProductCategoryZod } from "@/lib/db/drizzle/schema";
 import { pickFirst } from "@/utils/pickFirst";
 import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
+import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
 type PageProps = {
   params: Promise<{ id: string; category: string }>;
   searchParams: Promise<{ variant: string | undefined }>;
 };
 
-export async function generateStaticParams() {
-  const products = await getAllProducts();
-
-  return products.map((product) => ({
-    category: product.category,
-    id: String(product.id),
-  }));
-}
-
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
-  const productId = Number(id);
+  const productId = parsePositiveIntegerId(id);
 
-  if (!Number.isInteger(productId) || productId <= 0) {
+  if (productId === null) {
     return {
       title: "Product | Ecommerce Template",
       description: "Explore the latest product details at Ecommerce Template.",
@@ -59,9 +52,12 @@ async function DynamicProductContent({
 }) {
   const [{ id, category }, sp] = await Promise.all([params, searchParams]);
   const selectedVariantColor = pickFirst(sp, "variant");
-  const productId = Number(id);
+  const productId = parsePositiveIntegerId(id);
 
-  if (!Number.isInteger(productId) || productId <= 0) {
+  if (
+    !ProductCategoryZod.safeParse(category).success ||
+    productId === null
+  ) {
     notFound();
   }
 

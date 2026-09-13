@@ -1,45 +1,46 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/utils/auth";
-import { headers } from "next/headers";
+import { APIError } from "better-auth/api";
+import { ZodError } from "zod";
+
+import {
+  IdentityError,
+  updateIdentityProfileFromHeaders,
+} from "@/lib/identity";
 import { UpdateProfileSchema } from "@/schemas/auth";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const headersList = await headers();
-    const session = await auth.api.getSession({
-      headers: headersList,
-    });
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let payload: unknown;
+    try {
+      payload = await request.json();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return NextResponse.json(
+          { error: "Invalid profile payload" },
+          { status: 400 },
+        );
+      }
+      throw error;
     }
-
-    const parsed = UpdateProfileSchema.pick({ name: true })
+    const input = UpdateProfileSchema.pick({ name: true })
       .required({ name: true })
-      .safeParse(await req.json());
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid profile payload", details: parsed.error.flatten() },
-        { status: 400 },
-      );
-    }
-
-    const updatedUser = await auth.api.updateUser({
-      headers: headersList,
-      body: {
-        name: parsed.data.name,
-      },
-    });
-
+      .parse(payload);
+    const updatedUser = await updateIdentityProfileFromHeaders(
+      request.headers,
+      { name: input.name },
+    );
     return NextResponse.json({ user: updatedUser });
   } catch (error) {
-    console.error("Error updating user:", error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Internal server error",
-      },
-      { status: 500 },
-    );
+    if (
+      error instanceof IdentityError ||
+      (error instanceof APIError && error.statusCode === 401)
+    ) {
+      return NextResponse.json({ error: "authentication_required" }, { status: 401 });
+    }
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: "Invalid profile payload" }, { status: 400 });
+    }
+    console.error("User update failed", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

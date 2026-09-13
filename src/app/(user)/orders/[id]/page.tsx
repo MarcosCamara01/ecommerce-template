@@ -13,6 +13,7 @@ import { HiArrowLeft } from "react-icons/hi";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
 export async function generateMetadata() {
   return {
@@ -36,14 +37,18 @@ async function DynamicOrderContent({
 
 const OrderDetails = async ({ params }: Props) => {
   return (
-    <Suspense fallback={<OrderDetailsSkeleton items={6} />}>
-      <DynamicOrderContent params={params} />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Order details</h1>
+      <Suspense fallback={<OrderDetailsSkeleton items={6} />}>
+        <DynamicOrderContent params={params} />
+      </Suspense>
+    </>
   );
 };
 
 const OrderProducts = async ({ id }: { id: string }) => {
-  const order = await getOrder(Number(id));
+  const orderId = parsePositiveIntegerId(id);
+  const order = orderId === null ? null : await getOrder(orderId);
 
   if (!order) {
     return (
@@ -55,7 +60,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
         </p>
         <Link
           href="/orders"
-          className="flex items-center gap-2 px-4 py-2 transition-all rounded-lg bg-background-secondary hover:bg-background-tertiary"
+          className="flex items-center gap-2 px-4 py-2 transition-colors rounded-lg bg-background-secondary hover:bg-background-tertiary"
         >
           <HiArrowLeft className="w-4 h-4" />
           Back to Orders
@@ -65,7 +70,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
   }
 
   const allProducts = order.orderProducts.map(
-    (orderProduct: OrderProductWithDetails) => {
+    (orderProduct: OrderProductWithDetails, index: number) => {
       const variant = orderProduct.variant;
       const product = variant.product;
 
@@ -81,6 +86,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
             color: variant.color,
             sizes: variant.sizes,
             images: variant.images,
+            archivedAt: variant.archivedAt,
             createdAt: variant.createdAt,
             updatedAt: variant.updatedAt,
           },
@@ -92,6 +98,12 @@ const OrderProducts = async ({ id }: { id: string }) => {
         product: productWithVariants,
         size: orderProduct.size,
         quantity: orderProduct.quantity,
+        unitAmount: orderProduct.unitAmount,
+        currency: orderProduct.currency,
+        productName: orderProduct.productName,
+        variantColor: orderProduct.variantColor,
+        imageUrl: orderProduct.imageUrl,
+        priority: index === 0,
       };
     },
   );
@@ -104,12 +116,18 @@ const OrderProducts = async ({ id }: { id: string }) => {
         <div className="flex-1">
           <h2 className="mb-6 text-2xl font-bold">Order Items</h2>
           <GridProducts className="cart-ord-mobile">
-            {allProducts.map(({ orderProductId, product, size, quantity }) => (
+            {allProducts.map(({ orderProductId, product, size, quantity, unitAmount, currency, productName, variantColor, imageUrl, priority }) => (
               <OrderProduct
                 key={orderProductId}
                 product={product}
                 size={size}
                 quantity={quantity}
+                unitAmount={unitAmount}
+                currency={currency}
+                productName={productName}
+                variantColor={variantColor}
+                imageUrl={imageUrl}
+                priority={priority}
               />
             ))}
           </GridProducts>

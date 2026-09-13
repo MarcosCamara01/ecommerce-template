@@ -1,0 +1,1 @@
+ALTER TABLE "app_private"."order_items" ADD CONSTRAINT "order_status_valid" CHECK ("app_private"."order_items"."status" in ('confirmed', 'processing', 'shipped', 'delivered', 'cancelled'));
