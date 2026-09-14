@@ -95,6 +95,6 @@
     "react-doctor": "0.9.12",
     "supabase": "2.115.0",
     "tsx": "4.23.12",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   }
 }
