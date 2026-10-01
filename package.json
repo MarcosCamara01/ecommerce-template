@@ -54,7 +54,7 @@
     "fuse.js": "^7.1.0",
     "geist": "^1.4.1",
     "next": "16.3.4",
-    "nodemailer": "9.1.1",
+    "nodemailer": "10.0.9",
     "pg": "^8.16.3",
     "postgres": "^3.4.9",
     "react": "^19.2.0",
