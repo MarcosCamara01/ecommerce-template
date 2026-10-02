@@ -75,7 +75,7 @@ async function DynamicProductContent({
 
 export default async function ProductPage({ params, searchParams }: PageProps) {
   return (
-    <section className="pt-14">
+    <section>
       <Suspense fallback={<SingleProductSkeleton />}>
         <DynamicProductContent params={params} searchParams={searchParams} />
       </Suspense>

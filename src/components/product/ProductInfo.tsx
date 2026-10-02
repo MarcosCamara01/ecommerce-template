@@ -7,10 +7,10 @@ import {
 
 export const ProductInfo = () => {
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full border-t border-line">
       <AccordionItem value="item-1">
-        <AccordionTrigger headingLevel={2} className="text-sm">
-          COMPOSITION
+        <AccordionTrigger headingLevel={2}>
+          Composition
         </AccordionTrigger>
         <AccordionContent>
           <p>
@@ -22,8 +22,8 @@ export const ProductInfo = () => {
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-2">
-        <AccordionTrigger headingLevel={2} className="text-sm">
-          CARE
+        <AccordionTrigger headingLevel={2}>
+          Care
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-2">
           <p> Caring for your clothes is caring for the environment.</p>
@@ -36,8 +36,8 @@ export const ProductInfo = () => {
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-3">
-        <AccordionTrigger headingLevel={2} className="text-sm">
-          ORIGIN
+        <AccordionTrigger headingLevel={2}>
+          Origin
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-2">
           <p>

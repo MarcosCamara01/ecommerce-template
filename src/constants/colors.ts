@@ -1,5 +1,3 @@
-import type { CSSProperties } from "react";
-
 interface ColorMapping {
   [key: string]: string;
 }
@@ -28,50 +26,4 @@ export const colorMapping: ColorMapping = {
   "sky blue": "#7C97B6",
   straw: "#D8C39B",
   white: "#FAFAFA",
-};
-
-const normalizeColorName = (colorName: string) =>
-  colorName.trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
-
-const resolveSolidColor = (colorName: string) => {
-  const normalized = normalizeColorName(colorName);
-
-  if (colorMapping[normalized]) {
-    return colorMapping[normalized];
-  }
-
-  const fallbackEntries = Object.entries(colorMapping).sort(
-    ([left], [right]) => right.length - left.length,
-  );
-
-  const matchedEntry = fallbackEntries.find(([key]) => normalized.includes(key));
-
-  return matchedEntry?.[1] ?? "#6B7280";
-};
-
-export const getColorSwatchStyle = (colorName: string): CSSProperties => {
-  const parts = colorName
-    .split("/")
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  if (parts.length > 1) {
-    const resolvedColors = parts.map(resolveSolidColor);
-    const stops = resolvedColors
-      .map((color, index) => {
-        const start = Math.round((index / resolvedColors.length) * 100);
-        const end = Math.round(((index + 1) / resolvedColors.length) * 100);
-
-        return `${color} ${start}% ${end}%`;
-      })
-      .join(", ");
-
-    return {
-      background: `linear-gradient(90deg, ${stops})`,
-    };
-  }
-
-  return {
-    backgroundColor: resolveSolidColor(colorName),
-  };
 };

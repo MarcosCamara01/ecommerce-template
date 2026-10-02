@@ -1,0 +1,33 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Suspense, type ComponentProps } from "react";
+
+type NavLinkProps = ComponentProps<typeof Link> & { href: string };
+
+const isCurrent = (pathname: string, href: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
+
+function CurrentAwareLink(props: NavLinkProps) {
+  const pathname = usePathname();
+  return (
+    <Link
+      {...props}
+      aria-current={isCurrent(pathname, props.href) ? "page" : undefined}
+    />
+  );
+}
+
+/**
+ * A nav link that marks itself aria-current. The pathname is request data,
+ * so the prerendered shell carries the plain link and the marked one
+ * streams in behind it.
+ */
+export function NavLink(props: NavLinkProps) {
+  return (
+    <Suspense fallback={<Link {...props} />}>
+      <CurrentAwareLink {...props} />
+    </Suspense>
+  );
+}

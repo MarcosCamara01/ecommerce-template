@@ -71,8 +71,9 @@
     --err-line: #ff8d92;
   }
 
+  /* No html background: body's propagates to the canvas, so fixed layers at
+     z-index -1 (the product tint) paint above it. */
   html {
-    background: var(--bg);
     -webkit-text-size-adjust: 100%;
   }
 
@@ -176,6 +177,21 @@
   }
 }
 
+/* Items that arrive with a panel: 50ms stagger via --i, after the panel. */
+.stagger-in {
+  transition:
+    opacity 300ms var(--ease-out),
+    transform 300ms var(--ease-out);
+  transition-delay: calc(140ms + var(--i, 0) * 50ms);
+}
+
+@starting-style {
+  .stagger-in {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
 /* Theme switch: the new theme is revealed as a circle by ThemeToggle. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -195,6 +211,32 @@
   .lift:hover,
   .lift:hover .lift-img {
     transform: none;
+  }
+
+  @starting-style {
+    .stagger-in {
+      transform: none;
+    }
+  }
+
+  /* Keep fades, drop movement. */
+  .animate-pop,
+  .animate-bump {
+    animation: none;
+  }
+
+  .animate-spark {
+    display: none;
+  }
+
+  .animate-swap {
+    animation-name: opacity-in;
+  }
+}
+
+@keyframes opacity-in {
+  from {
+    opacity: 0;
   }
 }
 

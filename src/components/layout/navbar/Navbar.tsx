@@ -5,11 +5,12 @@ import Link from "next/link";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { BagDrawer } from "@/components/bag/BagDrawer";
 import { BagLink } from "./BagLink";
+import { NavLink } from "./NavLink";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
 /** FUNCTIONALITY */
-import { usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
@@ -25,15 +26,12 @@ const EditProfile = dynamic(() => import("./EditProfile"), {
 const iconButton =
   "press grid size-11 place-items-center rounded-pill text-fg hover:bg-card";
 
-const isCurrent = (pathname: string, href: string) =>
-  pathname === href || pathname.startsWith(`${href}/`);
 
 export const Navbar = ({
   sectionSummaries,
 }: {
   sectionSummaries: Promise<ShopSectionSummary[]>;
 }) => {
-  const pathname = usePathname();
   const { data: session } = useSession();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,26 +56,24 @@ export const Navbar = ({
             Store
           </Link>
           {shopSections.map((section) => (
-            <Link
+            <NavLink
               key={section.key}
               href={section.href}
-              aria-current={isCurrent(pathname, section.href) ? "page" : undefined}
               className="flex h-11 items-center rounded-pill px-4 text-sm hover:bg-card aria-[current=page]:bg-fg aria-[current=page]:text-bg"
             >
               {section.label}
-            </Link>
+            </NavLink>
           ))}
           <Link href="/search" aria-label="Search" className={iconButton}>
             <SearchIcon />
           </Link>
-          <Link
+          <NavLink
             href="/wishlist"
             aria-label="Wishlist"
-            aria-current={isCurrent(pathname, "/wishlist") ? "page" : undefined}
             className={cn(iconButton, "aria-[current=page]:bg-fg aria-[current=page]:text-bg")}
           >
             <HeartIcon />
-          </Link>
+          </NavLink>
           {session?.user ? (
             <UserMenu
               triggerRef={accountTriggerRef}
@@ -85,9 +81,8 @@ export const Navbar = ({
                 profileReturnFocusRef.current = accountTriggerRef.current;
                 editProfileManager.open();
               }}
-              className={cn(
-                isCurrent(pathname, "/orders") && "bg-fg text-bg hover:bg-fg",
-              )}
+              // Account pages mark themselves with data-account-page.
+              className="[body:has([data-account-page])_&]:bg-fg [body:has([data-account-page])_&]:text-bg"
             />
           ) : (
             <Link
@@ -99,12 +94,13 @@ export const Navbar = ({
             </Link>
           )}
           <ThemeToggle />
-          <BagLink className="h-11 px-[18px] text-sm" />
+          <BagLink opensDrawer className="h-11 px-[18px] text-sm" />
         </nav>
       </header>
 
       {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
-      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden">
+      {/* The product page carries its own controls over the gallery. */}
+      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-product-page])_&]:hidden">
         <Link
           href="/"
           className="font-display text-[26px] font-extrabold leading-none"
@@ -144,6 +140,8 @@ export const Navbar = ({
           </Sheet>
         </div>
       </header>
+
+      <BagDrawer />
 
       <EditProfile
         manager={editProfileManager}

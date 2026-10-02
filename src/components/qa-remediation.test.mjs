@@ -98,7 +98,7 @@ test("primary routes keep exactly one accessible heading across data states", as
     wishlistContent: "src/components/wishlist/WishlistProducts.tsx",
     orders: "src/app/(user)/orders/page.tsx",
     orderDetails: "src/app/(user)/orders/[id]/page.tsx",
-    product: "src/components/product/SingleProduct.tsx",
+    product: "src/components/product/ProductView.tsx",
     error: "src/app/error.tsx",
   };
   const entries = await Promise.all(
@@ -121,7 +121,8 @@ test("primary routes keep exactly one accessible heading across data states", as
   }
   assert.equal(h1Count(sources.cartContent), 0);
   assert.equal(h1Count(sources.wishlistContent), 0);
-  assert.match(sources.product, /<h1 className="sr-only">\{product\.name\}<\/h1>/);
+  // The product name is the page's visible display headline.
+  assert.match(sources.product, /<h1 className="[^"]*">\s*\{product\.name\}\s*<\/h1>/);
   assert.doesNotMatch(sources.search, /<h3[^>]*>\s*No products found/);
 });
 

@@ -11,9 +11,15 @@ import type { CartItem } from "@/lib/db/drizzle/schema";
 
 interface ButtonCheckoutProps {
   cartItemIds: CartItem["id"][];
+  className?: string;
+  children?: React.ReactNode;
 }
 
-export const ButtonCheckout = ({ cartItemIds }: ButtonCheckoutProps) => {
+export const ButtonCheckout = ({
+  cartItemIds,
+  className,
+  children = "Checkout",
+}: ButtonCheckoutProps) => {
   const { data: session } = useSession();
 
   const { mutate: buyProducts, isPending } = useMutation({
@@ -55,11 +61,11 @@ export const ButtonCheckout = ({ cartItemIds }: ButtonCheckoutProps) => {
   return (
     <LoadingButton
       onClick={() => buyProducts()}
-      className="w-full rounded-none bg-background-secondary p-2.5 h-full transition-colors hover:bg-background-tertiary"
+      className={className}
       loading={isPending}
       disabled={cartItemIds.length === 0}
     >
-      Continue
+      {children}
     </LoadingButton>
   );
 };

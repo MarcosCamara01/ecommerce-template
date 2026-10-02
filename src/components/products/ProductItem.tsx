@@ -37,7 +37,7 @@ export const ProductItem = ({ product, priority = false }: ProductItemProps) => 
             <h2 className="text-sm font-semibold truncate">{name}</h2>
           </Link>
 
-          <WishlistButton productId={id} />
+          <WishlistButton productId={id} productName={name} />
         </div>
         <div className="text-sm">{price.toFixed(2)} €</div>
       </div>
