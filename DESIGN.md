@@ -194,6 +194,9 @@ A two-value system: one ground and one ink per theme, with every other surface m
 - **Label** (400–500, 12–14px): metadata such as "Sweatshirts · Grey marl", stock, captions; secondary emphasis comes from 75–85% ink, not a smaller weight.
 - **Price** (500, 18–26px): prices in their own line, tabular numerals.
 
+### Display steps
+Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 50, 56, 64, 76, 88, 96, 112, 120 and 150px. Desktop display sizes are `min(px, vw)` pairs: 44, 56, 64, 96, 104, 120, 160, 190, 200, 240, 300 and 420px caps. Words that must fill a line (hero, section titles, search query) compute their size from the word's measured width (`src/lib/display-type.ts`).
+
 ### Named Rules
 **The Viewport Scale Rule.** Display sizes are always written as `min(<px>, <vw>)` so the word fills the width on any screen without overflowing. Hero words compute their size from the word's own em-width.
 
@@ -251,6 +254,11 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 
 ### Bag Drawer (signature)
 A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss.
+
+### Motion (implementation map)
+- Tokens: CSS `--ease-out`, `--ease-in-out`, `--ease-drawer` in `globals.css`; the same curves and the drag spring for JS in `src/lib/motion.ts`.
+- CSS transitions and keyframes for predetermined motion (press, size pill, card lift, toasts, photo swaps, hero letters, confetti, tiles); WAAPI for the colour reveal and the add-to-bag flight; the View Transitions API for the theme switch; Motion only for sheets (exits) and drag (`BottomSheet`).
+- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; colour changes crossfade in 200ms; sheets fade.
 
 ## Do's and Don'ts
 
