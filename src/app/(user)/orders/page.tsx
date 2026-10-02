@@ -1,10 +1,13 @@
 import { getUserOrders } from "./action";
+import { getAllProducts } from "@/app/actions";
 import { getPrincipal } from "@/lib/identity";
 import Link from "next/link";
 import { Suspense } from "react";
-import { SVGLoadingIcon } from "@/components/ui/loader";
+import { AccountGreeting, AccountNav } from "@/components/account/AccountNav";
 import { OrderCard } from "@/components/orders";
-import { HiOutlineCube } from "react-icons/hi";
+import { RailCard } from "@/components/products/RailCard";
+import { buttonClass } from "@/components/ui/button-classes";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export async function generateMetadata() {
   return {
@@ -18,20 +21,73 @@ export async function generateMetadata() {
  */
 const UserOrders = () => {
   return (
-    <>
-      <h1 className="sr-only">My orders</h1>
+    <section data-account-page="" className="flex flex-col gap-5 pb-24">
+      <div className="flex flex-col gap-5 pt-3 lg:pt-12">
+        <AccountGreeting />
+        <h1 className="font-display text-[112px] leading-[0.8] lg:text-[min(240px,16vw)]">
+          Orders
+        </h1>
+      </div>
       <Suspense
         fallback={
-          <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-            <SVGLoadingIcon height={30} width={30} />
+          <div aria-busy="true" aria-label="Loading orders" className="flex flex-col gap-3.5 pt-4">
+            {[0, 1].map((key) => (
+              <Skeleton key={key} className="h-[140px] rounded-photo-lg" />
+            ))}
           </div>
         }
       >
         <OrdersContent />
       </Suspense>
-    </>
+    </section>
   );
 };
+
+function OrdersMessage({
+  title,
+  body,
+  actions,
+  starters = false,
+}: {
+  title: string;
+  body: string;
+  actions: React.ReactNode;
+  starters?: boolean;
+}) {
+  return (
+    <div className="flex flex-col items-start gap-5 pt-7">
+      <div className="flex max-w-[760px] flex-col gap-4">
+        <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(120px,8.3vw)]">
+          {title}
+        </h2>
+        <p className="max-w-[520px] text-base lg:text-lg">{body}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">{actions}</div>
+      {starters ? (
+        <Suspense fallback={null}>
+          <Starters />
+        </Suspense>
+      ) : null}
+    </div>
+  );
+}
+
+async function Starters() {
+  const starters = (await getAllProducts())
+    .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
+    .slice(0, 4);
+  if (starters.length === 0) return null;
+  return (
+    <div className="flex w-full flex-col gap-4 pt-7">
+      <h3 className="text-13 font-semibold uppercase tracking-[0.08em]">Start with these</h3>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-6 lg:grid-cols-4">
+        {starters.map((product) => (
+          <RailCard key={product.id} product={product} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /**
  * Dynamic component that checks user and renders orders
@@ -42,20 +98,29 @@ const OrdersContent = async () => {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-91px)] gap-2 px-4">
-        <h2 className="mb-6 text-4xl font-bold">NO ORDERS YET</h2>
-        <p className="mb-4 text-lg">To view your orders you must be logged in.</p>
-        <Link
-          className="flex font-medium	 items-center bg-[#0C0C0C] justify-center text-sm min-w-[160px] max-w-[160px] h-[40px] px-[10px] rounded-md border border-solid border-[#2E2E2E] transition-colors hover:bg-background-tertiary hover:border-[#454545]"
-          href="/login"
-        >
-          Login
-        </Link>
-      </div>
+      <OrdersMessage
+        title="No orders yet"
+        body="To view your orders you must be logged in."
+        actions={
+          <>
+            <Link href="/login" className={buttonClass()}>
+              Sign in
+            </Link>
+            <Link href="/register" className={buttonClass({ variant: "secondary" })}>
+              Create account
+            </Link>
+          </>
+        }
+      />
     );
   }
 
-  return <Orders />;
+  return (
+    <>
+      <AccountNav current="orders" />
+      <Orders />
+    </>
+  );
 };
 
 const Orders = async () => {
@@ -63,68 +128,44 @@ const Orders = async () => {
 
   if (!orders) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-[80vh] gap-4 px-4">
-        <div className="p-6 rounded-full bg-red-500/10">
-          <HiOutlineCube className="w-16 h-16 text-red-500" />
-        </div>
-        <h2 className="text-3xl font-bold">Error Loading Orders</h2>
-        <p className="text-center text-muted-foreground max-w-md">
-          There was a problem loading your orders. Please make sure the database
-          tables are created.
-        </p>
-        <div className="flex gap-4">
-          <Link
-            className="flex font-medium items-center bg-background-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-background-tertiary"
-            href="/"
-          >
-            Go Home
-          </Link>
-          <Link
-            className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-border-secondary text-background-primary"
-            href="/orders"
-          >
-            Retry
-          </Link>
-        </div>
-      </div>
+      <OrdersMessage
+        title="Error loading orders"
+        body="There was a problem loading your orders. Please make sure the database tables are created."
+        actions={
+          <>
+            <Link href="/orders" className={buttonClass()}>
+              Retry
+            </Link>
+            <Link href="/" className={buttonClass({ variant: "secondary" })}>
+              Go home
+            </Link>
+          </>
+        }
+      />
     );
   }
 
   if (orders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-[80vh] gap-4 px-4">
-        <div className="p-6 rounded-full bg-background-secondary">
-          <HiOutlineCube className="w-16 h-16 text-muted-foreground" />
-        </div>
-        <h2 className="text-3xl font-bold">No Orders Yet</h2>
-        <p className="text-center text-muted-foreground max-w-md">
-          Start shopping and your orders will appear here. We&apos;ll keep track of
-          everything for you!
-        </p>
-        <Link
-          className="flex font-medium items-center bg-color-secondary justify-center text-sm min-w-[160px] h-[40px] px-6 rounded-lg transition-colors hover:bg-border-secondary text-background-primary"
-          href="/"
-        >
-          Start Shopping
-        </Link>
-      </div>
+      <OrdersMessage
+        title="No orders yet"
+        body="Start shopping and your orders will appear here. We'll keep track of everything for you!"
+        actions={
+          <Link href="/new-in" className={buttonClass()}>
+            Start shopping
+          </Link>
+        }
+        starters
+      />
     );
   }
 
   return (
-    <div className="pt-12 pb-20">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-2">My Orders</h2>
-        <p className="text-muted-foreground">
-          View and track all your orders in one place
-        </p>
-      </div>
-
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {orders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
-      </div>
+    <div className="flex flex-col gap-3.5 pt-2">
+      <h2 className="sr-only">Your orders</h2>
+      {orders.map((order) => (
+        <OrderCard key={order.id} order={order} />
+      ))}
     </div>
   );
 };

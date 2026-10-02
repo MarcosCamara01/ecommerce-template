@@ -1,81 +1,86 @@
 /** COMPONENTS */
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRightIcon } from "@/components/icons";
+import { OrderSteps } from "./OrderSteps";
 /** UTILS */
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 /** TYPES */
 import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
 import { orderViewModel } from "@/lib/orders/view-model";
-/** ICONS */
-import {
-  HiOutlineShoppingBag,
-  HiOutlineCalendar,
-  HiOutlineCube,
-} from "react-icons/hi";
 
 interface OrderCardProps {
   order: OrderWithDetails;
 }
 
+/** Orders list row: up to three photos, number, status, progress, totals. */
 export function OrderCard({ order }: OrderCardProps) {
   const { totalItems, totalPrice, deliveryDate, orderDate, status } =
     orderViewModel(order);
+  const thumbs = order.orderProducts.slice(0, 3);
 
   return (
     <Link
       href={`/orders/${order.id}`}
-      className="group relative overflow-hidden rounded-lg border border-solid border-border-primary bg-background-secondary transition-[border-color,box-shadow] duration-200 hover:border-border-secondary hover:shadow-lg"
+      className="grid items-center gap-5 rounded-photo-lg border border-line bg-fg/5 p-4 transition-colors duration-200 hover:border-fg lg:grid-cols-[260px_minmax(0,1fr)_auto]"
     >
-      <div className="space-y-4 p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-background-tertiary p-2">
-              <HiOutlineCube className="h-5 w-5 text-foreground" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Order #{order.orderNumber}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {format(orderDate, "dd MMM yyyy 'at' HH:mm")}
-              </p>
-            </div>
+      <div className="flex gap-1.5">
+        {thumbs.map((line) => (
+          <Image
+            key={line.id}
+            src={line.imageUrl}
+            alt=""
+            width={80}
+            height={106}
+            sizes="80px"
+            className="h-24 w-[72px] rounded-field bg-photo object-cover lg:h-[106px] lg:w-20"
+          />
+        ))}
+      </div>
+      <div className="flex min-w-0 flex-col gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-col">
+            <span className="font-display-75 text-[28px] font-extrabold leading-none">
+              Order #{order.orderNumber}
+            </span>
+            <span className="text-13 text-muted">
+              {format(orderDate, "dd MMM yyyy 'at' HH:mm")}
+            </span>
           </div>
-
-          <div
+          <span
             className={cn(
-              "rounded-full px-3 py-1 text-xs font-semibold",
+              "flex h-[30px] items-center rounded-pill px-3 text-13 font-semibold",
               status.className,
             )}
           >
             {status.label}
-          </div>
+          </span>
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <HiOutlineCalendar className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="text-xs text-muted-foreground">Delivery</p>
-              <p className="text-sm font-medium">
-                {format(deliveryDate, "dd MMM yyyy")}
-              </p>
-            </div>
+        <OrderSteps step={status.step} labelled={false} className="gap-1" />
+        <dl className="flex flex-wrap gap-x-7 gap-y-2 text-sm">
+          <div className="flex flex-col">
+            <dt className="text-xs text-muted">
+              {order.status === "delivered" ? "Delivered" : "Expected delivery"}
+            </dt>
+            <dd className="font-medium">{format(deliveryDate, "dd MMM yyyy")}</dd>
           </div>
-
-          <div className="flex items-center gap-2">
-            <HiOutlineShoppingBag className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm font-medium">{totalItems}</p>
+          <div className="flex flex-col">
+            <dt className="text-xs text-muted">Items</dt>
+            <dd className="font-medium tabular-nums">{totalItems}</dd>
           </div>
-        </div>
-
-        <div className="border-t border-border-primary pt-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Total</span>
-            <span className="text-lg font-bold">{totalPrice}</span>
+          <div className="flex flex-col">
+            <dt className="text-xs text-muted">Total</dt>
+            <dd className="font-semibold tabular-nums">{totalPrice}</dd>
           </div>
-        </div>
+        </dl>
       </div>
+      <span
+        aria-hidden="true"
+        className="hidden size-[52px] place-items-center rounded-pill border border-fg lg:grid"
+      >
+        <ArrowRightIcon />
+      </span>
     </Link>
   );
 }

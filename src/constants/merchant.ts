@@ -7,4 +7,5 @@ export const merchantPlaceholders = {
   fitNote: "[FIT NOTE — e.g. relaxed, take your usual size]",
   deliveryEstimate: "[ESTIMATE FROM CARRIER]",
   returnPolicy: "[RETURN POLICY]",
+  shipping: "[CALCULATED AT CHECKOUT]",
 };

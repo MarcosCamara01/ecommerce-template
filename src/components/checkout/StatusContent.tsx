@@ -1,15 +1,10 @@
 import Link from "next/link";
-import {
-  HiOutlineXCircle,
-  HiOutlineClock,
-  HiOutlineExclamation,
-} from "react-icons/hi";
 
-import { Button } from "@/components/ui/button";
 import type { CheckoutStatus } from "@/services/stripe.service";
 
 import { AutoRefreshStatus } from "./AutoRefreshStatus";
 import { checkoutStatusCopy } from "./checkout-copy";
+import { ResultMessage, type ResultIcon } from "./ResultMessage";
 
 type NonSuccessCheckoutStatus = Exclude<CheckoutStatus, "success">;
 
@@ -22,63 +17,54 @@ interface StatusContentProps {
 const STATUS_CONFIG: Record<
   NonSuccessCheckoutStatus,
   {
-    icon: typeof HiOutlineXCircle;
-    iconColor: string;
+    icon: ResultIcon;
     title: string;
     message: string;
     showRetry: boolean;
   }
 > = {
   expired: {
-    icon: HiOutlineClock,
-    iconColor: "text-yellow-500",
+    icon: "clock",
     title: "Session Expired",
     message: "Your checkout session has expired. Items in your cart are still saved.",
     showRetry: true,
   },
   canceled: {
-    icon: HiOutlineXCircle,
-    iconColor: "text-gray-500",
+    icon: "cross",
     title: "Payment Canceled",
     message: "You canceled the payment. Your cart items are still available.",
     showRetry: true,
   },
   pending: {
-    icon: HiOutlineClock,
-    iconColor: "text-blue-500",
+    icon: "spin",
     title: "Payment Pending",
     message: "Your payment is being processed. This page will update automatically.",
     showRetry: false,
   },
   fulfillment_pending: {
-    icon: HiOutlineClock,
-    iconColor: "text-blue-500",
+    icon: "spin",
     ...checkoutStatusCopy("fulfillment_pending"),
     showRetry: false,
   },
   needs_attention: {
-    icon: HiOutlineExclamation,
-    iconColor: "text-yellow-500",
+    icon: "alert",
     ...checkoutStatusCopy("needs_attention"),
     showRetry: false,
   },
   failed: {
-    icon: HiOutlineXCircle,
-    iconColor: "text-red-500",
+    icon: "cross",
     title: "Payment Failed",
     message: "Your payment could not be processed. Please try again with a different payment method.",
     showRetry: true,
   },
   not_found: {
-    icon: HiOutlineExclamation,
-    iconColor: "text-yellow-500",
+    icon: "alert",
     title: "Session Not Found",
     message: "This checkout session doesn't exist or has already been processed.",
     showRetry: false,
   },
   error: {
-    icon: HiOutlineExclamation,
-    iconColor: "text-red-500",
+    icon: "alert",
     title: "Something Went Wrong",
     message: "We couldn't verify your payment status. Please check your email or orders page.",
     showRetry: false,
@@ -87,52 +73,38 @@ const STATUS_CONFIG: Record<
 
 export function StatusContent({ status, sessionId, error }: StatusContentProps) {
   const config = STATUS_CONFIG[status];
-  const Icon = config.icon;
+  const checking = status === "pending" || status === "fulfillment_pending";
 
   return (
     <>
-      <AutoRefreshStatus
-        active={status === "pending" || status === "fulfillment_pending"}
+      <AutoRefreshStatus active={checking} />
+      <ResultMessage
+        icon={config.icon}
+        title={config.title}
+        message={config.message}
+        checking={checking}
+        primary={
+          config.showRetry
+            ? { href: "/cart", label: "Return to cart" }
+            : { href: "/orders", label: "Check orders" }
+        }
+        secondary={{ href: "/new-in", label: "Continue shopping" }}
+        footnote={
+          <div className="flex flex-col gap-1 text-sm text-muted">
+            {config.showRetry ? (
+              <Link href="/orders" className="self-start underline underline-offset-[3px]">
+                Check orders
+              </Link>
+            ) : null}
+            {error ? <p>Details: {error}</p> : null}
+            {status === "error" || status === "failed" ? (
+              <p>
+                Reference: <span className="font-mono">{sessionId.slice(0, 20)}…</span>
+              </p>
+            ) : null}
+          </div>
+        }
       />
-
-      <div className="rounded-lg border border-solid border-border-primary bg-background-secondary p-6">
-        <div className="mb-3 flex items-center gap-3">
-          <Icon className={`h-8 w-8 ${config.iconColor}`} />
-          <h2 className="text-2xl font-bold sm:text-3xl">{config.title}</h2>
-        </div>
-        <p className="text-sm text-muted-foreground">{config.message}</p>
-        {error && (
-          <p className="mt-2 text-xs text-muted-foreground/70">
-            Details: {error}
-          </p>
-        )}
-      </div>
-
-      <div className="flex flex-col justify-center gap-3 sm:flex-row">
-        {config.showRetry && (
-          <Button asChild className="gap-2">
-            <Link href="/cart">Return to Cart</Link>
-          </Button>
-        )}
-        <Button
-          asChild
-          variant={config.showRetry ? "outline" : "default"}
-          className="gap-2"
-        >
-          <Link href="/orders">Check Orders</Link>
-        </Button>
-        <Button asChild variant="outline" className="gap-2">
-          <Link href="/">Continue Shopping</Link>
-        </Button>
-      </div>
-
-      {(status === "error" || status === "failed") && (
-        <div className="rounded-lg border border-solid border-border-primary bg-background-tertiary p-3">
-          <p className="text-xs text-muted-foreground">
-            Reference: <span className="font-mono">{sessionId.slice(0, 20)}...</span>
-          </p>
-        </div>
-      )}
     </>
   );
 }

@@ -240,6 +240,14 @@
   .animate-rise {
     animation: none;
   }
+
+  .animate-tile {
+    animation-name: opacity-in;
+  }
+
+  .animate-fall {
+    display: none;
+  }
 }
 
 @keyframes opacity-in {

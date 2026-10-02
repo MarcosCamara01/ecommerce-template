@@ -128,6 +128,16 @@ module.exports = {
           from: { opacity: "0", transform: "scale(0.96)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
+        // Order success tiles.
+        tile: {
+          from: { opacity: "0", transform: "translateY(28px) scale(0.96)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        // Confetti: falls from the top to --fall, drifting --dx, turning --rot.
+        fall: {
+          from: { transform: "translate(0, -30px) rotate(0deg)", opacity: "1" },
+          to: { transform: "translate(var(--dx), var(--fall)) rotate(var(--rot))", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s var(--ease-out)",
@@ -140,6 +150,8 @@ module.exports = {
         "fade-in": "fade-in 450ms var(--ease-out) both",
         rise: "rise 700ms var(--ease-out) both",
         "fade-scale": "fade-scale 600ms var(--ease-out) both",
+        tile: "tile 600ms var(--ease-out) both",
+        fall: "fall var(--dur) var(--ease-in-out) var(--delay) both",
       },
       screens: {
         xs: "350px",

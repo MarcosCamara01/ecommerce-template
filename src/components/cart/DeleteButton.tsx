@@ -1,34 +1,26 @@
 "use client";
 
-import { toast } from "sonner";
-import { IoClose } from "react-icons/io5";
 import type { CartItem } from "@/lib/db/drizzle/schema";
 import { useCartMutation } from "@/hooks/cart";
 
+/** Removes the line at once; the mutation reports failures in a toast. */
 export const DeleteButton = ({
   cartItemId,
+  productName,
 }: {
   cartItemId: CartItem["id"];
+  productName: string;
 }) => {
   const { remove: removeFromCart } = useCartMutation();
 
-  const handleDelete = async () => {
-    try {
-      removeFromCart({ itemId: cartItemId });
-    } catch (error) {
-      console.error("Error removing item from cart", error);
-      toast.error("Error removing item from cart");
-    }
-  };
-
   return (
     <button
-      onClick={handleDelete}
-      disabled={false}
-      aria-label="Delete item"
-      className="transition-[color,opacity] hover:text-white disabled:opacity-50"
+      type="button"
+      onClick={() => removeFromCart({ itemId: cartItemId })}
+      aria-label={`Remove ${productName} from bag`}
+      className="h-11 px-3 text-sm underline underline-offset-[3px]"
     >
-      <IoClose className="w-[18px] h-[18px] text-color-secondary" />
+      Remove
     </button>
   );
 };

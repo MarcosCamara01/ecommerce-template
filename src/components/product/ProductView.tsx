@@ -104,6 +104,7 @@ export function ProductView({
 
       <div
         data-product-page=""
+        data-fixed-cta=""
         className="-mx-4 grid lg:mx-0 lg:grid-cols-[minmax(0,7fr)_minmax(400px,5fr)] lg:items-start lg:gap-12 lg:pb-24 lg:pt-8"
       >
         <ProductImages

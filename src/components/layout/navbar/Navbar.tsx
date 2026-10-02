@@ -14,10 +14,11 @@ import { UserMenu } from "./UserMenu";
 import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { shopSections } from "@/constants/navigation";
 import type { ShopSectionSummary } from "@/lib/catalog/sections";
 import { cn } from "@/lib/utils";
+import { EDIT_PROFILE_EVENT } from "@/components/account/AccountNav";
 
 const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
@@ -40,6 +41,17 @@ export const Navbar = ({
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
   const profileReturnFocusRef = useRef<HTMLElement | null>(null);
   const skipMobileMenuCloseAutoFocusRef = useRef(false);
+
+  // Account pages ask for the dialog from their own "Edit profile" pill.
+  useEffect(() => {
+    const open = (event: Event) => {
+      const trigger = (event as CustomEvent<HTMLElement | null>).detail;
+      profileReturnFocusRef.current = trigger;
+      editProfileManager.open();
+    };
+    window.addEventListener(EDIT_PROFILE_EVENT, open);
+    return () => window.removeEventListener(EDIT_PROFILE_EVENT, open);
+  }, [editProfileManager]);
 
   return (
     <>

@@ -7,13 +7,10 @@ import {
   NoSessionError,
   StatusContent,
   AutoRefreshStatus,
-  SuccessHeader,
-  OrderInfo,
-  EmailConfirmation,
-  DeliveryTimeline,
-  ActionButtons,
+  SuccessContent,
   FulfilledCheckoutSync,
 } from "@/components/checkout";
+import { getOrder } from "../orders/action";
 
 export async function generateMetadata() {
   return {
@@ -52,20 +49,19 @@ async function CheckoutResult({ sessionId }: { sessionId: string }) {
     );
   }
 
+  // The bought pieces dress the page; the outcome stands without them.
+  const order = await getOrder(outcome.orderId).catch(() => null);
+
   return (
     <>
       <AutoRefreshStatus active={outcome.cartCleanup === "pending"} />
       <FulfilledCheckoutSync cartCleanup={outcome.cartCleanup} />
-      <SuccessHeader />
-      <OrderInfo />
-      {session?.customer_details?.email && (
-        <EmailConfirmation
-          email={session.customer_details.email}
-          status={outcome.customerEmail}
-        />
-      )}
-      <DeliveryTimeline />
-      <ActionButtons orderId={outcome.orderId} />
+      <SuccessContent
+        orderId={outcome.orderId}
+        order={order}
+        email={session?.customer_details?.email}
+        emailStatus={outcome.customerEmail}
+      />
     </>
   );
 }
@@ -82,16 +78,12 @@ async function DynamicCheckoutContent({
     return <NoSessionError />;
   }
 
-  return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <CheckoutResult sessionId={sessionId} />
-    </div>
-  );
+  return <CheckoutResult sessionId={sessionId} />;
 }
 
 export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
-    <section className="px-6 py-12 sm:px-8">
+    <section>
       <h1 className="sr-only">Purchase result</h1>
       <Suspense fallback={<ResultSkeleton />}>
         <DynamicCheckoutContent searchParams={searchParams} />
