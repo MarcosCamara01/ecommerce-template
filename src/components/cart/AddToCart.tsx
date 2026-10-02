@@ -27,6 +27,8 @@ interface AddToCartProps {
   size: ProductSize | undefined;
   /** The photo that flies to the bag pill on desktop. */
   flySource: () => HTMLElement | null;
+  /** Short label ("Add to bag") for cards. */
+  compact?: boolean;
   className?: string;
 }
 
@@ -40,6 +42,7 @@ export function AddToCart({
   selectedVariant,
   size,
   flySource,
+  compact = false,
   className,
 }: AddToCartProps) {
   const { add: addToCart, isAdding } = useCartMutation();
@@ -80,7 +83,7 @@ export function AddToCart({
     <>
       <Button
         type="button"
-        size="lg"
+        size={compact ? "xs" : "lg"}
         disabled={!isHydrated || soldOut || isAdding}
         aria-busy={isAdding || undefined}
         onClick={() => (added ? openBag() : throttledAddToCart())}
@@ -89,8 +92,12 @@ export function AddToCart({
         {soldOut
           ? "Sold out"
           : added
-            ? "Added ✓ — view bag"
-            : `Add ${size ?? ""} to bag — ${price}`}
+            ? compact
+              ? "Added ✓"
+              : "Added ✓ — view bag"
+            : compact
+              ? "Add to bag"
+              : `Add ${size ?? ""} to bag — ${price}`}
       </Button>
       <AddedSheet item={sheetItem} onClose={() => setSheetItem(null)} />
     </>

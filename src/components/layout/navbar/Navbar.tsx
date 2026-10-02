@@ -6,6 +6,8 @@ import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { BagDrawer } from "@/components/bag/BagDrawer";
+import { SearchDialog } from "@/components/search/SearchDialog";
+import { openSearch } from "@/components/search/search-ui";
 import { BagLink } from "./BagLink";
 import { NavLink } from "./NavLink";
 import { MobileMenu } from "./MobileMenu";
@@ -17,6 +19,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { shopSections } from "@/constants/navigation";
 import type { ShopSectionSummary } from "@/lib/catalog/sections";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 import { EDIT_PROFILE_EVENT } from "@/components/account/AccountNav";
 
@@ -30,8 +33,10 @@ const iconButton =
 
 export const Navbar = ({
   sectionSummaries,
+  searchCatalog,
 }: {
   sectionSummaries: Promise<ShopSectionSummary[]>;
+  searchCatalog: Promise<ProductWithVariants[]>;
 }) => {
   const { data: session } = useSession();
 
@@ -41,6 +46,7 @@ export const Navbar = ({
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
   const profileReturnFocusRef = useRef<HTMLElement | null>(null);
   const skipMobileMenuCloseAutoFocusRef = useRef(false);
+  const searchAfterMenuCloseRef = useRef(false);
 
   // Account pages ask for the dialog from their own "Edit profile" pill.
   useEffect(() => {
@@ -56,7 +62,7 @@ export const Navbar = ({
   return (
     <>
       {/* Desktop: floating glass pill. The header itself lets clicks through. */}
-      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
+      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex [body:has([data-auth-page])_&]:!hidden">
         <nav
           aria-label="Main"
           className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] transition-[background-color] duration-600 ease-out"
@@ -76,9 +82,15 @@ export const Navbar = ({
               {section.label}
             </NavLink>
           ))}
-          <Link href="/search" aria-label="Search" className={iconButton}>
+          <button
+            type="button"
+            aria-label="Search"
+            aria-keyshortcuts="Meta+K /"
+            onClick={() => openSearch()}
+            className={iconButton}
+          >
             <SearchIcon />
-          </Link>
+          </button>
           <NavLink
             href="/wishlist"
             aria-label="Wishlist"
@@ -112,7 +124,7 @@ export const Navbar = ({
 
       {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
       {/* The product page carries its own controls over the gallery. */}
-      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-product-page])_&]:hidden">
+      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-auth-page])_&]:hidden [body:has([data-product-page])_&]:hidden">
         <Link
           href="/"
           className="font-display text-[26px] font-extrabold leading-none"
@@ -121,9 +133,15 @@ export const Navbar = ({
         </Link>
         <div className="flex items-center gap-0.5">
           <ThemeToggle />
-          <Link href="/search" aria-label="Search" className={iconButton}>
+          <button
+            type="button"
+            aria-label="Search"
+            aria-keyshortcuts="Meta+K /"
+            onClick={() => openSearch()}
+            className={iconButton}
+          >
             <SearchIcon />
-          </Link>
+          </button>
           <BagLink className="mx-1 h-10 px-3.5 text-13" />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -142,7 +160,16 @@ export const Navbar = ({
                 skipMobileMenuCloseAutoFocusRef.current = true;
                 profileReturnFocusRef.current = mobileMenuTriggerRef.current;
               }}
+              onSearch={() => {
+                searchAfterMenuCloseRef.current = true;
+              }}
               onCloseAutoFocus={(event) => {
+                if (searchAfterMenuCloseRef.current) {
+                  event.preventDefault();
+                  searchAfterMenuCloseRef.current = false;
+                  queueMicrotask(() => openSearch());
+                  return;
+                }
                 if (!skipMobileMenuCloseAutoFocusRef.current) return;
                 event.preventDefault();
                 skipMobileMenuCloseAutoFocusRef.current = false;
@@ -154,6 +181,7 @@ export const Navbar = ({
       </header>
 
       <BagDrawer />
+      <SearchDialog catalog={searchCatalog} />
 
       <EditProfile
         manager={editProfileManager}

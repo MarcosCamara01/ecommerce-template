@@ -6,7 +6,7 @@ import { FooterAccountLink } from "./FooterAccountLink";
 
 export const Footer = () => {
   return (
-    <footer className="flex flex-col gap-6 overflow-clip border-t border-line px-4 pb-6 lg:px-8 [body:has([data-fixed-cta])_&]:pb-28 lg:[body:has([data-fixed-cta])_&]:pb-6">
+    <footer className="[body:has([data-auth-page])_&]:hidden flex flex-col gap-6 overflow-clip border-t border-line px-4 pb-6 lg:px-8 [body:has([data-fixed-cta])_&]:pb-28 lg:[body:has([data-fixed-cta])_&]:pb-6">
       <div className="flex flex-wrap justify-between gap-4 pt-6 text-sm">
         <nav aria-label="Help" className="flex flex-wrap gap-x-6 gap-y-2">
           {helpLinks.map((link) => (

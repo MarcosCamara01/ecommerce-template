@@ -34,11 +34,14 @@ export function MobileMenu({
   sectionSummaries,
   onCloseAutoFocus,
   onEditProfile,
+  onSearch,
 }: {
   sectionSummaries: Promise<ShopSectionSummary[]>;
   onCloseAutoFocus: (event: Event) => void;
   /** Runs before the sheet closes; the dialog opens once it has. */
   onEditProfile: () => void;
+  /** Same hand-off for the search modal. */
+  onSearch: () => void;
 }) {
   const { data: session, isPending } = useSession();
   const { signOut } = useAuthMutation();
@@ -76,13 +79,14 @@ export function MobileMenu({
         </div>
 
         <SheetClose asChild>
-          <Link
-            href="/search"
-            className="flex h-12 items-center gap-2.5 rounded-pill border border-line px-4"
+          <button
+            type="button"
+            onClick={onSearch}
+            className="flex h-12 items-center gap-2.5 rounded-pill border border-line px-4 text-left"
           >
             <SearchIcon size={16} />
             <span className="text-muted">Search products…</span>
-          </Link>
+          </button>
         </SheetClose>
 
         <Suspense fallback={<SectionList sections={shopSections} />}>

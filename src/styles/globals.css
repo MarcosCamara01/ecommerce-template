@@ -265,3 +265,22 @@
 :root[data-theme-switching] {
   transition: none !important;
 }
+
+/* Toasts enter and leave through the bottom: transitions, so a repeated
+   trigger retargets instead of restarting. */
+[data-sonner-toast] {
+  transition:
+    transform 350ms var(--ease-out),
+    opacity 350ms var(--ease-out),
+    height 350ms var(--ease-out) !important;
+}
+
+[data-sonner-toast][data-removed="true"] {
+  transition-duration: 250ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast] {
+    transition-property: opacity !important;
+  }
+}

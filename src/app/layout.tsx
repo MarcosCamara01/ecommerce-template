@@ -3,11 +3,12 @@ import { Archivo } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Toaster } from "sonner";
 
 import { Navbar } from "@/components/layout/navbar";
+import { getSearchCatalog } from "@/lib/catalog/search-index";
 import { getShopSectionSummaries } from "@/lib/catalog/sections";
 import { Footer } from "@/components/layout/footer";
+import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/providers";
 import { themeInitScript } from "@/lib/theme";
 import "@/styles/globals.css";
@@ -67,14 +68,17 @@ export default async function RootLayout({
       <body className="font-sans">
         <Providers>
           {/* Counts only feed the mobile menu; they stream in behind it. */}
-          <Navbar sectionSummaries={getShopSectionSummaries()} />
+          <Navbar
+            sectionSummaries={getShopSectionSummaries()}
+            searchCatalog={getSearchCatalog()}
+          />
           <main className="mx-auto w-full max-w-[1920px] px-4 pb-24 lg:px-8">
             {children}
-            <Toaster position="bottom-right" />
             <Analytics />
             <SpeedInsights />
           </main>
           <Footer />
+          <Toaster />
         </Providers>
       </body>
     </html>

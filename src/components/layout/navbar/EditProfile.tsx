@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useRef, type RefObject } from "react";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -77,7 +79,6 @@ export default function EditProfile({
   return (
     <Dialog open={manager.active} onOpenChange={manager.set}>
       <DialogContent
-        className="sm:max-w-[425px]"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           nameRef.current?.focus();
@@ -106,41 +107,43 @@ export default function EditProfile({
           // Loaded with `dynamic(..., { ssr: false })`: this dialog cannot render
           // without JavaScript, so a server action would not enhance it. The
           // matching react-doctor override lives in doctor.config.json.
+          className="flex flex-col gap-3.5"
           onSubmit={(e) => {
             e.preventDefault();
             updateProfile();
           }}
         >
-          <div className="grid gap-4 py-4">
-            <div className="grid items-center grid-cols-4 gap-4">
-              <Label htmlFor="name" className="text-right">
+          <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="name" className="text-sm font-medium">
                 Name
               </Label>
               <Input
                 id="name"
                 ref={nameRef}
+                autoComplete="name"
                 defaultValue={session?.user?.name || ""}
-                className="col-span-3"
               />
             </div>
-            <div className="grid items-center grid-cols-4 gap-4">
-              <Label htmlFor="email" className="text-right">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email" className="text-sm font-medium">
                 Email
               </Label>
               <Input
                 id="email"
+                type="email"
                 defaultValue={session?.user?.email || ""}
                 disabled
-                className="col-span-3"
               />
             </div>
           </div>
           <DialogFooter>
-            <LoadingButton
-              type="submit"
-              loading={isPending}
-              className="h-[40px] min-w-[160px] max-w-[160px] px-[10px] text-sm"
-            >
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
+            <LoadingButton type="submit" loading={isPending}>
               Save changes
             </LoadingButton>
           </DialogFooter>

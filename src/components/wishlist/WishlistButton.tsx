@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 /** FUNCTIONALITY */
 import { useWishlist } from "@/hooks/wishlist";
 import { useThrottleFn } from "ahooks";
+import { toast } from "sonner";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 /** ICONS */
@@ -60,7 +61,16 @@ const WishlistButton = ({
   const { run: throttledToggle } = useThrottleFn(
     () => {
       if (isFavorite) {
-        removeFromWishlist({ productId });
+        // Removing is instant and quiet, with a way back.
+        removeFromWishlist(
+          { productId },
+          {
+            onSuccess: () =>
+              toast("Removed from wishlist", {
+                action: { label: "Undo", onClick: () => addToWishlist(productId) },
+              }),
+          },
+        );
         return;
       }
       addToWishlist(productId);
@@ -108,7 +118,11 @@ const WishlistButton = ({
         type="button"
         onClick={throttledToggle}
         aria-pressed={isFavorite}
-        aria-label={`Save ${productName} to wishlist`}
+        aria-label={
+          isFavorite
+            ? `Remove ${productName} from wishlist`
+            : `Save ${productName} to wishlist`
+        }
         className={cn(
           "press relative grid size-full place-items-center rounded-pill transition-[background-color,color,transform] duration-200",
           appearance === "disc" &&
