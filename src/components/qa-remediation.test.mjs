@@ -146,9 +146,11 @@ test("remaining route shells and result states preserve heading hierarchy", asyn
   const sources = Object.fromEntries(entries);
   const h1Count = (value) => (value.match(/<h1\b/g) ?? []).length;
 
-  for (const name of ["category", "result", "auth", "help", "admin", "notFound"]) {
+  for (const name of ["result", "auth", "help", "admin", "notFound"]) {
     assert.equal(h1Count(sources[name]), 1, `${name} must own one h1`);
   }
+  // The category title (the h1) lives in SectionHeading, rendered once.
+  assert.equal((sources.category.match(/<SectionHeading\b/g) ?? []).length, 1);
   for (const name of ["success", "status", "noSession"]) {
     assert.equal(h1Count(sources[name]), 0, `${name} must use the result route h1`);
   }
@@ -161,17 +163,16 @@ test("remaining route shells and result states preserve heading hierarchy", asyn
 });
 
 test("category routes identify the current collection in their accessible heading", async () => {
-  const category = await source("src/app/(store)/[category]/page.tsx");
+  const [category, heading] = await Promise.all([
+    source("src/app/(store)/[category]/page.tsx"),
+    source("src/components/products/SectionHeading.tsx"),
+  ]);
 
   assert.doesNotMatch(category, />Product collection<\/h1>/);
-  assert.match(
-    category,
-    /const categoryName = capitalizeFirstLetter\(parsedCategory\.data\)/,
-  );
-  assert.match(
-    category,
-    /<h1 className="sr-only">\{categoryName\} products<\/h1>/,
-  );
+  assert.match(category, /const section = sectionFor\(parsedCategory\.data\)/);
+  // The visible giant title is the h1 and names the collection.
+  assert.match(category, /<SectionHeading\s+title=\{section\.label\}/);
+  assert.match(heading, /<h1[\s\S]*?\{title\}\s*<\/h1>/);
 });
 
 test("product editing exposes archive and explicit restore controls", async () => {

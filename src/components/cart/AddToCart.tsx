@@ -92,13 +92,7 @@ export function AddToCart({
             ? "Added ✓ — view bag"
             : `Add ${size ?? ""} to bag — ${price}`}
       </Button>
-      <AddedSheet
-        item={sheetItem}
-        open={sheetItem !== null}
-        onOpenChange={(open) => {
-          if (!open) setSheetItem(null);
-        }}
-      />
+      <AddedSheet item={sheetItem} onClose={() => setSheetItem(null)} />
     </>
   );
 }

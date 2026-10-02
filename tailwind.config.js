@@ -118,6 +118,16 @@ module.exports = {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        // Display letters rise from a clipped line.
+        rise: {
+          from: { transform: "translateY(105%)" },
+          to: { transform: "translateY(0)" },
+        },
+        // Hero photo settles in.
+        "fade-scale": {
+          from: { opacity: "0", transform: "scale(0.96)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s var(--ease-out)",
@@ -128,6 +138,8 @@ module.exports = {
         bump: "bump 320ms var(--ease-out)",
         swap: "swap 450ms var(--ease-out) both",
         "fade-in": "fade-in 450ms var(--ease-out) both",
+        rise: "rise 700ms var(--ease-out) both",
+        "fade-scale": "fade-scale 600ms var(--ease-out) both",
       },
       screens: {
         xs: "350px",

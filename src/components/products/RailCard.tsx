@@ -22,7 +22,7 @@ export function RailCard({
 
   return (
     <Link href={href} className="lift flex flex-col gap-3">
-      <span className="relative block aspect-[3/4] overflow-hidden rounded-photo bg-photo">
+      <span className="lift-photo lift-shadow relative block aspect-[3/4] overflow-hidden rounded-photo bg-photo">
         <Image
           fill
           src={variant?.images[0] ?? product.img}

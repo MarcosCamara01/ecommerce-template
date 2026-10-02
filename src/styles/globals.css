@@ -157,18 +157,21 @@
     transform: scale(0.97);
   }
 
-  /* Card hover: 4px lift and photo scale 1.03, fine pointers only. */
+  /* Card hover: the photo lifts 4px and scales to 1.03, fine pointers only. */
   @media (hover: hover) and (pointer: fine) {
-    .lift {
-      transition: transform 300ms var(--ease-out);
+    .lift .lift-photo,
+    .lift .lift-img {
+      transition:
+        transform 300ms var(--ease-out),
+        box-shadow 300ms var(--ease-out);
     }
 
-    .lift:hover {
+    .lift:hover .lift-photo {
       transform: translateY(-4px);
     }
 
-    .lift .lift-img {
-      transition: transform 300ms var(--ease-out);
+    .lift:hover .lift-photo.lift-shadow {
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.22);
     }
 
     .lift:hover .lift-img {
@@ -208,7 +211,7 @@
     transform: none;
   }
 
-  .lift:hover,
+  .lift:hover .lift-photo,
   .lift:hover .lift-img {
     transform: none;
   }
@@ -229,8 +232,13 @@
     display: none;
   }
 
-  .animate-swap {
+  .animate-swap,
+  .animate-fade-scale {
     animation-name: opacity-in;
+  }
+
+  .animate-rise {
+    animation: none;
   }
 }
 

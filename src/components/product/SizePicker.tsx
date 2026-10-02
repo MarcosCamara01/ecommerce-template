@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const SIZES = ProductSizeZod.options;
 
 /**
- * Six equal pills; one ink capsule slides to the selected size (transform
+ * Equal pills (the full run by default); one ink capsule slides to the selected size (transform
  * 220ms ease-in-out, no bounce). Sizes the variant does not stock are
  * dashed, struck through and disabled.
  */
@@ -15,21 +15,26 @@ export function SizePicker({
   value,
   onChange,
   compact = false,
+  options = SIZES,
 }: {
   available: readonly ProductSize[];
   value: ProductSize | undefined;
   onChange: (size: ProductSize) => void;
   compact?: boolean;
+  /** Which sizes get a pill; defaults to the full run. */
+  options?: readonly ProductSize[];
 }) {
-  const index = value ? SIZES.indexOf(value) : -1;
+  const index = value ? options.indexOf(value) : -1;
   const gap = compact ? 5 : 6;
+  const n = options.length;
+  const inStockSizes = new Set(available);
 
   return (
     <div
       role="group"
       aria-label="Size"
-      className="relative grid grid-cols-6"
-      style={{ gap }}
+      className="relative grid"
+      style={{ gap, gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
     >
       {index >= 0 ? (
         <span
@@ -39,13 +44,13 @@ export function SizePicker({
             compact ? "h-11" : "h-[52px]",
           )}
           style={{
-            width: `calc((100% - ${gap * 5}px) / 6)`,
+            width: `calc((100% - ${gap * (n - 1)}px) / ${n})`,
             transform: `translateX(calc(${index} * (100% + ${gap}px)))`,
           }}
         />
       ) : null}
-      {SIZES.map((size) => {
-        const inStock = available.includes(size);
+      {options.map((size) => {
+        const inStock = inStockSizes.has(size);
         const selected = size === value;
         return (
           <button

@@ -1,18 +1,21 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 import { getCategoryProducts } from "@/app/actions";
+import { ProductsSkeleton } from "@/components/products";
+import { CatalogListing } from "@/components/products/CatalogListing";
 import {
-  ProductsSkeleton,
-  GridProducts,
-  ProductItem,
-} from "@/components/products";
+  SectionCount,
+  SectionHeading,
+} from "@/components/products/SectionHeading";
+import { buttonClass } from "@/components/ui/button-classes";
+import { shopSections } from "@/constants/navigation";
+import { getShopSectionSummaries } from "@/lib/catalog/sections";
 import {
   type ProductCategory,
   ProductCategoryZod,
 } from "@/lib/db/drizzle/schema";
-import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
-import Link from "next/link";
 
 interface Props {
   params: Promise<{
@@ -23,6 +26,9 @@ interface Props {
 export function generateStaticParams() {
   return ProductCategoryZod.options.map((category) => ({ category }));
 }
+
+const sectionFor = (category: ProductCategory) =>
+  shopSections.find((section) => section.key === category)!;
 
 export async function generateMetadata({ params }: Props) {
   const { category } = await params;
@@ -35,11 +41,11 @@ export async function generateMetadata({ params }: Props) {
     };
   }
 
-  const capitalizedCategory = capitalizeFirstLetter(parsedCategory.data);
+  const { label } = sectionFor(parsedCategory.data);
 
   return {
-    title: `${capitalizedCategory} | Ecommerce Template`,
-    description: `${capitalizedCategory} category at Ecommerce Template by Marcos Camara`,
+    title: `${label} | Ecommerce Template`,
+    description: `${label} category at Ecommerce Template by Marcos Camara`,
   };
 }
 
@@ -52,15 +58,28 @@ const CategoryPage = async ({ params }: Props) => {
     notFound();
   }
 
-  const categoryName = capitalizeFirstLetter(parsedCategory.data);
+  const section = sectionFor(parsedCategory.data);
   return (
-    <section className="pt-14">
-      <h1 className="sr-only">{categoryName} products</h1>
-      <Suspense fallback={<ProductsSkeleton items={6} />}>
+    <section className="pb-24">
+      <SectionHeading
+        title={section.label}
+        count={
+          <Suspense fallback={null}>
+            <SectionPieces category={parsedCategory.data} />
+          </Suspense>
+        }
+      />
+      <Suspense fallback={<ProductsSkeleton items={8} />}>
         <CategoryProducts category={parsedCategory.data} />
       </Suspense>
     </section>
   );
+};
+
+const SectionPieces = async ({ category }: { category: ProductCategory }) => {
+  const summaries = await getShopSectionSummaries();
+  const count = summaries.find((summary) => summary.key === category)?.count;
+  return count === undefined ? null : <SectionCount count={count} />;
 };
 
 const CategoryProducts = async ({
@@ -68,34 +87,30 @@ const CategoryProducts = async ({
 }: {
   category: ProductCategory;
 }) => {
-  const products = await getCategoryProducts(category);
-  const categoryName = capitalizeFirstLetter(category);
+  const [products, sections] = await Promise.all([
+    getCategoryProducts(category),
+    getShopSectionSummaries(),
+  ]);
+  const { label } = sectionFor(category);
 
   if (products.length === 0) {
     return (
-      <div className="mx-auto flex min-h-[45vh] max-w-xl flex-col items-center justify-center gap-4 px-6 text-center">
-        <h2 className="text-2xl font-bold text-pretty">
-          No products available in {categoryName}
+      <div className="flex min-h-[45vh] max-w-xl flex-col items-start justify-center gap-4 border-t border-line pt-10">
+        <h2 className="font-display text-5xl leading-[0.9]">
+          No products available in {label}
         </h2>
-        <p className="text-color-secondary">
+        <p className="text-muted">
           This collection is empty right now. Browse the full catalog for other products.
         </p>
-        <Link
-          href="/"
-          className="rounded-md border border-border-primary px-5 py-2.5 text-sm font-medium transition-colors hover:bg-background-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-        >
-          Browse All Products
+        <Link href="/new-in" className={buttonClass({ size: "sm" })}>
+          Browse all products
         </Link>
       </div>
     );
   }
 
   return (
-    <GridProducts>
-      {products.map((product, index) => (
-        <ProductItem key={product.id} product={product} priority={index === 0} />
-      ))}
-    </GridProducts>
+    <CatalogListing products={products} sections={sections} activeKey={category} />
   );
 };
 

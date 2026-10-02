@@ -27,3 +27,30 @@ export const colorMapping: ColorMapping = {
   straw: "#D8C39B",
   white: "#FAFAFA",
 };
+
+const normalizeColorName = (colorName: string) =>
+  colorName.trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
+
+const resolveSolidColor = (colorName: string) => {
+  const normalized = normalizeColorName(colorName);
+  if (colorMapping[normalized]) return colorMapping[normalized];
+  const match = Object.keys(colorMapping)
+    .sort((left, right) => right.length - left.length)
+    .find((key) => normalized.includes(key));
+  return match ? colorMapping[match] : "#6B7280";
+};
+
+/** Swatch fill for a colour name; "Navy / White" becomes a split swatch. */
+export const swatchBackground = (colorName: string): string => {
+  const parts = colorName
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length < 2) return resolveSolidColor(colorName);
+  const stops = parts.map((part, index) => {
+    const start = Math.round((index / parts.length) * 100);
+    const end = Math.round(((index + 1) / parts.length) * 100);
+    return `${resolveSolidColor(part)} ${start}% ${end}%`;
+  });
+  return `linear-gradient(90deg, ${stops.join(", ")})`;
+};

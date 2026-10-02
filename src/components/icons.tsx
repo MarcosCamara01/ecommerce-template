@@ -73,3 +73,15 @@ export const LogoutIcon = ({ size = 18, className }: IconProps) => (
     <path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" />
   </svg>
 );
+
+export const ArrowRightIcon = ({ size = 16, className }: IconProps) => (
+  <svg {...base(size)} strokeWidth="1.8" strokeLinecap="round" className={className}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
+
+export const ArrowUpRightIcon = ({ size = 22, className }: IconProps) => (
+  <svg {...base(size)} strokeWidth="1.6" strokeLinecap="round" className={className}>
+    <path d="M7 17 17 7M8 7h9v9" />
+  </svg>
+);
