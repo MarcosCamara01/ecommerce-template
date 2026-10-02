@@ -17,7 +17,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     return (
       <div
         className={cn(
-          "group flex w-full overflow-hidden rounded-md border border-border-primary bg-background-primary transition-colors focus-within:border-[#3b3b3b] focus-within:bg-background-secondary focus-within:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]",
+          "group flex h-[52px] w-full overflow-hidden rounded-field border border-line bg-field transition-[border-color,box-shadow] duration-120 ease-out focus-within:border-fg focus-within:shadow-[0_0_0_4px_var(--ring)] has-[[aria-invalid=true]]:border-err-line",
           containerClassName
         )}
       >
@@ -27,7 +27,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           type={showPassword ? "text" : "password"}
           placeholder={props.placeholder || "Password"}
           className={cn(
-            "h-11 w-full border-0 bg-transparent px-3.5 text-sm text-white placeholder:text-color-secondary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+            "h-full w-full border-0 bg-transparent px-[18px] text-[15px] text-fg focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-65",
             className
           )}
           name={props.name || "password"}
@@ -35,7 +35,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         <button
           aria-label={showPassword ? "Hide password" : "Show password"}
           aria-pressed={showPassword}
-          className="flex w-11 shrink-0 items-center justify-center border-l border-border-primary bg-background-primary text-color-secondary transition-colors duration-150 hover:bg-background-tertiary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-12 shrink-0 items-center justify-center rounded-pill text-muted transition-colors duration-120 hover:text-fg focus-visible:outline-offset-[-4px] disabled:cursor-not-allowed disabled:opacity-65"
           onClick={(e) => {
             e.preventDefault();
             setShowPassword(!showPassword);

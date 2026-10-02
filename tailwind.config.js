@@ -1,103 +1,103 @@
 /** @type {import('tailwindcss').Config} */
+
+// Theme colours are CSS variables (src/styles/globals.css) so light, dark and
+// the product page tint all flow through the same utilities. Opacity
+// modifiers (`bg-fg/10`) resolve through color-mix.
+const mix = (variable) =>
+  `color-mix(in srgb, var(${variable}) calc(<alpha-value> * 100%), transparent)`;
+
 module.exports = {
   darkMode: ["class"],
-  content: [
-    "./pages/**/*.{ts,tsx,js,jsx}",
-    "./components/**/*.{ts,tsx,js,jsx}",
-    "./app/**/*.{ts,tsx,js,jsx}",
-    "./src/**/*.{ts,tsx,js,jsx}",
-  ],
+  content: ["./src/**/*.{ts,tsx,js,jsx}"],
   prefix: "",
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-archivo)", "Arial Narrow", "sans-serif"],
+      },
+      colors: {
+        bg: mix("--bg"),
+        fg: mix("--fg"),
+        panel: "var(--panel)",
+        field: "var(--field)",
+        hover: "var(--hover)",
+        photo: "var(--photo)",
+        glass: "var(--glass)",
+        scrim: "var(--scrim)",
+        line: "var(--line)",
+        "line-soft": "var(--line-soft)",
+        card: "var(--card)",
+        ring: "var(--ring)",
+        skel: "var(--skel)",
+        muted: "var(--muted)",
+        err: {
+          bg: "var(--err-bg)",
+          fg: "var(--err-fg)",
+          line: "var(--err-line)",
+        },
+        // LEGACY-ALIASES: pre-redesign names mapped onto the new tokens while
+        // pages are migrated. Delete once nothing references them.
+        "background-primary": mix("--bg"),
+        "background-secondary": mix("--bg"),
+        "background-tertiary": "var(--card)",
+        "border-primary": "var(--line)",
+        "border-secondary": "var(--line)",
+        "color-secondary": "var(--muted)",
+        "color-tertiary": mix("--fg"),
+      },
+      borderRadius: {
+        pill: "999px",
+        field: "16px",
+        chip: "20px",
+        toast: "22px",
+        photo: "24px",
+        "photo-lg": "28px",
+        section: "32px",
+      },
+      fontSize: {
+        13: ["13px", "1.45"],
+      },
+      transitionTimingFunction: {
+        out: "var(--ease-out)",
+        "in-out": "var(--ease-in-out)",
+        drawer: "var(--ease-drawer)",
+      },
+      transitionDuration: {
+        120: "120ms",
+        220: "220ms",
+        250: "250ms",
+        350: "350ms",
+        420: "420ms",
+        450: "450ms",
+        600: "600ms",
+      },
+      boxShadow: {
+        float: "var(--shadow-float)",
+        lift: "var(--shadow-lift)",
+        hero: "var(--shadow-hero)",
+      },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        shimmer: {
+          "0%, 100%": { opacity: "0.55" },
+          "50%": { opacity: "1" },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-      },
-      gridTemplateColumns: {
-        "auto-fill-250": "repeat(auto-fill, minmax(250px, 1fr))",
-        "auto-fill-350": "repeat(auto-fill, minmax(350px, 1fr))",
-        "auto-fill-110": "repeat(auto-fill, minmax(110px, 1fr))",
-        "auto-fill-32": "repeat(auto-fill, minmax(32px, 1fr))",
-      },
-      colors: {
-        999: "#999",
-        "border-primary": "#242424",
-        "border-secondary": "#7F7F7F",
-        "background-primary": "#000",
-        "background-secondary": "#0a0a0a",
-        "background-tertiary": "#1F1F1F",
-        "background-alert": "rgba(0, 0, 0, 0.9)",
-        "color-secondary": "#A1A1A1",
-        "color-tertiary": "#EDEDED",
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
-      },
-      height: {
-        260: "260px",
-        "60vh": "60vh",
-        "80vh": "80vh",
-      },
-      minWidth: {
-        250: "250px",
-        "grid-img": "560px",
-      },
-      maxWidth: {
-        90: "90%",
-        180: "180px",
-        350: "350px",
-      },
-      flexBasis: {
-        600: "600px",
-        800: "800px",
-      },
-      translate: {
-        hide: "-100%",
+        "accordion-down": "accordion-down 0.2s var(--ease-out)",
+        "accordion-up": "accordion-up 0.2s var(--ease-out)",
+        shimmer: "shimmer 1.6s ease-in-out infinite",
       },
       screens: {
         xs: "350px",
-      },
-      flexGrow: {
-        999: "999",
-      },
-      inset: {
-        selected: "-7px",
-      },
-      fontSize: {
-        13: "13px",
       },
     },
   },

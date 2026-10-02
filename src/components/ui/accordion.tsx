@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { LuChevronDown } from "react-icons/lu";
+import { LuPlus } from "react-icons/lu";
 
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b border-[#2E2E2E]", className)}
+    className={cn("border-b border-line", className)}
     {...props}
   />
 ));
@@ -34,13 +34,16 @@ const AccordionTrigger = React.forwardRef<
         <AccordionPrimitive.Trigger
           ref={ref}
           className={cn(
-            "flex flex-1 items-center justify-between py-4 font-medium transition-all [&[data-state=open]>svg]:rotate-180",
+            "flex min-h-14 flex-1 items-center justify-between text-left text-sm font-medium [&[data-state=open]>svg]:rotate-45",
             className
           )}
           {...props}
         >
           {children}
-          <LuChevronDown className="w-4 h-4 transition-transform duration-200 shrink-0" />
+          <LuPlus
+            aria-hidden="true"
+            className="size-4 shrink-0 transition-transform duration-220 ease-in-out motion-reduce:transition-none"
+          />
         </AccordionPrimitive.Trigger>
       </Heading>
     </AccordionPrimitive.Header>
@@ -56,7 +59,7 @@ const AccordionContent = React.forwardRef<
     ref={ref}
     forceMount={forceMount}
     className={cn(
-      "overflow-hidden text-color-secondary text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
+      "overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down motion-reduce:animate-none",
       forceMount && "data-[state=closed]:hidden"
     )}
     {...props}

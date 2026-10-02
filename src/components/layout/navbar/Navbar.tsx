@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { WishlistLink } from "./WishlistLink";
 import { CartLink } from "./CartLink";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 /** FUNCTIONALITY */
@@ -234,6 +235,9 @@ export const Navbar = () => {
 
         {/* Cart and Wishlist Buttons */}
         <ul className="flex gap-2">
+          <li className="flex items-center justify-center">
+            <ThemeToggle />
+          </li>
           <li className="flex items-center justify-center">
             <CartLink />
           </li>
