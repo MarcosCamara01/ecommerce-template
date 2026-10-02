@@ -2,47 +2,42 @@
 
 /** COMPONENTS */
 import Link from "next/link";
-import { LinksDesktop } from "./LinksDesktop";
-import { UserMenu } from "./UserMenu";
-import { SearchInput } from "./SearchInput";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetClose,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import { WishlistLink } from "./WishlistLink";
-import { CartLink } from "./CartLink";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BagLink } from "./BagLink";
+import { MobileMenu } from "./MobileMenu";
+import { UserMenu } from "./UserMenu";
 /** FUNCTIONALITY */
+import { usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
-import { useRef } from "react";
-import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-/** ICONS */
-import { FiUser, FiMenu, FiCreditCard } from "react-icons/fi";
-import { RiLogoutBoxLine } from "react-icons/ri";
+import { useRef, useState } from "react";
+import { shopSections } from "@/constants/navigation";
+import type { ShopSectionSummary } from "@/lib/catalog/sections";
+import { cn } from "@/lib/utils";
 
 const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
 });
 
-const linksData = [
-  { path: "/t-shirts", name: "T-SHIRTS" },
-  { path: "/pants", name: "PANTS" },
-  { path: "/sweatshirts", name: "SWEATSHIRTS" },
-];
+const iconButton =
+  "press grid size-11 place-items-center rounded-pill text-fg hover:bg-card";
 
-export const Navbar = () => {
-  const { data: session, isPending } = useSession();
+const isCurrent = (pathname: string, href: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
 
+export const Navbar = ({
+  sectionSummaries,
+}: {
+  sectionSummaries: Promise<ShopSectionSummary[]>;
+}) => {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+
+  const [menuOpen, setMenuOpen] = useState(false);
   const editProfileManager = useManager();
-  const { signOut } = useAuthMutation();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
   const profileReturnFocusRef = useRef<HTMLElement | null>(null);
@@ -50,201 +45,104 @@ export const Navbar = () => {
 
   return (
     <>
-      <header className="pointer-events-auto w-full px-3.5 gap-4 xs:px-6 sm:px-12 py-6 flex items-center justify-between bg-background-secondary border-b border-solid border-border-primary">
-        {/* Mobile Menu Trigger */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <button
-              ref={mobileMenuTriggerRef}
-              type="button"
-              aria-label="Open navigation menu"
-              className="flex px-4 py-2 lg:hidden hover:opacity-75 transition-opacity"
-            >
-              <FiMenu size={24} aria-hidden="true" />
-            </button>
-          </SheetTrigger>
-
-          <SheetContent
-            side="left"
-            className="w-full sm:w-80 p-0"
-            onCloseAutoFocus={(event) => {
-              if (!skipMobileMenuCloseAutoFocusRef.current) return;
-              event.preventDefault();
-              skipMobileMenuCloseAutoFocusRef.current = false;
-              queueMicrotask(editProfileManager.open);
-            }}
+      {/* Desktop: floating glass pill. The header itself lets clicks through. */}
+      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
+        <nav
+          aria-label="Main"
+          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] transition-[background-color] duration-600 ease-out"
+        >
+          <Link
+            href="/"
+            className="px-[18px] font-display text-[26px] font-extrabold leading-[44px]"
           >
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-border-primary">
-                <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Browse product collections and account actions.
-                </SheetDescription>
-              </div>
-
-              {/* Navigation Links */}
-              <nav className="flex-1 overflow-y-auto">
-                <ul className="flex flex-col gap-2 p-4">
-                  {/* Category Links */}
-                  {linksData.map((link) => (
-                    <li key={link.path}>
-                      <SheetClose asChild>
-                        <Link
-                          href={link.path}
-                          className="flex items-center px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                        >
-                          {link.name}
-                        </Link>
-                      </SheetClose>
-                    </li>
-                  ))}
-
-                  {/* Separator */}
-                  {(session?.user || isPending) && (
-                    <Separator className="my-2" />
-                  )}
-
-                  {/* User Links Skeleton */}
-                  {isPending && (
-                    <>
-                      <li>
-                        <div className="flex items-center px-4 py-2">
-                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                          <Skeleton className="h-4 w-24" />
-                        </div>
-                      </li>
-                      <li>
-                        <div className="flex items-center px-4 py-2">
-                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                          <Skeleton className="h-4 w-20" />
-                        </div>
-                      </li>
-                      <li>
-                        <Separator className="my-2" />
-                      </li>
-                      <li>
-                        <div className="flex items-center px-4 py-2">
-                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                          <Skeleton className="h-4 w-16" />
-                        </div>
-                      </li>
-                    </>
-                  )}
-
-                  {/* User Links */}
-                  {session?.user && !isPending && (
-                    <>
-                      <li>
-                        <SheetClose asChild>
-                          <Link
-                            href="/orders"
-                            className="flex items-center px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                          >
-                            <FiCreditCard className="mr-2" size={16} />
-                            <span>View orders</span>
-                          </Link>
-                        </SheetClose>
-                      </li>
-
-                      <li>
-                        <SheetClose asChild>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              skipMobileMenuCloseAutoFocusRef.current = true;
-                              profileReturnFocusRef.current =
-                                mobileMenuTriggerRef.current;
-                            }}
-                            className="flex items-center w-full px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                          >
-                            <FiUser className="mr-2" size={16} />
-                            <span>Edit profile</span>
-                          </button>
-                        </SheetClose>
-                      </li>
-
-                      <li>
-                        <Separator className="my-2" />
-                      </li>
-
-                      <li>
-                        <button
-                          onClick={() => signOut.mutate()}
-                          className="flex gap-2 items-center w-full px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                        >
-                          <RiLogoutBoxLine size={16} />
-                          <span>Log out</span>
-                        </button>
-                      </li>
-                    </>
-                  )}
-
-                  {/* Login Link for non-authenticated users */}
-                  {!session?.user && !isPending && (
-                    <li>
-                      <SheetClose asChild>
-                        <Link
-                          href="/login"
-                          className="flex items-center px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                        >
-                          Login
-                        </Link>
-                      </SheetClose>
-                    </li>
-                  )}
-                </ul>
-              </nav>
-            </div>
-          </SheetContent>
-        </Sheet>
-
-        {/* Desktop Navigation */}
-        <ul className="justify-between hidden gap-2 text-sm lg:flex">
-          {isPending ? (
-            <li className="items-center justify-center hidden lg:flex">
-              <Skeleton className="w-24 h-9 rounded-md" />
-            </li>
-          ) : session?.user ? (
-            <li className="items-center justify-center hidden lg:flex">
-              <UserMenu
-                triggerRef={accountTriggerRef}
-                onEditProfile={() => {
-                  profileReturnFocusRef.current = accountTriggerRef.current;
-                  editProfileManager.open();
-                }}
-              />
-            </li>
+            Store
+          </Link>
+          {shopSections.map((section) => (
+            <Link
+              key={section.key}
+              href={section.href}
+              aria-current={isCurrent(pathname, section.href) ? "page" : undefined}
+              className="flex h-11 items-center rounded-pill px-4 text-sm hover:bg-card aria-[current=page]:bg-fg aria-[current=page]:text-bg"
+            >
+              {section.label}
+            </Link>
+          ))}
+          <Link href="/search" aria-label="Search" className={iconButton}>
+            <SearchIcon />
+          </Link>
+          <Link
+            href="/wishlist"
+            aria-label="Wishlist"
+            aria-current={isCurrent(pathname, "/wishlist") ? "page" : undefined}
+            className={cn(iconButton, "aria-[current=page]:bg-fg aria-[current=page]:text-bg")}
+          >
+            <HeartIcon />
+          </Link>
+          {session?.user ? (
+            <UserMenu
+              triggerRef={accountTriggerRef}
+              onEditProfile={() => {
+                profileReturnFocusRef.current = accountTriggerRef.current;
+                editProfileManager.open();
+              }}
+              className={cn(
+                isCurrent(pathname, "/orders") && "bg-fg text-bg hover:bg-fg",
+              )}
+            />
           ) : (
-            <li className="flex items-center justify-center">
-              <Link
-                href="/login"
-                className="w-24 h-9 text-sm flex items-center justify-center text-color-secondary transition-colors hover:text-white font-medium"
-              >
-                Login
-              </Link>
-            </li>
+            <Link
+              href="/login"
+              aria-label="Account"
+              className={iconButton}
+            >
+              <UserIcon />
+            </Link>
           )}
-          <li>
-            <LinksDesktop />
-          </li>
-        </ul>
+          <ThemeToggle />
+          <BagLink className="h-11 px-[18px] text-sm" />
+        </nav>
+      </header>
 
-        {/* Search Input */}
-        <SearchInput />
-
-        {/* Cart and Wishlist Buttons */}
-        <ul className="flex gap-2">
-          <li className="flex items-center justify-center">
-            <ThemeToggle />
-          </li>
-          <li className="flex items-center justify-center">
-            <CartLink />
-          </li>
-          <li className="flex items-center justify-center">
-            <WishlistLink />
-          </li>
-        </ul>
+      {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
+      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden">
+        <Link
+          href="/"
+          className="font-display text-[26px] font-extrabold leading-none"
+        >
+          Store
+        </Link>
+        <div className="flex items-center gap-0.5">
+          <ThemeToggle />
+          <Link href="/search" aria-label="Search" className={iconButton}>
+            <SearchIcon />
+          </Link>
+          <BagLink className="mx-1 h-10 px-3.5 text-13" />
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                ref={mobileMenuTriggerRef}
+                type="button"
+                aria-label="Open navigation menu"
+                className={iconButton}
+              >
+                <MenuIcon />
+              </button>
+            </SheetTrigger>
+            <MobileMenu
+              sectionSummaries={sectionSummaries}
+              onEditProfile={() => {
+                skipMobileMenuCloseAutoFocusRef.current = true;
+                profileReturnFocusRef.current = mobileMenuTriggerRef.current;
+              }}
+              onCloseAutoFocus={(event) => {
+                if (!skipMobileMenuCloseAutoFocusRef.current) return;
+                event.preventDefault();
+                skipMobileMenuCloseAutoFocusRef.current = false;
+                queueMicrotask(editProfileManager.open);
+              }}
+            />
+          </Sheet>
+        </div>
       </header>
 
       <EditProfile

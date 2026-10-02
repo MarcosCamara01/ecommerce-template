@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 
 import { Navbar } from "@/components/layout/navbar";
+import { getShopSectionSummaries } from "@/lib/catalog/sections";
 import { Footer } from "@/components/layout/footer";
 import { Providers } from "@/providers";
 import { themeInitScript } from "@/lib/theme";
@@ -65,8 +66,9 @@ export default async function RootLayout({
       </head>
       <body className="font-sans">
         <Providers>
-          <Navbar />
-          <main className="mx-auto w-full max-w-[1920px] px-6 pb-24 sm:px-12">
+          {/* Counts only feed the mobile menu; they stream in behind it. */}
+          <Navbar sectionSummaries={getShopSectionSummaries()} />
+          <main className="mx-auto w-full max-w-[1920px] px-4 pb-24 lg:px-8">
             {children}
             <Toaster position="bottom-right" />
             <Analytics />

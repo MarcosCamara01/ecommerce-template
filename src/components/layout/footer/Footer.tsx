@@ -1,98 +1,44 @@
 import Link from "next/link";
 
-export const Footer = () => {
-  const linkStyles = "text-sm transition duration-150 ease hover:text-white";
-  const liStyles = "text-color-secondary my-1.5";
+import { helpLinks } from "@/constants/navigation";
 
+import { FooterAccountLink } from "./FooterAccountLink";
+
+export const Footer = () => {
   return (
-    <footer className="px-6 py-24 border-t border-solid pointer-events-auto bg-background-secondary border-[#242424]">
-      <nav className="flex flex-wrap justify-around gap-5 mx-auto max-w-screen-2xl">
-        <div className="w-full max-w-xs">
-          <h2 className="my-3 text-sm font-medium">Products</h2>
-          <ul className="grid grid-cols-2">
-            <li className={liStyles}>
-              <Link href="/t-shirts" className={linkStyles}>
-                T-shirts
-              </Link>
-            </li>
-            <li className={liStyles}>
-              <Link href="/pants" className={linkStyles}>
-                Pants
-              </Link>
-            </li>
-            <li className={liStyles}>
-              <Link href="/sweatshirts" className={linkStyles}>
-                Sweatshirts
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="w-full max-w-xs">
-          <h2 className="my-3 text-sm font-medium">Assistance</h2>
-          <ul className="grid grid-cols-2">
-            <li className={liStyles}>
-              <Link href="/help/size-guide" className={linkStyles}>
-                Size guide
-              </Link>
-            </li>
-            <li className={liStyles}>
-              <Link href="/help/delivery" className={linkStyles}>
-                Delivery
-              </Link>
-            </li>
-            <li className={liStyles}>
-              <Link href="/help/returns" className={linkStyles}>
-                Returns and refunds
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="w-full max-w-xs">
-          <h2 className="my-3 text-sm font-medium">About Marcos</h2>
-          <ul className="grid grid-cols-2">
-            <li className={liStyles}>
-              <Link
-                href="https://marcoscamara.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={linkStyles}
-              >
-                Portfolio
-              </Link>
-            </li>
-            <li className={liStyles}>
-              <Link
-                href="https://www.linkedin.com/in/marcospenelascamara/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={linkStyles}
-              >
-                LinkedIn
-              </Link>
-            </li>
-            <li className={liStyles}>
-              <Link
-                href="https://github.com/MarcosCamara01"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={linkStyles}
-              >
-                GitHub
-              </Link>
-            </li>
-            <li className={liStyles}>
-              <Link
-                href="https://medium.com/@marcoscamara"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={linkStyles}
-              >
-                Medium
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </nav>
+    <footer className="flex flex-col gap-6 overflow-clip border-t border-line px-4 pb-6 lg:px-8">
+      <div className="flex flex-wrap justify-between gap-4 pt-6 text-sm">
+        <nav aria-label="Help" className="flex flex-wrap gap-x-6 gap-y-2">
+          {helpLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="hover:underline hover:underline-offset-[3px]">
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <nav aria-label="Account" className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link href="/orders" className="hover:underline hover:underline-offset-[3px]">
+            Orders
+          </Link>
+          <Link href="/wishlist" className="hover:underline hover:underline-offset-[3px]">
+            Wishlist
+          </Link>
+          <FooterAccountLink />
+          <Link
+            href="https://github.com/MarcosCamara01/ecommerce-template"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted hover:text-fg"
+          >
+            Source on GitHub
+          </Link>
+        </nav>
+      </div>
+      <p
+        aria-hidden="true"
+        className="select-none text-center font-display text-[min(420px,29vw)] leading-[0.76]"
+      >
+        Store
+      </p>
     </footer>
   );
 };

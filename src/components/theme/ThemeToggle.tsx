@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 import { toggleTheme } from "./theme-store";
 
-const ThemeIcon = ({ className }: { className?: string }) => (
+export const ThemeIcon = ({ className }: { className?: string }) => (
   <svg
     aria-hidden="true"
     width="18"

@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LazyMotion } from "motion/react";
 import { ReactNode, useState } from "react";
 
 function createQueryClient() {
@@ -16,10 +17,17 @@ function createQueryClient() {
   });
 }
 
+const loadMotionFeatures = () =>
+  import("@/lib/motion-features").then((module) => module.default);
+
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(createQueryClient);
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <LazyMotion features={loadMotionFeatures} strict>
+        {children}
+      </LazyMotion>
+    </QueryClientProvider>
   );
 }

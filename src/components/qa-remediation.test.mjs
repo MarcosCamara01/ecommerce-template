@@ -30,15 +30,16 @@ test("cart actions stay disabled until client hydration", async () => {
 });
 
 test("icon-only controls expose accessible names and sheet descriptions", async () => {
-  const [password, navbar, variant] = await Promise.all([
+  const [password, navbar, mobileMenu, variant] = await Promise.all([
     source("src/components/ui/form/PasswordInput.tsx"),
     source("src/components/layout/navbar/Navbar.tsx"),
+    source("src/components/layout/navbar/MobileMenu.tsx"),
     source("src/components/admin/VariantForm.tsx"),
   ]);
   assert.match(password, /aria-label=\{showPassword \? "Hide password" : "Show password"\}/);
   assert.match(password, /aria-pressed=\{showPassword\}/);
   assert.match(navbar, /aria-label="Open navigation menu"/);
-  assert.match(navbar, /<SheetDescription/);
+  assert.match(mobileMenu, /<SheetDescription/);
   assert.match(variant, /aria-label=\{`Move variant \$\{index \+ 1\} up`\}/);
   assert.match(variant, /aria-label=\{`Remove variant \$\{index \+ 1\}`\}/);
 });
