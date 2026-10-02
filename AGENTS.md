@@ -13,6 +13,7 @@ Skills live in `.agents/skills/`. Invoke with `$skill-name`.
 | Design system, `DESIGN.md`, audit / critique / polish / typeset | `$impeccable` |
 | Visual craft: radius, press, outlines, icon weight | `$better-ui` |
 | Accessibility and interaction guidelines | `$web-design-guidelines` |
+| Fix accessibility: names, keyboard, focus, contrast | `$fixing-accessibility` |
 | Name a motion effect | `$animation-vocabulary` |
 | Implement a purposeful animation | `$animate` |
 | Interruptible springs, sheets, gestures | `$apple-design` |
@@ -22,6 +23,7 @@ Skills live in `.agents/skills/`. Invoke with `$skill-name`.
 | Intent | Skill |
 |---|---|
 | React / Next performance | `$vercel-react-best-practices` |
+| React Doctor audit (`npm run doctor`) | `$react-doctor` |
 | Component composition APIs | `$vercel-composition-patterns` |
 | Visual QA in a real browser | `$agent-browser` |
 | Stripe Checkout, tax, webhooks | `$stripe-best-practices` |
