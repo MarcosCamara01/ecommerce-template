@@ -10,8 +10,7 @@ Skills live in `.agents/skills/`. Invoke with `$skill-name`.
 
 | Intent | Skill |
 |---|---|
-| Design system, `DESIGN.md`, polish / quieter / typeset | `$impeccable` |
-| Audit an existing storefront surface (read-only plans) | `$improve-ui` |
+| Design system, `DESIGN.md`, audit / critique / polish / typeset | `$impeccable` |
 | Visual craft: radius, press, outlines, icon weight | `$better-ui` |
 | Accessibility and interaction guidelines | `$web-design-guidelines` |
 | Name a motion effect | `$animation-vocabulary` |
