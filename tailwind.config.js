@@ -36,15 +36,6 @@ module.exports = {
           fg: "var(--err-fg)",
           line: "var(--err-line)",
         },
-        // LEGACY-ALIASES: pre-redesign names mapped onto the new tokens while
-        // pages are migrated. Delete once nothing references them.
-        "background-primary": mix("--bg"),
-        "background-secondary": mix("--bg"),
-        "background-tertiary": "var(--card)",
-        "border-primary": "var(--line)",
-        "border-secondary": "var(--line)",
-        "color-secondary": "var(--muted)",
-        "color-tertiary": mix("--fg"),
       },
       borderRadius: {
         pill: "999px",

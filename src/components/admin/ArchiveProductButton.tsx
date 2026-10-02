@@ -59,18 +59,23 @@ export function ArchiveProductButton({ productId }: { productId: number }) {
   });
 
   return (
-    <div className="mx-auto max-w-3xl px-6 pb-10 md:px-8">
-      <div className="flex flex-col gap-3 rounded-lg border border-red-500/30 bg-red-500/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div className="flex flex-col gap-4 rounded-photo-lg border border-err-line px-[22px] py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-semibold text-red-200">Archive Product</h2>
-          <p className="mt-1 text-sm text-color-secondary">
+          <h2 className="font-semibold">Archive Product</h2>
+          <p className="mt-1 text-sm text-muted">
             Hide this product from the storefront while preserving orders and its durable identity.
           </p>
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <Button type="button" variant="destructive">
-              <FiArchive className="mr-2 h-4 w-4" aria-hidden="true" />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="border-err-line text-err-fg hover:border-err-line"
+            >
+              <FiArchive className="h-4 w-4" aria-hidden="true" />
               Archive Product
             </Button>
           </DialogTrigger>
@@ -91,7 +96,7 @@ export function ArchiveProductButton({ productId }: { productId: number }) {
                 type="button"
                 loading={archive.isPending}
                 onClick={() => archive.mutate()}
-                className="bg-red-600 text-white hover:bg-red-500"
+                variant="destructive"
               >
                 Confirm Archive
               </LoadingButton>

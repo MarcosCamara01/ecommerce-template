@@ -62,7 +62,7 @@ export const Navbar = ({
   return (
     <>
       {/* Desktop: floating glass pill. The header itself lets clicks through. */}
-      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex [body:has([data-auth-page])_&]:!hidden">
+      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex [body:has([data-auth-page])_&]:!hidden [body:has([data-admin-page])_&]:!hidden">
         <nav
           aria-label="Main"
           className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] transition-[background-color] duration-600 ease-out"
@@ -124,7 +124,7 @@ export const Navbar = ({
 
       {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
       {/* The product page carries its own controls over the gallery. */}
-      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-auth-page])_&]:hidden [body:has([data-product-page])_&]:hidden">
+      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-admin-page])_&]:hidden [body:has([data-auth-page])_&]:hidden [body:has([data-product-page])_&]:hidden">
         <Link
           href="/"
           className="font-display text-[26px] font-extrabold leading-none"

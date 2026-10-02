@@ -158,7 +158,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
                 alt={`Existing ${index + 1}`}
                 width={100}
                 height={150}
-                className="rounded-lg object-cover aspect-[2/3] w-full shadow-sm"
+                className="rounded-field object-cover aspect-[2/3] w-full shadow-sm"
               />
               <Button
                 type="button"
@@ -172,7 +172,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
               </Button>
               <Badge
                 variant="outline"
-                className="absolute bottom-1 left-1 text-[10px] px-1.5 py-0 bg-green-500/20 border-green-500 text-green-400"
+                className="absolute bottom-1 left-1 text-[10px] px-1.5 py-0 border-line bg-panel text-fg"
               >
                 {index + 1}
               </Badge>
@@ -191,7 +191,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
                 alt={`Preview ${index + 1}`}
                 width={100}
                 height={150}
-                className="rounded-lg object-cover aspect-[2/3] w-full shadow-sm"
+                className="rounded-field object-cover aspect-[2/3] w-full shadow-sm"
               />
               <Button
                 type="button"
@@ -220,23 +220,23 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          "border-2 border-dashed rounded-lg transition-[border-color,background-color] duration-200",
+          "border-[1.5px] border-dashed rounded-field transition-[border-color,background-color] duration-200",
           isDragging
-            ? "border-white bg-white/5"
-            : "border-border-secondary hover:border-color-tertiary",
+            ? "border-fg bg-card"
+            : "border-line hover:border-fg",
         )}
       >
         <div className="flex flex-col items-center justify-center py-6 px-4">
-          <div className="p-2 rounded-full bg-bg-tertiary mb-2">
+          <div className="p-2 rounded-full bg-card mb-2">
             <FiImage
-              className="h-5 w-5 text-color-tertiary"
+              className="h-5 w-5 text-muted"
               aria-hidden="true"
             />
           </div>
-          <p className="text-xs text-color-tertiary text-center mb-2">
+          <p className="text-xs text-muted text-center mb-2">
             Drag & drop images or click to browse
           </p>
-          <p className="text-xs text-color-tertiary text-center mb-2">
+          <p className="text-xs text-muted text-center mb-2">
             {CATALOG_IMAGE_HELP_TEXT}
           </p>
           <Button
@@ -269,7 +269,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
 
       {/* Image Count */}
       {totalImages > 0 && (
-        <p className="text-xs text-color-tertiary">
+        <p className="text-xs text-muted">
           {totalImages} image{totalImages !== 1 ? "s" : ""} total
           {existingImages.length > 0 && ` (${existingImages.length} existing)`}
           {newImages.length > 0 && ` (${newImages.length} new)`}
@@ -280,7 +280,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
           id={errorId}
           role="alert"
           aria-live="polite"
-          className="text-sm font-medium text-red-400"
+          className="text-sm font-medium text-err-fg"
         >
           {displayedError}
         </p>

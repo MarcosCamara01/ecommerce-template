@@ -50,11 +50,10 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
                 aria-pressed={isSelected}
                 onClick={() => toggleSize(size)}
                 className={cn(
-                  "min-w-[48px] h-10 px-3 text-sm font-medium rounded-md border-2 transition-all duration-200",
-                  "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary focus:ring-white/30",
+                  "press h-10 w-[52px] rounded-pill border text-13 transition-[background-color,color,border-color,transform] duration-120",
                   isSelected
-                    ? "border-white bg-white text-black shadow-sm"
-                    : "border-border-secondary text-color-secondary hover:border-color-tertiary hover:bg-bg-tertiary",
+                    ? "border-fg bg-fg text-bg"
+                    : "border-line text-fg hover:border-fg",
                 )}
               >
                 {size}
@@ -64,7 +63,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
         </div>
         {selectedSizes.length > 0 && (
           <div className="flex items-center gap-2 pt-2">
-            <span className="text-xs text-color-tertiary">Selected:</span>
+            <span className="text-xs text-muted">Selected:</span>
             <div className="flex flex-wrap gap-1">
               {selectedSizes.map((size) => (
                 <Badge key={size} variant="secondary" className="text-xs">
@@ -74,7 +73,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
             </div>
           </div>
         )}
-        {error && <p className="text-sm font-medium text-red-400">{error}</p>}
+        {error && <p className="text-sm font-medium text-err-fg">{error}</p>}
       </div>
     );
   },

@@ -116,7 +116,7 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
       </aside>
 
       {/* Phone checkout bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-3 border-t border-line bg-bg px-4 pb-6 pt-4 lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-3 border-t border-line bg-bg px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-4 lg:hidden">
         <ColourBar items={items} className="h-2.5" />
         <div className="flex justify-between text-13 text-muted">
           <span>Shipping</span>

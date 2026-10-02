@@ -41,14 +41,14 @@ export function EditProductForm({
   };
 
   return (
-    <>
-      <ProductForm
-        mode="edit"
-        initialData={mapProductToFormData(product)}
-        restoreArchived={restoreArchived}
-        onSuccess={handleSuccess}
-      />
-      {!restoreArchived && <ArchiveProductButton productId={product.id} />}
-    </>
+    <ProductForm
+      mode="edit"
+      initialData={mapProductToFormData(product)}
+      restoreArchived={restoreArchived}
+      onSuccess={handleSuccess}
+      footer={
+        restoreArchived ? null : <ArchiveProductButton productId={product.id} />
+      }
+    />
   );
 }

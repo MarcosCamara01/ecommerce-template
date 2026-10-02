@@ -231,7 +231,7 @@ export function ProductView({
           </div>
 
           <div className="flex gap-2">
-            <div className="fixed inset-x-4 bottom-6 z-30 lg:static lg:grow">
+            <div className="fixed inset-x-4 bottom-[max(24px,env(safe-area-inset-bottom))] z-30 lg:static lg:grow">
               <AddToCart
                 key={`${variant.id}-${size}`}
                 product={product}

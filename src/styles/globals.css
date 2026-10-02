@@ -256,11 +256,6 @@
   }
 }
 
-/* Safe area for mobile devices with notch/home indicator */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
 /* Freeze tinted colour transitions while the theme snapshot is taken. */
 :root[data-theme-switching] {
   transition: none !important;
