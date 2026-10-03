@@ -32,17 +32,12 @@ export const useWishlistMutation = () => {
     },
     onMutate: async (productId: number) => {
       if (!userId) {
-        toast.info("Login first to add to wishlist");
         throw new Error("Unauthorized");
       }
 
       await queryClient.cancelQueries({
         queryKey: WISHLIST_QUERY_KEYS.wishlistList(userId),
       });
-
-      const previousData = queryClient.getQueryData<WishlistListResponse>(
-        WISHLIST_QUERY_KEYS.wishlistList(userId),
-      );
 
       const tempItem: WishlistItem = {
         id: -Math.floor(Math.random() * 1e9),
@@ -62,17 +57,14 @@ export const useWishlistMutation = () => {
         },
       );
 
-      return { previousData, tempItem };
+      return { tempItem };
     },
     onSuccess: (data, _, context) => {
-      if (!userId) {
+      if (!userId || !context) {
         return;
       }
 
-      const { tempItem } = context as {
-        previousData?: WishlistListResponse;
-        tempItem: WishlistItem;
-      };
+      const { tempItem } = context;
 
       queryClient.setQueryData<WishlistListResponse>(
         WISHLIST_QUERY_KEYS.wishlistList(userId),
@@ -90,15 +82,18 @@ export const useWishlistMutation = () => {
       });
     },
     onError: (error, _, context) => {
-      const { previousData } = context as {
-        previousData?: WishlistListResponse;
-        tempItem: WishlistItem;
-      };
-      if (previousData && userId) {
+      if (context && userId) {
         queryClient.setQueryData<WishlistListResponse>(
           WISHLIST_QUERY_KEYS.wishlistList(userId),
-          previousData,
+          (current = { items: [] }) => ({
+            items: current.items.filter((item) => item.id !== context.tempItem.id),
+          }),
         );
+      }
+
+      if (error.message === "Unauthorized" || error.message === "authentication_required") {
+        toast.info("Login first to add to wishlist");
+        return;
       }
 
       console.error("Error adding to wishlist:", error);
@@ -165,10 +160,7 @@ export const useWishlistMutation = () => {
       return { previousData, previousDetails };
     },
     onError: (error, _, context) => {
-      const { previousData, previousDetails } = context as {
-        previousData?: WishlistListResponse;
-        previousDetails?: WishlistDetailsResponse;
-      };
+      const { previousData, previousDetails } = context ?? {};
 
       if (previousData && userId) {
         queryClient.setQueryData<WishlistListResponse>(

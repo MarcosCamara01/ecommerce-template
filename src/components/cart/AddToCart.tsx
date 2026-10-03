@@ -11,7 +11,6 @@ import { flyToBag } from "@/components/bag/fly-to-bag";
 import { Button } from "@/components/ui/button";
 import { useCartMutation } from "@/hooks/cart";
 import { useHydrated } from "@/hooks/useHydrated";
-import { useSession } from "@/lib/auth/client";
 import {
   type ProductSize,
   type ProductVariant,
@@ -47,7 +46,6 @@ export function AddToCart({
   className,
 }: AddToCartProps) {
   const { add: addToCart, isAdding } = useCartMutation();
-  const { data: session } = useSession();
   const isHydrated = useHydrated();
   const [added, setAdded] = useState(false);
   const [sheetItem, setSheetItem] = useState<AddedItem | null>(null);
@@ -55,24 +53,24 @@ export function AddToCart({
   const { run: throttledAddToCart } = useThrottleFn(
     () => {
       if (!size) return;
-      addToCart({ size, variantId: selectedVariant.id });
-      // Signed-out visitors get the sign-in toast from the mutation instead.
-      if (!session?.user) return;
-
-      const line = { name: displayName(product.name), color: selectedVariant.color, size };
-      if (window.matchMedia(DESKTOP).matches) {
-        void flyToBag(flySource()).then(() => {
-          bumpBag();
-          setAdded(true);
-          window.setTimeout(() => openBag(line), 160);
-        });
-      } else {
-        setSheetItem({
-          ...line,
-          price: product.price,
-          image: selectedVariant.images[0],
-        });
-      }
+      addToCart({ size, variantId: selectedVariant.id }, {
+        onSuccess: () => {
+          const line = { name: displayName(product.name), color: selectedVariant.color, size };
+          if (window.matchMedia(DESKTOP).matches) {
+            void flyToBag(flySource()).then(() => {
+              bumpBag();
+              setAdded(true);
+              window.setTimeout(() => openBag(line), 160);
+            });
+          } else {
+            setSheetItem({
+              ...line,
+              price: product.price,
+              image: selectedVariant.images[0],
+            });
+          }
+        },
+      });
     },
     { wait: 300 },
   );

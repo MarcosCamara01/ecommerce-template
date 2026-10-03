@@ -32,12 +32,12 @@ export default function EditProfile({
   manager: Manager;
   returnFocusRef: RefObject<HTMLElement | null>;
 }) {
-  const { data: session } = useSession();
+  const { data: session, refetch: refetchSession } = useSession();
   const router = useRouter();
   const nameRef = useRef<HTMLInputElement>(null);
 
   // No React Query cache holds the user's name: it lives in the Better Auth
-  // session store, and router.refresh() re-renders the server components.
+  // session store; refresh it before re-rendering the server components.
   // react-doctor-disable-next-line react-doctor/query-mutation-missing-invalidation
   const { mutate: updateProfile, isPending } = useMutation({
     mutationFn: async () => {
@@ -62,7 +62,8 @@ export default function EditProfile({
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await refetchSession();
       manager.close();
       router.refresh();
       toast.success("Profile updated successfully");

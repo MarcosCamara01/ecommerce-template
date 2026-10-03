@@ -7,6 +7,7 @@ import {
   getProductByIdForManager,
 } from "@/services/products.service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
@@ -22,9 +23,9 @@ async function DynamicEditProductContent({
 }) {
   const { id } = await params;
   const { restore } = await searchParams;
-  const productId = parseInt(id, 10);
+  const productId = parsePositiveIntegerId(id);
 
-  if (isNaN(productId)) {
+  if (productId === null) {
     notFound();
   }
 

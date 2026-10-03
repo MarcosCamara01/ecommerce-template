@@ -21,8 +21,8 @@ async function SearchResults({ searchParams }: SearchProps) {
   const filteredProducts = searchProducts(products, q);
   const title = q ? `“${q}”` : "Search";
   const titleStyle = {
-    "--title-m": fitDisplaySize(title, { maxPx: 120, budgetPx: 340, vwBudget: 88 }),
-    "--title-d": fitDisplaySize(title, { maxPx: 240, budgetPx: 1300, vwBudget: 90 }),
+    "--title-m": `max(32px, ${fitDisplaySize(title, { maxPx: 120, budgetPx: 340, vwBudget: 88 })})`,
+    "--title-d": `max(48px, ${fitDisplaySize(title, { maxPx: 240, budgetPx: 1300, vwBudget: 90 })})`,
   } as React.CSSProperties;
 
   return (

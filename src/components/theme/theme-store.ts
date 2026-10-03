@@ -9,7 +9,8 @@ const emit = () => listeners.forEach((listener) => listener());
 
 const hasStoredTheme = () => {
   try {
-    return localStorage.getItem(THEME_STORAGE_KEY) !== null;
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return stored === "light" || stored === "dark";
   } catch {
     return false;
   }

@@ -180,6 +180,7 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
             setActive(0);
           }}
           onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) return;
             if (event.key === "ArrowDown" && results.length > 0) {
               event.preventDefault();
               setActive((index) => (index + 1) % results.length);

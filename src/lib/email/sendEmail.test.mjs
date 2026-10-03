@@ -31,6 +31,21 @@ test("each durable email effect sends exactly one stable message", async () => {
   );
 });
 
+test("receipts preserve the bought product name and color after catalog edits", async () => {
+  const harness = loadEmailHarness();
+  const order = orderFixture();
+  order.orderProducts[0].variant.product.name = "Renamed catalog product";
+  order.orderProducts[0].variant.color = "Changed catalog color";
+
+  for (const delivery of ["customer", "owner"]) {
+    await harness.sendEmail(order, delivery, `work:7:email:${delivery}`);
+    const { html } = harness.messages.at(-1);
+    assert.match(html, /T-Shirt/);
+    assert.match(html, /Blue/);
+    assert.doesNotMatch(html, /Renamed catalog product|Changed catalog color/);
+  }
+});
+
 function loadEmailHarness() {
   const messages = [];
   const modules = {
@@ -86,6 +101,8 @@ function orderFixture() {
       quantity: 1,
       size: "M",
       unitAmount: 2500,
+      productName: "T-Shirt",
+      variantColor: "Blue",
       variant: {
         color: "Blue",
         product: { name: "T-Shirt" },

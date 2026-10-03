@@ -65,10 +65,10 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
       price,
       category,
       reset: () => {
-        setName("");
-        setDescription("");
-        setPrice("");
-        setCategory("");
+        setName(initialData?.name || "");
+        setDescription(initialData?.description || "");
+        setPrice(initialData?.price?.toString() || "");
+        setCategory(initialData?.category || "");
       },
     }));
 

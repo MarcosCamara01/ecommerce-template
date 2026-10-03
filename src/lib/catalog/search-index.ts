@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
+import { connection } from "next/server";
 
 import { dataAccess } from "@/lib/data-access";
 import {
@@ -13,6 +14,11 @@ import {
  * Cached under "products", which catalogue mutations revalidate.
  */
 export async function getSearchCatalog(): Promise<ProductWithVariants[]> {
+  await connection();
+  return getCachedSearchCatalog();
+}
+
+async function getCachedSearchCatalog(): Promise<ProductWithVariants[]> {
   "use cache";
   cacheTag("products");
   cacheLife("hours");

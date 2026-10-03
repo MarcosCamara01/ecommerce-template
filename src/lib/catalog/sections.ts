@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
+import { connection } from "next/server";
 
 import { shopSections, type ShopSection } from "@/constants/navigation";
 import { dataAccess } from "@/lib/data-access";
@@ -16,6 +17,11 @@ export type ShopSectionSummary = ShopSection & {
  * which catalogue mutations already revalidate.
  */
 export async function getShopSectionSummaries(): Promise<ShopSectionSummary[]> {
+  await connection();
+  return getCachedShopSectionSummaries();
+}
+
+async function getCachedShopSectionSummaries(): Promise<ShopSectionSummary[]> {
   "use cache";
   cacheTag("products");
   cacheLife("hours");
