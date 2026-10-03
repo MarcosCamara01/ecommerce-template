@@ -30,6 +30,8 @@ interface WishlistButtonProps {
   productId: ProductWithVariants["id"];
   productName: string;
   appearance?: Appearance;
+  /** On the wishlist page a saved piece shows a plain cross instead. */
+  showsRemove?: boolean;
   className?: string;
 }
 
@@ -41,6 +43,7 @@ const WishlistButton = ({
   productId,
   productName,
   appearance = "disc",
+  showsRemove = false,
   className,
 }: WishlistButtonProps) => {
   const isHydrated = useSyncExternalStore(
@@ -61,16 +64,13 @@ const WishlistButton = ({
   const { run: throttledToggle } = useThrottleFn(
     () => {
       if (isFavorite) {
-        // Removing is instant and quiet, with a way back.
-        removeFromWishlist(
-          { productId },
-          {
-            onSuccess: () =>
-              toast("Removed from wishlist", {
-                action: { label: "Undo", onClick: () => addToWishlist(productId) },
-              }),
-          },
-        );
+        // Removing is instant and quiet, with a way back. The toast is
+        // raised here, not in a mutate callback: on the wishlist page the
+        // card unmounts with the removal and its callbacks never run.
+        removeFromWishlist({ productId });
+        toast("Removed from wishlist", {
+          action: { label: "Undo", onClick: () => addToWishlist(productId) },
+        });
         return;
       }
       addToWishlist(productId);
@@ -126,7 +126,9 @@ const WishlistButton = ({
         className={cn(
           "press relative grid size-full place-items-center rounded-pill transition-[background-color,color,transform] duration-200",
           appearance === "disc" &&
-            (isFavorite ? "bg-[#111214] text-white" : "bg-white/85 text-[#111214]"),
+            (isFavorite && !showsRemove
+              ? "bg-[#111214] text-white"
+              : "bg-white/85 text-[#111214]"),
           appearance === "outline" &&
             (isFavorite ? "bg-fg text-bg" : "border border-line text-fg"),
         )}
@@ -135,7 +137,22 @@ const WishlistButton = ({
           key={celebration}
           className={cn("grid", celebration > 0 && isFavorite && "animate-pop")}
         >
-          <HeartIcon size={size.icon} filled={isFavorite} />
+          {showsRemove && isFavorite ? (
+            <svg
+              aria-hidden="true"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            >
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          ) : (
+            <HeartIcon size={size.icon} filled={isFavorite} />
+          )}
         </span>
       </button>
     </span>

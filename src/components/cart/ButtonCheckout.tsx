@@ -13,12 +13,14 @@ interface ButtonCheckoutProps {
   cartItemIds: CartItem["id"][];
   className?: string;
   children?: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 export const ButtonCheckout = ({
   cartItemIds,
   className,
   children = "Checkout",
+  icon,
 }: ButtonCheckoutProps) => {
   const { data: session } = useSession();
 
@@ -63,6 +65,7 @@ export const ButtonCheckout = ({
       onClick={() => buyProducts()}
       className={className}
       loading={isPending}
+      icon={icon}
       disabled={cartItemIds.length === 0}
     >
       {children}

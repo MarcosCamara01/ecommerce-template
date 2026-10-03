@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
+import { useHydrated } from "@/hooks/useHydrated";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +16,10 @@ const pill =
 /** "Hi, Alex" above an account page title. */
 export function AccountGreeting() {
   const { data: session } = useSession();
-  const firstName = session?.user?.name?.split(" ")[0];
+  // The session is only known in the browser; wait for hydration so the
+  // first client render matches the server's.
+  const hydrated = useHydrated();
+  const firstName = hydrated ? session?.user?.name?.split(" ")[0] : undefined;
   if (!firstName) return null;
   return <span className="text-sm text-muted">Hi, {firstName}</span>;
 }

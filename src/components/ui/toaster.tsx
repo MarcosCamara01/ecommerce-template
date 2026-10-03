@@ -18,7 +18,8 @@ export function Toaster() {
         classNames: {
           toast:
             "flex w-full items-center gap-3 rounded-toast bg-fg py-2 pl-[18px] pr-2 text-bg shadow-lift min-h-14",
-          title: "grow font-medium",
+          content: "grow",
+          title: "font-medium",
           description: "text-13 opacity-85",
           icon: "shrink-0",
           actionButton:

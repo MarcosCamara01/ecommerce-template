@@ -17,7 +17,14 @@ export type PreviewValues = {
  * product page (the same tint function the storefront uses).
  */
 export function StorefrontPreview({ values }: { values: PreviewValues }) {
-  const tint = tintForColor(values.color);
+  // Until a colour is typed the card sits on the neutral panel, as in the
+  // canvas, so it reads as a card instead of dissolving into the page.
+  const tint = values.color
+    ? tintForColor(values.color)
+    : {
+        light: { bg: "#F3F4F5", fg: "#111214" },
+        dark: { bg: "#1C1D1F", fg: "#ECEDEE" },
+      };
   const price = Number(values.price.replace(",", "."));
 
   return (
@@ -55,11 +62,11 @@ export function StorefrontPreview({ values }: { values: PreviewValues }) {
       <span className="flex justify-between gap-2.5">
         <span className="font-semibold">{values.name || "Product name"}</span>
         <span className="whitespace-nowrap tabular-nums">
-          {Number.isFinite(price) && price > 0 ? formatPriceFromEuros(price) : "—"}
+          {Number.isFinite(price) && price > 0 ? formatPriceFromEuros(price) : "— €"}
         </span>
       </span>
       <span className="text-13">
-        {values.color ? `${values.color} · the product page takes this colour` : "Add a colour to see the page tint"}
+        {values.color || "No colour yet"} · the product page takes this colour
       </span>
     </div>
   );

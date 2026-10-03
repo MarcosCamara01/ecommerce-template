@@ -27,7 +27,7 @@ async function SearchResults({ searchParams }: SearchProps) {
 
   return (
     <>
-      <section className="flex flex-col gap-5 pb-6 pt-3 lg:pt-12">
+      <section data-search-page="" className="flex flex-col gap-5 pb-6 pt-3 lg:pt-12">
         <span className="text-13 text-muted">Search results</span>
         <h1
           style={titleStyle}
@@ -38,8 +38,9 @@ async function SearchResults({ searchParams }: SearchProps) {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
           <SearchPill query={q} />
           <span className="text-sm text-muted" aria-live="polite">
-            {filteredProducts.length}{" "}
-            {filteredProducts.length === 1 ? "product" : "products"}
+            {filteredProducts.length === 0
+              ? "No matches"
+              : `${filteredProducts.length} ${filteredProducts.length === 1 ? "product" : "products"}`}
           </span>
         </div>
       </section>
@@ -53,7 +54,7 @@ async function SearchResults({ searchParams }: SearchProps) {
       ) : (
         <section className="flex flex-col gap-7 pb-24">
           <div className="flex max-w-[900px] flex-col gap-4">
-            <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(120px,8.3vw)]">
+            <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(112px,7.8vw)]">
               Nothing matches yet
             </h2>
             <p className="text-lg">

@@ -19,7 +19,7 @@ export async function generateMetadata() {
 
 const CartPage = () => {
   return (
-    <section data-bag-page="" className="flex flex-col gap-6 pb-24 lg:gap-8">
+    <section data-bag-page="" className="flex flex-col gap-6 pb-24">
       {/* Phones: back and theme only, like the canvas bag. */}
       <div className="-mx-2 flex h-14 items-center justify-between lg:hidden">
         <Link

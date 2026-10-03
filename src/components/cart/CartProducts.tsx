@@ -106,8 +106,11 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
             <dd className="font-display-75 text-[44px] font-extrabold leading-none">{subtotal}</dd>
           </div>
         </dl>
-        <ButtonCheckout cartItemIds={cartItemIds} className="h-16 text-base">
-          <LockIcon />
+        <ButtonCheckout
+          cartItemIds={cartItemIds}
+          icon={<LockIcon />}
+          className="h-16 text-base"
+        >
           Checkout securely
         </ButtonCheckout>
         <p className="text-center text-xs text-muted">

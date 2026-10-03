@@ -2,8 +2,8 @@ import { fitDisplaySize } from "@/lib/display-type";
 
 /**
  * Giant section title sized to its own word (phones: up to 120px across
- * 358px; desktop: up to 240px, or 69vw of the word's width) with the piece
- * count beside it.
+ * 320px, which leaves room for the two-digit count; desktop: up to 240px,
+ * or 69vw of the word's width) with the piece count beside it.
  */
 export function SectionHeading({
   title,
@@ -13,7 +13,7 @@ export function SectionHeading({
   count?: React.ReactNode;
 }) {
   const style = {
-    "--title-m": fitDisplaySize(title, { maxPx: 120, budgetPx: 358, vwBudget: 92 }),
+    "--title-m": fitDisplaySize(title, { maxPx: 120, budgetPx: 320, vwBudget: 82 }),
     "--title-d": fitDisplaySize(title, { maxPx: 240, budgetPx: 1000, vwBudget: 69 }),
   } as React.CSSProperties;
 

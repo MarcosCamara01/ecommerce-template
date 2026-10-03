@@ -199,7 +199,7 @@ export function ProductForm({
     setState({ success: false, message: "", errors: undefined });
   };
 
-  const title = mode === "create" ? "Create Product" : "Edit Product";
+  const title = mode === "create" ? "New product" : "Edit product";
   const subtitle =
     mode === "create"
       ? "Add a new product with variants and images to your store"

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { AccountNav } from "@/components/account/AccountNav";
 import { HeartIcon } from "@/components/icons";
 import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
@@ -20,9 +19,9 @@ export async function generateMetadata() {
 
 const WishlistPage = () => {
   return (
-    <section data-account-page="" className="flex flex-col gap-5 pb-24">
+    <section className="flex flex-col gap-5 pb-24 lg:gap-7">
       <div className="flex items-end justify-between gap-4 pt-3 lg:pt-12">
-        <h1 className="font-display text-[112px] leading-[0.8] lg:text-[min(240px,16vw)]">
+        <h1 className="font-display text-[88px] leading-[0.8] lg:text-[min(240px,16vw)]">
           Wishlist
         </h1>
         <Suspense fallback={null}>
@@ -104,22 +103,19 @@ const WishlistContent = async () => {
   }
 
   return (
-    <>
-      <AccountNav current="wishlist" />
-      <WishlistProducts
-        emptyState={
-          <EmptyWishlist
-            title="Nothing saved yet"
-            body="Tap the heart on any piece to keep it here for later."
-            actions={
-              <Link href="/new-in" className={buttonClass()}>
-                See what&apos;s new
-              </Link>
-            }
-          />
-        }
-      />
-    </>
+    <WishlistProducts
+      emptyState={
+        <EmptyWishlist
+          title="Nothing saved yet"
+          body="Tap the heart on any piece to keep it here for later."
+          actions={
+            <Link href="/new-in" className={buttonClass()}>
+              See what&apos;s new
+            </Link>
+          }
+        />
+      }
+    />
   );
 };
 

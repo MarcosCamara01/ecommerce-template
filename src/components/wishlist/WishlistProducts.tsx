@@ -36,7 +36,7 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
           />
         </Link>
         <span className="absolute right-2.5 top-2.5">
-          <WishlistButton productId={product.id} productName={product.name} />
+          <WishlistButton showsRemove productId={product.id} productName={product.name} />
         </span>
       </span>
       <Link href={href} className="flex justify-between gap-2.5 px-1">
@@ -115,9 +115,11 @@ export const WishlistCount = () => {
   const { items, isSuccess } = useWishlistDetails();
   if (!isSuccess) return null;
   return (
-    <span className="whitespace-nowrap pb-1.5 font-display text-[28px] font-extrabold normal-case leading-none tabular-nums lg:text-[56px]">
+    <span
+      aria-label={`${items.length} ${items.length === 1 ? "piece" : "pieces"}`}
+      className="pb-1.5 font-display text-[40px] font-extrabold leading-none tabular-nums lg:text-[64px]"
+    >
       {String(items.length).padStart(2, "0")}
-      <span className="opacity-65"> {items.length === 1 ? "piece" : "pieces"}</span>
     </span>
   );
 };

@@ -57,7 +57,7 @@ function OrdersMessage({
   return (
     <div className="flex flex-col items-start gap-5 pt-7">
       <div className="flex max-w-[760px] flex-col gap-4">
-        <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(120px,8.3vw)]">
+        <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(112px,7.8vw)]">
           {title}
         </h2>
         <p className="max-w-[520px] text-base lg:text-lg">{body}</p>

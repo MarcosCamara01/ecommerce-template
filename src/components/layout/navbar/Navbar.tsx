@@ -96,7 +96,12 @@ export const Navbar = ({
             aria-label="Search"
             aria-keyshortcuts="Meta+K /"
             onClick={() => openSearch()}
-            className={cn(iconButton, offBag)}
+            className={cn(
+              iconButton,
+              offBag,
+              // The search page marks itself with data-search-page.
+              "[body:has([data-search-page])_&]:bg-fg [body:has([data-search-page])_&]:text-bg",
+            )}
           >
             <SearchIcon />
           </button>
