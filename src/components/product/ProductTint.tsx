@@ -22,8 +22,8 @@ const vars = (tint: Tint, base: Tint, animate: boolean) => `
  * The inline <style> sets --bg/--fg on :root, so the navigation, text and
  * surfaces transition with them (registered with @property). Behind the
  * page, two fixed layers do the reveal: the previous colour, and the new one
- * growing as a circle from the swatch that was tapped. The style element
- * unmounts with the page, so no other route is ever tinted.
+ * growing as a circle from the swatch that was tapped. Disable the stylesheet
+ * while Activity retains the hidden page so it cannot tint another route.
  */
 export function ProductTint({
   tint,
@@ -66,7 +66,17 @@ export function ProductTint({
 
   return (
     <>
-      <style>{vars(tint, base, origin !== null)}</style>
+      <style
+        ref={(style) => {
+          if (!style) return;
+          style.media = "";
+          return () => {
+            style.media = "not all";
+          };
+        }}
+      >
+        {vars(tint, base, origin !== null)}
+      </style>
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 -z-10 bg-[var(--tint-base)] transition-[background-color] duration-200 ease-out"
