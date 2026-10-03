@@ -1,5 +1,6 @@
 "use client";
 
+import { displayName } from "@/utils/product-name";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -39,7 +40,7 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
         </span>
       </span>
       <Link href={href} className="flex justify-between gap-2.5 px-1">
-        <span className="font-medium">{product.name}</span>
+        <span className="font-medium">{displayName(product.name)}</span>
         <span className="whitespace-nowrap tabular-nums">{formatPriceFromEuros(product.price)}</span>
       </Link>
       <span className="flex items-center gap-1.5 px-1 text-13 text-muted">
@@ -114,7 +115,7 @@ export const WishlistCount = () => {
   const { items, isSuccess } = useWishlistDetails();
   if (!isSuccess) return null;
   return (
-    <span className="whitespace-nowrap pb-1.5 font-display text-[28px] font-extrabold leading-none tabular-nums lg:text-[56px]">
+    <span className="whitespace-nowrap pb-1.5 font-display text-[28px] font-extrabold normal-case leading-none tabular-nums lg:text-[56px]">
       {String(items.length).padStart(2, "0")}
       <span className="opacity-65"> {items.length === 1 ? "piece" : "pieces"}</span>
     </span>

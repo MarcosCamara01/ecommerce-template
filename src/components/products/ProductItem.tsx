@@ -1,3 +1,4 @@
+import { displayName } from "@/utils/product-name";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -43,7 +44,7 @@ export const ProductItem = ({
         <span className="flex justify-between gap-3 px-0.5 lg:px-1">
           <span className="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
             <span className="truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
-              {name}
+              {displayName(name)}
             </span>
             {color ? (
               <span className="flex items-center gap-1.5 text-xs lg:text-13">

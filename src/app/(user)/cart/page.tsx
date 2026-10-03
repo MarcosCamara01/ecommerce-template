@@ -7,6 +7,7 @@ import { BagCount } from "@/components/cart/CartProducts";
 import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getPrincipal } from "@/lib/identity";
 
 export async function generateMetadata() {
@@ -18,8 +19,30 @@ export async function generateMetadata() {
 
 const CartPage = () => {
   return (
-    <section className="flex flex-col gap-6 pb-24 lg:gap-8">
-      <h1 className="pt-2 font-display text-[120px] leading-[0.8] lg:pt-10 lg:text-[min(240px,16.6vw)]">
+    <section data-bag-page="" className="flex flex-col gap-6 pb-24 lg:gap-8">
+      {/* Phones: back and theme only, like the canvas bag. */}
+      <div className="-mx-2 flex h-14 items-center justify-between lg:hidden">
+        <Link
+          href="/new-in"
+          aria-label="Continue shopping"
+          className="press grid size-11 place-items-center rounded-pill"
+        >
+          <svg
+            aria-hidden="true"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          >
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </Link>
+        <ThemeToggle />
+      </div>
+      <h1 className="font-display text-[120px] leading-[0.8] lg:pt-10 lg:text-[min(240px,16.6vw)]">
         Bag
         <Suspense fallback={null}>
           <BagCount />

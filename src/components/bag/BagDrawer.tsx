@@ -1,5 +1,6 @@
 "use client";
 
+import { displayName } from "@/utils/product-name";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -98,7 +99,7 @@ export function BagDrawer() {
                     className="h-[108px] w-[84px] rounded-field bg-photo object-cover"
                   />
                   <span className="flex min-w-0 flex-col gap-1">
-                    <span className="font-medium">{item.product.name}</span>
+                    <span className="font-medium">{displayName(item.product.name)}</span>
                     <span className="text-13 text-muted">
                       {item.variant.color} · {item.size} · Qty {item.quantity}
                     </span>

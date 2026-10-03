@@ -1,3 +1,4 @@
+import { displayName } from "@/utils/product-name";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -54,7 +55,7 @@ export const CartProduct = ({
             href={productLink}
             className="font-medium leading-tight lg:font-display-75 lg:text-[30px] lg:leading-none lg:[word-spacing:0.1em]"
           >
-            {name}
+            {displayName(name)}
           </Link>
           <span className="flex items-center gap-2 text-xs text-muted lg:text-sm">
             <span

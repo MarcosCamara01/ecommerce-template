@@ -18,10 +18,10 @@ export function SectionHeading({
   } as React.CSSProperties;
 
   return (
-    <div className="flex items-end justify-between gap-6 pt-2 lg:pt-10">
+    <div className="flex items-end justify-between gap-2 pt-2 lg:gap-6 lg:pt-10">
       <h1
         style={style}
-        className="font-display text-[length:var(--title-m)] leading-[0.8] lg:text-[length:var(--title-d)]"
+        className="whitespace-nowrap font-display text-[length:var(--title-m)] leading-[0.8] lg:text-[length:var(--title-d)]"
       >
         {title}
       </h1>
@@ -32,7 +32,7 @@ export function SectionHeading({
 
 export function SectionCount({ count }: { count: number }) {
   return (
-    <span className="whitespace-nowrap pb-1.5 font-display text-[28px] font-extrabold leading-none tabular-nums lg:pb-3 lg:text-[56px]">
+    <span className="whitespace-nowrap pb-1.5 font-display text-[28px] font-extrabold normal-case leading-none tabular-nums lg:pb-3 lg:text-[56px]">
       {String(count).padStart(2, "0")}
       <span className="opacity-65 max-lg:sr-only"> pieces</span>
     </span>

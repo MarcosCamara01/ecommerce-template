@@ -1,5 +1,6 @@
 "use client";
 
+import { displayName } from "@/utils/product-name";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import Image from "next/image";
 import Link from "next/link";
@@ -107,7 +108,7 @@ export function SearchDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            "fixed inset-0 z-50 bg-black/45",
+            "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] backdrop-blur-[6px] dark:bg-black/55",
             !instant &&
               "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-150 data-[state=open]:duration-150",
           )}
@@ -269,7 +270,7 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
                       />
                       <span className="flex min-w-0 flex-col">
                         <span className="truncate font-medium">
-                          <Highlight text={product.name} query={term} />
+                          <Highlight text={displayName(product.name)} query={term} />
                         </span>
                         <span className="flex items-center gap-1.5 text-13 text-muted">
                           {color ? (

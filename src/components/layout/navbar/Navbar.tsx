@@ -29,6 +29,8 @@ const EditProfile = dynamic(() => import("./EditProfile"), {
 
 const iconButton =
   "press grid size-11 place-items-center rounded-pill text-fg hover:bg-card";
+// Store-only controls step aside on the bag page.
+const offBag = "[body:has([data-bag-page])_&]:hidden";
 
 
 export const Navbar = ({
@@ -77,24 +79,31 @@ export const Navbar = ({
             <NavLink
               key={section.key}
               href={section.href}
-              className="flex h-11 items-center rounded-pill px-4 text-sm hover:bg-card aria-[current=page]:bg-fg aria-[current=page]:text-bg"
+              className="flex h-11 items-center rounded-pill px-4 text-sm hover:bg-card aria-[current=page]:bg-fg aria-[current=page]:text-bg [body:has([data-bag-page])_&]:hidden"
             >
               {section.label}
             </NavLink>
           ))}
+          {/* The bag page trades the store links for a way back. */}
+          <Link
+            href="/new-in"
+            className="hidden h-11 items-center rounded-pill px-4 text-sm hover:bg-card [body:has([data-bag-page])_&]:flex"
+          >
+            Continue shopping
+          </Link>
           <button
             type="button"
             aria-label="Search"
             aria-keyshortcuts="Meta+K /"
             onClick={() => openSearch()}
-            className={iconButton}
+            className={cn(iconButton, offBag)}
           >
             <SearchIcon />
           </button>
           <NavLink
             href="/wishlist"
             aria-label="Wishlist"
-            className={cn(iconButton, "aria-[current=page]:bg-fg aria-[current=page]:text-bg")}
+            className={cn(iconButton, offBag, "aria-[current=page]:bg-fg aria-[current=page]:text-bg")}
           >
             <HeartIcon />
           </NavLink>
@@ -106,13 +115,16 @@ export const Navbar = ({
                 editProfileManager.open();
               }}
               // Account pages mark themselves with data-account-page.
-              className="[body:has([data-account-page])_&]:bg-fg [body:has([data-account-page])_&]:text-bg"
+              className={cn(
+                offBag,
+                "[body:has([data-account-page])_&]:bg-fg [body:has([data-account-page])_&]:text-bg",
+              )}
             />
           ) : (
             <Link
               href="/login"
               aria-label="Account"
-              className={iconButton}
+              className={cn(iconButton, offBag)}
             >
               <UserIcon />
             </Link>
@@ -124,7 +136,7 @@ export const Navbar = ({
 
       {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
       {/* The product page carries its own controls over the gallery. */}
-      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-admin-page])_&]:hidden [body:has([data-auth-page])_&]:hidden [body:has([data-product-page])_&]:hidden">
+      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-admin-page])_&]:hidden [body:has([data-bag-page])_&]:hidden [body:has([data-auth-page])_&]:hidden [body:has([data-product-page])_&]:hidden">
         <Link
           href="/"
           className="font-display text-[26px] font-extrabold leading-none"

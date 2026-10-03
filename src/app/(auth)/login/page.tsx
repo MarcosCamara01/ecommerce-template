@@ -93,6 +93,7 @@ function LoginContent() {
               name="email"
               autoComplete="email"
               required
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>
@@ -110,6 +111,7 @@ function LoginContent() {
               name="password"
               autoComplete="current-password"
               required
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>

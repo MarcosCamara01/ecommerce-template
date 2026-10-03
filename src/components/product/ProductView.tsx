@@ -145,7 +145,7 @@ export function ProductView({
           }
         />
 
-        <div className="flex flex-col gap-3.5 px-4 pb-32 pt-[18px] lg:sticky lg:top-[100px] lg:gap-7 lg:px-0 lg:pb-0 lg:pt-0">
+        <div className="flex min-w-0 flex-col gap-3.5 px-4 pb-32 pt-[18px] lg:sticky lg:top-[100px] lg:gap-7 lg:px-0 lg:pb-0 lg:pt-0">
           <div className="flex flex-col gap-3.5">
             <div className="hidden items-center justify-between gap-3 lg:flex">
               <span className="text-13">
@@ -161,8 +161,11 @@ export function ProductView({
                 {price}
               </span>
             </div>
-            <p className="max-w-[60ch] text-muted">{product.description}</p>
           </div>
+          {/* On phones the description follows the buying controls. */}
+          <p className="max-w-[60ch] text-muted max-lg:order-1 lg:-mt-3.5">
+            {product.description}
+          </p>
 
           <div className="flex flex-col gap-3">
             <span className="hidden text-sm lg:block">
@@ -171,7 +174,7 @@ export function ProductView({
             <div
               role="group"
               aria-label="Colour"
-              className="flex flex-wrap gap-2 lg:grid lg:grid-cols-2 lg:gap-2.5"
+              className="-mx-4 flex gap-2 overflow-x-auto px-4 py-0.5 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-2.5 lg:overflow-visible lg:px-0"
             >
               {product.variants.map((option) => {
                 const selected = option.id === variant.id;
@@ -182,7 +185,7 @@ export function ProductView({
                     aria-pressed={selected}
                     onClick={(event) => pickVariant(option, event)}
                     className={cn(
-                      "press flex h-12 items-center gap-2 rounded-pill pl-1 pr-3.5 text-left text-13 lg:h-auto lg:gap-3 lg:rounded-chip lg:p-1.5 lg:pr-3.5 lg:text-[15px]",
+                      "press flex h-12 shrink-0 items-center gap-2 whitespace-nowrap rounded-pill pl-1 pr-3.5 text-left text-13 lg:whitespace-normal lg:h-auto lg:gap-3 lg:rounded-chip lg:p-1.5 lg:pr-3.5 lg:text-[15px]",
                       selected
                         ? "border-[1.5px] border-fg lg:bg-card"
                         : "border border-line hover:border-fg",
@@ -249,7 +252,7 @@ export function ProductView({
             />
           </div>
 
-          <ul className="flex flex-col gap-2 text-sm">
+          <ul className="flex flex-col gap-2 text-sm max-lg:order-2">
             <li className="flex items-center gap-2.5">
               <svg
                 aria-hidden="true"
@@ -285,7 +288,7 @@ export function ProductView({
             </li>
           </ul>
 
-          {details}
+          <div className="max-lg:order-2">{details}</div>
         </div>
       </div>
     </>

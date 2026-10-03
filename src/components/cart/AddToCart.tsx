@@ -1,5 +1,6 @@
 "use client";
 
+import { displayName } from "@/utils/product-name";
 import { useState } from "react";
 
 import { useThrottleFn } from "ahooks";
@@ -58,7 +59,7 @@ export function AddToCart({
       // Signed-out visitors get the sign-in toast from the mutation instead.
       if (!session?.user) return;
 
-      const line = { name: product.name, color: selectedVariant.color, size };
+      const line = { name: displayName(product.name), color: selectedVariant.color, size };
       if (window.matchMedia(DESKTOP).matches) {
         void flyToBag(flySource()).then(() => {
           bumpBag();

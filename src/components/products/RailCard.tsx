@@ -1,3 +1,4 @@
+import { displayName } from "@/utils/product-name";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -32,7 +33,7 @@ export function RailCard({
         />
       </span>
       <span className="flex justify-between gap-3 px-1">
-        <span className="font-medium">{product.name}</span>
+        <span className="font-medium">{displayName(product.name)}</span>
         <span className="whitespace-nowrap tabular-nums">
           {formatPriceFromEuros(product.price)}
         </span>

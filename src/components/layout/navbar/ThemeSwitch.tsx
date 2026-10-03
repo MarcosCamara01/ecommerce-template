@@ -19,7 +19,7 @@ export function ThemeSwitchTrack({
     <span
       aria-hidden="true"
       className={cn(
-        "relative shrink-0 rounded-pill transition-colors duration-220 ease-in-out",
+        "relative block shrink-0 rounded-pill transition-colors duration-220 ease-in-out",
         size === "md" ? "h-8 w-[52px]" : "h-6 w-10",
         dark ? "bg-fg" : "bg-fg/25",
         className,
@@ -50,7 +50,7 @@ export function ThemeSwitch({ className }: { className?: string }) {
         const box = event.currentTarget.getBoundingClientRect();
         toggleTheme({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
       }}
-      className={cn("press rounded-pill", className)}
+      className={cn("press shrink-0 rounded-pill", className)}
     >
       <ThemeSwitchTrack />
     </button>

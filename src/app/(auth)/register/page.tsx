@@ -95,6 +95,7 @@ function RegisterContent() {
              
               name="name"
               autoComplete="name"
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>
@@ -115,6 +116,7 @@ function RegisterContent() {
              
               name="email"
               autoComplete="email"
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>
@@ -135,6 +137,7 @@ function RegisterContent() {
               autoComplete="new-password"
               aria-describedby="register-password-hint"
               required
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>

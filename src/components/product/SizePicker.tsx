@@ -41,7 +41,7 @@ export function SizePicker({
           aria-hidden="true"
           className={cn(
             "absolute left-0 top-0 rounded-pill bg-fg transition-transform duration-220 ease-in-out motion-reduce:transition-none",
-            compact ? "h-11" : "h-[52px]",
+            compact ? "h-11" : "h-11 lg:h-[52px]",
           )}
           style={{
             width: `calc((100% - ${gap * (n - 1)}px) / ${n})`,
@@ -62,7 +62,7 @@ export function SizePicker({
             onClick={() => onChange(size)}
             className={cn(
               "press relative rounded-pill border transition-[color,transform] duration-220 ease-in-out",
-              compact ? "h-11 text-13" : "h-[52px] text-sm",
+              compact ? "h-11 text-13" : "h-11 text-13 lg:h-[52px] lg:text-sm",
               selected
                 ? "border-transparent text-bg"
                 : inStock
