@@ -43,6 +43,7 @@
     "ahooks": "^3.9.5",
     "autoprefixer": "^10.4.21",
     "better-auth": "1.6.28",
+    "braces": "file:vendor/braces",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -72,6 +73,7 @@
     "@esbuild-kit/core-utils@3.3.2": {
       "esbuild": "0.25.12"
     },
+    "braces": "$braces",
     "defu": "6.1.5",
     "js-cookie": "3.0.8",
     "js-yaml": "4.3.2",
