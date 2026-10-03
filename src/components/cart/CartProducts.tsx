@@ -140,4 +140,3 @@ export const BagCount = () => {
   const count = items.reduce((total, item) => total + item.quantity, 0);
   return <span className="opacity-60"> ({count})</span>;
 };
-

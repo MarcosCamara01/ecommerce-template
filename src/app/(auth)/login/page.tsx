@@ -89,7 +89,7 @@ function LoginContent() {
               type="email"
               ref={emailRef}
               placeholder="name@example.com"
-             
+
               name="email"
               autoComplete="email"
               required

@@ -79,7 +79,7 @@
   "note": "Depth/cycle-only backport onto published3.0.3. Parse retains the published quote/comma behavior; unrelated differences already present in PR base master are intentionally omitted.",
   "privatePackage": {
     "name": "@ecommerce-template/braces-depth-safe",
-    "version": "0.0.0-private.1",
-    "note": "This is a private maintained backport, not a published upstream release."
+    "version": "3.0.4-depth-guard.1",
+    "note": "This is the private fork patch version on braces@3.0.3 source, not a published upstream release."
   }
 }

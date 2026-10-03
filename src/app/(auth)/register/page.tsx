@@ -92,7 +92,7 @@ function RegisterContent() {
               ref={nameRef}
               required
               placeholder="Alex Morgan"
-             
+
               name="name"
               autoComplete="name"
               aria-invalid={Boolean(error) || undefined}
@@ -113,7 +113,7 @@ function RegisterContent() {
               ref={emailRef}
               required
               placeholder="name@example.com"
-             
+
               name="email"
               autoComplete="email"
               aria-invalid={Boolean(error) || undefined}
