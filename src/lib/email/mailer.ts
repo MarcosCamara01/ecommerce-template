@@ -1,6 +1,6 @@
 import "server-only";
 
-import nodemailer from "nodemailer";
+import * as nodemailer from "nodemailer";
 
 type MailOptions = {
   to: string | string[];
