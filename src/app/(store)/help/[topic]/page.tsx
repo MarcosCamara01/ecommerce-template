@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { OrderSteps } from "@/components/orders/OrderSteps";
-import { ProductSizeZod } from "@/lib/db/drizzle/schema";
+import { SizeChart } from "@/components/help/SizeChart";
 import { cn } from "@/lib/utils";
 
 /**
@@ -31,7 +30,7 @@ const helpTopics = {
 
 type HelpTopic = keyof typeof helpTopics;
 
-const card = "flex flex-col gap-3.5 rounded-photo-lg border border-line bg-fg/5 p-[22px]";
+const card = "flex flex-col gap-3.5 rounded-photo-lg border border-line bg-fg/[0.04] p-[22px]";
 const inverted = "flex flex-wrap items-center gap-[18px] rounded-photo-lg bg-fg p-[22px] text-bg";
 
 export function generateStaticParams() {
@@ -102,60 +101,66 @@ export default async function HelpPage({
   );
 }
 
+const TEE = "M42 10 L28 14 L10 32 L22 44 L32 36 L32 84 L88 84 L88 36 L98 44 L110 32 L92 14 L78 10 Q60 22 42 10 Z";
+
 const MEASURES = [
-  ["Chest", "Around the fullest part of your chest, under your arms, tape level."],
-  ["Waist", "Around your natural waistline, keeping one finger under the tape."],
-  ["Length", "From the highest point of the shoulder straight down to the hem."],
+  {
+    name: "Chest",
+    how: "Around the fullest part of your chest, under your arms, tape level.",
+    outline: TEE,
+    tape: "M36 42 H84",
+    ends: "M36 38 v8 M84 38 v8",
+  },
+  {
+    name: "Waist",
+    how: "Around your natural waistline, keeping one finger under the tape.",
+    outline: "M36 8 H84 L90 84 H66 L60 34 L54 84 H30 Z",
+    tape: "M32 16 H88",
+    ends: "M32 12 v8 M88 12 v8",
+  },
+  {
+    name: "Length",
+    how: "From the highest point of the shoulder straight down to the hem.",
+    outline: TEE,
+    tape: "M60 16 V80",
+    ends: "M56 16 h8 M56 80 h8",
+  },
 ] as const;
+
+const MEASURE_NAMES = MEASURES.map((measure) => measure.name);
 
 function SizeGuide() {
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-3">
-        {MEASURES.map(([name, how], index) => (
-          <div key={name} className={card}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3">
+        {MEASURES.map((measure, index) => (
+          <div key={measure.name} className={card}>
+            <svg
+              viewBox="0 0 120 90"
+              className="h-[110px] w-full"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d={measure.outline} />
+              <path d={measure.tape} strokeDasharray="4 4" strokeWidth="2.4" />
+              <path d={measure.ends} />
+            </svg>
             <span className="font-display text-[40px] leading-[0.9]">
-              {String(index + 1).padStart(2, "0")} {name}
+              {String(index + 1).padStart(2, "0")} {measure.name}
             </span>
-            <span className="text-sm">{how}</span>
+            <span className="text-sm">{measure.how}</span>
           </div>
         ))}
       </div>
       <div className={card}>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="text-xl font-semibold">Size chart</h2>
-          <span className="text-13 text-muted">Body measurements in cm</span>
+          <span className="text-13">Body measurements in cm · tap your size</span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-separate border-spacing-x-1 text-center text-sm tabular-nums">
-            <thead>
-              <tr>
-                <th scope="col" className="pb-2.5 pr-2 text-left text-13 font-medium">
-                  Size
-                </th>
-                {ProductSizeZod.options.map((size) => (
-                  <th key={size} scope="col" className="min-w-10 pb-2.5 font-semibold">
-                    {size}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {MEASURES.map(([name]) => (
-                <tr key={name}>
-                  <th scope="row" className="border-t border-line py-3 pr-2 text-left font-medium">
-                    {name}
-                  </th>
-                  {ProductSizeZod.options.map((size) => (
-                    <td key={size} className="border-t border-line py-3 text-muted">
-                      [—]
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <SizeChart rows={MEASURE_NAMES} />
       </div>
       <div className={inverted}>
         <h2 className="font-display text-[44px] leading-[0.9]">Between sizes?</h2>
@@ -169,21 +174,21 @@ function SizeGuide() {
 }
 
 const DELIVERY_OPTIONS = [
-  { name: "Standard", time: "[X–Y BUSINESS DAYS]", price: "[PRICE]" },
-  { name: "Express", time: "[X–Y BUSINESS DAYS]", price: "[PRICE]" },
+  { name: "Standard", time: "[X–Y business days]", price: "[PRICE]" },
+  { name: "Express", time: "[X–Y business days]", price: "[PRICE]" },
 ] as const;
 
-const TRACK_NOTES = [
-  "Payment received. A confirmation email is on its way.",
-  "We are preparing and packing your order.",
-  "Handed to the carrier · [TRACKING DETAILS].",
-  "At your door. Your order page shows the date.",
-];
+const TRACK = [
+  ["Confirmed", "Payment received. A confirmation email is on its way."],
+  ["Processing", "We are preparing and packing your order."],
+  ["Shipped", "Handed to the carrier · [TRACKING DETAILS]."],
+  ["Delivered", "At your door. Your order page shows the date."],
+] as const;
 
 function Delivery() {
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3">
         {DELIVERY_OPTIONS.map((option) => (
           <div key={option.name} className={cn(card, "gap-2.5")}>
             <span className="font-display text-[44px] leading-[0.9]">{option.name}</span>
@@ -196,11 +201,22 @@ function Delivery() {
       </div>
       <div className={cn(card, "gap-4")}>
         <h2 className="text-xl font-semibold">Where your order is</h2>
-        <OrderSteps step={2} notes={TRACK_NOTES} />
+        <ol className="grid grid-cols-[repeat(auto-fit,minmax(min(150px,100%),1fr))] gap-3.5">
+          {TRACK.map(([label, body], index) => (
+            <li key={label} className="flex flex-col gap-2">
+              <span
+                aria-hidden="true"
+                className={cn("h-1.5 rounded-pill", index < 2 ? "bg-fg" : "bg-fg/25")}
+              />
+              <span className="font-semibold">{label}</span>
+              <span className="text-sm">{body}</span>
+            </li>
+          ))}
+        </ol>
       </div>
       <div className={cn(inverted, "justify-between")}>
         <h2 className="font-display text-[44px] leading-[0.9]">We ship to</h2>
-        <span className="font-medium">[COUNTRIES / REGIONS]</span>
+        <span className="text-base font-medium">[COUNTRIES / REGIONS]</span>
       </div>
     </>
   );
@@ -216,13 +232,13 @@ function Returns() {
   return (
     <>
       <div className={cn(inverted, "items-end gap-5")}>
-        <span className="font-display text-[96px] leading-[0.8] lg:text-[160px]">[N]</span>
+        <span className="font-display text-[120px] leading-[0.8] lg:text-[200px]">[N]</span>
         <div className="flex flex-col gap-1 pb-2">
           <h2 className="font-display text-[40px] leading-[0.9]">Days to return</h2>
           <p>From the day your order arrives · [RETURN WINDOW]</p>
         </div>
       </div>
-      <ol className="grid gap-3 sm:grid-cols-3">
+      <ol className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3">
         {RETURN_STEPS.map(([title, body], index) => (
           <li key={title} className={cn(card, "gap-2.5")}>
             <span className="font-display text-[64px] leading-[0.85]">
