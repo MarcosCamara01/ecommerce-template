@@ -17,6 +17,17 @@ const HOLD = "[data-hero-hold]";
 /** A piece's own controls: photo, name, size, add to bag. */
 const CLAIM = "[data-hero-claim]";
 
+/** The rotation toggle: it never holds, or it could not start it again. */
+const FREE = "[data-hero-free]";
+
+const holds = (target: EventTarget) =>
+  target instanceof Element &&
+  target.closest(HOLD) !== null &&
+  target.closest(FREE) === null;
+
+/** Every 5% of the hero that scrolls in or out is a chance to look again. */
+const VIEW_STEPS = Array.from({ length: 21 }, (_, step) => step / 20);
+
 const subscribeToVisibility = (onChange: () => void) => {
   document.addEventListener("visibilitychange", onChange);
   return () => document.removeEventListener("visibilitychange", onChange);
@@ -34,8 +45,9 @@ export const wrap = (value: number, count: number) =>
  *   resting pointer would hold it for no reason), while the hero is scrolled
  *   away, the tab is hidden or a dialog is open.
  * - Choosing a piece, a size or adding to the bag stops it for good; the
- *   toggle starts it again. Mark those controls with `data-hero-claim` and
- *   the areas that hold it with `data-hero-hold`.
+ *   toggle starts it again. Mark those controls with `data-hero-claim`, the
+ *   areas that hold it with `data-hero-hold` and the toggle with
+ *   `data-hero-free`.
  * - It never runs under reduced motion.
  */
 export function useHeroRotation(
@@ -59,17 +71,33 @@ export function useHeroRotation(
   );
   const lastAutoMove = useRef(Number.NEGATIVE_INFINITY);
 
-  const rotates = hydrated && count > 1 && !reducedMotion;
+  // The toggle is in the server's HTML, so nothing shifts when the page
+  // wakes up; the rotation itself only starts once it has.
+  const rotates = count > 1 && !reducedMotion;
   const playing =
-    rotates && !stopped && !pointed && !focused && inView && pageVisible;
+    hydrated &&
+    rotates &&
+    !stopped &&
+    !pointed &&
+    !focused &&
+    inView &&
+    pageVisible;
   const index = wrap(step, count);
 
   useEffect(() => {
     const region = regionRef.current;
     if (!region) return;
+    // In view while half of the hero is on screen or, where the hero is
+    // taller than the screen (a phone on its side), it fills half of it.
     const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.intersectionRatio >= 0.5),
-      { threshold: 0.5 },
+      ([entry]) => {
+        const screen = entry.rootBounds?.height ?? window.innerHeight;
+        setInView(
+          entry.intersectionRatio >= 0.5 ||
+            entry.intersectionRect.height >= screen / 2,
+        );
+      },
+      { threshold: VIEW_STEPS },
     );
     observer.observe(region);
     return () => observer.disconnect();
@@ -138,13 +166,10 @@ export function useHeroRotation(
     hold: {
       onPointerOver: (event: React.PointerEvent) => {
         if (event.pointerType !== "mouse") return;
-        setPointed(
-          event.target instanceof Element && event.target.closest(HOLD) !== null,
-        );
+        setPointed(holds(event.target));
       },
       onPointerLeave: () => setPointed(false),
-      onFocus: (event: React.FocusEvent) =>
-        setFocused(event.target.closest(HOLD) !== null),
+      onFocus: (event: React.FocusEvent) => setFocused(holds(event.target)),
       onBlur: (event: React.FocusEvent) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
       },

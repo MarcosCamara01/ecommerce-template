@@ -24,6 +24,7 @@ export function RotationToggle({
   return (
     <button
       type="button"
+      data-hero-free=""
       onClick={onToggle}
       aria-label={stopped ? "Resume automatic rotation" : "Pause automatic rotation"}
       className={cn(

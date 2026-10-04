@@ -89,13 +89,15 @@ export function HomeShowcase({
   return (
     <>
       {/* Desktop sizes come from --hero-u, 1px of the 880px canvas scaled to
-          the height of the screen (see .hero in globals.css). */}
+          the height of the screen (see .hero in globals.css). The fanned
+          cards are clipped at the sides; `hidden` is for browsers without
+          `clip`. */}
       <section
         ref={heroRef}
         aria-roledescription="carousel"
         aria-label="Featured pieces"
         {...rotation.hold}
-        className="hero relative isolate -mx-4 overflow-x-clip px-4 pb-10 lg:-mx-8 lg:h-[var(--hero-h)] lg:px-8 lg:pb-0 lg:pt-6"
+        className="hero relative isolate -mx-4 overflow-x-hidden overflow-x-clip px-4 pb-10 lg:-mx-8 lg:h-[var(--hero-h)] lg:px-8 lg:pb-0 lg:pt-6"
       >
         <div className="relative h-[470px] lg:static lg:h-auto">
           <p
