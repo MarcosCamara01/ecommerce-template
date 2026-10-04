@@ -62,8 +62,8 @@ function LoginContent() {
         action="/api/auth/email-form"
         onSubmit={handleSubmit}
       >
-        <input type="hidden" name="mode" value="sign-in" />
-        <input type="hidden" name="callbackURL" value={callbackURL} />
+        <Input type="hidden" name="mode" value="sign-in" className="hidden" />
+        <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
         {error && (
           <div
             role="alert"

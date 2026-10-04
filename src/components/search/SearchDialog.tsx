@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Suspense, use, useEffect, useId, useState } from "react";
 
 import { ArrowRightIcon, SearchIcon } from "@/components/icons";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { shopSections } from "@/constants/navigation";
 import { swatchBackground } from "@/constants/colors";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
@@ -161,11 +162,13 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
 
   return (
     <>
-      <label className="flex min-h-[68px] items-center gap-3 border-b border-line pl-5 pr-3">
-        <SearchIcon />
-        <span className="sr-only">Search products</span>
-        <input
+      <InputGroup variant="search">
+        <InputGroupAddon>
+          <SearchIcon />
+        </InputGroupAddon>
+        <InputGroupInput
           type="search"
+          aria-label="Search products"
           role="combobox"
           aria-expanded={results.length > 0}
           aria-controls={listId}
@@ -192,15 +195,16 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
               go(results[active] ? productHref(results[active]) : resultsHref);
             }
           }}
-          className="h-[52px] min-w-0 grow bg-transparent text-xl outline-none [&::-webkit-search-cancel-button]:hidden"
         />
-        <kbd className="hidden rounded-lg border border-line px-2 py-1 font-sans text-xs text-muted lg:block">
-          Esc
-        </kbd>
-        <DialogPrimitive.Close className="grid h-11 place-items-center px-2.5 font-medium lg:hidden">
-          Cancel
-        </DialogPrimitive.Close>
-      </label>
+        <InputGroupAddon align="inline-end">
+          <kbd className="hidden rounded-lg border border-line px-2 py-1 font-sans text-xs text-muted lg:block">
+            Esc
+          </kbd>
+          <DialogPrimitive.Close className="grid h-11 place-items-center px-2.5 font-medium lg:hidden">
+            Cancel
+          </DialogPrimitive.Close>
+        </InputGroupAddon>
+      </InputGroup>
 
       <div className="flex flex-col gap-[22px] overflow-y-auto p-5">
         {!term ? (

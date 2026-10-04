@@ -5,6 +5,8 @@ import test from "node:test";
 import ts from "typescript";
 
 const require = createRequire(import.meta.url);
+const inputSource = await readFile(new URL("../ui/input.tsx", import.meta.url), "utf8");
+const groupSource = await readFile(new URL("../ui/input-group.tsx", import.meta.url), "utf8");
 const source = await readFile(new URL("./SearchDialog.tsx", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
@@ -14,6 +16,30 @@ const compiled = ts.transpileModule(source, {
     esModuleInterop: true,
   },
 }).outputText;
+
+function loadUi(source, modules) {
+  const compiledUi = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      jsx: ts.JsxEmit.ReactJSX,
+      esModuleInterop: true,
+    },
+  }).outputText;
+  const result = { exports: {} };
+  new Function("require", "module", "exports", compiledUi)(
+    (id) => modules[id] ?? require(id), result, result.exports,
+  );
+  return result.exports;
+}
+
+const utils = { cn: (...values) => values.filter(Boolean).join(" ") };
+const inputUi = loadUi(inputSource, { "@/lib/utils": utils });
+const groupUi = loadUi(groupSource, {
+  "@/lib/utils": utils,
+  "./input": inputUi,
+  "./button": { Button: "button" },
+});
 
 function loadSearchInput() {
   const navigations = [];
@@ -30,6 +56,7 @@ function loadSearchInput() {
     "@radix-ui/react-dialog": { Close: "button" },
     "@/utils/product-name": { displayName: (value) => value },
     "@/components/icons": { ArrowRightIcon: "svg", SearchIcon: "svg" },
+    "@/components/ui/input-group": groupUi,
     "@/constants/navigation": { shopSections: [] },
     "@/constants/colors": { swatchBackground: () => "" },
     "@/lib/utils": { cn: (...values) => values.filter(Boolean).join(" ") },
@@ -46,7 +73,9 @@ function loadSearchInput() {
     (id) => modules[id] ?? require(id), panelModule, panelModule.exports,
   );
   const panel = panelModule.exports.qaPanel({ catalog: [] });
-  const input = panel.props.children[0].props.children.find((child) => child.type === "input");
+  const control = panel.props.children[0].props.children.find((child) => child.type === groupUi.InputGroupInput);
+  const wrappedInput = groupUi.InputGroupInput(control.props);
+  const input = inputUi.Input.render(wrappedInput.props, null);
   return { input, navigations };
 }
 

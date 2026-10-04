@@ -64,8 +64,8 @@ function RegisterContent() {
         onSubmit={handleSubmit}
         className="flex flex-col gap-4"
       >
-        <input type="hidden" name="mode" value="sign-up" />
-        <input type="hidden" name="callbackURL" value={callbackURL} />
+        <Input type="hidden" name="mode" value="sign-up" className="hidden" />
+        <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
         {error && (
           <div
             role="alert"

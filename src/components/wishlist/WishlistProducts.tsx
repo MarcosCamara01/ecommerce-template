@@ -9,6 +9,7 @@ import { AddToCart } from "@/components/cart/AddToCart";
 import { swatchBackground } from "@/constants/colors";
 import { useWishlistDetails } from "@/hooks/wishlist";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { ProductSize, ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
@@ -54,21 +55,18 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
       <div className="flex gap-1.5">
         <label className="relative h-11 w-16 shrink-0">
           <span className="sr-only">Size for {product.name}</span>
-          <select
+          <NativeSelect
+            variant="compact"
             value={size ?? ""}
             onChange={(event) => setSize(event.target.value as ProductSize)}
             disabled={variant.sizes.length === 0}
-            className="h-full w-full appearance-none rounded-pill border border-line bg-transparent pl-4 text-sm"
           >
             {variant.sizes.map((option) => (
-              <option key={option} value={option}>
+              <NativeSelectOption key={option} value={option}>
                 {option}
-              </option>
+              </NativeSelectOption>
             ))}
-          </select>
-          <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px]">
-            ▾
-          </span>
+          </NativeSelect>
         </label>
         <div className="grow">
           <AddToCart

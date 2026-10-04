@@ -8,6 +8,7 @@ import { AddToCart } from "@/components/cart/AddToCart";
 import { ArrowRightIcon } from "@/components/icons";
 import { SizePicker } from "@/components/product/SizePicker";
 import { RailCard } from "@/components/products/RailCard";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { shopSections } from "@/constants/navigation";
 import { swatchBackground } from "@/constants/colors";
 import type {
@@ -209,20 +210,17 @@ export function HomeShowcase({
           <div className="flex gap-2">
             <label className="relative h-14 w-[72px] shrink-0">
               <span className="sr-only">Size</span>
-              <select
+              <NativeSelect
+                variant="hero"
                 value={size ?? ""}
                 onChange={(event) => setPickedSize(event.target.value as ProductSize)}
-                className="press h-full w-full appearance-none rounded-pill border border-fg bg-transparent pl-[22px] font-medium"
               >
                 {variant.sizes.map((option) => (
-                  <option key={option} value={option}>
+                  <NativeSelectOption key={option} value={option}>
                     {option}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-              </select>
-              <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs">
-                ▾
-              </span>
+              </NativeSelect>
             </label>
             <div className="grow">
               <AddToCart
