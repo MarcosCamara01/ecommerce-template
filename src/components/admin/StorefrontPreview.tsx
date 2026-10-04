@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 
-import { tintForColor } from "@/lib/tint";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
 export type PreviewValues = {
@@ -12,33 +11,12 @@ export type PreviewValues = {
   image: string | null;
 };
 
-/**
- * How the product card will look, on the tint its first colour gives the
- * product page (the same tint function the storefront uses).
- */
+/** How the product card will look in the active storefront theme. */
 export function StorefrontPreview({ values }: { values: PreviewValues }) {
-  // Until a colour is typed the card sits on the neutral panel, as in the
-  // canvas, so it reads as a card instead of dissolving into the page.
-  const tint = values.color
-    ? tintForColor(values.color)
-    : {
-        light: { bg: "#F3F4F5", fg: "#111214" },
-        dark: { bg: "#1C1D1F", fg: "#ECEDEE" },
-      };
   const price = Number(values.price.replace(",", "."));
 
   return (
-    <div
-      className="flex flex-col gap-3 rounded-photo-lg bg-[var(--preview-bg)] p-4 text-[var(--preview-fg)] transition-[background-color,color] duration-600 ease-out dark:bg-[var(--preview-bg-dark)] dark:text-[var(--preview-fg-dark)]"
-      style={
-        {
-          "--preview-bg": tint.light.bg,
-          "--preview-fg": tint.light.fg,
-          "--preview-bg-dark": tint.dark.bg,
-          "--preview-fg-dark": tint.dark.fg,
-        } as React.CSSProperties
-      }
-    >
+    <div className="flex flex-col gap-3 rounded-photo-lg bg-field p-4 text-fg">
       <span className="text-xs font-semibold uppercase tracking-[0.08em]">
         Storefront preview
       </span>
@@ -66,7 +44,7 @@ export function StorefrontPreview({ values }: { values: PreviewValues }) {
         </span>
       </span>
       <span className="text-13">
-        {values.color || "No colour yet"} · the product page takes this colour
+        {values.color || "No colour yet"}
       </span>
     </div>
   );

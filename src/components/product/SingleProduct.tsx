@@ -4,7 +4,6 @@ import { getProduct } from "@/app/actions";
 import { shopSections } from "@/constants/navigation";
 import type { ProductVariant } from "@/lib/db/drizzle/schema";
 import { getBlurDataURL } from "@/lib/images/blur.server";
-import { tintForColor } from "@/lib/tint";
 
 import { EditProductButton } from "./EditProductButton";
 import { ProductInfo } from "./ProductInfo";
@@ -50,9 +49,6 @@ export const SingleProduct = async ({
   }
 
   const section = shopSections.find((entry) => entry.key === product.category);
-  const tints = Object.fromEntries(
-    product.variants.map((variant) => [variant.id, tintForColor(variant.color)]),
-  );
   // Placeholders only for the photos on screen at first paint.
   const blurDataURLs = Object.fromEntries(
     await Promise.all(
@@ -68,7 +64,6 @@ export const SingleProduct = async ({
       product={product}
       categoryLabel={section?.label ?? product.category}
       categoryHref={section?.href ?? `/${product.category}`}
-      tints={tints}
       initialVariantId={selectedVariant.id}
       blurDataURLs={blurDataURLs}
       editButton={<EditProductButton productId={product.id} />}

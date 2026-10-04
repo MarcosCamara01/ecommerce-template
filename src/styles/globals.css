@@ -5,22 +5,7 @@
 /*
  * Chromatic design tokens. DESIGN.md is the source of truth for values and
  * rules; this file only wires them to the page.
- *
- * --bg and --fg are registered so the product page can transition them when
- * a variant tints the whole page (see ProductTint). Every other surface is
- * derived from those two, so a tint or theme change carries through.
  */
-@property --bg {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: #e4e7ea;
-}
-
-@property --fg {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: #111214;
-}
 
 @layer base {
   :root {
@@ -71,8 +56,6 @@
     --err-line: #ff8d92;
   }
 
-  /* No html background: body's propagates to the canvas, so fixed layers at
-     z-index -1 (the product tint) paint above it. */
   html {
     -webkit-text-size-adjust: 100%;
   }
@@ -254,11 +237,6 @@
   from {
     opacity: 0;
   }
-}
-
-/* Freeze tinted colour transitions while the theme snapshot is taken. */
-:root[data-theme-switching] {
-  transition: none !important;
 }
 
 /* Toasts enter and leave through the bottom: transitions, so a repeated

@@ -66,8 +66,6 @@ export function setTheme(next: Theme, origin?: { x: number; y: number }) {
     return;
   }
 
-  // Tinted pages transition --fg/--bg; freeze that while the snapshot runs.
-  root.dataset.themeSwitching = "";
   const transition = document.startViewTransition(apply);
   transition.ready
     .then(() => {
@@ -90,9 +88,6 @@ export function setTheme(next: Theme, origin?: { x: number; y: number }) {
       );
     })
     .catch(() => {});
-  transition.finished.finally(() => {
-    delete root.dataset.themeSwitching;
-  });
 }
 
 export function toggleTheme(origin?: { x: number; y: number }) {

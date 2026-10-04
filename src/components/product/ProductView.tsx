@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import { AddToCart } from "@/components/cart/AddToCart";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -13,13 +13,10 @@ import type {
   ProductVariant,
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
-import type { Tint } from "@/lib/tint";
-import { prefersReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
 import { ProductImages } from "./ProductImages";
-import { ProductTint, type RevealOrigin } from "./ProductTint";
 import { SizePicker } from "./SizePicker";
 
 const ALL_SIZES = 6;
@@ -35,15 +32,13 @@ const overlayButton =
   "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214]";
 
 /**
- * The one page that takes the garment's colour. Picking a variant swaps
- * photos and sizes in place (the URL follows with replaceState) and floods
- * the page with the variant's tint from the tapped swatch.
+ * Picking a variant swaps photos and sizes in place; the URL follows with
+ * replaceState while the page keeps the selected light or dark theme.
  */
 export function ProductView({
   product,
   categoryLabel,
   categoryHref,
-  tints,
   initialVariantId,
   blurDataURLs,
   editButton,
@@ -52,18 +47,13 @@ export function ProductView({
   product: ProductWithVariants;
   categoryLabel: string;
   categoryHref: string;
-  /** Tint per variant id, computed once on the server. */
-  tints: Record<number, Tint>;
   initialVariantId: number;
   blurDataURLs: Record<string, string | null>;
   editButton: React.ReactNode;
   details: React.ReactNode;
 }) {
   const [variantId, setVariantId] = useState(initialVariantId);
-  // The variant whose colour the reveal grows over.
-  const [baseVariantId, setBaseVariantId] = useState(initialVariantId);
-  const [origin, setOrigin] = useState<RevealOrigin | null>(null);
-  const settle = useCallback(() => setBaseVariantId(variantId), [variantId]);
+  const [hasChangedVariant, setHasChangedVariant] = useState(false);
   const [pickedSize, setPickedSize] = useState<ProductSize | null>(null);
 
   const variant =
@@ -76,15 +66,9 @@ export function ProductView({
       : variant.sizes[0];
   const price = formatPriceFromEuros(product.price);
 
-  const pickVariant = (
-    next: ProductVariant,
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const pickVariant = (next: ProductVariant) => {
     if (next.id === variant.id) return;
-    const box = event.currentTarget.getBoundingClientRect();
-    setOrigin({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
-    // Grow over what is on screen now; reduced motion just crossfades.
-    setBaseVariantId(prefersReducedMotion() ? next.id : variant.id);
+    setHasChangedVariant(true);
     setVariantId(next.id);
     window.history.replaceState(
       null,
@@ -95,13 +79,6 @@ export function ProductView({
 
   return (
     <>
-      <ProductTint
-        tint={tints[variant.id]}
-        base={tints[baseVariantId] ?? tints[variant.id]}
-        origin={origin}
-        onSettled={settle}
-      />
-
       <div
         // Activity retains hidden pages in the DOM. Only the active product
         // should hide the mobile header and reserve space for its fixed CTA.
@@ -123,7 +100,7 @@ export function ProductView({
           name={product.name}
           selectedVariant={variant}
           blurDataURLs={blurDataURLs}
-          fadeIn={origin !== null}
+          fadeIn={hasChangedVariant}
           overlay={
             <>
               <Link
@@ -194,7 +171,7 @@ export function ProductView({
                     key={option.id}
                     type="button"
                     aria-pressed={selected}
-                    onClick={(event) => pickVariant(option, event)}
+                    onClick={() => pickVariant(option)}
                     className={cn(
                       "press flex h-12 shrink-0 items-center gap-2 whitespace-nowrap rounded-pill pl-1 pr-3.5 text-left text-13 lg:whitespace-normal lg:h-auto lg:gap-3 lg:rounded-chip lg:p-1.5 lg:pr-3.5 lg:text-[15px]",
                       selected

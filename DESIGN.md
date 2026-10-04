@@ -1,6 +1,6 @@
 ---
 name: Store — Chromatic
-description: A clothing store where the product page takes the colour of the garment, set in giant condensed type on a cool neutral ground.
+description: A clothing store with giant condensed type and fixed neutral light and dark themes on every page.
 colors:
   ground-light: "#E4E7EA"
   ink-light: "#111214"
@@ -137,16 +137,17 @@ components:
 
 ## Overview
 
-**Creative North Star: "The Fitting-Room Swatch"**
+**Creative North Star: "The Fitting Room"**
 
-The store is a cool, quiet grey room where the clothes do the talking. Everywhere except the product page, the ground is a neutral light grey (or a near-black in dark mode) and the type is ink. On the product page the whole room takes the colour of the garment you are looking at: pick Navy and the page floods navy from the swatch you tapped. Colour is earned by the product, never applied as decoration.
+The store is a cool, quiet grey room where the clothes do the talking. Every route, including product pages, uses the same neutral light grey ground in light mode or near-black ground in dark mode, with the corresponding ink. The active theme determines the page palette. Choosing a product or variant updates the clothing imagery and details while the page keeps that theme's neutral ground and ink.
 
-The voice is giant, condensed, black uppercase: Archivo at 62% width set so large it touches the edges of the viewport, scaled with `min(px, vw)`. Everything else is Geist at 15px, calm and legible. Controls are pills; photographs are soft-cornered tiles on their own pale ground so cut-outs and studio shots read the same on any tint.
+The voice is giant, condensed, black uppercase: Archivo at 62% width set so large it touches the edges of the viewport, scaled with `min(px, vw)`. Everything else is Geist at 15px, calm and legible. Controls are pills; photographs are soft-cornered tiles on their own pale ground so cut-outs and studio shots read consistently in both themes.
 
-Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for three moments (choosing a colour, saving to the wishlist, completing an order) and never repeats on back navigation.
+Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for three moments (switching themes, saving to the wishlist, completing an order) and never repeats on back navigation.
 
 **Key Characteristics:**
-- Neutral ground everywhere, garment colour only on the product page.
+
+- Two fixed neutral themes on every route, including product pages.
 - Condensed black uppercase display type at viewport scale.
 - Pills for every control, 24–28px tiles for every photo.
 - A floating glass navigation pill on desktop; a full-screen sheet on mobile.
@@ -157,26 +158,28 @@ Motion is physical and short: things press, slide from the edge they live on, an
 A two-value system: one ground and one ink per theme, with every other surface mixed from those two.
 
 ### Primary
+
 - **Ink** (`ink-light` / `ink-dark`): text, icons, primary buttons, the selected size pill, toasts. Primary buttons are ink-filled with ground-coloured text, so the accent is always the ink itself.
 
 ### Neutral
+
 - **Cool Ground** (`ground-light`): page background in light mode, and the text colour on ink-filled controls.
 - **Night Ground** (`ground-dark`): page background in dark mode.
 - **Panel** (`panel-light` / `panel-dark`): drawers, sheets, menus and dialogs that sit above the page.
 - **Field** (`field-light` / `field-dark`): text inputs and selects.
-- **Photo Ground** (`photo-ground`): the fixed pale backdrop behind every product photo, in both themes and on every tint.
+- **Photo Ground** (`photo-ground`): the fixed pale backdrop behind every product photo, in both themes and on every route.
 - **Lines and washes** (derived): hairlines are ink at 20% (`--line`), soft dividers 15%, selected-card wash 8% (`--card`), skeletons 10%, focus halo 15% (`--ring`). Secondary text is ink at 75% mixed into the ground (`--muted`), never a separate grey.
-- **Glass** (derived): the navigation pill is white at 45% over light text grounds and white at 10% over dark ones, blurred 20px. It follows the lightness of the ink, so it also adapts on a tinted product page.
+- **Glass** (derived): the navigation pill is white at 45% over light grounds and white at 10% over dark ones, blurred 20px. It follows the active light or dark theme on every route.
 
 ### Tertiary
+
 - **Error** (`error-*`): only for failures. Surface, ink and line variants per theme; never decorative.
 
 ### Named Rules
-**The Earned Colour Rule.** Only the product page changes the page colour, and only to the tint of the chosen variant. Every other page sits on Cool Ground or Night Ground.
+
+**The Fixed Themes Rule.** Every route uses Cool Ground and light-theme ink, or Night Ground and dark-theme ink. Product and variant choices never change the page palette.
 
 **The Two Values Rule.** New surfaces are mixed from `--bg` and `--fg` (`color-mix`), not picked from a palette. If a colour cannot be described as ink-at-N%, it needs a reason.
-
-**The Tint Contract.** A variant tint is four values: light ground, light ink, dark ground, dark ink. Known garment colours have hand-tuned tints; any other colour derives its tint from `colorMapping` and must clear 4.5:1 between ground and ink.
 
 ## Typography
 
@@ -186,6 +189,7 @@ A two-value system: one ground and one ink per theme, with every other surface m
 **Character:** a poster face for the shop window and a workmanlike grotesque for the shop floor. The display face is always condensed to 62%, weight 900, uppercase; the body face never shouts.
 
 ### Hierarchy
+
 - **Display** (900, `min(240px, 16vw)` down to `min(104px, 7.2vw)`, line-height 0.8–0.84): page titles such as the hero word, category names, "Bag", "Thank you.", "404".
 - **Headline** (900, `min(120px, 8.3vw)`, 0.85): section titles ("Wear it with", "Goes with …"). Mobile uses fixed sizes (50px menu, 120px listing).
 - **Title** (700, width 75%, 26–44px, 0.95–1): product names under a giant word.
@@ -195,9 +199,11 @@ A two-value system: one ground and one ink per theme, with every other surface m
 - **Price** (500, 18–26px): prices in their own line, tabular numerals.
 
 ### Display steps
+
 Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 50, 56, 64, 76, 88, 96, 112, 120 and 150px. Desktop display sizes are `min(px, vw)` pairs: 44, 56, 64, 96, 104, 120, 160, 190, 200, 240, 300 and 420px caps. Words that must fill a line (hero, section titles, search query) compute their size from the word's measured width (`src/lib/display-type.ts`).
 
 ### Named Rules
+
 **The Viewport Scale Rule.** Display sizes are always written as `min(<px>, <vw>)` so the word fills the width on any screen without overflowing. Hero words compute their size from the word's own em-width.
 
 **The One Voice Rule.** Archivo only appears condensed (62%, or 75% for product names). Never use it at normal width or in sentence case.
@@ -211,12 +217,14 @@ Desktop pages use a 32px side gutter, sections separated by 96px. Mobile uses a 
 Mostly flat. Depth comes from three soft, offset shadows and from the scrim behind drawers, never from borders plus shadows together.
 
 ### Shadow Vocabulary
+
 - **Float** (`0 10px 40px rgba(0,0,0,.12)`): the navigation pill.
 - **Lift** (`0 20px 50px rgba(0,0,0,.2)`): toasts, menus, the flying product photo.
 - **Hero** (`0 40px 100px rgba(0,0,0,.28)`): the home hero photo and modal dialogs.
 - **Drawer edge** (`-30px 0 80px rgba(0,0,0,.25)`): the bag drawer while open.
 
 ### Named Rules
+
 **The Flat-By-Default Rule.** Cards have no shadow at rest. Hover on a fine pointer lifts a card 4px and scales its photo to 1.03; nothing else.
 
 ## Shapes
@@ -226,6 +234,7 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 ## Components
 
 ### Buttons
+
 - **Shape:** full pill (999px).
 - **Primary:** ink fill, ground text, 600 weight, 56px tall (64px for Add to bag, 60px for Checkout).
 - **Hover / Press:** hover darkens to the hover tone; press scales to 0.97 in 120ms ease-out. Focus shows a 2px ink ring with a ground-coloured gap.
@@ -233,45 +242,53 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 - **Busy:** a 16px ring spinner before the label ("Adding…"). **Disabled:** dashed hairline, 65% opacity.
 
 ### Chips
+
 - **Size pills:** six equal pills, 52px tall. The selected pill is a single ink capsule that slides between sizes (220ms ease-in-out); out-of-stock sizes are dashed and struck through.
-- **Colour variants:** 20px-radius chips with a 48×60 thumbnail, name and stock line; the selected one has a 1.5px ink border and an 8% wash.
+- **Colour variants:** 20px-radius chips with a 48×60 thumbnail, name and stock line; the selected one has a 1.5px ink border and an 8% wash. Selection updates the product imagery and availability using the current theme's neutral controls.
 - **Filters:** 40px pills; selected is ink-filled.
 
 ### Cards / Containers
+
 - **Corner Style:** 24px photo tile; text sits below the photo, never on top.
 - **Background:** none; the photo tile carries Photo Ground.
 - **Shadow Strategy:** flat (see Elevation).
 - **Wishlist heart:** a 40px white disc on the photo's corner.
 
 ### Inputs / Fields
+
 - **Style:** 52px tall, 16px radius, Field background, hairline border.
 - **Focus:** border turns ink and a 4px halo at ink 15% appears.
 - **Error:** error-line border with the message below in error ink.
 
 ### Navigation
+
 - **Desktop:** a centred floating pill (6px padding) with the STORE wordmark, category links, icon buttons (44px), the theme toggle and an ink "Bag · n" pill. The current category is ink-filled. Glass background blurred 20px.
 - **Mobile:** a 56px bar with the wordmark and 44px icon buttons; the menu is a full-screen sheet with 50px condensed category rows and thumbnails, account tiles, help links and a dark-mode switch.
 
 ### Bag Drawer (signature)
+
 A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss.
 
 ### Motion (implementation map)
+
 - Tokens: CSS `--ease-out`, `--ease-in-out`, `--ease-drawer` in `globals.css`; the same curves and the drag spring for JS in `src/lib/motion.ts`.
-- CSS transitions and keyframes for predetermined motion (press, size pill, card lift, toasts, photo swaps, hero letters, confetti, tiles); WAAPI for the colour reveal and the add-to-bag flight; the View Transitions API for the theme switch; Motion only for sheets (exits) and drag (`BottomSheet`).
-- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; colour changes crossfade in 200ms; sheets fade.
+- CSS transitions and keyframes for predetermined motion (press, size pill, card lift, toasts, photo swaps, hero letters, confetti, tiles); WAAPI for the add-to-bag flight; the View Transitions API for the light/dark theme switch; Motion only for sheets (exits) and drag (`BottomSheet`).
+- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; themes switch instantly; sheets fade.
 
 ## Do's and Don'ts
 
 ### Do:
+
 - **Do** derive every surface from `--bg` and `--fg`; use `color-mix` for washes and lines.
 - **Do** write display sizes as `min(px, vw)` and keep Archivo at 62% width, weight 900, uppercase.
 - **Do** put every product photo on Photo Ground (#E4E7EA) with a 24–28px radius.
-- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, colour reveal 600–650ms, theme 500ms.
+- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, theme switch 500ms.
 - **Do** keep fades and drop movement under `prefers-reduced-motion`.
 - **Do** leave merchant facts the code does not define (delivery, returns, measurements, fit, address) as visible placeholders.
 
 ### Don't:
-- **Don't** tint any page other than the product page.
+
+- **Don't** derive page backgrounds or ink from a product or variant colour.
 - **Don't** animate opening search with ⌘K or "/", typing results, filters, sorting or tab switches.
 - **Don't** celebrate removals: unsaving a wishlist item or emptying the bag is instant.
 - **Don't** add borders and shadows to the same element, or shadows to cards at rest.
