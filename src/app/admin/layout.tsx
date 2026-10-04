@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Admin | Ecommerce Template",
+};
+
 /** Admin context sits below the global store navigation. */
 export default function AdminLayout({
   children,

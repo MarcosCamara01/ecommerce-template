@@ -7,6 +7,10 @@ import { RailCard } from "@/components/products/RailCard";
 import { SearchPill } from "@/components/search/SearchPill";
 import { fitDisplaySize } from "@/lib/display-type";
 
+export const metadata = {
+  title: "Search | Ecommerce Template",
+};
+
 interface SearchProps {
   searchParams: Promise<{ q: string | undefined }>;
 }
@@ -63,7 +67,7 @@ async function SearchResults({ searchParams }: SearchProps) {
             </p>
           </div>
           <div className={grid}>
-            {products
+            {[...products]
               .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
               .slice(0, 4)
               .map((product) => (

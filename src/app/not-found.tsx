@@ -6,6 +6,10 @@ import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { getSearchCatalog } from "@/lib/catalog/search-index";
 
+export const metadata = {
+  title: "Page not found | Ecommerce Template",
+};
+
 export default function NotFound() {
   return (
     <div data-error-page="" className="pb-12 lg:pb-24">
