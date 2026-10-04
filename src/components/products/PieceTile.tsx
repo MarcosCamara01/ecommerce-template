@@ -12,7 +12,8 @@ import { QuickAdd } from "./QuickAdd";
 
 /**
  * The photo tile of a product card, with the card's hover. Put `group/piece`
- * on the card: while it is pointed at or focused,
+ * on the card: while it is pointed at, or holds keyboard focus (not the
+ * focus a mouse click leaves behind, which would keep the card open),
  *
  * - the piece's next photo rises over the first like a sheet (clip-path,
  *   500ms ease-out) and settles from a slight zoom, then drops back;
@@ -73,14 +74,14 @@ export function PieceTile({
           className="object-cover"
         />
         {canHover && nextSrc && nextSrc !== src ? (
-          <span className="absolute inset-0 transition-[clip-path,opacity] duration-300 ease-out [clip-path:inset(100%_0_0_0_round_24px_24px_0_0)] group-focus-within/piece:[clip-path:inset(0_0_0_0_round_0px)] group-hover/piece:duration-500 group-hover/piece:[clip-path:inset(0_0_0_0_round_0px)] motion-reduce:opacity-0 motion-reduce:[clip-path:none] motion-reduce:group-focus-within/piece:opacity-100 motion-reduce:group-hover/piece:opacity-100">
+          <span className="absolute inset-0 transition-[clip-path,opacity] duration-300 ease-out [clip-path:inset(100%_0_0_0_round_24px_24px_0_0)] group-has-[:focus-visible]/piece:[clip-path:inset(0_0_0_0_round_0px)] group-hover/piece:duration-500 group-hover/piece:[clip-path:inset(0_0_0_0_round_0px)] motion-reduce:opacity-0 motion-reduce:[clip-path:none] motion-reduce:group-has-[:focus-visible]/piece:opacity-100 motion-reduce:group-hover/piece:opacity-100">
             <Image
               fill
               data-fly=""
               src={nextSrc}
               alt=""
               sizes={sizes}
-              className="scale-110 object-cover transition-transform duration-300 ease-out group-focus-within/piece:scale-100 group-hover/piece:scale-100 group-hover/piece:duration-700 motion-reduce:scale-100"
+              className="scale-110 object-cover transition-transform duration-300 ease-out group-has-[:focus-visible]/piece:scale-100 group-hover/piece:scale-100 group-hover/piece:duration-700 motion-reduce:scale-100"
             />
           </span>
         ) : null}
