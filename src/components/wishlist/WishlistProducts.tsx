@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 
 import { AddToCart } from "@/components/cart/AddToCart";
-import { PiecePhoto } from "@/components/products/PiecePhoto";
+import { PieceTile } from "@/components/products/PieceTile";
 import { swatchBackground } from "@/constants/colors";
 import { useWishlistDetails } from "@/hooks/wishlist";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,30 +19,26 @@ import WishlistButton from "./WishlistButton";
 function SavedPiece({ product }: { product: ProductWithVariants }) {
   const variant = product.variants[0];
   const [size, setSize] = useState<ProductSize | undefined>(variant?.sizes[0]);
-  const photoRef = useRef<HTMLSpanElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
   if (!variant) return null;
   const href = `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`;
 
   return (
-    <article className="flex flex-col gap-2.5">
-      <span ref={photoRef} className="relative block overflow-hidden rounded-photo bg-photo">
-        <Link
-          href={href}
-          tabIndex={-1}
-          aria-hidden="true"
-          className="group/piece relative block aspect-[3/4]"
-        >
-          <PiecePhoto
-            src={variant.images[0] ?? product.img}
-            nextSrc={variant.images[1]}
-            alt=""
-            sizes="(max-width: 1023px) 50vw, 25vw"
-          />
-        </Link>
+    <article className="group/piece flex flex-col gap-2.5">
+      {/* The card has its own size and add row, so no quick add here. */}
+      <PieceTile
+        ref={photoRef}
+        product={product}
+        variant={variant}
+        href={href}
+        src={variant.images[0] ?? product.img}
+        sizes="(max-width: 1023px) 50vw, 25vw"
+        quickAdd={false}
+      >
         <span className="absolute right-2.5 top-2.5">
           <WishlistButton showsRemove productId={product.id} productName={product.name} />
         </span>
-      </span>
+      </PieceTile>
       <Link href={href} className="flex justify-between gap-2.5 px-1">
         <span className="font-medium">{displayName(product.name)}</span>
         <span className="whitespace-nowrap tabular-nums">{formatPriceFromEuros(product.price)}</span>

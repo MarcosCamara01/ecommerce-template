@@ -10,7 +10,10 @@ const EASE_IN_OUT = "cubic-bezier(0.77, 0, 0.175, 1)";
  */
 export function flyToBag(source: HTMLElement | null): Promise<void> {
   const target = document.querySelector<HTMLElement>("[data-bag-target]");
-  const photo = source?.querySelector("img");
+  // A card showing its second photo marks it: that is the one in view.
+  const photo =
+    source?.querySelector<HTMLImageElement>("img[data-fly]") ??
+    source?.querySelector("img");
   if (!source || !photo || !target || prefersReducedMotion()) {
     return Promise.resolve();
   }
