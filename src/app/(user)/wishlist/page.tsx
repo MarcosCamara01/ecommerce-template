@@ -21,7 +21,8 @@ const WishlistPage = () => {
   return (
     <section className="flex flex-col gap-5 pb-24 lg:gap-7">
       <div className="flex items-end justify-between gap-4 pt-3 lg:pt-12">
-        <h1 className="font-display text-[88px] leading-[0.8] lg:text-[min(240px,16vw)]">
+        {/* The title shares its row with the count: it scales down on narrow phones. */}
+        <h1 className="font-display text-[min(88px,20vw)] leading-[0.8] lg:text-[min(240px,16vw)]">
           Wishlist
         </h1>
         <Suspense fallback={null}>
@@ -64,7 +65,7 @@ function EmptyWishlist({
 }
 
 async function Starters() {
-  const starters = (await getAllProducts())
+  const starters = [...(await getAllProducts())]
     .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
     .slice(0, 4);
   if (starters.length === 0) return null;

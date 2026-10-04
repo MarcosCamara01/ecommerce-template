@@ -16,7 +16,7 @@ interface OrderCardProps {
 
 /** Orders list row: up to three photos, number, status, progress, totals. */
 export function OrderCard({ order }: OrderCardProps) {
-  const { totalItems, totalPrice, deliveryDate, orderDate, status } =
+  const { totalItems, totalPrice, delivery, orderDate, status } =
     orderViewModel(order);
   const thumbs = order.orderProducts.slice(0, 3);
 
@@ -59,12 +59,12 @@ export function OrderCard({ order }: OrderCardProps) {
         </div>
         <OrderSteps step={status.step} labelled={false} className="gap-1" />
         <dl className="flex flex-wrap gap-x-7 gap-y-2 text-sm">
-          <div className="flex flex-col">
-            <dt className="text-xs text-muted">
-              {order.status === "delivered" ? "Delivered" : "Expected delivery"}
-            </dt>
-            <dd className="font-medium">{format(deliveryDate, "dd MMM yyyy")}</dd>
-          </div>
+          {delivery ? (
+            <div className="flex flex-col">
+              <dt className="text-xs text-muted">{delivery.label}</dt>
+              <dd className="font-medium">{format(delivery.date, "dd MMM yyyy")}</dd>
+            </div>
+          ) : null}
           <div className="flex flex-col">
             <dt className="text-xs text-muted">Items</dt>
             <dd className="font-medium tabular-nums">{totalItems}</dd>

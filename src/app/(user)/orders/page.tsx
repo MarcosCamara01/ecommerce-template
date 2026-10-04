@@ -24,7 +24,7 @@ const UserOrders = () => {
     <section data-account-page="" className="flex flex-col gap-5 pb-24">
       <div className="flex flex-col gap-5 pt-3 lg:pt-12">
         <AccountGreeting />
-        <h1 className="font-display text-[112px] leading-[0.8] lg:text-[min(240px,16vw)]">
+        <h1 className="font-display text-[min(112px,29vw)] leading-[0.8] lg:text-[min(240px,16vw)]">
           Orders
         </h1>
       </div>
@@ -73,7 +73,7 @@ function OrdersMessage({
 }
 
 async function Starters() {
-  const starters = (await getAllProducts())
+  const starters = [...(await getAllProducts())]
     .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
     .slice(0, 4);
   if (starters.length === 0) return null;

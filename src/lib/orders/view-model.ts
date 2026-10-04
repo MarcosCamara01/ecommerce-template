@@ -17,6 +17,15 @@ export function orderViewModel(order: {
     ),
     totalPrice: formatPriceFromCents(order.customerInfo.totalPrice),
     deliveryDate: new Date(order.deliveryDate),
+    // What the order says about delivery: the day it arrived, the day it is
+    // expected, or nothing once it is cancelled.
+    delivery:
+      order.status === "cancelled"
+        ? null
+        : {
+            label: order.status === "delivered" ? "Delivered" : "Expected delivery",
+            date: new Date(order.deliveryDate),
+          },
     orderDate: new Date(order.createdAt),
     status: orderStatusPresentation(order.status),
   };

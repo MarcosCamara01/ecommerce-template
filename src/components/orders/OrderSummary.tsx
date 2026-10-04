@@ -15,7 +15,7 @@ interface OrderSummaryProps {
 
 /** Status, dates, totals and the delivery address for one order. */
 export function OrderSummary({ order }: OrderSummaryProps) {
-  const { totalItems, totalPrice, deliveryDate, orderDate, status } =
+  const { totalItems, totalPrice, delivery, orderDate, status } =
     orderViewModel(order);
   const address = order.customerInfo?.address;
   const delivered = order.status === "delivered";
@@ -25,11 +25,14 @@ export function OrderSummary({ order }: OrderSummaryProps) {
       <h2 className="text-lg font-semibold">Order status</h2>
       <OrderSteps
         step={status.step}
+        // A cancelled order went no further than being placed.
         notes={[
           format(orderDate, "dd MMM"),
           status.step === 2 ? "Now" : "",
-          "—",
-          `${delivered ? "" : "Est. "}${format(deliveryDate, "dd MMM")}`,
+          delivery ? "—" : "",
+          delivery
+            ? `${delivered ? "" : "Est. "}${format(delivery.date, "dd MMM")}`
+            : "",
         ]}
       />
 
@@ -38,8 +41,14 @@ export function OrderSummary({ order }: OrderSummaryProps) {
         <dd className="text-right font-medium">{order.orderNumber}</dd>
         <dt className="text-muted">Order date</dt>
         <dd className="text-right font-medium">{format(orderDate, "dd MMM yyyy")}</dd>
-        <dt className="text-muted">Expected delivery</dt>
-        <dd className="text-right font-medium">{format(deliveryDate, "dd MMM yyyy")}</dd>
+        {delivery ? (
+          <>
+            <dt className="text-muted">{delivery.label}</dt>
+            <dd className="text-right font-medium">
+              {format(delivery.date, "dd MMM yyyy")}
+            </dd>
+          </>
+        ) : null}
         <dt className="text-muted">
           {totalItems} {totalItems === 1 ? "item" : "items"}
         </dt>
