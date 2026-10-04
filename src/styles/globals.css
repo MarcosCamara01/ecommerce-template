@@ -155,17 +155,6 @@
   .press:active:not(:disabled) {
     transform: scale(0.97);
   }
-
-  /* Product cards: pointing at one underlines its name. Nothing moves and
-     no shadow appears. Fine pointers only, so it never sticks after a tap.
-     `.piece` covers cards whose photo and name are separate links. */
-  @media (hover: hover) and (pointer: fine) {
-    .piece-link:hover .piece-name,
-    .piece:has(.piece-link:hover) .piece-name {
-      text-decoration-line: underline;
-      text-underline-offset: 3px;
-    }
-  }
 }
 
 /* Items that arrive with a panel: 50ms stagger via --i, after the panel. */

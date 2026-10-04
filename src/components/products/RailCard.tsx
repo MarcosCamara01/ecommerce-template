@@ -1,13 +1,14 @@
 import { displayName } from "@/utils/product-name";
-import Image from "next/image";
 import Link from "next/link";
 
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
+import { PiecePhoto } from "./PiecePhoto";
+
 /**
  * A plain product tile for rails ("Wear it with", "Goes with"): 24px photo
- * tile, name and price below. Pointing at it underlines the name.
+ * tile, name and price below. Pointing at it shows the next photo.
  */
 export function RailCard({
   product,
@@ -22,18 +23,17 @@ export function RailCard({
     : `/${product.category}/${product.id}`;
 
   return (
-    <Link href={href} className="piece-link flex flex-col gap-3">
+    <Link href={href} className="group/piece flex flex-col gap-3">
       <span className="relative block aspect-[3/4] overflow-hidden rounded-photo bg-photo">
-        <Image
-          fill
+        <PiecePhoto
           src={variant?.images[0] ?? product.img}
+          nextSrc={variant?.images[1]}
           alt={product.name}
           sizes={sizes}
-          className="object-cover"
         />
       </span>
       <span className="flex justify-between gap-3 px-1">
-        <span className="piece-name font-medium">{displayName(product.name)}</span>
+        <span className="font-medium">{displayName(product.name)}</span>
         <span className="whitespace-nowrap tabular-nums">
           {formatPriceFromEuros(product.price)}
         </span>

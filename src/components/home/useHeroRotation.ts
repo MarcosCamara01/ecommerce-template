@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { useHydrated } from "@/hooks/useHydrated";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 /** How long a piece stays up before the hero moves on to the next one. */
 export const HERO_DWELL_MS = 6000;
@@ -15,14 +16,6 @@ const HOLD = "[data-hero-hold]";
 
 /** A piece's own controls: photo, name, size, add to bag. */
 const CLAIM = "[data-hero-claim]";
-
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
-
-const subscribeToReducedMotion = (onChange: () => void) => {
-  const media = window.matchMedia(REDUCED_MOTION);
-  media.addEventListener("change", onChange);
-  return () => media.removeEventListener("change", onChange);
-};
 
 const subscribeToVisibility = (onChange: () => void) => {
   document.addEventListener("visibilitychange", onChange);
@@ -58,11 +51,7 @@ export function useHeroRotation(
   const [focused, setFocused] = useState(false);
   const [inView, setInView] = useState(true);
   const hydrated = useHydrated();
-  const reducedMotion = useSyncExternalStore(
-    subscribeToReducedMotion,
-    () => window.matchMedia(REDUCED_MOTION).matches,
-    () => false,
-  );
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const pageVisible = useSyncExternalStore(
     subscribeToVisibility,
     () => document.visibilityState === "visible",

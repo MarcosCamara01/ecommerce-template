@@ -1,8 +1,9 @@
 import { displayName } from "@/utils/product-name";
-import Image from "next/image";
 import Link from "next/link";
 
 import WishlistButton from "@/components/wishlist/WishlistButton";
+
+import { PiecePhoto } from "./PiecePhoto";
 import { swatchBackground } from "@/constants/colors";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
@@ -16,7 +17,7 @@ interface ProductItemProps {
 /**
  * Listing card: photo on its own pale tile, name, colour dot and price,
  * with the wishlist heart on the photo's corner. Pointing at the card
- * underlines its name; nothing moves.
+ * shows the piece's next photo; nothing moves.
  */
 export const ProductItem = ({
   product,
@@ -31,20 +32,19 @@ export const ProductItem = ({
 
   return (
     <article className="relative">
-      <Link href={productLink} className="piece-link flex flex-col gap-2 lg:gap-3">
+      <Link href={productLink} className="group/piece flex flex-col gap-2 lg:gap-3">
         <span className="relative block aspect-[3/4] overflow-hidden rounded-[18px] bg-photo lg:rounded-photo">
-          <Image
-            fill
+          <PiecePhoto
             src={img}
+            nextSrc={variants[0]?.images[1]}
             alt={name}
             priority={priority}
             sizes={sizes}
-            className="object-cover"
           />
         </span>
         <span className="flex justify-between gap-3 px-0.5 lg:px-1">
           <span className="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
-            <span className="piece-name truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
+            <span className="truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
               {displayName(name)}
             </span>
             {color ? (

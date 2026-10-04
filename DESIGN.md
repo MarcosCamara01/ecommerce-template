@@ -143,7 +143,7 @@ The store is a cool, quiet grey room where the clothes do the talking. Every rou
 
 The voice is giant, condensed, black uppercase: Archivo at 62% width set so large it touches the edges of the viewport, scaled with `min(px, vw)`. Everything else is Geist at 15px, calm and legible. Controls are pills; photographs are soft-cornered tiles on their own pale ground so cut-outs and studio shots read consistently in both themes.
 
-Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for two moments (saving to the wishlist, completing an order) and never repeats on back navigation. Hover and the theme switch are quiet: colour only, nothing moves.
+Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for two moments (saving to the wishlist, completing an order) and never repeats on back navigation. Hover and the theme switch are quiet: nothing moves.
 
 **Key Characteristics:**
 
@@ -227,7 +227,7 @@ Mostly flat. Depth comes from three soft, offset shadows and from the scrim behi
 
 **The Flat Card Rule.** Cards have no shadow, at rest or on hover, and never move.
 
-**The Quiet Hover Rule.** Pointing at something answers with colour only, in 150ms or less: an 8% ink wash and an ink-filled arrow on a section row, an underlined name on a product card. Nothing lifts, grows or appears. Hover is limited to pointers that can hover, so it never sticks after a tap.
+**The Quiet Hover Rule.** Pointing at something answers in place, in 150ms or less, and nothing moves: a section row gets an 8% ink wash and an ink-filled arrow; a product card crossfades to the piece's next photo. Nothing lifts, grows, casts a shadow or pops in from outside, and names are not underlined. Hover is limited to pointers that can hover, so it never sticks after a tap and touch screens never download the second photo.
 
 ## Shapes
 
@@ -254,7 +254,7 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 - **Corner Style:** 24px photo tile; text sits below the photo, never on top.
 - **Background:** none; the photo tile carries Photo Ground.
 - **Shadow Strategy:** flat (see Elevation).
-- **Hover:** the name underlines (3px offset); the photo stays still.
+- **Hover:** the tile crossfades to the piece's next photo (the second of its first colour: a closer look, on the model). The tile itself stays still.
 - **Wishlist heart:** a 40px white disc on the photo's corner.
 
 ### Inputs / Fields
@@ -310,6 +310,6 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 - **Don't** animate opening search with ⌘K or "/", typing results, filters, sorting or tab switches.
 - **Don't** celebrate removals: unsaving a wishlist item or emptying the bag is instant.
 - **Don't** add borders and shadows to the same element, or shadows to cards.
-- **Don't** animate the light/dark switch, or make a hover lift, zoom or reveal anything.
+- **Don't** animate the light/dark switch, or make a hover lift, zoom, cast a shadow or underline a product name.
 - **Don't** use grey text: secondary text is ink at 75–85%.
 - **Don't** invent shipping, returns or sizing policies.
