@@ -31,6 +31,8 @@ export const CartProduct = ({
 }: CartProductProps) => {
   const { name, price, category, id } = product;
   const productLink = `/${category}/${id}?variant=${encodeURIComponent(variant.color)}`;
+  // The same piece can be in the bag in two sizes: the controls say which.
+  const lineName = `${displayName(name)}, ${variant.color}, size ${size}`;
 
   return (
     <article className="grid grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line py-3 lg:grid-cols-[150px_minmax(0,1fr)_auto] lg:items-stretch lg:gap-6 lg:py-5">
@@ -71,15 +73,15 @@ export const CartProduct = ({
             <ProductCartInfo
               cartItemId={cartItemId}
               quantity={quantity}
-              productName={name}
+              productName={lineName}
               compact
             />
           </span>
           <span className="max-lg:hidden">
-            <ProductCartInfo cartItemId={cartItemId} quantity={quantity} productName={name} />
+            <ProductCartInfo cartItemId={cartItemId} quantity={quantity} productName={lineName} />
           </span>
           <span className="max-lg:hidden">
-            <DeleteButton cartItemId={cartItemId} productName={name} />
+            <DeleteButton cartItemId={cartItemId} productName={lineName} />
           </span>
         </div>
       </div>
@@ -88,7 +90,7 @@ export const CartProduct = ({
           {formatPriceFromEuros(price * quantity)}
         </span>
         <span className="lg:hidden">
-          <DeleteButton cartItemId={cartItemId} productName={name} />
+          <DeleteButton cartItemId={cartItemId} productName={lineName} />
         </span>
       </div>
     </article>

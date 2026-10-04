@@ -4,6 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, m, useReducedMotion, type PanInfo } from "motion/react";
 import { useRef, useState } from "react";
 
+import { useFocusReturn } from "@/hooks/useFocusReturn";
 import { DRAG_SPRING, EASE_DRAWER, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,7 @@ export function BottomSheet({
   children: React.ReactNode;
 }) {
   const reduceMotion = useReducedMotion();
+  const focusReturn = useFocusReturn();
   const panelRef = useRef<HTMLDivElement>(null);
   const [releaseVelocity, setReleaseVelocity] = useState<number | null>(null);
 
@@ -79,6 +81,7 @@ export function BottomSheet({
             <Dialog.Content
               forceMount
               asChild
+              {...focusReturn}
               {...(description ? {} : { "aria-describedby": undefined })}
             >
               <m.div

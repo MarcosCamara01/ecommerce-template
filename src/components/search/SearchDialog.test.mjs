@@ -59,6 +59,7 @@ function loadSearchInput() {
     "@/components/ui/input-group": groupUi,
     "@/constants/navigation": { shopSections: [] },
     "@/constants/colors": { swatchBackground: () => "" },
+    "@/hooks/useFocusReturn": { useFocusReturn: () => ({}) },
     "@/lib/utils": { cn: (...values) => values.filter(Boolean).join(" ") },
     "@/utils/formatters": { formatPriceFromEuros: String },
     "@/utils/search": { searchProducts: () => [] },

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCartDetails } from "@/hooks/cart";
+import { useFocusReturn } from "@/hooks/useFocusReturn";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
 import { setBagOpen, useBagUi } from "./bag-ui";
@@ -26,6 +27,7 @@ import { setBagOpen, useBagUi } from "./bag-ui";
  */
 export function BagDrawer() {
   const { open, added } = useBagUi();
+  const focusReturn = useFocusReturn();
   const { items, isLoading } = useCartDetails();
   const count = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce(
@@ -37,6 +39,7 @@ export function BagDrawer() {
     <Sheet open={open} onOpenChange={setBagOpen}>
       <SheetContent
         side="right"
+        {...focusReturn}
         className="w-[min(460px,100vw)] gap-5 bg-bg p-7 shadow-[-30px_0_80px_rgba(0,0,0,.25)]"
       >
         <div className="flex items-center justify-between">

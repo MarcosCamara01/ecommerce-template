@@ -83,9 +83,16 @@ export function AddToCart({
       <Button
         type="button"
         size={compact ? "xs" : "lg"}
-        disabled={!isHydrated || soldOut || isAdding}
+        disabled={!isHydrated || soldOut}
+        // Busy rather than disabled while the request runs: a disabled
+        // button drops keyboard focus to the top of the page.
         aria-busy={isAdding || undefined}
-        onClick={() => (added ? openBag() : throttledAddToCart())}
+        aria-disabled={isAdding || undefined}
+        onClick={() => {
+          if (isAdding) return;
+          if (added) openBag();
+          else throttledAddToCart();
+        }}
         className={cn("w-full", className)}
       >
         {soldOut

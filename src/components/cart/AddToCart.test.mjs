@@ -23,12 +23,15 @@ for (const desktop of [true, false]) {
     try {
       harness.render().button.onClick();
       await new Promise(setImmediate);
-      assert.equal(harness.render().button.disabled, true);
+      assert.equal(harness.render().button["aria-busy"], true);
+      assert.equal(harness.render().button.disabled, false, "a busy button keeps keyboard focus");
+      harness.render().button.onClick();
+      assert.equal(harness.submissions.length, 1, "a click while adding adds nothing");
       harness.assertNoConfirmation();
 
       harness.reject(new Error("Request rejected"));
       await assert.rejects(harness.completion(), { message: "Request rejected" });
-      assert.equal(harness.render().button.disabled, false);
+      assert.equal(harness.render().button["aria-busy"], undefined);
       harness.assertNoConfirmation();
 
       harness.render().button.onClick();

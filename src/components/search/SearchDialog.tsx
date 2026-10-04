@@ -11,6 +11,7 @@ import { ArrowRightIcon, SearchIcon } from "@/components/icons";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { shopSections } from "@/constants/navigation";
 import { swatchBackground } from "@/constants/colors";
+import { useFocusReturn } from "@/hooks/useFocusReturn";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
@@ -83,6 +84,7 @@ export function SearchDialog({
   catalog: Promise<ProductWithVariants[]>;
 }) {
   const { open, instant } = useSearchUi();
+  const focusReturn = useFocusReturn();
 
   // ⌘K / Ctrl+K anywhere, and "/" when not typing in a field.
   useEffect(() => {
@@ -116,6 +118,7 @@ export function SearchDialog({
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
+          {...focusReturn}
           className={cn(
             "fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none lg:inset-auto lg:left-1/2 lg:top-24 lg:max-h-[calc(100vh-140px)] lg:w-[min(720px,calc(100%-32px))] lg:-translate-x-1/2 lg:rounded-photo-lg",
             !instant &&

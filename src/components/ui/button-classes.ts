@@ -1,8 +1,12 @@
 import { cva } from "class-variance-authority";
 
-/** Pill button classes, shared by <Button> and links styled as buttons. */
+/**
+ * Pill button classes, shared by <Button> and links styled as buttons. A
+ * button waiting on a request is `aria-busy`, not disabled: it looks the
+ * same but keeps keyboard focus.
+ */
 export const buttonClass = cva(
-  "press inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-pill font-semibold transition-[transform,background-color,color,opacity] duration-120 ease-out disabled:pointer-events-none disabled:opacity-65",
+  "press inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-pill font-semibold transition-[transform,background-color,color,opacity] duration-120 ease-out disabled:pointer-events-none disabled:opacity-65 aria-busy:pointer-events-none aria-busy:opacity-65",
   {
     variants: {
       variant: {

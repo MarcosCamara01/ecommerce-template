@@ -161,7 +161,8 @@ export const Navbar = ({
               }}
               onCloseAutoFocus={(event) => {
                 if (searchAfterMenuCloseRef.current) {
-                  event.preventDefault();
+                  // The menu button takes focus back first, so closing the
+                  // search returns there.
                   searchAfterMenuCloseRef.current = false;
                   queueMicrotask(() => openSearch());
                   return;
