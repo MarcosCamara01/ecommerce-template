@@ -124,6 +124,11 @@ module.exports = {
           from: { opacity: "0", transform: "translateY(28px) scale(0.96)" },
           to: { opacity: "1", transform: "translateY(0) scale(1)" },
         },
+        // Hero rotation ring: fills while a piece is up (pathLength 100).
+        dwell: {
+          from: { strokeDashoffset: "100" },
+          to: { strokeDashoffset: "0" },
+        },
         // Confetti: falls from the top to --fall, drifting --dx, turning --rot.
         fall: {
           from: { transform: "translate(0, -30px) rotate(0deg)", opacity: "1" },
@@ -143,6 +148,8 @@ module.exports = {
         "fade-scale": "fade-scale 600ms var(--ease-out) both",
         tile: "tile 600ms var(--ease-out) both",
         fall: "fall var(--dur) var(--ease-in-out) var(--delay) both",
+        // Constant motion; the duration is set where it is used.
+        dwell: "dwell linear both",
       },
       screens: {
         xs: "350px",

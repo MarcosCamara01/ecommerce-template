@@ -204,13 +204,13 @@ Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 5
 
 ### Named Rules
 
-**The Viewport Scale Rule.** Display sizes are always written as `min(<px>, <vw>)` so the word fills the width on any screen without overflowing. Hero words compute their size from the word's own em-width.
+**The Viewport Scale Rule.** Display sizes are always written as `min(<px>, <vw>)` so the word fills the width on any screen without overflowing. Hero words compute their size from the word's own em-width, capped by the hero's height on short screens.
 
 **The One Voice Rule.** Archivo only appears condensed (62%, or 75% for product names). Never use it at normal width or in sentence case.
 
 ## Layout
 
-Desktop pages use a 32px side gutter, sections separated by 96px. Mobile uses a 16px gutter. Grids are fluid (`repeat(auto-fit, minmax(min(280px, 100%), 1fr))` on desktop, two columns on mobile with 18px × 10px gaps). The product page is a 7fr / 5fr split with a sticky buy column (top 100px). Category bands on the home page run edge to edge with hairlines between them. The footer ends in the STORE wordmark at `min(420px, 29vw)`. No page scrolls horizontally at 390px.
+Desktop pages use a 32px side gutter, sections separated by 96px. Mobile uses a 16px gutter. Grids are fluid (`repeat(auto-fit, minmax(min(280px, 100%), 1fr))` on desktop, two columns on mobile with 18px × 10px gaps). The product page is a 7fr / 5fr split with a sticky buy column (top 100px). The home hero is one screen tall on desktop: its height is the viewport minus the navigation, between 560px and the 880px of the canvas, and its photo, type and offsets scale with that height (`--hero-u`, one canvas pixel), so the piece's name, sizes and Add to bag are always on the first screen. Category bands on the home page run edge to edge with hairlines between them. The footer ends in the STORE wordmark at `min(420px, 29vw)`. No page scrolls horizontally at 390px.
 
 ## Elevation & Depth
 
@@ -267,6 +267,16 @@ The global navigation stays at the top of the viewport while scrolling on mobile
 - **Desktop:** a centred floating pill (6px padding), sticky at the top, with the STORE wordmark, category links, icon buttons (44px), the theme toggle and an ink "Bag · n" pill. The current category is ink-filled. Glass background blurred 20px over an opaque themed header surface, so scrolling photos cannot obscure the controls.
 - **Mobile:** a sticky 56px bar at the top with the wordmark and 44px icon buttons; the menu is a full-screen sheet with 50px condensed category rows and thumbnails, account tiles, help links and a dark-mode switch.
 
+### Home Hero (signature)
+
+A carousel of the newest pieces. The piece's word fills the width behind a deck of photos: the current piece upright in front, the next two fanned out to its right (the next one peeks in from the edge on phones). Its details and quick add sit bottom-left, the counter, rotation toggle and "Next piece" bottom-right.
+
+- **Rotation:** the piece changes by itself every 6 seconds. The ring on the toggle fills over that time, so a change never comes as a surprise.
+- **It waits** while the pointer or keyboard focus is on the piece's details and quick add, while the hero is scrolled away, the tab is hidden or a dialog is open. The photos do not hold it: they fill the middle of the screen, where a resting pointer would stop it for no reason.
+- **It stops** when the visitor chooses a piece, a size or adds to the bag; the toggle starts it again. A click that lands within half a second of an automatic change is dropped, because it was aimed at the piece that just left.
+- **Touch:** the front photo can be swiped to the next or previous piece.
+- **Reduced motion:** no rotation and no toggle; pieces change by hand and cross-fade in place.
+
 ### Bag Drawer (signature)
 
 A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss.
@@ -274,8 +284,9 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 ### Motion (implementation map)
 
 - Tokens: CSS `--ease-out`, `--ease-in-out`, `--ease-drawer` in `globals.css`; the same curves and the drag spring for JS in `src/lib/motion.ts`.
-- CSS transitions and keyframes for predetermined motion (press, size pill, card lift, toasts, photo swaps, hero letters, confetti, tiles); WAAPI for the add-to-bag flight; the View Transitions API for the light/dark theme switch; Motion only for sheets (exits) and drag (`BottomSheet`).
-- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; themes switch instantly; sheets fade.
+- CSS transitions and keyframes for predetermined motion (press, size pill, card lift, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight; the View Transitions API for the light/dark theme switch; Motion only for sheets (exits) and drag (`BottomSheet`).
+- The hero deck moves with transitions (transform and opacity, 700ms ease-out), one place per piece, so rapid changes retarget; the rotation ring is the only linear motion. A swipe follows the finger and the card carries on from where it is let go.
+- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; themes switch instantly; sheets fade.
 
 ## Do's and Don'ts
 
@@ -286,6 +297,7 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 - **Do** put every product photo on Photo Ground (#E4E7EA) with a 24–28px radius.
 - **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, theme switch 500ms.
 - **Do** keep fades and drop movement under `prefers-reduced-motion`.
+- **Do** give anything that moves by itself a visible pause control, and stop it once the visitor acts on it.
 - **Do** leave merchant facts the code does not define (delivery, returns, measurements, fit, address) as visible placeholders.
 
 ### Don't:

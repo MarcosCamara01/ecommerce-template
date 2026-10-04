@@ -85,3 +85,22 @@ export const ArrowUpRightIcon = ({ size = 22, className }: IconProps) => (
     <path d="M7 17 17 7M8 7h9v9" />
   </svg>
 );
+
+export const PauseIcon = ({ size = 16, className }: IconProps) => (
+  <svg {...base(size)} strokeWidth="2.2" strokeLinecap="round" className={className}>
+    <path d="M9 6.5v11M15 6.5v11" />
+  </svg>
+);
+
+/** Sits a little right of centre, where a triangle looks centred. */
+export const PlayIcon = ({ size = 16, className }: IconProps) => (
+  <svg
+    {...base(size)}
+    fill="currentColor"
+    strokeWidth="1.8"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M9 6.5v11l9-5.5-9-5.5Z" />
+  </svg>
+);

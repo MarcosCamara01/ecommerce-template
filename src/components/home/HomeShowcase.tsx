@@ -19,6 +19,10 @@ import type {
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
+import { HeroDeck } from "./HeroDeck";
+import { RotationToggle } from "./RotationToggle";
+import { useHeroRotation } from "./useHeroRotation";
+
 export type HeroPiece = {
   product: ProductWithVariants;
   variant: ProductVariant;
@@ -33,13 +37,16 @@ export type HeroPiece = {
 
 const CATEGORY_SECTIONS = shopSections.filter((section) => section.key !== "new-in");
 
-// The entrance plays on the first load of the session and when the visitor
-// changes piece, never when they come back to the home page.
+// The entrance plays on the first load of the session and on every change of
+// piece, never when the visitor comes back to the home page.
 let entrancePlayed = false;
 
 /**
- * Home: a hero word that rises letter by letter behind the piece's photo,
- * quick add, the pieces by colour, the section bands and a "Goes with" rail.
+ * Home: a hero that fits the first screen and works as a carousel. The word
+ * rises letter by letter behind a deck of photos (the piece in front, the
+ * next ones fanned out behind it) and the piece changes by itself until the
+ * visitor takes over. Below: the pieces by colour, the section bands and a
+ * "Goes with" rail.
  */
 export function HomeShowcase({
   pieces,
@@ -48,11 +55,12 @@ export function HomeShowcase({
   pieces: HeroPiece[];
   bands: React.ReactNode;
 }) {
-  const [index, setIndex] = useState(0);
-  // 0 = no entrance; every change of piece bumps it to replay.
-  const [entrance, setEntrance] = useState(() => (entrancePlayed ? 0 : 1));
+  const heroRef = useRef<HTMLElement>(null);
+  const rotation = useHeroRotation(pieces.length, heroRef);
+  const { index, moves } = rotation;
+  const [firstLoad] = useState(() => !entrancePlayed);
   const [pickedSize, setPickedSize] = useState<ProductSize | null>(null);
-  const photoRef = useRef<HTMLDivElement>(null);
+  const deckRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     entrancePlayed = true;
   }, []);
@@ -62,19 +70,33 @@ export function HomeShowcase({
   const size =
     pickedSize && variant.sizes.includes(pickedSize) ? pickedSize : variant.sizes[0];
   const productHref = `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`;
+  // The photo that flies to the bag is the card in front.
+  const frontCard = () =>
+    deckRef.current?.querySelector<HTMLElement>('[data-deck-slot="0"]') ?? null;
 
-  const show = (next: number) => {
-    if (next === index) return;
-    setIndex(next);
-    setEntrance((count) => count + 1);
-  };
-
-  const animate = entrance > 0;
+  const animate = firstLoad || moves > 0;
   const word = piece.word.toUpperCase().split("");
+  const toggle = rotation.rotates ? (
+    <RotationToggle
+      playing={rotation.playing}
+      stopped={rotation.stopped}
+      cycle={moves}
+      onToggle={rotation.toggle}
+      className="size-11 lg:size-[52px]"
+    />
+  ) : null;
 
   return (
     <>
-      <section className="relative -mx-4 overflow-hidden px-4 pb-10 lg:-mx-8 lg:min-h-[880px] lg:px-8 lg:pt-6">
+      {/* Desktop sizes come from --hero-u, 1px of the 880px canvas scaled to
+          the height of the screen (see .hero in globals.css). */}
+      <section
+        ref={heroRef}
+        aria-roledescription="carousel"
+        aria-label="Featured pieces"
+        {...rotation.hold}
+        className="hero relative isolate -mx-4 overflow-x-clip px-4 pb-10 lg:-mx-8 lg:h-[var(--hero-h)] lg:px-8 lg:pb-0 lg:pt-6"
+      >
         <div className="relative h-[470px] lg:static lg:h-auto">
           <p
             aria-label={piece.word}
@@ -84,9 +106,9 @@ export function HomeShowcase({
                 "--word-d": piece.wordSize.desktop,
               } as React.CSSProperties
             }
-            className="absolute inset-x-0 top-0 whitespace-nowrap text-center font-display text-[length:var(--word-m)] leading-[0.85] lg:static lg:text-[length:var(--word-d)] lg:leading-[0.82]"
+            className="absolute inset-x-0 top-0 whitespace-nowrap text-center font-display text-[length:var(--word-m)] leading-[0.85] lg:static lg:text-[length:min(var(--word-d),calc(var(--hero-u)*316))] lg:leading-[0.82]"
           >
-            <span key={`${index}-${entrance}`} className="inline-flex overflow-hidden align-top">
+            <span key={moves} className="inline-flex overflow-hidden align-top">
               {word.map((letter, position) => (
                 <span
                   key={position}
@@ -99,42 +121,45 @@ export function HomeShowcase({
               ))}
             </span>
           </p>
-          <div
-            ref={photoRef}
-            className="absolute left-1/2 top-[70px] w-64 -translate-x-1/2 overflow-hidden rounded-photo bg-photo shadow-hero lg:top-[150px] lg:w-[min(440px,30vw)] lg:rounded-photo-lg"
-          >
-            <Link href={productHref} tabIndex={-1} aria-hidden="true">
-              <Image
-                key={`${index}-${entrance}`}
-                src={variant.images[0] ?? product.img}
-                alt=""
-                width={440}
-                height={660}
-                priority
-                sizes="(max-width: 1023px) 256px, 30vw"
-                className={cn(
-                  "aspect-[2/3] w-full object-cover",
-                  animate && "animate-fade-scale [animation-delay:200ms]",
-                )}
-              />
-            </Link>
-          </div>
+          <HeroDeck
+            ref={deckRef}
+            pieces={pieces}
+            step={rotation.step}
+            settle={firstLoad}
+            onShift={rotation.shift}
+          />
         </div>
 
         {/* Piece details: under the photo on phones, bottom-left on desktop. */}
-        <div className="flex flex-col gap-3.5 lg:absolute lg:bottom-12 lg:left-8 lg:w-[min(340px,25vw)] lg:gap-[18px]">
-          <div className="flex items-end justify-between gap-3 lg:flex-col lg:items-start lg:gap-[18px]">
-            <div className="flex flex-col gap-0.5 lg:gap-[18px]">
-              <span className="text-xs text-muted lg:text-13">
-                {piece.categoryLabel} · {variant.color}
+        <div
+          data-hero-hold=""
+          className="flex flex-col gap-3.5 lg:absolute lg:bottom-[calc(var(--hero-u)*48)] lg:left-8 lg:w-[min(340px,25vw)] lg:gap-[max(12px,calc(var(--hero-u)*18))]"
+        >
+          {/* Announced when the visitor changes piece, not while it rotates. */}
+          <div
+            data-hero-claim=""
+            aria-live={rotation.playing ? "off" : "polite"}
+            aria-atomic="true"
+          >
+            <div
+              key={moves}
+              className={cn(
+                "flex items-end justify-between gap-3 lg:flex-col lg:items-start lg:gap-[max(12px,calc(var(--hero-u)*18))]",
+                moves > 0 && "animate-fade-in",
+              )}
+            >
+              <div className="flex flex-col gap-0.5 lg:gap-[max(12px,calc(var(--hero-u)*18))]">
+                <span className="text-xs text-muted lg:text-13">
+                  {piece.categoryLabel} · {variant.color}
+                </span>
+                <h2 className="font-display-75 text-[26px] leading-none lg:text-[length:max(28px,calc(var(--hero-u)*44))] lg:leading-[0.95] lg:[word-spacing:0.08em]">
+                  <Link href={productHref}>{product.name}</Link>
+                </h2>
+              </div>
+              <span className="whitespace-nowrap text-lg font-medium tabular-nums lg:text-[length:max(18px,calc(var(--hero-u)*22))]">
+                {formatPriceFromEuros(product.price)}
               </span>
-              <h2 className="font-display-75 text-[26px] leading-none lg:text-[44px] lg:leading-[0.95] lg:[word-spacing:0.08em]">
-                <Link href={productHref}>{product.name}</Link>
-              </h2>
             </div>
-            <span className="whitespace-nowrap text-lg font-medium tabular-nums lg:text-[22px]">
-              {formatPriceFromEuros(product.price)}
-            </span>
           </div>
 
           {/* Phones: the pieces as colour dots. */}
@@ -145,7 +170,7 @@ export function HomeShowcase({
                 type="button"
                 aria-label={`${option.variant.color} ${option.word}`}
                 aria-pressed={position === index}
-                onClick={() => show(position)}
+                onClick={() => rotation.show(position)}
                 className="press grid size-11 place-items-center rounded-pill aria-pressed:shadow-[0_0_0_1.5px_var(--fg)]"
               >
                 <span
@@ -155,9 +180,14 @@ export function HomeShowcase({
               </button>
             ))}
             <span className="ml-auto text-xs">{pieces.length} colours</span>
+            {toggle}
           </div>
 
-          <div className="hidden lg:block" style={{ width: variant.sizes.length * 54 - 6 }}>
+          <div
+            data-hero-claim=""
+            className="hidden lg:block"
+            style={{ width: variant.sizes.length * 54 - 6 }}
+          >
             <SizePicker
               compact
               options={variant.sizes}
@@ -166,32 +196,35 @@ export function HomeShowcase({
               onChange={setPickedSize}
             />
           </div>
-          <div className="hidden lg:block">
+          <div data-hero-claim="" className="hidden lg:block">
             <AddToCart
               key={`${variant.id}-${size}`}
               product={product}
               selectedVariant={variant}
               size={size}
-              flySource={() => photoRef.current}
+              flySource={frontCard}
               className="h-14 text-[15px]"
             />
           </div>
         </div>
 
-        {/* Desktop: piece counter and next. */}
-        <div className="absolute bottom-12 right-8 hidden flex-col items-end gap-4 lg:flex">
-          <span className="font-display text-[64px] font-extrabold leading-none tabular-nums">
+        {/* Desktop: piece counter, rotation toggle and next. */}
+        <div className="absolute bottom-[calc(var(--hero-u)*48)] right-8 hidden flex-col items-end gap-4 lg:flex">
+          <span className="font-display text-[length:max(40px,calc(var(--hero-u)*64))] font-extrabold leading-none tabular-nums">
             {String(index + 1).padStart(2, "0")}
             <span className="opacity-60">/{String(pieces.length).padStart(2, "0")}</span>
           </span>
-          <button
-            type="button"
-            onClick={() => show((index + 1) % pieces.length)}
-            className="press flex h-[52px] items-center gap-2.5 rounded-pill border border-fg px-[22px] font-medium"
-          >
-            Next piece
-            <ArrowRightIcon />
-          </button>
+          <div className="flex items-center gap-2">
+            {toggle}
+            <button
+              type="button"
+              onClick={() => rotation.shift(1)}
+              className="press flex h-[52px] items-center gap-2.5 rounded-pill border border-fg px-[22px] font-medium"
+            >
+              Next piece
+              <ArrowRightIcon />
+            </button>
+          </div>
         </div>
 
         {/* Phones: sections and quick add pinned under the hero. */}
@@ -207,7 +240,7 @@ export function HomeShowcase({
               </Link>
             ))}
           </nav>
-          <div className="flex gap-2">
+          <div data-hero-hold="" data-hero-claim="" className="flex gap-2">
             <label className="relative h-14 w-[72px] shrink-0">
               <span className="sr-only">Size</span>
               <NativeSelect
@@ -228,7 +261,7 @@ export function HomeShowcase({
                 product={product}
                 selectedVariant={variant}
                 size={size}
-                flySource={() => photoRef.current}
+                flySource={frontCard}
                 className="h-14 text-[15px]"
               />
             </div>
@@ -244,7 +277,7 @@ export function HomeShowcase({
               key={option.product.id}
               type="button"
               aria-pressed={position === index}
-              onClick={() => show(position)}
+              onClick={() => rotation.show(position)}
               className="press flex items-center gap-3.5 rounded-chip border border-line p-2 pr-4 text-left aria-pressed:border-fg aria-pressed:bg-card"
             >
               <Image

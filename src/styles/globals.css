@@ -131,6 +131,22 @@
     text-transform: uppercase;
   }
 
+  /* Home hero on desktop: one screen tall under the 76px navigation, from
+     560px up to the 880px of the canvas. --hero-u is one canvas pixel at
+     that height; the hero writes its offsets and sizes in it. */
+  @media (min-width: 1024px) {
+    .hero {
+      --hero-h: clamp(560px, calc(100vh - 76px), 880px);
+      --hero-u: calc(var(--hero-h) / 880);
+    }
+
+    @supports (height: 100svh) {
+      .hero {
+        --hero-h: clamp(560px, calc(100svh - 76px), 880px);
+      }
+    }
+  }
+
   /* Press feedback for every pill button (120ms, ease-out). */
   .press {
     transition: transform 120ms var(--ease-out);

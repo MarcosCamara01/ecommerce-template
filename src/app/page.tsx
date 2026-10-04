@@ -57,10 +57,15 @@ const Showcase = async () => {
   return <HomeShowcase pieces={pieces} bands={<SectionBands />} />;
 };
 
+// Holds the hero's place: the same height and photo size on desktop.
 const HomeSkeleton = () => (
-  <div aria-busy="true" aria-label="Loading" className="flex flex-col items-center gap-6 pt-6">
-    <Skeleton className="h-[min(240px,20vw)] w-[70%] rounded-photo" />
-    <Skeleton className="aspect-[2/3] w-64 rounded-photo-lg lg:w-[min(440px,30vw)]" />
+  <div
+    aria-busy="true"
+    aria-label="Loading"
+    className="hero flex flex-col items-center gap-6 pt-6 lg:h-[var(--hero-h)]"
+  >
+    <Skeleton className="h-[min(240px,20vw)] w-[70%] rounded-photo lg:h-[calc(var(--hero-u)*120)]" />
+    <Skeleton className="aspect-[2/3] w-64 rounded-photo-lg lg:w-[min(30vw,calc(var(--hero-u)*432))]" />
   </div>
 );
 
