@@ -156,25 +156,14 @@
     transform: scale(0.97);
   }
 
-  /* Card hover: the photo lifts 4px and scales to 1.03, fine pointers only. */
+  /* Product cards: pointing at one underlines its name. Nothing moves and
+     no shadow appears. Fine pointers only, so it never sticks after a tap.
+     `.piece` covers cards whose photo and name are separate links. */
   @media (hover: hover) and (pointer: fine) {
-    .lift .lift-photo,
-    .lift .lift-img {
-      transition:
-        transform 300ms var(--ease-out),
-        box-shadow 300ms var(--ease-out);
-    }
-
-    .lift:hover .lift-photo {
-      transform: translateY(-4px);
-    }
-
-    .lift:hover .lift-photo.lift-shadow {
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.22);
-    }
-
-    .lift:hover .lift-img {
-      transform: scale(1.03);
+    .piece-link:hover .piece-name,
+    .piece:has(.piece-link:hover) .piece-name {
+      text-decoration-line: underline;
+      text-underline-offset: 3px;
     }
   }
 }
@@ -194,24 +183,17 @@
   }
 }
 
-/* Theme switch: the new theme is revealed as a circle by ThemeToggle. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-::view-transition-new(root) {
-  z-index: 1;
+/* Theme switch: instant. While the theme flips nothing transitions, because
+   every colour on the page changes at once and they would all fade together
+   and smear. Only the thumb of the dark-mode switch still slides. */
+.theme-switching *:not(.theme-thumb),
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .press:active:not(:disabled) {
-    transform: none;
-  }
-
-  .lift:hover .lift-photo,
-  .lift:hover .lift-img {
     transform: none;
   }
 

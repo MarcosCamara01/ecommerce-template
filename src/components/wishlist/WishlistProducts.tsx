@@ -24,24 +24,24 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
   const href = `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`;
 
   return (
-    <article className="lift flex flex-col gap-2.5">
-      <span ref={photoRef} className="lift-photo lift-shadow relative block overflow-hidden rounded-photo bg-photo">
-        <Link href={href} tabIndex={-1} aria-hidden="true">
+    <article className="piece flex flex-col gap-2.5">
+      <span ref={photoRef} className="relative block overflow-hidden rounded-photo bg-photo">
+        <Link href={href} tabIndex={-1} aria-hidden="true" className="piece-link">
           <Image
             src={variant.images[0] ?? product.img}
             alt=""
             width={300}
             height={400}
             sizes="(max-width: 1023px) 50vw, 25vw"
-            className="lift-img aspect-[3/4] w-full object-cover"
+            className="aspect-[3/4] w-full object-cover"
           />
         </Link>
         <span className="absolute right-2.5 top-2.5">
           <WishlistButton showsRemove productId={product.id} productName={product.name} />
         </span>
       </span>
-      <Link href={href} className="flex justify-between gap-2.5 px-1">
-        <span className="font-medium">{displayName(product.name)}</span>
+      <Link href={href} className="piece-link flex justify-between gap-2.5 px-1">
+        <span className="piece-name font-medium">{displayName(product.name)}</span>
         <span className="whitespace-nowrap tabular-nums">{formatPriceFromEuros(product.price)}</span>
       </Link>
       <span className="flex items-center gap-1.5 px-1 text-13 text-muted">

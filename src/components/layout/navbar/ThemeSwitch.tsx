@@ -27,7 +27,8 @@ export function ThemeSwitchTrack({
     >
       <span
         className={cn(
-          "absolute rounded-pill transition-transform duration-220 ease-in-out motion-reduce:transition-none",
+          // `theme-thumb` keeps this slide while the page swaps theme at once.
+          "theme-thumb absolute rounded-pill transition-transform duration-220 ease-in-out motion-reduce:transition-none",
           size === "md" ? "left-1 top-1 size-6" : "left-[3px] top-[3px] size-[18px]",
           dark
             ? cn("bg-bg", size === "md" ? "translate-x-5" : "translate-x-4")
@@ -46,10 +47,7 @@ export function ThemeSwitch({ className }: { className?: string }) {
       role="switch"
       aria-checked={theme === "dark"}
       aria-label="Dark mode"
-      onClick={(event) => {
-        const box = event.currentTarget.getBoundingClientRect();
-        toggleTheme({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
-      }}
+      onClick={() => toggleTheme()}
       className={cn("press shrink-0 rounded-pill", className)}
     >
       <ThemeSwitchTrack />

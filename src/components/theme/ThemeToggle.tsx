@@ -21,19 +21,13 @@ export const ThemeIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/** Icon button that reveals the other theme as a circle from itself. */
+/** Icon button that switches between the light and dark themes. */
 export function ThemeToggle({ className }: { className?: string }) {
   return (
     <button
       type="button"
       aria-label="Switch colour theme"
-      onClick={(event) => {
-        const box = event.currentTarget.getBoundingClientRect();
-        toggleTheme({
-          x: box.left + box.width / 2,
-          y: box.top + box.height / 2,
-        });
-      }}
+      onClick={() => toggleTheme()}
       className={cn(
         "press grid size-11 place-items-center rounded-pill text-fg",
         className,

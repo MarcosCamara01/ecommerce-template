@@ -143,7 +143,7 @@ The store is a cool, quiet grey room where the clothes do the talking. Every rou
 
 The voice is giant, condensed, black uppercase: Archivo at 62% width set so large it touches the edges of the viewport, scaled with `min(px, vw)`. Everything else is Geist at 15px, calm and legible. Controls are pills; photographs are soft-cornered tiles on their own pale ground so cut-outs and studio shots read consistently in both themes.
 
-Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for three moments (switching themes, saving to the wishlist, completing an order) and never repeats on back navigation.
+Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for two moments (saving to the wishlist, completing an order) and never repeats on back navigation. Hover and the theme switch are quiet: colour only, nothing moves.
 
 **Key Characteristics:**
 
@@ -225,7 +225,9 @@ Mostly flat. Depth comes from three soft, offset shadows and from the scrim behi
 
 ### Named Rules
 
-**The Flat-By-Default Rule.** Cards have no shadow at rest. Hover on a fine pointer lifts a card 4px and scales its photo to 1.03; nothing else.
+**The Flat Card Rule.** Cards have no shadow, at rest or on hover, and never move.
+
+**The Quiet Hover Rule.** Pointing at something answers with colour only, in 150ms or less: an 8% ink wash and an ink-filled arrow on a section row, an underlined name on a product card. Nothing lifts, grows or appears. Hover is limited to pointers that can hover, so it never sticks after a tap.
 
 ## Shapes
 
@@ -252,6 +254,7 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 - **Corner Style:** 24px photo tile; text sits below the photo, never on top.
 - **Background:** none; the photo tile carries Photo Ground.
 - **Shadow Strategy:** flat (see Elevation).
+- **Hover:** the name underlines (3px offset); the photo stays still.
 - **Wishlist heart:** a 40px white disc on the photo's corner.
 
 ### Inputs / Fields
@@ -284,9 +287,10 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 ### Motion (implementation map)
 
 - Tokens: CSS `--ease-out`, `--ease-in-out`, `--ease-drawer` in `globals.css`; the same curves and the drag spring for JS in `src/lib/motion.ts`.
-- CSS transitions and keyframes for predetermined motion (press, size pill, card lift, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight; the View Transitions API for the light/dark theme switch; Motion only for sheets (exits) and drag (`BottomSheet`).
+- CSS transitions and keyframes for predetermined motion (press, size pill, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight; Motion only for sheets (exits) and drag (`BottomSheet`).
+- The light/dark switch is instant. Transitions are switched off for the swap, so the colours snap together instead of fading; only the thumb of the dark-mode switch slides.
 - The hero deck moves with transitions (transform and opacity, 700ms ease-out), one place per piece, so rapid changes retarget; the rotation ring is the only linear motion. A swipe follows the finger and the card carries on from where it is let go.
-- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; themes switch instantly; sheets fade.
+- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; sheets fade.
 
 ## Do's and Don'ts
 
@@ -295,7 +299,7 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 - **Do** derive every surface from `--bg` and `--fg`; use `color-mix` for washes and lines.
 - **Do** write display sizes as `min(px, vw)` and keep Archivo at 62% width, weight 900, uppercase.
 - **Do** put every product photo on Photo Ground (#E4E7EA) with a 24–28px radius.
-- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, theme switch 500ms.
+- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, hover 150ms.
 - **Do** keep fades and drop movement under `prefers-reduced-motion`.
 - **Do** give anything that moves by itself a visible pause control, and stop it once the visitor acts on it.
 - **Do** leave merchant facts the code does not define (delivery, returns, measurements, fit, address) as visible placeholders.
@@ -305,6 +309,7 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 - **Don't** derive page backgrounds or ink from a product or variant colour.
 - **Don't** animate opening search with ⌘K or "/", typing results, filters, sorting or tab switches.
 - **Don't** celebrate removals: unsaving a wishlist item or emptying the bag is instant.
-- **Don't** add borders and shadows to the same element, or shadows to cards at rest.
+- **Don't** add borders and shadows to the same element, or shadows to cards.
+- **Don't** animate the light/dark switch, or make a hover lift, zoom or reveal anything.
 - **Don't** use grey text: secondary text is ink at 75–85%.
 - **Don't** invent shipping, returns or sizing policies.

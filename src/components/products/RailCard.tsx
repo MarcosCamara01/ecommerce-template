@@ -7,7 +7,7 @@ import { formatPriceFromEuros } from "@/utils/formatters";
 
 /**
  * A plain product tile for rails ("Wear it with", "Goes with"): 24px photo
- * tile, name and price below. Lifts 4px on fine pointers.
+ * tile, name and price below. Pointing at it underlines the name.
  */
 export function RailCard({
   product,
@@ -22,18 +22,18 @@ export function RailCard({
     : `/${product.category}/${product.id}`;
 
   return (
-    <Link href={href} className="lift flex flex-col gap-3">
-      <span className="lift-photo lift-shadow relative block aspect-[3/4] overflow-hidden rounded-photo bg-photo">
+    <Link href={href} className="piece-link flex flex-col gap-3">
+      <span className="relative block aspect-[3/4] overflow-hidden rounded-photo bg-photo">
         <Image
           fill
           src={variant?.images[0] ?? product.img}
           alt={product.name}
           sizes={sizes}
-          className="lift-img object-cover"
+          className="object-cover"
         />
       </span>
       <span className="flex justify-between gap-3 px-1">
-        <span className="font-medium">{displayName(product.name)}</span>
+        <span className="piece-name font-medium">{displayName(product.name)}</span>
         <span className="whitespace-nowrap tabular-nums">
           {formatPriceFromEuros(product.price)}
         </span>

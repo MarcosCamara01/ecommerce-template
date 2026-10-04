@@ -18,6 +18,9 @@ function themeEnvironment(stored, { blocked = false, systemDark = false } = {}) 
     addEventListener: (_, listener) => listeners.add(listener),
     removeEventListener: (_, listener) => listeners.delete(listener),
   };
+  const storage = { value: stored };
+  // Frames run when the test says so, to see what is on <html> in between.
+  const frames = [];
   const context = {
     document: {
       documentElement: {
@@ -26,17 +29,37 @@ function themeEnvironment(stored, { blocked = false, systemDark = false } = {}) 
           toggle: (value, on) => on ? classes.add(value) : classes.delete(value),
         },
       },
+      body: { getBoundingClientRect: () => ({}) },
     },
     localStorage: {
       getItem: () => {
         if (blocked) throw new Error("Storage blocked");
-        return stored;
+        return storage.value;
+      },
+      setItem: (_, value) => {
+        if (blocked) throw new Error("Storage blocked");
+        storage.value = value;
       },
     },
     matchMedia: () => media,
+    requestAnimationFrame: (callback) => frames.push(callback),
   };
   vm.runInNewContext(themeInitScript, context);
-  return { context, classes, media, listeners };
+  const paint = () => {
+    while (frames.length > 0) frames.shift()();
+  };
+  return { context, classes, media, listeners, storage, paint };
+}
+
+function loadThemeStore(environment) {
+  const themeModule = { exports: {} };
+  vm.runInNewContext(compiled, {
+    ...environment.context,
+    module: themeModule,
+    exports: themeModule.exports,
+    require: (id) => ({ react: {}, "@/lib/theme": { THEME_STORAGE_KEY } })[id],
+  });
+  return themeModule.exports;
 }
 
 function subscribeToTheme(environment) {
@@ -96,4 +119,27 @@ test("an explicit stored theme ignores subsequent OS changes", () => {
   } finally {
     unsubscribe();
   }
+});
+
+test("switching theme is instant: transitions are off for the swap only", () => {
+  const environment = themeEnvironment("light");
+  const { setTheme, toggleTheme } = loadThemeStore(environment);
+
+  setTheme("dark");
+  assert.equal(environment.classes.has("dark"), true);
+  assert.equal(environment.storage.value, "dark");
+  // Still blocking transitions until the new colours have painted.
+  assert.equal(environment.classes.has("theme-switching"), true);
+  environment.paint();
+  assert.equal(environment.classes.has("theme-switching"), false);
+
+  toggleTheme();
+  environment.paint();
+  assert.equal(environment.classes.has("dark"), false);
+  assert.equal(environment.storage.value, "light");
+  assert.equal(environment.classes.has("theme-switching"), false);
+});
+
+test("the theme store no longer animates the switch", () => {
+  assert.doesNotMatch(source, /startViewTransition|clipPath|\.animate\(/);
 });

@@ -124,8 +124,7 @@ export function UserMenu({
             onSelect={(event) => {
               // Stay open so the switch can be seen to flip.
               event.preventDefault();
-              const box = (event.target as HTMLElement).getBoundingClientRect();
-              toggleTheme({ x: box.right - 32, y: box.top + box.height / 2 });
+              toggleTheme();
             }}
             className="min-h-11 rounded-[14px]"
           >

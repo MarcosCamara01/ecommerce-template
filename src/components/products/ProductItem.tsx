@@ -14,8 +14,9 @@ interface ProductItemProps {
 }
 
 /**
- * Listing card: photo on its own pale tile, name, colour dot and price.
- * The wishlist heart sits on the photo's corner and lifts with it.
+ * Listing card: photo on its own pale tile, name, colour dot and price,
+ * with the wishlist heart on the photo's corner. Pointing at the card
+ * underlines its name; nothing moves.
  */
 export const ProductItem = ({
   product,
@@ -29,21 +30,21 @@ export const ProductItem = ({
     : `/${category}/${id}`;
 
   return (
-    <article className="lift relative">
-      <Link href={productLink} className="flex flex-col gap-2 lg:gap-3">
-        <span className="lift-photo lift-shadow relative block aspect-[3/4] overflow-hidden rounded-[18px] bg-photo lg:rounded-photo">
+    <article className="relative">
+      <Link href={productLink} className="piece-link flex flex-col gap-2 lg:gap-3">
+        <span className="relative block aspect-[3/4] overflow-hidden rounded-[18px] bg-photo lg:rounded-photo">
           <Image
             fill
             src={img}
             alt={name}
             priority={priority}
             sizes={sizes}
-            className="lift-img object-cover"
+            className="object-cover"
           />
         </span>
         <span className="flex justify-between gap-3 px-0.5 lg:px-1">
           <span className="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
-            <span className="truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
+            <span className="piece-name truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
               {displayName(name)}
             </span>
             {color ? (
@@ -65,7 +66,7 @@ export const ProductItem = ({
           </span>
         </span>
       </Link>
-      <span className="lift-photo absolute right-1.5 top-1.5 lg:right-3 lg:top-3">
+      <span className="absolute right-1.5 top-1.5 lg:right-3 lg:top-3">
         <WishlistButton
           productId={id}
           productName={name}

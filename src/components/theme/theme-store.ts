@@ -19,13 +19,33 @@ const hasStoredTheme = () => {
 const currentTheme = (): Theme =>
   document.documentElement.classList.contains("dark") ? "dark" : "light";
 
+// While this class is on <html> nothing transitions (see globals.css).
+const SWITCHING = "theme-switching";
+
+/**
+ * Puts a theme on the page at once. Every colour changes together, so
+ * transitions are switched off for the swap: left on, they would all fade
+ * at the same time and the change would smear instead of snapping.
+ */
+function applyTheme(theme: Theme) {
+  const root = document.documentElement;
+  root.classList.toggle(SWITCHING, true);
+  root.classList.toggle("dark", theme === "dark");
+  // Reading layout commits the new colours while transitions are still off;
+  // they come back once that frame has painted.
+  document.body.getBoundingClientRect();
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => root.classList.toggle(SWITCHING, false)),
+  );
+}
+
 function subscribe(listener: () => void) {
   listeners.add(listener);
   // Follow the OS while the visitor has not picked a theme themselves.
   const media = matchMedia("(prefers-color-scheme: dark)");
   const onSystemChange = () => {
     if (hasStoredTheme()) return;
-    document.documentElement.classList.toggle("dark", media.matches);
+    applyTheme(media.matches ? "dark" : "light");
     emit();
   };
   media.addEventListener("change", onSystemChange);
@@ -40,56 +60,17 @@ export function useTheme(): Theme | null {
   return useSyncExternalStore(subscribe, currentTheme, () => null);
 }
 
-const REVEAL_MS = 500;
-const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
-
-/**
- * Switches theme. With an origin point and motion allowed, the new theme is
- * revealed as a circle growing from that point (View Transitions API);
- * otherwise it swaps instantly.
- */
-export function setTheme(next: Theme, origin?: { x: number; y: number }) {
-  const root = document.documentElement;
-  const apply = () => {
-    root.classList.toggle("dark", next === "dark");
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      // Private mode: the choice lasts for this page view only.
-    }
-    emit();
-  };
-
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!origin || reduceMotion || !document.startViewTransition) {
-    apply();
-    return;
+/** Switches theme at once, with no animation, and remembers the choice. */
+export function setTheme(next: Theme) {
+  applyTheme(next);
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  } catch {
+    // Private mode: the choice lasts for this page view only.
   }
-
-  const transition = document.startViewTransition(apply);
-  transition.ready
-    .then(() => {
-      const radius = Math.hypot(
-        Math.max(origin.x, innerWidth - origin.x),
-        Math.max(origin.y, innerHeight - origin.y),
-      );
-      root.animate(
-        {
-          clipPath: [
-            `circle(0px at ${origin.x}px ${origin.y}px)`,
-            `circle(${radius}px at ${origin.x}px ${origin.y}px)`,
-          ],
-        },
-        {
-          duration: REVEAL_MS,
-          easing: EASE_OUT,
-          pseudoElement: "::view-transition-new(root)",
-        },
-      );
-    })
-    .catch(() => {});
+  emit();
 }
 
-export function toggleTheme(origin?: { x: number; y: number }) {
-  setTheme(currentTheme() === "dark" ? "light" : "dark", origin);
+export function toggleTheme() {
+  setTheme(currentTheme() === "dark" ? "light" : "dark");
 }
