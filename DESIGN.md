@@ -143,7 +143,7 @@ The store is a cool, quiet grey room where the clothes do the talking. Every rou
 
 The voice is giant, condensed, black uppercase: Archivo at 62% width set so large it touches the edges of the viewport, scaled with `min(px, vw)`. Everything else is Geist at 15px, calm and legible. Controls are pills; photographs are soft-cornered tiles on their own pale ground so cut-outs and studio shots read consistently in both themes.
 
-Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for two moments (saving to the wishlist, completing an order) and never repeats on back navigation. Hover and the theme switch are quiet: nothing moves.
+Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for two moments (saving to the wishlist, completing an order) and never repeats on back navigation. Hover is a signature on product cards and section rows (see The Hover Rule); the theme switch is instant.
 
 **Key Characteristics:**
 
@@ -227,7 +227,7 @@ Mostly flat. Depth comes from three soft, offset shadows and from the scrim behi
 
 **The Flat Card Rule.** Cards have no shadow, at rest or on hover, and never move.
 
-**The Quiet Hover Rule.** Pointing at something answers in place, in 150ms or less, and nothing moves: a section row gets an 8% ink wash and an ink-filled arrow; a product card crossfades to the piece's next photo. Nothing lifts, grows, casts a shadow or pops in from outside, and names are not underlined. Hover is limited to pointers that can hover, so it never sticks after a tap and touch screens never download the second photo.
+**The Hover Rule.** Hover has presence, and it happens inside the thing pointed at: a product card raises its next photo and a glass quick-add capsule; a section row fills with ink from the edge the pointer crossed. The tile or row itself never lifts, grows or casts a shadow, nothing pops in from outside it, and names are not underlined. Hover is limited to pointers that can hover, so it never sticks after a tap and touch screens never download a card's second photo.
 
 ## Shapes
 
@@ -251,10 +251,10 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 
 ### Cards / Containers
 
-- **Corner Style:** 24px photo tile; text sits below the photo, never on top.
+- **Corner Style:** 24px photo tile; text sits below the photo. The one thing allowed on the photo, besides the wishlist heart, is the quick-add capsule on hover.
 - **Background:** none; the photo tile carries Photo Ground.
 - **Shadow Strategy:** flat (see Elevation).
-- **Hover:** the tile crossfades to the piece's next photo (the second of its first colour: a closer look, on the model). The tile itself stays still.
+- **Hover:** the piece's next photo (the second of its first colour: a closer look, on the model) rises over the first like a sheet with rounded shoulders, settling from a slight zoom (clip-path, 500ms ease-out; 300ms back down). Just behind it a glass capsule rises over the foot of the photo with the sizes arriving one after another; the ink slides to the size pointed at (220ms) and one click adds it: the photo flies to the Bag pill, the counter bumps and the drawer opens. The capsule is white glass with fixed ink, because photos are pale in both themes; its sizes are one tab stop, moved through with the arrow keys.
 - **Wishlist heart:** a 40px white disc on the photo's corner.
 
 ### Inputs / Fields
@@ -280,6 +280,10 @@ A carousel of the newest pieces. The piece's word fills the width behind a deck 
 - **Touch:** the front photo can be swiped to the next or previous piece.
 - **Reduced motion:** no rotation and no toggle; pieces change by hand and cross-fade in place.
 
+### Section Rows (signature)
+
+Edge-to-edge rows in giant type on the home page. Ink pours in from the edge the pointer crossed (450ms ease-out), turning the row to ink with ground-coloured type, and drains through the edge it leaves by (350ms), so moving down the list the ink travels with the pointer. The word shifts 12px and the arrow flies out through the corner it points at while the next one arrives. A change of direction carries on from where the ink is. Keyboard focus inks the row with a plain transition.
+
 ### Bag Drawer (signature)
 
 A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss.
@@ -287,10 +291,10 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 ### Motion (implementation map)
 
 - Tokens: CSS `--ease-out`, `--ease-in-out`, `--ease-drawer` in `globals.css`; the same curves and the drag spring for JS in `src/lib/motion.ts`.
-- CSS transitions and keyframes for predetermined motion (press, size pill, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight; Motion only for sheets (exits) and drag (`BottomSheet`).
+- CSS transitions and keyframes for predetermined motion (press, size pill, card hover, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight and the section row ink, which has to start from the edge the pointer crossed and carry on mid-way; Motion only for sheets (exits) and drag (`BottomSheet`).
 - The light/dark switch is instant. Transitions are switched off for the swap, so the colours snap together instead of fading; only the thumb of the dark-mode switch slides.
 - The hero deck moves with transitions (transform and opacity, 700ms ease-out), one place per piece, so rapid changes retarget; the rotation ring is the only linear motion. A swipe follows the finger and the card carries on from where it is let go.
-- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; sheets fade.
+- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; sheets fade; a card's next photo cross-fades and a section row inks at once.
 
 ## Do's and Don'ts
 
@@ -299,7 +303,7 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 - **Do** derive every surface from `--bg` and `--fg`; use `color-mix` for washes and lines.
 - **Do** write display sizes as `min(px, vw)` and keep Archivo at 62% width, weight 900, uppercase.
 - **Do** put every product photo on Photo Ground (#E4E7EA) with a 24–28px radius.
-- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, hover 150ms.
+- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, card and row hover 300–500ms.
 - **Do** keep fades and drop movement under `prefers-reduced-motion`.
 - **Do** give anything that moves by itself a visible pause control, and stop it once the visitor acts on it.
 - **Do** leave merchant facts the code does not define (delivery, returns, measurements, fit, address) as visible placeholders.
@@ -310,6 +314,7 @@ A 460px panel that slides in from the right edge over a 32% scrim, items stagger
 - **Don't** animate opening search with ⌘K or "/", typing results, filters, sorting or tab switches.
 - **Don't** celebrate removals: unsaving a wishlist item or emptying the bag is instant.
 - **Don't** add borders and shadows to the same element, or shadows to cards.
-- **Don't** animate the light/dark switch, or make a hover lift, zoom, cast a shadow or underline a product name.
+- **Don't** animate the light/dark switch.
+- **Don't** make a card or row lift or cast a shadow on hover, underline a product name, or bring anything in from outside the tile or row.
 - **Don't** use grey text: secondary text is ink at 75–85%.
 - **Don't** invent shipping, returns or sizing policies.
