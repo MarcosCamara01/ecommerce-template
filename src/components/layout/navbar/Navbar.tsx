@@ -60,11 +60,13 @@ export const Navbar = ({
 
   return (
     <>
-      {/* Desktop: floating glass pill. The header itself lets clicks through. */}
-      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center bg-bg px-8 pt-5 lg:flex">
+      {/* Desktop: a floating glass pill. The header around it has no surface
+          and lets clicks through, so the page scrolls behind and beside the
+          pill; the glass is dense enough to read over any photo. */}
+      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
         <nav
           aria-label="Main"
-          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] transition-[background-color] duration-600 ease-out"
+          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] backdrop-saturate-150 transition-[background-color] duration-600 ease-out"
         >
           <Link
             href="/"

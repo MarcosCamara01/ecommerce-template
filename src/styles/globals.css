@@ -17,7 +17,10 @@
     --field: #f3f4f5;
     --hover: #2e3034;
     --photo: #e4e7ea;
-    --glass: rgba(255, 255, 255, 0.45);
+    /* The navigation pill: over the ground it reads as the canvas glass
+       (white at 45%), but it is a denser tint so the controls stay legible
+       when a photo scrolls behind it. */
+    --glass: rgba(244, 245, 247, 0.78);
     --scrim: rgba(0, 0, 0, 0.32);
 
     --line: color-mix(in srgb, var(--fg) 20%, transparent);
@@ -48,7 +51,7 @@
     --panel: #1c1d20;
     --field: #1c1d1f;
     --hover: #c9cbce;
-    --glass: rgba(255, 255, 255, 0.1);
+    --glass: rgba(46, 47, 50, 0.8);
     --scrim: rgba(0, 0, 0, 0.5);
 
     --err-bg: #2a1215;
