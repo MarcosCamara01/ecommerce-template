@@ -1,12 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowUpRightIcon } from "@/components/icons";
 import { getShopSectionSummaries } from "@/lib/catalog/sections";
 
 /**
- * Edge-to-edge section rows in giant type. On a fine pointer the newest
- * photo of the section peeks in, tilted, while the row is hovered.
+ * Edge-to-edge section rows in giant type. Pointing at a row (or focusing
+ * it) washes it with 8% ink and fills its arrow: colour only, 150ms. The
+ * hover is limited to pointers that can hover, so it never sticks after a
+ * tap.
  */
 export async function SectionBands() {
   const sections = (await getShopSectionSummaries()).filter(
@@ -19,24 +20,14 @@ export async function SectionBands() {
         <Link
           key={section.key}
           href={section.href}
-          className="group relative flex items-center justify-between gap-4 overflow-hidden border-b border-line px-4 py-2 lg:px-8"
+          className="group flex items-center justify-between gap-4 border-b border-line px-4 py-2 transition-[background-color] duration-150 ease-out focus-visible:bg-card lg:px-8 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-card"
         >
           <span className="font-display text-[min(190px,13.2vw)] leading-[0.92]">
             {section.label}
           </span>
-          {section.image ? (
-            <Image
-              src={section.image}
-              alt=""
-              width={150}
-              height={200}
-              sizes="150px"
-              className="pointer-events-none absolute left-[70%] top-1/2 hidden h-[200px] w-[150px] -translate-x-1/2 -translate-y-1/2 -rotate-6 rounded-[18px] object-cover opacity-0 shadow-[0_20px_50px_rgba(0,0,0,.25)] transition-opacity duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:block group-hover:opacity-100 group-focus-visible:opacity-100"
-            />
-          ) : null}
           <span className="flex shrink-0 items-center gap-3 whitespace-nowrap text-sm lg:gap-4 lg:text-[15px]">
             {String(section.count).padStart(2, "0")} styles
-            <span className="grid size-11 place-items-center rounded-pill border border-fg lg:size-16">
+            <span className="grid size-11 place-items-center rounded-pill border border-fg transition-[background-color,color] duration-150 ease-out group-focus-visible:bg-fg group-focus-visible:text-bg lg:size-16 [@media(hover:hover)_and_(pointer:fine)]:group-hover:bg-fg [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-bg">
               <ArrowUpRightIcon />
             </span>
           </span>

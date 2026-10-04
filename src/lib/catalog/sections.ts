@@ -8,7 +8,7 @@ import { dataAccess } from "@/lib/data-access";
 
 export type ShopSectionSummary = ShopSection & {
   count: number;
-  /** Newest product photo in the section, for menu and band thumbnails. */
+  /** Newest product photo in the section, for the menu thumbnails. */
   image: string | null;
 };
 
