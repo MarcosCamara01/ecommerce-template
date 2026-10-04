@@ -7,7 +7,6 @@ import { BagCount } from "@/components/cart/CartProducts";
 import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getPrincipal } from "@/lib/identity";
 
 export async function generateMetadata() {
@@ -20,7 +19,7 @@ export async function generateMetadata() {
 const CartPage = () => {
   return (
     <section data-bag-page="" className="flex flex-col gap-6 pb-24">
-      {/* Phones: back and theme only, like the canvas bag. */}
+      {/* Phones retain a contextual way back below the global navigation. */}
       <div className="-mx-2 flex h-14 items-center justify-between lg:hidden">
         <Link
           href="/new-in"
@@ -40,7 +39,6 @@ const CartPage = () => {
             <path d="M15 5l-7 7 7 7" />
           </svg>
         </Link>
-        <ThemeToggle />
       </div>
       <h1 className="font-display text-[120px] leading-[0.8] lg:pt-10 lg:text-[min(240px,16.6vw)]">
         Bag

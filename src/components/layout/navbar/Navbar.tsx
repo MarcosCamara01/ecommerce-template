@@ -29,9 +29,6 @@ const EditProfile = dynamic(() => import("./EditProfile"), {
 
 const iconButton =
   "press grid size-11 place-items-center rounded-pill text-fg hover:bg-card";
-// Store-only controls step aside on the bag page.
-const offBag = "[body:has([data-bag-page])_&]:hidden";
-
 
 export const Navbar = ({
   sectionSummaries,
@@ -64,7 +61,7 @@ export const Navbar = ({
   return (
     <>
       {/* Desktop: floating glass pill. The header itself lets clicks through. */}
-      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex [body:has([data-error-page])_&]:!hidden [body:has([data-auth-page])_&]:!hidden [body:has([data-admin-page])_&]:!hidden">
+      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center bg-bg px-8 pt-5 lg:flex">
         <nav
           aria-label="Main"
           className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] transition-[background-color] duration-600 ease-out"
@@ -79,36 +76,24 @@ export const Navbar = ({
             <NavLink
               key={section.key}
               href={section.href}
-              className="flex h-11 items-center rounded-pill px-4 text-sm hover:bg-card aria-[current=page]:bg-fg aria-[current=page]:text-bg [body:has([data-bag-page])_&]:hidden"
+              className="flex h-11 items-center rounded-pill px-4 text-sm hover:bg-card aria-[current=page]:bg-fg aria-[current=page]:text-bg"
             >
               {section.label}
             </NavLink>
           ))}
-          {/* The bag page trades the store links for a way back. */}
-          <Link
-            href="/new-in"
-            className="hidden h-11 items-center rounded-pill px-4 text-sm hover:bg-card [body:has([data-bag-page])_&]:flex"
-          >
-            Continue shopping
-          </Link>
           <button
             type="button"
             aria-label="Search"
             aria-keyshortcuts="Meta+K /"
             onClick={() => openSearch()}
-            className={cn(
-              iconButton,
-              offBag,
-              // The search page marks itself with data-search-page.
-              "[body:has([data-search-page])_&]:bg-fg [body:has([data-search-page])_&]:text-bg",
-            )}
+            className={iconButton}
           >
             <SearchIcon />
           </button>
           <NavLink
             href="/wishlist"
             aria-label="Wishlist"
-            className={cn(iconButton, offBag, "aria-[current=page]:bg-fg aria-[current=page]:text-bg")}
+            className={cn(iconButton, "aria-[current=page]:bg-fg aria-[current=page]:text-bg")}
           >
             <HeartIcon />
           </NavLink>
@@ -119,17 +104,12 @@ export const Navbar = ({
                 profileReturnFocusRef.current = accountTriggerRef.current;
                 editProfileManager.open();
               }}
-              // Account pages mark themselves with data-account-page.
-              className={cn(
-                offBag,
-                "[body:has([data-account-page])_&]:bg-fg [body:has([data-account-page])_&]:text-bg",
-              )}
             />
           ) : (
             <Link
               href="/login"
               aria-label="Account"
-              className={cn(iconButton, offBag)}
+              className={iconButton}
             >
               <UserIcon />
             </Link>
@@ -140,8 +120,7 @@ export const Navbar = ({
       </header>
 
       {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
-      {/* The product page carries its own controls over the gallery. */}
-      <header className="flex h-14 items-center justify-between pl-4 pr-2 lg:hidden [body:has([data-error-page])_&]:hidden [body:has([data-admin-page])_&]:hidden [body:has([data-bag-page])_&]:hidden [body:has([data-auth-page])_&]:hidden [body:has([data-product-page])_&]:hidden">
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between bg-bg pl-4 pr-2 lg:hidden">
         <Link
           href="/"
           className="font-display text-[26px] font-extrabold leading-none"

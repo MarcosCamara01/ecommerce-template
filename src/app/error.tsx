@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 
-import { ErrorHeader } from "@/components/layout/ErrorHeader";
 import { Button } from "@/components/ui/button";
 import { buttonClass } from "@/components/ui/button-classes";
 
 export default function Error({ reset }: { reset: () => void }) {
   return (
     <div data-error-page="" className="pb-12 lg:pb-24">
-      <ErrorHeader />
       <section className="flex flex-col items-start gap-[18px] pt-2">
       <span
         aria-hidden="true"

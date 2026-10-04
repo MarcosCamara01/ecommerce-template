@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { ErrorHeader } from "@/components/layout/ErrorHeader";
 import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { getSearchCatalog } from "@/lib/catalog/search-index";
@@ -10,7 +9,6 @@ import { getSearchCatalog } from "@/lib/catalog/search-index";
 export default function NotFound() {
   return (
     <div data-error-page="" className="pb-12 lg:pb-24">
-      <ErrorHeader />
       <div className="flex flex-col gap-10 pt-2 lg:gap-16">
       <section className="relative flex flex-col items-start gap-[18px]">
         <div>

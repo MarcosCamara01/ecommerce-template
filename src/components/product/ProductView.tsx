@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { AddToCart } from "@/components/cart/AddToCart";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 import { merchantPlaceholders } from "@/constants/merchant";
 import type {
@@ -80,8 +79,8 @@ export function ProductView({
   return (
     <>
       <div
-        // Activity retains hidden pages in the DOM. Only the active product
-        // should hide the mobile header and reserve space for its fixed CTA.
+        // Activity retains hidden pages in the DOM. Reserve footer space for
+        // the fixed CTA only while this product is active.
         ref={(page) => {
           if (!page) return;
           page.setAttribute("data-product-page", "");
@@ -122,7 +121,6 @@ export function ProductView({
                 </svg>
               </Link>
               <span className="flex gap-1.5">
-                <ThemeToggle className="bg-white/80 text-[#111214]" />
                 <WishlistButton
                   productId={product.id}
                   productName={product.name}

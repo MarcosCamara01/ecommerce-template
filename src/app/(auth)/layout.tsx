@@ -6,8 +6,8 @@ import { AuthArtWord } from "@/components/auth/AuthArtWord";
 import { getSearchCatalog } from "@/lib/catalog/search-index";
 
 /**
- * Sign-in and sign-up stand alone (no store navigation): an ink art panel
- * with two of the newest pieces on desktop, the form beside it.
+ * Sign-in and sign-up sit beneath the persistent global navigation:
+ * an ink art panel with two of the newest pieces on desktop, the form beside it.
  */
 export default function AuthLayout({
   children,

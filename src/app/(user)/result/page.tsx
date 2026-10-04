@@ -10,7 +10,6 @@ import {
   SuccessContent,
   FulfilledCheckoutSync,
 } from "@/components/checkout";
-import { ErrorHeader } from "@/components/layout/ErrorHeader";
 import { getOrder } from "../orders/action";
 
 export async function generateMetadata() {
@@ -85,7 +84,6 @@ async function DynamicCheckoutContent({
 export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
     <section data-error-page="">
-      <ErrorHeader search={false} />
       <h1 className="sr-only">Purchase result</h1>
       <Suspense fallback={<ResultSkeleton />}>
         <DynamicCheckoutContent searchParams={searchParams} />

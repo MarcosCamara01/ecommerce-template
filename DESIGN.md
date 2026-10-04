@@ -150,7 +150,7 @@ Motion is physical and short: things press, slide from the edge they live on, an
 - Two fixed neutral themes on every route, including product pages.
 - Condensed black uppercase display type at viewport scale.
 - Pills for every control, 24–28px tiles for every photo.
-- A floating glass navigation pill on desktop; a full-screen sheet on mobile.
+- Persistent global navigation on every route: a floating glass pill on desktop and a sticky bar with a full-screen menu sheet on mobile.
 - Light and dark for every page, both at WCAG AA.
 
 ## Colors
@@ -262,8 +262,10 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 
 ### Navigation
 
-- **Desktop:** a centred floating pill (6px padding) with the STORE wordmark, category links, icon buttons (44px), the theme toggle and an ink "Bag · n" pill. The current category is ink-filled. Glass background blurred 20px.
-- **Mobile:** a 56px bar with the wordmark and 44px icon buttons; the menu is a full-screen sheet with 50px condensed category rows and thumbnails, account tiles, help links and a dark-mode switch.
+The global navigation stays at the top of the viewport while scrolling on mobile and desktop. It is visible on storefront, product, sign-in, sign-up, bag, error and admin routes.
+
+- **Desktop:** a centred floating pill (6px padding), sticky at the top, with the STORE wordmark, category links, icon buttons (44px), the theme toggle and an ink "Bag · n" pill. The current category is ink-filled. Glass background blurred 20px over an opaque themed header surface, so scrolling photos cannot obscure the controls.
+- **Mobile:** a sticky 56px bar at the top with the wordmark and 44px icon buttons; the menu is a full-screen sheet with 50px condensed category rows and thumbnails, account tiles, help links and a dark-mode switch.
 
 ### Bag Drawer (signature)
 

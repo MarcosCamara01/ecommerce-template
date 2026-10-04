@@ -1,8 +1,6 @@
 import Link from "next/link";
 
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-
-/** Admin pages get their own bar instead of the store navigation. */
+/** Admin context sits below the global store navigation. */
 export default function AdminLayout({
   children,
 }: {
@@ -10,7 +8,7 @@ export default function AdminLayout({
 }) {
   return (
     <div data-admin-page="">
-      <header className="sticky top-0 z-40 -mx-4 flex h-16 items-center justify-between border-b border-line bg-bg pl-4 pr-2 lg:-mx-8 lg:px-8">
+      <header className="-mx-4 flex h-16 items-center justify-between border-b border-line bg-bg pl-4 pr-2 lg:-mx-8 lg:px-8">
         <span className="flex items-baseline gap-2">
           <Link href="/" className="font-display text-[26px] font-extrabold leading-none">
             Store
@@ -24,7 +22,6 @@ export default function AdminLayout({
           >
             View store
           </Link>
-          <ThemeToggle />
         </span>
       </header>
       {children}
