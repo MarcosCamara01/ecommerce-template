@@ -69,7 +69,17 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
   const cartItemIds = items.map((item) => item.id);
 
   return (
-    <div data-fixed-cta="" className="grid items-start gap-12 pb-48 lg:grid-cols-[minmax(0,1fr)_440px] lg:pb-0">
+    <div
+      // Activity retains hidden pages in the DOM. Reserve room for the fixed
+      // checkout bar only while the bag is the page on screen.
+      ref={(page) => {
+        if (!page) return;
+        page.setAttribute("data-fixed-cta", "summary");
+        return () => page.removeAttribute("data-fixed-cta");
+      }}
+      data-fixed-cta="summary"
+      className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_440px]"
+    >
       <div className="flex flex-col border-t border-line">
         {items.map(({ id, product, size, quantity, variant }) => (
           <CartProduct

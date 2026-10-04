@@ -244,3 +244,24 @@
     transition-property: opacity !important;
   }
 }
+
+/* Below desktop the product and bag pages pin their purchase bar to the
+   bottom of the screen. --cta-clearance is its height plus a 12px gap, over
+   the bar's own bottom inset: toasts rise above the bar instead of covering
+   it, and the footer ends above it. */
+@media (max-width: 1023px) {
+  body:has([data-fixed-cta]) {
+    --cta-clearance: 72px;
+  }
+
+  /* The bag's bar also carries the colour bar and the shipping line. */
+  body:has([data-fixed-cta="summary"]) {
+    --cta-clearance: 142px;
+  }
+
+  body:has([data-fixed-cta]) [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: calc(
+      max(24px, env(safe-area-inset-bottom)) + var(--cta-clearance)
+    );
+  }
+}

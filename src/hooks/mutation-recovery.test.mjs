@@ -70,6 +70,17 @@ async function loadMutation(kind, {
   return { client, mutations, notices, listKey, createAddition, listReads: () => listReads, fetchCalls: () => fetchCalls };
 }
 
+// The notices people read: the storefront says "bag" and "sign in".
+const SIGN_IN = {
+  cart: "Sign in to add to your bag",
+  wishlist: "Sign in to save to your wishlist",
+};
+const ADD_ERROR = {
+  cart: "Couldn’t add to your bag. Try again.",
+  wishlist: "Couldn’t save to your wishlist. Try again.",
+};
+const BAG_ERROR = "Couldn’t update your bag. Try again.";
+
 for (const kind of ["cart", "wishlist"]) {
   test(`${kind} unauthorized add shows sign-in guidance once and preserves other mutation feedback`, async () => {
     const { client, mutations, notices, fetchCalls } = await loadMutation(kind, { authenticated: false });
@@ -81,8 +92,8 @@ for (const kind of ["cart", "wishlist"]) {
         await assert.rejects(mutation.mutate(variables[index]), { message: "Unauthorized" });
       }
       assert.deepEqual(notices, kind === "cart"
-        ? ["Login first to add to cart", "Error updating cart", "Error removing from cart", "Error clearing cart"]
-        : ["Login first to add to wishlist", "Error removing from wishlist"]);
+        ? [SIGN_IN.cart, BAG_ERROR, BAG_ERROR, BAG_ERROR]
+        : [SIGN_IN.wishlist, "Couldn’t update your wishlist. Try again."]);
       assert.equal(fetchCalls(), 0, "unauthenticated mutations stop before fetching");
     } finally {
       client.clear();
@@ -97,7 +108,7 @@ for (const kind of ["cart", "wishlist"]) {
         { message: "Request rejected" },
       );
       assert.deepEqual(client.getQueryData(listKey)?.items ?? [], []);
-      assert.deepEqual(notices, [`Error adding to ${kind}`]);
+      assert.deepEqual(notices, [ADD_ERROR[kind]]);
     } finally {
       client.clear();
     }
@@ -113,7 +124,7 @@ for (const kind of ["cart", "wishlist"]) {
         { message: "authentication_required" },
       );
       assert.deepEqual(client.getQueryData(listKey)?.items ?? [], []);
-      assert.deepEqual(notices, [`Login first to add to ${kind}`]);
+      assert.deepEqual(notices, [SIGN_IN[kind]]);
     } finally {
       client.clear();
     }
@@ -211,7 +222,7 @@ test("an existing cart line rolls back offline without replacing the original ad
       { message: "Request rejected" },
     );
     assert.equal(harness.client.getQueryData(harness.listKey).items[0].quantity, 3);
-    assert.deepEqual(harness.notices, ["Error adding to cart"]);
+    assert.deepEqual(harness.notices, [ADD_ERROR.cart]);
     assert.equal(harness.client.getQueryState(harness.listKey).error.message, "Reconciliation is offline");
   } finally {
     harness.client.clear();

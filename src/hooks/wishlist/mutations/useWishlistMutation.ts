@@ -92,12 +92,12 @@ export const useWishlistMutation = () => {
       }
 
       if (error.message === "Unauthorized" || error.message === "authentication_required") {
-        toast.info("Login first to add to wishlist");
+        toast.info("Sign in to save to your wishlist");
         return;
       }
 
       console.error("Error adding to wishlist:", error);
-      toast.error("Error adding to wishlist");
+      toast.error("Couldn’t save to your wishlist. Try again.");
     },
   });
 
@@ -177,7 +177,7 @@ export const useWishlistMutation = () => {
       }
 
       console.error("Error removing from wishlist:", error);
-      toast.error("Error removing from wishlist");
+      toast.error("Couldn’t update your wishlist. Try again.");
     },
     onSuccess: () => {
       if (!userId) {

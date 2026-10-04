@@ -141,12 +141,12 @@ export const useCartMutation = () => {
       }
 
       if (error.message === "Unauthorized" || error.message === "authentication_required") {
-        toast.info("Login first to add to cart");
+        toast.info("Sign in to add to your bag");
         return;
       }
 
       console.error("Error adding to cart:", error);
-      toast.error("Error adding to cart");
+      toast.error("Couldn’t add to your bag. Try again.");
     },
   });
 
@@ -267,7 +267,7 @@ export const useCartMutation = () => {
       }
 
       console.error("Error updating cart:", error);
-      toast.error("Error updating cart");
+      toast.error("Couldn’t update your bag. Try again.");
     },
   });
 
@@ -342,7 +342,7 @@ export const useCartMutation = () => {
       }
 
       console.error("Error removing from cart:", error);
-      toast.error("Error removing from cart");
+      toast.error("Couldn’t update your bag. Try again.");
     },
   });
 
@@ -406,7 +406,7 @@ export const useCartMutation = () => {
       }
 
       console.error("Error clearing cart:", error);
-      toast.error("Error clearing cart");
+      toast.error("Couldn’t update your bag. Try again.");
     },
   });
 

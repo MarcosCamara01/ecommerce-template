@@ -4,9 +4,13 @@ import { helpLinks } from "@/constants/navigation";
 
 import { FooterAccountLink } from "./FooterAccountLink";
 
+/**
+ * Below desktop the product and bag pages pin a purchase bar to the bottom
+ * of the screen: the footer ends above it (--cta-clearance, globals.css).
+ */
 export const Footer = () => {
   return (
-    <footer className="[body:has([data-error-page])_&]:hidden [body:has([data-admin-page])_&]:hidden [body:has([data-auth-page])_&]:hidden flex flex-col gap-6 overflow-clip border-t border-line px-4 pb-6 lg:px-8 [body:has([data-fixed-cta])_&]:pb-28 lg:[body:has([data-fixed-cta])_&]:pb-6">
+    <footer className="[body:has([data-error-page])_&]:hidden [body:has([data-admin-page])_&]:hidden [body:has([data-auth-page])_&]:hidden flex flex-col gap-6 overflow-clip border-t border-line px-4 pb-6 lg:px-8 max-lg:[body:has([data-fixed-cta])_&]:pb-[calc(max(24px,env(safe-area-inset-bottom))_+_var(--cta-clearance)_+_16px)]">
       <div className="flex flex-wrap justify-between gap-4 pt-6 text-sm">
         <nav aria-label="Help" className="flex flex-wrap gap-x-6 gap-y-2">
           {helpLinks.map((link) => (

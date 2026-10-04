@@ -26,13 +26,13 @@ const STATUS_CONFIG: Record<
   expired: {
     icon: "clock",
     title: "Session Expired",
-    message: "Your checkout session has expired. Items in your cart are still saved.",
+    message: "Your checkout session has expired. Your bag is still saved.",
     showRetry: true,
   },
   canceled: {
     icon: "cross",
     title: "Payment Canceled",
-    message: "You canceled the payment. Your cart items are still available.",
+    message: "You canceled the payment. Your bag is still as you left it.",
     showRetry: true,
   },
   pending: {
