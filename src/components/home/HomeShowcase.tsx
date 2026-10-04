@@ -316,7 +316,7 @@ export function HomeShowcase({
               Swipe →
             </span>
           </div>
-          <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] lg:gap-4 lg:overflow-visible lg:px-0">
+          <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] lg:gap-4 lg:overflow-visible lg:px-0">
             {piece.pairs.map((pair) => (
               <div key={pair.id} className="w-[70%] shrink-0 snap-start lg:w-auto">
                 <RailCard product={pair} />

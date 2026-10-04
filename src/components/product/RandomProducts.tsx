@@ -5,8 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { RailCard } from "../products/RailCard";
 
+// Four pieces share one row from the smallest desktop width (1024px) up;
+// a wider minimum left the fourth alone on a second row below 1232px.
 const rail =
-  "grid grid-cols-2 gap-x-2.5 gap-y-[18px] lg:grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] lg:gap-4";
+  "grid grid-cols-2 gap-x-2.5 gap-y-[18px] lg:grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] lg:gap-4";
 
 const RandomProducts = async ({
   productIdToExclude,

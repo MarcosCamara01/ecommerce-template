@@ -169,7 +169,7 @@ A two-value system: one ground and one ink per theme, with every other surface m
 - **Field** (`field-light` / `field-dark`): text inputs and selects.
 - **Photo Ground** (`photo-ground`): the fixed pale backdrop behind every product photo, in both themes and on every route.
 - **Lines and washes** (derived): hairlines are ink at 20% (`--line`), soft dividers 15%, selected-card wash 8% (`--card`), skeletons 10%, focus halo 15% (`--ring`). Secondary text is ink at 75% mixed into the ground (`--muted`), never a separate grey.
-- **Glass** (derived): the navigation pill is white at 45% over light grounds and white at 10% over dark ones, blurred 20px. It follows the active light or dark theme on every route.
+- **Glass** (`--glass`): the navigation pill. Over the ground it reads as the canvas glass (white at 45% on light, white at 10% on dark), but it is a denser tint of that colour (78–80%) blurred 20px, so the controls stay legible when a photo scrolls behind it. It follows the active light or dark theme on every route.
 
 ### Tertiary
 
@@ -210,7 +210,7 @@ Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 5
 
 ## Layout
 
-Desktop pages use a 32px side gutter, sections separated by 96px. Mobile uses a 16px gutter. Grids are fluid (`repeat(auto-fit, minmax(min(280px, 100%), 1fr))` on desktop, two columns on mobile with 18px × 10px gaps). The product page is a 7fr / 5fr split with a sticky buy column (top 100px). The home hero is one screen tall on desktop: its height is the viewport minus the navigation, between 560px and the 880px of the canvas, and its photo, type and offsets scale with that height (`--hero-u`, one canvas pixel), so the piece's name, sizes and Add to bag are always on the first screen. Category bands on the home page run edge to edge with hairlines between them. The footer ends in the STORE wordmark at `min(420px, 29vw)`. No page scrolls horizontally at 390px.
+Desktop pages use a 32px side gutter, sections separated by 96px. Mobile uses a 16px gutter. Grids are fluid (`repeat(auto-fit, minmax(min(280px, 100%), 1fr))` on desktop, two columns on mobile with 18px × 10px gaps); the four-piece rails ("Wear it with", "Goes with") use a 220px minimum so the four stay on one row from 1024px up. The product page is a 7fr / 5fr split with a sticky buy column (top 100px). The home hero is one screen tall on desktop: its height is the viewport minus the navigation, between 560px and the 880px of the canvas, and its photo, type and offsets scale with that height (`--hero-u`, one canvas pixel), so the piece's name, sizes and Add to bag are always on the first screen. Category bands on the home page run edge to edge with hairlines between them. The footer ends in the STORE wordmark at `min(420px, 29vw)`. No page scrolls horizontally from 320px up.
 
 ## Elevation & Depth
 
@@ -267,7 +267,7 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 
 The global navigation stays at the top of the viewport while scrolling on mobile and desktop. It is visible on storefront, product, sign-in, sign-up, bag, error and admin routes.
 
-- **Desktop:** a centred floating pill (6px padding), sticky at the top, with the STORE wordmark, category links, icon buttons (44px), the theme toggle and an ink "Bag · n" pill. The current category is ink-filled. Glass background blurred 20px over an opaque themed header surface, so scrolling photos cannot obscure the controls.
+- **Desktop:** a centred floating pill (6px padding), sticky at the top, with the STORE wordmark, category links, icon buttons (44px), the theme toggle and an ink "Bag · n" pill. The current category is ink-filled. The pill floats: the header around it has no surface, so the page scrolls behind and beside it, and the glass itself keeps the controls readable over photos. Never put an opaque band behind the pill: it slices the content in a straight line at the pill's edge.
 - **Mobile:** a sticky 56px bar at the top with the wordmark and 44px icon buttons; the menu is a full-screen sheet with 50px condensed category rows and thumbnails, account tiles, help links and a dark-mode switch.
 
 ### Home Hero (signature)
