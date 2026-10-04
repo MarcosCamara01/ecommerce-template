@@ -200,7 +200,7 @@ A two-value system: one ground and one ink per theme, with every other surface m
 
 ### Display steps
 
-Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 50, 56, 64, 76, 88, 96, 112, 120 and 150px. Desktop display sizes are `min(px, vw)` pairs: 44, 56, 64, 96, 104, 120, 160, 190, 200, 240, 300 and 420px caps. Words that must fill a line (hero, section titles, search query) compute their size from the word's measured width (`src/lib/display-type.ts`).
+Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 50, 56, 64, 76, 88, 96, 112, 120 and 150px. Desktop display sizes are `min(px, vw)` pairs: 44, 56, 64, 96, 104, 120, 160, 190, 200, 240, 300 and 420px caps. Words that must fill a line (hero, section titles, search query) compute their size from the word's measured width (`src/lib/display-type.ts`). A fixed size that would not fit the narrowest phones (320px) takes a vw cap as well ("Wishlist" beside its count, "Orders"): no title may push the page sideways.
 
 ### Named Rules
 
@@ -241,7 +241,7 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 - **Primary:** ink fill, ground text, 600 weight, 56px tall (64px for Add to bag, 60px for Checkout).
 - **Hover / Press:** hover darkens to the hover tone; press scales to 0.97 in 120ms ease-out. Focus shows a 2px ink ring with a ground-coloured gap.
 - **Secondary:** 1px ink outline, 48px. **Text link:** underlined with 3px offset.
-- **Busy:** a 16px ring spinner before the label ("Adding…"). **Disabled:** dashed hairline, 65% opacity.
+- **Busy:** a 16px ring spinner before the label ("Adding…"). **Disabled:** dashed hairline, 65% opacity. Add to bag is busy, not disabled, while its request runs (`aria-busy`, same 65% look): a disabled button drops keyboard focus.
 
 ### Chips
 
@@ -276,17 +276,21 @@ A carousel of the newest pieces. The piece's word fills the width behind a deck 
 
 - **Rotation:** the piece changes by itself every 6 seconds. The ring on the toggle fills over that time, so a change never comes as a surprise.
 - **It waits** while the pointer or keyboard focus is on the piece's details and quick add, while the hero is scrolled away, the tab is hidden or a dialog is open. The photos do not hold it: they fill the middle of the screen, where a resting pointer would stop it for no reason.
-- **It stops** when the visitor chooses a piece, a size or adds to the bag; the toggle starts it again. A click that lands within half a second of an automatic change is dropped, because it was aimed at the piece that just left.
+- **It stops** when the visitor chooses a piece, a size or adds to the bag; the toggle starts it again, and never holds the rotation itself, wherever it sits. A click that lands within half a second of an automatic change is dropped, because it was aimed at the piece that just left.
 - **Touch:** the front photo can be swiped to the next or previous piece.
 - **Reduced motion:** no rotation and no toggle; pieces change by hand and cross-fade in place.
 
 ### Section Rows (signature)
 
-Edge-to-edge rows in giant type on the home page. Ink pours in from the edge the pointer crossed (450ms ease-out), turning the row to ink with ground-coloured type, and drains through the edge it leaves by (350ms), so moving down the list the ink travels with the pointer. The word shifts 12px and the arrow flies out through the corner it points at while the next one arrives. A change of direction carries on from where the ink is. Keyboard focus inks the row with a plain transition.
+Edge-to-edge rows in giant type on the home page. Ink pours in from the edge the pointer crossed (450ms ease-out), turning the row to ink with ground-coloured type, and drains through the edge it leaves by (350ms), so moving down the list the ink travels with the pointer. The word shifts 12px and the arrow flies out through the corner it points at while the next one arrives. A change of direction carries on from where the ink is. Keyboard focus inks the row with a plain transition. On phones a row is the word and the arrow: the count stays for screen readers only, so the longest word fits.
 
 ### Bag Drawer (signature)
 
-A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss.
+A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss. Closing the drawer, the search or a phone panel gives focus back to the control that opened it (`useFocusReturn`).
+
+### Toasts
+
+Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" with Undo, "Sign in to add to your bag", "Couldn’t update your bag. Try again." They say bag and sign in, like the rest of the store. Below desktop the product and bag pages pin a purchase bar to the bottom of the screen; there a toast rises above the bar instead of covering it, and the footer ends above it (`--cta-clearance`).
 
 ### Motion (implementation map)
 
