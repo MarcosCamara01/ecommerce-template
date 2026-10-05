@@ -38,10 +38,19 @@ const nextConfig = {
     // browsers and the optimizer's cache can keep each size for a month.
     minimumCacheTTL: 60 * 60 * 24 * 31,
     dangerouslyAllowLocalIP: allowLocalSupabaseImages,
+    // No host is open at every path: the optimizer resizes whatever a
+    // pattern lets through, and each new image is billed. Unsplash serves
+    // its photos at /photo-<id> (and /premium_photo-<id>).
     remotePatterns: [
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+        pathname: "/photo-*",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/premium_photo-*",
       },
       ...(supabaseImagePattern ? [supabaseImagePattern] : []),
     ],
