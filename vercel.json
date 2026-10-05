@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run vercel-build",
+  "fluid": true,
   "crons": [
     {
       "path": "/api/cron/fulfillment",

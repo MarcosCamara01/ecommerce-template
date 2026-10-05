@@ -1,0 +1,15 @@
+{
+  "diff": false,
+  "ignore": {
+    "rules": [
+      "vercel-doctor/vercel-consider-bun-runtime",
+      "vercel-doctor/vercel-avoid-platform-cron",
+      "vercel-doctor/vercel-consider-fluid-compute"
+    ],
+    "files": [
+      "src/app/favicon.ico",
+      "public/main-image.webp",
+      "public/qa-seed/**"
+    ]
+  }
+}
