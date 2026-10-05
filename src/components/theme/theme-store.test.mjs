@@ -143,3 +143,23 @@ test("switching theme is instant: transitions are off for the swap only", () => 
 test("the theme store no longer animates the switch", () => {
   assert.doesNotMatch(source, /startViewTransition|clipPath|\.animate\(/);
 });
+
+test("the theme has one control, in the navigation", async () => {
+  const { readdir } = await import("node:fs/promises");
+  const root = new URL("../../", import.meta.url);
+  const files = (await readdir(root, { recursive: true }))
+    .filter((file) => /\.tsx?$/.test(file) && !/\.test\./.test(file));
+  const sources = await Promise.all(
+    files.map(async (file) => [file, await readFile(new URL(file, root), "utf8")]),
+  );
+  const using = (pattern) =>
+    sources.filter(([, text]) => pattern.test(text)).map(([file]) => file).sort();
+
+  // Rendered by the navigation only (its pill on desktop, its bar on phones).
+  assert.deepEqual(using(/<ThemeToggle\b/), ["components/layout/navbar/Navbar.tsx"]);
+  // Nothing else switches the theme: no second switch in a menu or a page.
+  assert.deepEqual(using(/\b(toggleTheme|setTheme)\(/), [
+    "components/theme/ThemeToggle.tsx",
+    "components/theme/theme-store.ts",
+  ]);
+});

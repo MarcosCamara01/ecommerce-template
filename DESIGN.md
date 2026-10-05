@@ -268,7 +268,8 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 The global navigation stays at the top of the viewport while scrolling on mobile and desktop. It is visible on storefront, product, sign-in, sign-up, bag, error and admin routes.
 
 - **Desktop:** a centred floating pill (6px padding), sticky at the top, with the STORE wordmark, category links, icon buttons (44px), the theme toggle and an ink "Bag · n" pill. The current category is ink-filled. The pill floats: the header around it has no surface, so the page scrolls behind and beside it, and the glass itself keeps the controls readable over photos. Never put an opaque band behind the pill: it slices the content in a straight line at the pill's edge.
-- **Mobile:** a sticky 56px bar at the top with the wordmark and 44px icon buttons; the menu is a full-screen sheet with 50px condensed category rows and thumbnails, account tiles, help links and a dark-mode switch.
+- **Mobile:** a sticky 56px bar at the top with the wordmark and 44px icon buttons; the menu is a full-screen sheet with 50px condensed category rows and thumbnails, account tiles and help links.
+- **Theme toggle:** one control, in the navigation (the pill on desktop, the bar on phones). It is not repeated in the account menu, the phone menu or the sign-in pages.
 
 ### Home Hero (signature)
 
@@ -296,7 +297,7 @@ Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" wit
 
 - Tokens: CSS `--ease-out`, `--ease-in-out`, `--ease-drawer` in `globals.css`; the same curves and the drag spring for JS in `src/lib/motion.ts`.
 - CSS transitions and keyframes for predetermined motion (press, size pill, card hover, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight and the section row ink, which has to start from the edge the pointer crossed and carry on mid-way; Motion only for sheets (exits) and drag (`BottomSheet`).
-- The light/dark switch is instant. Transitions are switched off for the swap, so the colours snap together instead of fading; only the thumb of the dark-mode switch slides.
+- The light/dark switch is instant. Transitions are switched off for the swap, so the colours snap together instead of fading.
 - The hero deck moves with transitions (transform and opacity, 700ms ease-out), one place per piece, so rapid changes retarget; the rotation ring is the only linear motion. A swipe follows the finger and the card carries on from where it is let go.
 - Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; sheets fade; a card's next photo cross-fades and a section row inks at once.
 
@@ -318,7 +319,7 @@ Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" wit
 - **Don't** animate opening search with ⌘K or "/", typing results, filters, sorting or tab switches.
 - **Don't** celebrate removals: unsaving a wishlist item or emptying the bag is instant.
 - **Don't** add borders and shadows to the same element, or shadows to cards.
-- **Don't** animate the light/dark switch.
+- **Don't** animate the light/dark switch, or offer it anywhere but the navigation.
 - **Don't** make a card or row lift or cast a shadow on hover, underline a product name, or bring anything in from outside the tile or row.
 - **Don't** use grey text: secondary text is ink at 75–85%.
 - **Don't** invent shipping, returns or sizing policies.

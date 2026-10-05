@@ -16,12 +16,9 @@ import {
   OrdersIcon,
   UserIcon,
 } from "@/components/icons";
-import { ThemeIcon } from "@/components/theme/ThemeToggle";
-import { ThemeSwitchTrack } from "./ThemeSwitch";
 /** FUNCTIONALITY */
 import { useSession } from "@/lib/auth/client";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-import { toggleTheme, useTheme } from "@/components/theme/theme-store";
 import { cn } from "@/lib/utils";
 import { useRef, type RefObject } from "react";
 
@@ -44,7 +41,6 @@ export function UserMenu({
 }) {
   const { data: session } = useSession();
   const { signOut } = useAuthMutation();
-  const theme = useTheme();
   const skipCloseAutoFocusRef = useRef(false);
   const name = session?.user?.name || "Your account";
   const email = session?.user?.email;
@@ -116,21 +112,6 @@ export function UserMenu({
               <HeartIcon />
               <span>Wishlist</span>
             </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            role="menuitemcheckbox"
-            aria-checked={theme === "dark"}
-            onSelect={(event) => {
-              // Stay open so the switch can be seen to flip.
-              event.preventDefault();
-              toggleTheme();
-            }}
-            className="min-h-11 rounded-[14px]"
-          >
-            <ThemeIcon />
-            <span className="grow">Dark mode</span>
-            <ThemeSwitchTrack size="sm" />
           </DropdownMenuItem>
         </DropdownMenuGroup>
 

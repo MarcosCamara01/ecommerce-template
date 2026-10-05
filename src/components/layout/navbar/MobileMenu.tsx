@@ -24,7 +24,6 @@ import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 import { useSession } from "@/lib/auth/client";
 
 import type { ShopSectionSummary } from "@/lib/catalog/sections";
-import { ThemeSwitch } from "./ThemeSwitch";
 
 const tile =
   "press flex h-12 items-center gap-2.5 rounded-field bg-card px-3.5 text-left text-fg";
@@ -157,17 +156,14 @@ export function MobileMenu({
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-4">
-          <div className="flex flex-wrap gap-3.5 text-sm">
-            {helpLinks.map((link) => (
-              <SheetClose asChild key={link.href}>
-                <Link href={link.href} className="py-2">
-                  {link.label}
-                </Link>
-              </SheetClose>
-            ))}
-          </div>
-          <ThemeSwitch />
+        <div className="mt-auto flex flex-wrap gap-3.5 border-t border-line pt-4 text-sm">
+          {helpLinks.map((link) => (
+            <SheetClose asChild key={link.href}>
+              <Link href={link.href} className="py-2">
+                {link.label}
+              </Link>
+            </SheetClose>
+          ))}
         </div>
       </nav>
     </SheetContent>

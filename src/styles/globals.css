@@ -177,8 +177,8 @@
 
 /* Theme switch: instant. While the theme flips nothing transitions, because
    every colour on the page changes at once and they would all fade together
-   and smear. Only the thumb of the dark-mode switch still slides. */
-.theme-switching *:not(.theme-thumb),
+   and smear. */
+.theme-switching *,
 .theme-switching *::before,
 .theme-switching *::after {
   transition: none !important;
