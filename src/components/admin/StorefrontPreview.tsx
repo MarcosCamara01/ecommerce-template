@@ -44,7 +44,7 @@ export function StorefrontPreview({ values }: { values: PreviewValues }) {
         </span>
       </span>
       <span className="text-13">
-        {values.color || "No colour yet"}
+        {values.color || "No color yet"}
       </span>
     </div>
   );

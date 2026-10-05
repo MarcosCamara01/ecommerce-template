@@ -6,11 +6,11 @@ export type ShopSection = {
   href: string;
 };
 
-/** Store sections in navigation order. "New in" is the whole catalogue. */
+/** Store sections in navigation order. "New arrivals" is the whole catalogue. */
 export const shopSections: ShopSection[] = [
-  { key: "new-in", label: "New in", href: "/new-in" },
+  { key: "new-in", label: "New arrivals", href: "/new-in" },
   { key: "t-shirts", label: "T-shirts", href: "/t-shirts" },
-  { key: "pants", label: "Trousers", href: "/pants" },
+  { key: "pants", label: "Pants", href: "/pants" },
   { key: "sweatshirts", label: "Sweatshirts", href: "/sweatshirts" },
 ];
 

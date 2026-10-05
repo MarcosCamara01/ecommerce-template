@@ -13,7 +13,7 @@ const HERO_PIECES = 4;
 const Home = async () => {
   return (
     <>
-      <h1 className="sr-only">Store — new in this season</h1>
+      <h1 className="sr-only">Store — new arrivals this season</h1>
       <Suspense fallback={<HomeSkeleton />}>
         <Showcase />
       </Suspense>

@@ -131,7 +131,7 @@ export function SuccessContent({
               "Next",
               "—",
               view
-                ? `Est. ${format(view.deliveryDate, "dd MMM")}`
+                ? `Est. ${format(view.deliveryDate, "MMM d")}`
                 : merchantPlaceholders.deliveryEstimate,
             ]}
           />

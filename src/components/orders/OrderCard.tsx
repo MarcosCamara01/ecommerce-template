@@ -45,7 +45,7 @@ export function OrderCard({ order }: OrderCardProps) {
               Order #{order.orderNumber}
             </span>
             <span className="text-13 text-muted">
-              {format(orderDate, "dd MMM yyyy 'at' HH:mm")}
+              {format(orderDate, "MMM d, yyyy 'at' h:mm a")}
             </span>
           </div>
           <span
@@ -62,7 +62,7 @@ export function OrderCard({ order }: OrderCardProps) {
           {delivery ? (
             <div className="flex flex-col">
               <dt className="text-xs text-muted">{delivery.label}</dt>
-              <dd className="font-medium">{format(delivery.date, "dd MMM yyyy")}</dd>
+              <dd className="font-medium">{format(delivery.date, "MMM d, yyyy")}</dd>
             </div>
           ) : null}
           <div className="flex flex-col">

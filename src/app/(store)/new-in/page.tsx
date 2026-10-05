@@ -10,15 +10,15 @@ import {
 import { getShopSectionSummaries } from "@/lib/catalog/sections";
 
 export const metadata = {
-  title: "New in | Ecommerce Template",
-  description: "The whole catalogue, newest first.",
+  title: "New arrivals | Ecommerce Template",
+  description: "The whole catalog, newest first.",
 };
 
 export default function NewInPage() {
   return (
     <section className="pb-24">
       <SectionHeading
-        title="New in"
+        title="New arrivals"
         count={
           <Suspense fallback={null}>
             <AllPieces />

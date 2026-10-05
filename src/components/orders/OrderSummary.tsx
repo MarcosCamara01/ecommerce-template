@@ -27,11 +27,11 @@ export function OrderSummary({ order }: OrderSummaryProps) {
         step={status.step}
         // A cancelled order went no further than being placed.
         notes={[
-          format(orderDate, "dd MMM"),
+          format(orderDate, "MMM d"),
           status.step === 2 ? "Now" : "",
           delivery ? "—" : "",
           delivery
-            ? `${delivered ? "" : "Est. "}${format(delivery.date, "dd MMM")}`
+            ? `${delivered ? "" : "Est. "}${format(delivery.date, "MMM d")}`
             : "",
         ]}
       />
@@ -40,12 +40,12 @@ export function OrderSummary({ order }: OrderSummaryProps) {
         <dt className="text-muted">Order number</dt>
         <dd className="text-right font-medium">{order.orderNumber}</dd>
         <dt className="text-muted">Order date</dt>
-        <dd className="text-right font-medium">{format(orderDate, "dd MMM yyyy")}</dd>
+        <dd className="text-right font-medium">{format(orderDate, "MMM d, yyyy")}</dd>
         {delivery ? (
           <>
             <dt className="text-muted">{delivery.label}</dt>
             <dd className="text-right font-medium">
-              {format(delivery.date, "dd MMM yyyy")}
+              {format(delivery.date, "MMM d, yyyy")}
             </dd>
           </>
         ) : null}

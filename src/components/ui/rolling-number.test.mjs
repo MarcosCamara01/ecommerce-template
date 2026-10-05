@@ -54,12 +54,12 @@ test("a figure rolls up when it grows and down when it shrinks", () => {
   assert.match(grown.props.className, /\banimate-roll\b/);
   assert.equal(grown.props.style["--roll"], "45%");
 
-  const shrunk = render({ value: 1, children: "1,00 €" });
+  const shrunk = render({ value: 1, children: "€1.00" });
   assert.equal(shrunk.props.style["--roll"], "-45%");
-  assert.equal(shrunk.props.children, "1,00 €");
+  assert.equal(shrunk.props.children, "€1.00");
 
   // Rendering again with the same figure keeps the element: no replay.
-  assert.equal(render({ value: 1, children: "1,00 €" }).key, "1");
+  assert.equal(render({ value: 1, children: "€1.00" }).key, "1");
 });
 
 test("a figure that has rolled is a plain figure again", () => {

@@ -23,7 +23,7 @@ const presentations: Record<
   shipped: { label: "Shipped", step: 3, className: ACTIVE_CHIP },
   // Finished states read as an outline: nothing is moving any more.
   delivered: { label: "Delivered", step: 4, className: SETTLED_CHIP },
-  cancelled: { label: "Cancelled", step: 0, className: SETTLED_CHIP },
+  cancelled: { label: "Canceled", step: 0, className: SETTLED_CHIP },
 };
 
 export function orderStatusPresentation(status: OrderStatus) {

@@ -195,12 +195,12 @@ A two-value system: one ground and one ink per theme, with every other surface m
 - **Title** (700, width 75%, 26–44px, 0.95–1): product names under a giant word.
 - **Wordmark** (800, 26px): the STORE mark in the navigation.
 - **Body** (400, 15px, 1.5): descriptions, lists, form copy. Keep measure under 70ch.
-- **Label** (400–500, 12–14px): metadata such as "Sweatshirts · Grey marl", stock, captions; secondary emphasis comes from 75–85% ink, not a smaller weight.
+- **Label** (400–500, 12–14px): metadata such as "Sweatshirts · Heather gray", stock, captions; secondary emphasis comes from 75–85% ink, not a smaller weight.
 - **Price** (500, 18–26px): prices in their own line, tabular numerals.
 
 ### Display steps
 
-Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 50, 56, 64, 76, 88, 96, 112, 120 and 150px. Desktop display sizes are `min(px, vw)` pairs: 44, 56, 64, 96, 104, 120, 160, 190, 200, 240, 300 and 420px caps. Words that must fill a line (hero, section titles, search query) compute their size from the word's measured width (`src/lib/display-type.ts`). A fixed size that would not fit the narrowest phones (320px) takes a vw cap as well ("Wishlist" beside its count, "Orders"): no title may push the page sideways.
+Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 50, 56, 64, 76, 88, 96, 112, 120 and 150px. Desktop display sizes are `min(px, vw)` pairs: 44, 56, 64, 80, 96, 104, 120, 160, 190, 200, 240, 300 and 420px caps. Words that must fill a line (hero, section titles, search query) compute their size from the word's measured width (`src/lib/display-type.ts`). A fixed size that would not fit the narrowest phones (320px) takes a vw cap as well ("Wishlist" beside its count, "Orders"): no title may push the page sideways. A product name on its own page is giant when it is short and steps down as it grows (104, 80, 64, 56, 44px): it takes the largest step at which it is no taller than two lines of the largest (`fitDisplayStep`), and each step also has a vh cap, so a long name or a short window never pushes the buying controls off the first screen.
 
 ### Named Rules
 
@@ -210,7 +210,7 @@ Phones use fixed display sizes from the canvas: 26 (wordmark), 28, 44, 46, 48, 5
 
 ## Layout
 
-Desktop pages use a 32px side gutter, sections separated by 96px. Mobile uses a 16px gutter. Grids are fluid (`repeat(auto-fit, minmax(min(280px, 100%), 1fr))` on desktop, two columns on mobile with 18px × 10px gaps); the four-piece rails ("Wear it with", "Goes with") use a 220px minimum so the four stay on one row from 1024px up. The product page is a 7fr / 5fr split with a sticky buy column (top 100px). The home hero is one screen tall on desktop: its height is the viewport minus the navigation, between 560px and the 880px of the canvas, and its photo, type and offsets scale with that height (`--hero-u`, one canvas pixel), so the piece's name, sizes and Add to bag are always on the first screen. Category bands on the home page run edge to edge with hairlines between them. The footer ends in the STORE wordmark at `min(420px, 29vw)`. No page scrolls horizontally from 320px up.
+Desktop pages use a 32px side gutter, sections separated by 96px. Mobile uses a 16px gutter. Grids are fluid (`repeat(auto-fit, minmax(min(280px, 100%), 1fr))` on desktop, two columns on mobile with 18px × 10px gaps); the four-piece rails ("Wear it with", "Goes with") use a 220px minimum so the four stay on one row from 1024px up. The product page is a 7fr / 5fr split with a sticky buy column (top 100px). Add to bag never leaves the window while the product is on screen: the name, colours, sizes and the button come first and the description follows them; in a window too short for them the column scrolls up just until the buy row sits at the bottom of the window and holds there; and until its own place arrives the buy row holds to the bottom edge on the page ground, with the column passing beneath it. The home hero is one screen tall on desktop: its height is the viewport minus the navigation, between 560px and the 880px of the canvas, and its photo, type and offsets scale with that height (`--hero-u`, one canvas pixel), so the piece's name, sizes and Add to bag are always on the first screen. Category bands on the home page run edge to edge with hairlines between them. The footer ends in the STORE wordmark at `min(420px, 29vw)`. No page scrolls horizontally from 320px up.
 
 ## Elevation & Depth
 
@@ -290,6 +290,10 @@ Edge-to-edge rows in giant type on the home page. Ink pours in from the edge the
 
 A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss. Closing the drawer, the search or a phone panel gives focus back to the control that opened it (`useFocusReturn`).
 
+### Photo viewer
+
+Pressing a photo on the product page opens it in a full-window viewer over Photo Ground, in both themes, so a studio shot runs into the page without a frame. The photo is shown whole, as large as the window allows; a count, a close button, the arrows (desktop) and a strip of thumbnails sit over it as white glass pills with fixed dark ink. Swipe, the arrows, the thumbnails or the arrow keys change photo; with a mouse a click enlarges it twice over and it follows the pointer, and another click sets it back. It opens and closes with a 150–200ms fade; the arrow keys change photo at once. Escape or the cross closes it and focus returns to the photo it came from.
+
 ### Re-arranging (signature)
 
 When a grid or list changes its arrangement, nothing teleports: each piece glides from where it was to where it now is (`useFlip`). It covers the listing going from three columns to four, a new sort or size filter, the gap a removed wishlist piece or bag line leaves.
@@ -323,6 +327,7 @@ Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" wit
 - **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills and figures 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, card and row hover 300–500ms, a re-arranged grid 500ms.
 - **Do** keep fades and drop movement under `prefers-reduced-motion`.
 - **Do** give anything that moves by itself a visible pause control, and stop it once the visitor acts on it.
+- **Do** write everything the store says in American English: color, gray, center, catalog, canceled; pants, sweater, sneakers, zipper, soccer. Prices and dates take the en-US form too: €45.95, Oct 5, 2026, 3:30 PM. (This document keeps its own spelling; the rule is for what a visitor reads.)
 - **Do** leave merchant facts the code does not define (delivery, returns, measurements, fit, address) as visible placeholders.
 
 ### Don't:

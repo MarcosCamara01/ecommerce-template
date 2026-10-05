@@ -109,7 +109,7 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
       >
         <div className="flex flex-col gap-2">
           <ColourBar items={items} className="h-3" />
-          <span className="text-xs text-muted">The colours in your bag</span>
+          <span className="text-xs text-muted">The colors in your bag</span>
         </div>
         <dl className="flex flex-col gap-2.5 tabular-nums">
           <div className="flex justify-between">

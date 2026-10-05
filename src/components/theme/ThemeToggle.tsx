@@ -36,7 +36,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           ? "Switch to light theme"
           : theme === "light"
             ? "Switch to dark theme"
-            : "Switch colour theme"
+            : "Switch color theme"
       }
       onClick={() => toggleTheme()}
       className={cn(

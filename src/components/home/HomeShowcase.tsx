@@ -181,7 +181,7 @@ export function HomeShowcase({
                 />
               </button>
             ))}
-            <span className="ml-auto text-xs">{pieces.length} colours</span>
+            <span className="ml-auto text-xs">{pieces.length} colors</span>
             {toggle}
           </div>
 
@@ -272,7 +272,7 @@ export function HomeShowcase({
       </section>
 
       <section className="flex flex-col gap-4 pb-20">
-        <h2 className="text-13 text-muted">Shop by colour</h2>
+        <h2 className="text-13 text-muted">Shop by color</h2>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-3">
           {pieces.map((option, position) => (
             <button

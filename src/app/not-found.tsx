@@ -71,7 +71,7 @@ async function NewIn() {
   if (pieces.length === 0) return null;
   return (
     <section className="flex flex-col gap-4 border-t border-line pt-[22px]">
-      <h2 className="font-semibold">New in</h2>
+      <h2 className="font-semibold">New arrivals</h2>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(240px,44%),1fr))] gap-x-3 gap-y-5">
         {pieces.map((product) => (
           <RailCard key={product.id} product={product} />

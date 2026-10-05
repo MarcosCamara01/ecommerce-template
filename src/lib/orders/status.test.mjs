@@ -15,7 +15,7 @@ test("shipment labels follow durable state instead of delivery estimates", () =>
   assert.equal(orderStatusPresentation("processing").label, "Processing");
   assert.equal(orderStatusPresentation("shipped").label, "Shipped");
   assert.equal(orderStatusPresentation("delivered").label, "Delivered");
-  assert.equal(orderStatusPresentation("cancelled").label, "Cancelled");
+  assert.equal(orderStatusPresentation("cancelled").label, "Canceled");
 });
 
 test("progress steps follow the order lifecycle and settle when finished", () => {

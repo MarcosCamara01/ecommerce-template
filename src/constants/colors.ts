@@ -5,6 +5,7 @@ interface ColorMapping {
 export const colorMapping: ColorMapping = {
   anthracite: "#4A4A4A",
   "anthracite grey": "#4B525A",
+  "anthracite gray": "#4B525A",
   beige: "#E8E0D5",
   black: "#1A1A1A",
   blue: "#6B8CAE",
@@ -16,7 +17,9 @@ export const colorMapping: ColorMapping = {
   ecru: "#F0EBE3",
   green: "#5D7B6F",
   grey: "#9CA3AF",
+  gray: "#9CA3AF",
   "grey marl": "#B8BDC6",
+  "heather gray": "#B8BDC6",
   "light green": "#A8C5B5",
   "mid blue": "#5F7FA5",
   navy: "#2F4360",
