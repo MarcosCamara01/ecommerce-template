@@ -1,7 +1,7 @@
 "use client";
 
 import NextLink from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 /**
  * The store's link. The page behind it is fetched ahead when the visitor
@@ -9,32 +9,36 @@ import { useState } from "react";
  * when the link merely scrolls into view. A listing therefore does not ask
  * for every product page on screen, and a navigation still starts warm.
  *
- * `prefetch` decides otherwise: the sections of the navigation pass "auto"
- * and are fetched as soon as they show, as Next does by default.
+ * Next's own prefetch is off and the router is asked directly, so the fetch
+ * starts in the very event that showed the intent.
  */
 export default function Link({
-  prefetch,
   onMouseEnter,
   onFocus,
   onTouchStart,
   ...props
-}: React.ComponentProps<typeof NextLink>) {
-  const [intent, setIntent] = useState(false);
+}: Omit<React.ComponentProps<typeof NextLink>, "prefetch">) {
+  const router = useRouter();
+  const { href } = props;
+
+  const fetchAhead = () => {
+    if (typeof href === "string") router.prefetch(href);
+  };
 
   return (
     <NextLink
       {...props}
-      prefetch={prefetch ?? (intent ? null : false)}
+      prefetch={false}
       onMouseEnter={(event) => {
-        setIntent(true);
+        fetchAhead();
         onMouseEnter?.(event);
       }}
       onFocus={(event) => {
-        setIntent(true);
+        fetchAhead();
         onFocus?.(event);
       }}
       onTouchStart={(event) => {
-        setIntent(true);
+        fetchAhead();
         onTouchStart?.(event);
       }}
     />

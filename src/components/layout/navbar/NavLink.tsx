@@ -13,7 +13,6 @@ function CurrentAwareLink(props: NavLinkProps) {
   const pathname = usePathname();
   return (
     <Link
-      prefetch="auto"
       {...props}
       aria-current={isCurrent(pathname, props.href) ? "page" : undefined}
     />
@@ -23,13 +22,11 @@ function CurrentAwareLink(props: NavLinkProps) {
 /**
  * A nav link that marks itself aria-current. The pathname is request data,
  * so the prerendered shell carries the plain link and the marked one
- * streams in behind it. The sections of the navigation are always on show
- * and are where most visits go next, so their pages are fetched ahead as
- * soon as they render, not on intent like the rest of the store's links.
+ * streams in behind it.
  */
 export function NavLink(props: NavLinkProps) {
   return (
-    <Suspense fallback={<Link prefetch="auto" {...props} />}>
+    <Suspense fallback={<Link {...props} />}>
       <CurrentAwareLink {...props} />
     </Suspense>
   );
