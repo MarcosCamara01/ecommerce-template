@@ -12,13 +12,58 @@ const ADVANCE: Record<string, number> = {
   "%": 0.73, " ": 0.1, ".": 0.21, "&": 0.56, "'": 0.2,
 };
 
-/** Width of `text` in em, with a 3% margin for kerning and rounding. */
-export function displayEm(text: string): number {
-  const em = text.toUpperCase().split("").reduce(
+const advance = (text: string) =>
+  text.toUpperCase().split("").reduce(
     (total, char) => total + (ADVANCE[char] ?? 0.5),
     0,
   );
-  return Math.max(em, 1) * 1.03;
+
+/** Width of `text` in em, with a 3% margin for kerning and rounding. */
+export function displayEm(text: string): number {
+  return Math.max(advance(text), 1) * 1.03;
+}
+
+/**
+ * How many lines `text` takes in display type in a measure of `measureEm`
+ * (the width of its column over the font size). Lines break at spaces and
+ * after hyphens, as the browser breaks them.
+ */
+export function displayLines(text: string, measureEm: number): number {
+  let lines = 1;
+  let used = 0;
+  for (const word of text.trim().split(/\s+/)) {
+    // "QUARTER-ZIP" may break after its hyphen.
+    word.split(/(?<=-)/).forEach((chunk, index) => {
+      const width = advance(chunk) * 1.03;
+      const gap = index === 0 && used > 0 ? ADVANCE[" "] : 0;
+      if (used > 0 && used + gap + width > measureEm) {
+        lines += 1;
+        used = width;
+      } else {
+        used += gap + width;
+      }
+    });
+  }
+  return lines;
+}
+
+/**
+ * The largest of `steps` (largest first) at which `text` is no taller than
+ * `budgetPx`, in a column `measureEm` wide at the first step. The smallest
+ * step if none fits.
+ */
+export function fitDisplayStep<Step extends { px: number; leading: number }>(
+  text: string,
+  steps: readonly Step[],
+  { measureEm, budgetPx }: { measureEm: number; budgetPx: number },
+): Step {
+  const [largest] = steps;
+  return (
+    steps.find((step) => {
+      const lines = displayLines(text, (measureEm * largest.px) / step.px);
+      return lines * step.px * step.leading <= budgetPx;
+    }) ?? steps[steps.length - 1]
+  );
 }
 
 /**

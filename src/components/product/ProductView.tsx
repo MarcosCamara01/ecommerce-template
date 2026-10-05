@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AddToCart } from "@/components/cart/AddToCart";
 import WishlistButton from "@/components/wishlist/WishlistButton";
@@ -12,6 +12,7 @@ import type {
   ProductVariant,
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
+import { fitDisplayStep } from "@/lib/display-type";
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
@@ -29,6 +30,21 @@ const stockLine = (variant: ProductVariant) =>
 
 const overlayButton =
   "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214]";
+
+// Desktop sizes for the name, largest first. A short name is set giant; a
+// longer one steps down until it is no taller than two lines of the largest
+// size, so the buying controls stay on the first screen. Each step also
+// yields to a short window (vh), like the home hero.
+const NAME_STEPS = [
+  { px: 104, leading: 0.84, className: "lg:text-[min(104px,7.2vw,12.5vh)] lg:leading-[0.84]" },
+  { px: 80, leading: 0.86, className: "lg:text-[min(80px,5.6vw,9.6vh)] lg:leading-[0.86]" },
+  { px: 64, leading: 0.88, className: "lg:text-[min(64px,4.5vw,7.7vh)] lg:leading-[0.88]" },
+  { px: 56, leading: 0.9, className: "lg:text-[min(56px,3.9vw,6.7vh)] lg:leading-[0.9]" },
+  { px: 44, leading: 0.92, className: "lg:text-[min(44px,3.1vw,5.3vh)] lg:leading-[0.92]" },
+] as const;
+// The buy column is never narrower than this many times the largest size.
+const NAME_MEASURE_EM = 5.18;
+const NAME_BUDGET_PX = 2 * NAME_STEPS[0].px * NAME_STEPS[0].leading;
 
 /**
  * Picking a variant swaps photos and sizes in place; the URL follows with
@@ -64,6 +80,33 @@ export function ProductView({
       ? pickedSize
       : variant.sizes[0];
   const price = formatPriceFromEuros(product.price);
+  const nameStep = fitDisplayStep(product.name, NAME_STEPS, {
+    measureEm: NAME_MEASURE_EM,
+    budgetPx: NAME_BUDGET_PX,
+  });
+
+  // In a window too short for the name, colours, sizes and button, the buy
+  // column would keep the button below the fold for as long as it sticks.
+  // Knowing how far down the buy row ends, CSS lets the column scroll up
+  // just until the row sits at the bottom of the window, and hold there.
+  const columnRef = useRef<HTMLDivElement>(null);
+  const sizesRef = useRef<HTMLDivElement>(null);
+  const buyRowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const column = columnRef.current;
+    const sizes = sizesRef.current;
+    const buyRow = buyRowRef.current;
+    if (!column || !sizes || !buyRow) return;
+    const observer = new ResizeObserver(() => {
+      // A row held to the edge reports where it is drawn, so its own place
+      // is taken from the block above it.
+      const gap = parseFloat(getComputedStyle(column).rowGap) || 0;
+      const end = sizes.offsetTop + sizes.offsetHeight + gap + buyRow.offsetHeight;
+      column.style.setProperty("--buy-height", `${end}px`);
+    });
+    observer.observe(column);
+    return () => observer.disconnect();
+  }, []);
 
   const pickVariant = (next: ProductVariant) => {
     if (next.id === variant.id) return;
@@ -131,7 +174,10 @@ export function ProductView({
           }
         />
 
-        <div className="flex min-w-0 flex-col gap-3.5 px-4 pb-32 pt-[18px] lg:sticky lg:top-[100px] lg:gap-7 lg:px-0 lg:pb-0 lg:pt-0">
+        <div
+          ref={columnRef}
+          className="flex min-w-0 flex-col gap-3.5 px-4 pb-32 pt-[18px] lg:sticky lg:top-[min(100px,calc(100dvh_-_var(--buy-height,0px)))] lg:gap-7 lg:px-0 lg:pb-0 lg:pt-0"
+        >
           <div className="flex flex-col gap-3.5">
             <div className="hidden items-center justify-between gap-3 lg:flex">
               <span className="text-13">
@@ -140,7 +186,7 @@ export function ProductView({
               {editButton}
             </div>
             <div className="flex items-end justify-between gap-3 lg:flex-col lg:items-start lg:gap-3.5">
-              <h1 className="font-display text-[46px] leading-[0.86] lg:text-[min(104px,7.2vw)] lg:leading-[0.84]">
+              <h1 className={cn("font-display text-[46px] leading-[0.86]", nameStep.className)}>
                 {product.name}
               </h1>
               <span className="whitespace-nowrap text-lg font-medium tabular-nums lg:text-[26px]">
@@ -148,18 +194,18 @@ export function ProductView({
               </span>
             </div>
           </div>
-          {/* On phones the description follows the buying controls. */}
-          <p className="max-w-[60ch] text-muted max-lg:order-1 lg:-mt-3.5">
+          {/* The description follows the buying controls. */}
+          <p className="order-1 max-w-[60ch] text-muted">
             {product.description}
           </p>
 
           <div className="flex flex-col gap-3">
             <span className="hidden text-sm lg:block">
-              Colour <span className="text-muted">— {variant.color}</span>
+              Color <span className="text-muted">— {variant.color}</span>
             </span>
             <div
               role="group"
-              aria-label="Colour"
+              aria-label="Color"
               className="-mx-4 flex gap-2 overflow-x-auto px-4 py-0.5 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-2.5 lg:overflow-visible lg:px-0"
             >
               {product.variants.map((option) => {
@@ -199,7 +245,7 @@ export function ProductView({
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div ref={sizesRef} className="flex flex-col gap-3">
             <div className="flex justify-between text-sm">
               <span>
                 Size <span className="text-muted">— {size ?? "None left"}</span>
@@ -219,7 +265,14 @@ export function ProductView({
             <span className="text-13">Fit: {merchantPlaceholders.fitNote}</span>
           </div>
 
-          <div className="flex gap-2">
+          {/* Add to bag never leaves the window. On phones it is pinned to
+              the bottom of the screen; on desktop, while the column runs past
+              the window, the row holds to the bottom edge on the page ground
+              and the column scrolls beneath it. */}
+          <div
+            ref={buyRowRef}
+            className="flex gap-2 lg:sticky lg:bottom-0 lg:z-10 lg:-mb-6 lg:bg-bg lg:pb-6 lg:before:pointer-events-none lg:before:absolute lg:before:inset-x-0 lg:before:bottom-full lg:before:h-4 lg:before:bg-gradient-to-t lg:before:from-bg lg:before:to-transparent"
+          >
             <div className="fixed inset-x-4 bottom-[max(24px,env(safe-area-inset-bottom))] z-30 lg:static lg:grow">
               <AddToCart
                 key={`${variant.id}-${size}`}
@@ -238,7 +291,7 @@ export function ProductView({
             />
           </div>
 
-          <ul className="flex flex-col gap-2 text-sm max-lg:order-2">
+          <ul className="order-2 flex flex-col gap-2 text-sm">
             <li className="flex items-center gap-2.5">
               <svg
                 aria-hidden="true"
@@ -274,7 +327,7 @@ export function ProductView({
             </li>
           </ul>
 
-          <div className="max-lg:order-2">{details}</div>
+          <div className="order-2">{details}</div>
         </div>
       </div>
     </>

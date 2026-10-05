@@ -122,7 +122,11 @@ test("primary routes keep exactly one accessible heading across data states", as
   assert.equal(h1Count(sources.cartContent), 0);
   assert.equal(h1Count(sources.wishlistContent), 0);
   // The product name is the page's visible display headline.
-  assert.match(sources.product, /<h1 className="[^"]*">\s*\{product\.name\}\s*<\/h1>/);
+  // Its size depends on the name, so the class may be an expression.
+  assert.match(
+    sources.product,
+    /<h1 className=(?:"[^"]*"|\{[^>]*\})>\s*\{product\.name\}\s*<\/h1>/,
+  );
   assert.doesNotMatch(sources.search, /<h3[^>]*>\s*No products found/);
 });
 
