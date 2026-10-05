@@ -96,7 +96,13 @@ const WishlistButton = ({
   return (
     <span className={cn("relative grid shrink-0", size.box, className)}>
       {celebration > 0 ? (
-        <span key={celebration} aria-hidden="true">
+        // Out of flow: as a grid item it would take a row of its own and
+        // squash the button for good after the first save.
+        <span
+          key={celebration}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+        >
           {SPARK_ANGLES.map((angle) => (
             <span
               key={angle}
