@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });
     }
-    return NextResponse.json(session);
+    // One shopper's checkout: no cache may keep it.
+    return NextResponse.json(session, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     if (error instanceof IdentityError) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

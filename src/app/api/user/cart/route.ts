@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
     const items = details
       ? cartItemWithDetailsSchema.array().parse(await cart.listWithDetails())
       : selectCartItemSchema.array().parse(await cart.list());
-    return NextResponse.json({ items });
+    // One shopper's bag: no cache may keep it.
+    return NextResponse.json({ items }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     return cartRouteError(error);
   }
