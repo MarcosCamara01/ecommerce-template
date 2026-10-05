@@ -1,4 +1,4 @@
-export type CheckoutCartState<Item> = Readonly<{
+type CheckoutCartState<Item> = Readonly<{
   cartItemId: number;
   active: boolean;
   item: Item | null;

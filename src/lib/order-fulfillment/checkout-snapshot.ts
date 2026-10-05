@@ -1,4 +1,4 @@
-export type CheckoutSnapshotItem = {
+type CheckoutSnapshotItem = {
   cartItemId: number;
   variantId: number;
   size: string;

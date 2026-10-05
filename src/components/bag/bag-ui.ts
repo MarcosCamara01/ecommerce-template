@@ -6,7 +6,7 @@ import { useSyncExternalStore } from "react";
  * UI state for the bag drawer, shared by the nav pill, the product page and
  * the drawer itself (they live in different trees: layout and page).
  */
-export type AddedLine = { name: string; color: string; size: string };
+type AddedLine = { name: string; color: string; size: string };
 
 type BagUi = {
   open: boolean;

@@ -1,4 +1,4 @@
-export type ExternalErrorFacts = Readonly<{
+type ExternalErrorFacts = Readonly<{
   code: string | null;
   type: string | null;
   statusCode: number | null;

@@ -1,4 +1,4 @@
-export const orderStatuses = [
+const orderStatuses = [
   "confirmed",
   "processing",
   "shipped",
@@ -6,7 +6,7 @@ export const orderStatuses = [
   "cancelled",
 ] as const;
 
-export type OrderStatus = (typeof orderStatuses)[number];
+type OrderStatus = (typeof orderStatuses)[number];
 
 /** The four steps of the order progress bar, in order. */
 export const orderSteps = ["Confirmed", "Processing", "Shipped", "Delivered"] as const;

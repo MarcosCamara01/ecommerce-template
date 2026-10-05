@@ -1,1 +1,1 @@
-export { sendEmail, type OrderDetails } from "./sendEmail";
+export { sendEmail } from "./sendEmail";

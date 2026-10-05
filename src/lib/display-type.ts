@@ -19,7 +19,7 @@ const advance = (text: string) =>
   );
 
 /** Width of `text` in em, with a 3% margin for kerning and rounding. */
-export function displayEm(text: string): number {
+function displayEm(text: string): number {
   return Math.max(advance(text), 1) * 1.03;
 }
 

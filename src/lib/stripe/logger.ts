@@ -148,4 +148,4 @@ export const stripeLogger = {
   },
 };
 
-export type { StripeLogEntry };
+

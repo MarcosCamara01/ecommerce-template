@@ -49,7 +49,7 @@ const CATALOG_SYSTEM_PRINCIPAL_IMPORTERS = new Set([
 const normalizePath = (value) => value.split(sep).join("/");
 const withoutExtension = (value) => value.replace(/\.(?:ts|tsx|js|mjs)$/, "");
 
-export function extractModuleSpecifiers(source, fileName = "source.ts") {
+function extractModuleSpecifiers(source, fileName = "source.ts") {
   const sourceFile = ts.createSourceFile(
     fileName,
     source,
@@ -80,7 +80,7 @@ export function extractModuleSpecifiers(source, fileName = "source.ts") {
   return specifiers;
 }
 
-export function extractRuntimeImportNames(
+function extractRuntimeImportNames(
   source,
   requestedSpecifier,
   fileName = "source.ts",
@@ -139,7 +139,7 @@ export function extractRuntimeImportNames(
   return names;
 }
 
-export function resolveWorkspaceImport(importer, specifier, projectRoot) {
+function resolveWorkspaceImport(importer, specifier, projectRoot) {
   let target;
   if (specifier.startsWith("@/")) {
     target = resolve(projectRoot, "src", specifier.slice(2));
@@ -219,7 +219,7 @@ export function findViolationsInSource({
   return [...new Set(violations)];
 }
 
-export function findArchitectureViolations(projectRoot = process.cwd()) {
+function findArchitectureViolations(projectRoot = process.cwd()) {
   const sourceRoot = join(projectRoot, "src");
   const violations = [];
   for (const file of walk(sourceRoot)) {

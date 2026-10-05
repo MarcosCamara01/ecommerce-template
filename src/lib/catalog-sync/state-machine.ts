@@ -4,7 +4,7 @@ export const CATALOG_SYNC_MAX_ATTEMPTS = 8;
 export const CATALOG_SYNC_LEASE_MS = 5 * 60 * 1000;
 export const CATALOG_SYNC_IDEMPOTENCY_REPLAY_WINDOW_MS = 24 * 60 * 60_000;
 
-export type CatalogSyncReplaySafety =
+type CatalogSyncReplaySafety =
   | Readonly<{ allowed: true }>
   | Readonly<{
       allowed: false;

@@ -6,4 +6,3 @@ export const UpdateProfileSchema = z.object({
   phone: z.string().optional(),
 });
 
-export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;

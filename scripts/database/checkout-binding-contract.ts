@@ -2,7 +2,7 @@ import postgres from "postgres";
 
 type SqlClient = ReturnType<typeof postgres>;
 
-export type CheckoutBindingRoutine = Readonly<{
+type CheckoutBindingRoutine = Readonly<{
   owner: string;
   securityDefiner: boolean;
   language: string;

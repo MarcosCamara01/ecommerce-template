@@ -10,7 +10,7 @@ import {
   type CheckoutIntentItem,
 } from "../schema/checkout";
 
-export type OwnedCheckoutOutcomeRecord = Readonly<{
+type OwnedCheckoutOutcomeRecord = Readonly<{
   workState: "pending" | "processing" | "succeeded" | "needs_attention" | null;
   orderId: number | null;
   customerEmailState:

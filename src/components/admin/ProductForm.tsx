@@ -17,8 +17,6 @@ import { readImagePreview } from "./image-preview";
 import { StorefrontPreview, type PreviewValues } from "./StorefrontPreview";
 import { catalogImageBatchErrors } from "@/lib/catalog-sync/image-file-contract";
 
-export type { ProductFormData };
-
 interface FormState {
   success: boolean;
   message: string;

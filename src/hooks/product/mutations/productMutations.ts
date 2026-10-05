@@ -4,7 +4,7 @@ type ProductMutationPayload = Partial<ProductApiResponse> & {
   error?: string;
 };
 
-export async function executeProductMutation(input: {
+async function executeProductMutation(input: {
   method: "POST" | "PUT" | "DELETE";
   url: string;
   body?: FormData;

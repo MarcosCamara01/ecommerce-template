@@ -2,7 +2,7 @@ interface ColorMapping {
   [key: string]: string;
 }
 
-export const colorMapping: ColorMapping = {
+const colorMapping: ColorMapping = {
   anthracite: "#4A4A4A",
   "anthracite grey": "#4B525A",
   "anthracite gray": "#4B525A",

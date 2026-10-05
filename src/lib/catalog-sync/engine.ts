@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { CatalogSyncOperationRecord, CatalogSyncState, CatalogSyncStripeResult } from "./model";
 
 export type CatalogSyncResult = { operationId: string; productId: number; state: CatalogSyncState; outcome: "succeeded" | "retry_scheduled" | "needs_attention" | "busy" };
-export type CatalogSyncEngineRepository = {
+type CatalogSyncEngineRepository = {
   claimById(id: string, worker: string): Promise<CatalogSyncOperationRecord | null>;
   claimNext(worker: string): Promise<CatalogSyncOperationRecord | null>;
   renewLease(id: string, worker: string): Promise<boolean>;

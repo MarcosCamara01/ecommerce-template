@@ -16,7 +16,7 @@ import type {
 } from "../db/drizzle/schema";
 import { catalogImageExtension } from "./image-file-contract";
 
-export type CatalogCreateUpload = {
+type CatalogCreateUpload = {
   file: File;
   path: string;
   url: string;

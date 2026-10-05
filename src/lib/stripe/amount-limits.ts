@@ -1,4 +1,4 @@
-export const STRIPE_EUR_MIN_CHARGE_CENTS = 50;
+const STRIPE_EUR_MIN_CHARGE_CENTS = 50;
 export const STRIPE_EUR_MAX_CHARGE_CENTS = 99_999_999;
 
 export function stripeEurChargeTotal(

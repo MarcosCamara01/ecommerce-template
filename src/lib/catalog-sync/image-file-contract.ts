@@ -2,7 +2,8 @@
 // every new image in one multipart request, so the complete file batch must
 // leave ample room for multipart headers and product metadata.
 export const CATALOG_IMAGE_MAX_BYTES = 3 * 1024 * 1024;
-export const CATALOG_IMAGE_BATCH_MAX_BYTES = CATALOG_IMAGE_MAX_BYTES;
+// A request carries one photo, so a batch may weigh what one photo may.
+export const CATALOG_IMAGE_BATCH_MAX_BYTES = 1 * CATALOG_IMAGE_MAX_BYTES;
 export const PRODUCT_IMAGES_BUCKET_MAX_BYTES = 5 * 1024 * 1024;
 export const CATALOG_IMAGE_ALLOWED_MIME_TYPES = [
   "image/jpeg",

@@ -1,4 +1,4 @@
-export type FulfillmentOrderEvidence = Readonly<{
+type FulfillmentOrderEvidence = Readonly<{
   userId: string;
   stripeSessionId: string;
   totalPrice: number;
@@ -6,7 +6,7 @@ export type FulfillmentOrderEvidence = Readonly<{
   products: readonly FulfillmentOrderLineEvidence[];
 }>;
 
-export type FulfillmentOrderLineEvidence = Readonly<{
+type FulfillmentOrderLineEvidence = Readonly<{
   variantId: number;
   quantity: number;
   size: string;

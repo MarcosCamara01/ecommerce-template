@@ -18,7 +18,6 @@ const queryClient = postgres(connectionString, {
 });
 
 export const db = drizzle(queryClient, { schema });
-export type Database = typeof db;
 export type DatabaseTransaction = Parameters<
   Parameters<typeof db.transaction>[0]
 >[0];

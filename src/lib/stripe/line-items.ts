@@ -12,13 +12,13 @@
  * Intentionally dependency-free so it can be unit tested in isolation.
  */
 
-export interface VariantPricedCartItem {
+interface VariantPricedCartItem {
   variantId: number;
   quantity: number | null;
   variant: { stripeId: string | null };
 }
 
-export interface StripeLineItem {
+interface StripeLineItem {
   price: string;
   quantity: number;
 }

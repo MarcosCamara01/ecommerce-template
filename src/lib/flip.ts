@@ -10,7 +10,7 @@
 export type Box = { left: number; top: number; width: number; height: number };
 
 /** The scale (a, d) and translation (e, f) of a 2D transform. */
-export type Matrix = { a: number; d: number; e: number; f: number };
+type Matrix = { a: number; d: number; e: number; f: number };
 
 export const IDENTITY: Matrix = { a: 1, d: 1, e: 0, f: 0 };
 
@@ -53,7 +53,7 @@ export function sameBox(first: Box, second: Box): boolean {
   );
 }
 
-export type Inversion = { x: number; y: number; scaleX: number; scaleY: number };
+type Inversion = { x: number; y: number; scaleX: number; scaleY: number };
 
 /**
  * The transform that draws an element laid out at `to` where `from` is.
