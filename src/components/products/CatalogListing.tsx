@@ -203,7 +203,9 @@ export function CatalogListing({
           <ProductItem
             key={product.id}
             product={product}
-            priority={index < 2}
+            // The first row is on screen at once: four on desktop, and the
+            // first two rows of two on a phone.
+            priority={index < 4}
             sizes={`(max-width: 1023px) 50vw, ${columns === 3 ? 33 : 25}vw`}
           />
         ))}
