@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { openBag, useBagUi } from "@/components/bag/bag-ui";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { useCart } from "@/hooks/cart";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +12,8 @@ const pill =
 
 /**
  * Ink "Bag · n" pill. On desktop it opens the bag drawer and is the landing
- * point for the add-to-bag flight; on phones it links to the bag page.
+ * point for the add-to-bag flight; on phones it links to the bag page. The
+ * count rolls when it changes, like the figures on the bag page.
  */
 export function BagLink({
   opensDrawer = false,
@@ -32,7 +34,13 @@ export function BagLink({
       aria-hidden="true"
       className={cn("inline-block", bump > 0 && "animate-bump")}
     >
-      {isSuccess ? `Bag · ${count}` : "Bag"}
+      {isSuccess ? (
+        <>
+          Bag · <RollingNumber value={count} />
+        </>
+      ) : (
+        "Bag"
+      )}
     </span>
   );
 

@@ -206,7 +206,8 @@
   }
 
   .animate-swap,
-  .animate-fade-scale {
+  .animate-fade-scale,
+  .animate-roll {
     animation-name: opacity-in;
   }
 

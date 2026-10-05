@@ -1,9 +1,11 @@
 "use client";
 
 import { useCartDetails } from "@/hooks/cart";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { swatchBackground } from "@/constants/colors";
 import { merchantPlaceholders } from "@/constants/merchant";
+import { useFlip } from "@/hooks/useFlip";
 import type { CartItemWithDetails } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
@@ -44,6 +46,8 @@ const ColourBar = ({ items, className }: { items: CartItemWithDetails[]; classNa
 
 export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) => {
   const { items, isPending } = useCartDetails();
+  // Removing a line is instant; the ones below slide up into its place.
+  const linesRef = useFlip<HTMLDivElement>();
 
   if (isPending) {
     return (
@@ -63,8 +67,13 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
 
   if (items.length === 0) return <>{emptyState}</>;
 
-  const subtotal = formatPriceFromEuros(
-    items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+  const amount = items.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0,
+  );
+  // The figure rolls when a quantity or a removal changes it.
+  const subtotal = (
+    <RollingNumber value={amount}>{formatPriceFromEuros(amount)}</RollingNumber>
   );
   const cartItemIds = items.map((item) => item.id);
 
@@ -80,7 +89,7 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
       data-fixed-cta="summary"
       className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_440px]"
     >
-      <div className="flex flex-col border-t border-line">
+      <div ref={linesRef} className="flex flex-col border-t border-line">
         {items.map(({ id, product, size, quantity, variant }) => (
           <CartProduct
             key={id}
@@ -148,5 +157,10 @@ export const BagCount = () => {
   const { items, isSuccess } = useCartDetails();
   if (!isSuccess) return null;
   const count = items.reduce((total, item) => total + item.quantity, 0);
-  return <span className="opacity-60"> ({count})</span>;
+  return (
+    <span className="opacity-60">
+      {" "}
+      (<RollingNumber value={count} />)
+    </span>
+  );
 };

@@ -2,6 +2,7 @@ import { displayName } from "@/utils/product-name";
 import Image from "next/image";
 import Link from "next/link";
 
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { swatchBackground } from "@/constants/colors";
 import type {
   CartItem,
@@ -35,7 +36,10 @@ export const CartProduct = ({
   const lineName = `${displayName(name)}, ${variant.color}, size ${size}`;
 
   return (
-    <article className="grid grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line py-3 lg:grid-cols-[150px_minmax(0,1fr)_auto] lg:items-stretch lg:gap-6 lg:py-5">
+    <article
+      data-flip-item={cartItemId}
+      className="grid grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line py-3 lg:grid-cols-[150px_minmax(0,1fr)_auto] lg:items-stretch lg:gap-6 lg:py-5"
+    >
       <Link
         href={productLink}
         tabIndex={-1}
@@ -87,7 +91,9 @@ export const CartProduct = ({
       </div>
       <div className="flex flex-col items-end gap-1 self-start pt-0.5 lg:gap-2">
         <span className="whitespace-nowrap tabular-nums lg:text-xl lg:font-medium">
-          {formatPriceFromEuros(price * quantity)}
+          <RollingNumber value={price * quantity}>
+            {formatPriceFromEuros(price * quantity)}
+          </RollingNumber>
         </span>
         <span className="lg:hidden">
           <DeleteButton cartItemId={cartItemId} productName={lineName} />

@@ -7,7 +7,9 @@ import { useRef, useState } from "react";
 import { AddToCart } from "@/components/cart/AddToCart";
 import { PieceTile } from "@/components/products/PieceTile";
 import { swatchBackground } from "@/constants/colors";
+import { useFlip } from "@/hooks/useFlip";
 import { useWishlistDetails } from "@/hooks/wishlist";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { ProductSize, ProductWithVariants } from "@/lib/db/drizzle/schema";
@@ -24,7 +26,7 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
   const href = `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`;
 
   return (
-    <article className="group/piece flex flex-col gap-2.5">
+    <article data-flip-item={product.id} className="group/piece flex flex-col gap-2.5">
       {/* The card has its own size and add row, so no quick add here. */}
       <PieceTile
         ref={photoRef}
@@ -39,11 +41,11 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
           <WishlistButton showsRemove productId={product.id} productName={product.name} />
         </span>
       </PieceTile>
-      <Link href={href} className="flex justify-between gap-2.5 px-1">
+      <Link href={href} data-flip-part="move" className="flex justify-between gap-2.5 px-1">
         <span className="font-medium">{displayName(product.name)}</span>
         <span className="whitespace-nowrap tabular-nums">{formatPriceFromEuros(product.price)}</span>
       </Link>
-      <span className="flex items-center gap-1.5 px-1 text-13 text-muted">
+      <span data-flip-part="move" className="flex items-center gap-1.5 px-1 text-13 text-muted">
         <span
           aria-hidden="true"
           className="size-2.5 rounded-pill shadow-[0_0_0_1px_var(--line)]"
@@ -51,7 +53,7 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
         />
         {variant.color}
       </span>
-      <div className="flex gap-1.5">
+      <div data-flip-part="move" className="flex gap-1.5">
         <label className="relative h-11 w-16 shrink-0">
           <span className="sr-only">Size for {product.name}</span>
           <NativeSelect
@@ -85,6 +87,8 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
 
 export const WishlistProducts = ({ emptyState }: { emptyState: React.ReactNode }) => {
   const { items, isPending } = useWishlistDetails();
+  // Removing a piece is instant; the others glide over to close the gap.
+  const gridRef = useFlip<HTMLDivElement>();
 
   if (isPending) {
     return (
@@ -99,7 +103,10 @@ export const WishlistProducts = ({ emptyState }: { emptyState: React.ReactNode }
   if (items.length === 0) return <>{emptyState}</>;
 
   return (
-    <div className="grid grid-cols-2 gap-x-3 gap-y-7 border-t border-line pt-5 lg:grid-cols-[repeat(auto-fill,minmax(min(300px,44%),1fr))]">
+    <div
+      ref={gridRef}
+      className="grid grid-cols-2 gap-x-3 gap-y-7 border-t border-line pt-5 lg:grid-cols-[repeat(auto-fill,minmax(min(300px,44%),1fr))]"
+    >
       {items.map(({ id, product }) => (
         <SavedPiece key={id} product={product} />
       ))}
@@ -116,7 +123,9 @@ export const WishlistCount = () => {
       aria-label={`${items.length} ${items.length === 1 ? "piece" : "pieces"}`}
       className="pb-1.5 font-display text-[40px] font-extrabold leading-none tabular-nums lg:text-[64px]"
     >
-      {String(items.length).padStart(2, "0")}
+      <RollingNumber value={items.length}>
+        {String(items.length).padStart(2, "0")}
+      </RollingNumber>
     </span>
   );
 };

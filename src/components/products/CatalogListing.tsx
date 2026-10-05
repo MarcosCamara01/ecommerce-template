@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BottomSheet, BottomSheetClose } from "@/components/ui/bottom-sheet";
 import type { ShopSection } from "@/constants/navigation";
+import { useFlip } from "@/hooks/useFlip";
 import {
   ProductSizeZod,
   type ProductSize,
@@ -43,8 +44,9 @@ const chip =
 
 /**
  * Filter bar and grid for a store section. Section chips are links; size,
- * sort and grid density are local view state and change the grid at once
- * (filters and sorting never animate).
+ * sort and grid density are local view state. When one of them re-arranges
+ * the grid, each piece glides to its new place and size (useFlip) instead
+ * of jumping there, and the ink of the density switch slides across.
  */
 export function CatalogListing({
   products,
@@ -59,6 +61,7 @@ export function CatalogListing({
   const [sort, setSort] = useState<Sort>("newest");
   const [columns, setColumns] = useState<3 | 4>(4);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const gridRef = useFlip<HTMLDivElement>();
 
   const shown = products
     .filter((product) => !size || stocks(product, size))
@@ -150,8 +153,16 @@ export function CatalogListing({
           <div
             role="group"
             aria-label="Grid density"
-            className="flex rounded-pill border border-line p-1"
+            className="relative flex rounded-pill border border-line p-1"
           >
+            {/* One ink capsule slides between the two, as on the size pills. */}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "absolute left-1 top-1 h-9 w-11 rounded-pill bg-fg transition-transform duration-220 ease-in-out motion-reduce:transition-none",
+                columns === 4 && "translate-x-full",
+              )}
+            />
             {([3, 4] as const).map((count) => (
               <button
                 key={count}
@@ -159,7 +170,7 @@ export function CatalogListing({
                 aria-pressed={columns === count}
                 aria-label={`${count} columns`}
                 onClick={() => setColumns(count)}
-                className="h-9 w-11 rounded-pill text-13 font-semibold aria-pressed:bg-fg aria-pressed:text-bg"
+                className="press relative h-9 w-11 rounded-pill text-13 font-semibold transition-[color,transform] duration-220 ease-in-out aria-pressed:text-bg"
               >
                 {count}
               </button>
@@ -179,23 +190,24 @@ export function CatalogListing({
             Show every size
           </button>
         </p>
-      ) : (
-        <div
-          className={cn(
-            "grid grid-cols-2 gap-x-2.5 gap-y-[18px] lg:gap-x-4 lg:gap-y-7",
-            columns === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4",
-          )}
-        >
-          {shown.map((product, index) => (
-            <ProductItem
-              key={product.id}
-              product={product}
-              priority={index < 2}
-              sizes={`(max-width: 1023px) 50vw, ${columns === 3 ? 33 : 25}vw`}
-            />
-          ))}
-        </div>
-      )}
+      ) : null}
+      {/* Stays mounted when a size empties it, so the pieces rise back in. */}
+      <div
+        ref={gridRef}
+        className={cn(
+          "grid grid-cols-2 gap-x-2.5 gap-y-[18px] lg:gap-x-4 lg:gap-y-7",
+          columns === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4",
+        )}
+      >
+        {shown.map((product, index) => (
+          <ProductItem
+            key={product.id}
+            product={product}
+            priority={index < 2}
+            sizes={`(max-width: 1023px) 50vw, ${columns === 3 ? 33 : 25}vw`}
+          />
+        ))}
+      </div>
 
       <BottomSheet
         open={sheetOpen}

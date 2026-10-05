@@ -55,6 +55,8 @@ export function PieceTile({
   return (
     <div
       ref={ref}
+      // Where a grid re-arranges (useFlip) the tile follows its box.
+      data-flip-part="morph"
       className={cn("relative overflow-hidden rounded-photo bg-photo", className)}
     >
       {/* The name below is the link people read; this one is for the pointer. */}

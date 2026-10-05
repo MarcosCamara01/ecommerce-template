@@ -143,7 +143,7 @@ The store is a cool, quiet grey room where the clothes do the talking. Every rou
 
 The voice is giant, condensed, black uppercase: Archivo at 62% width set so large it touches the edges of the viewport, scaled with `min(px, vw)`. Everything else is Geist at 15px, calm and legible. Controls are pills; photographs are soft-cornered tiles on their own pale ground so cut-outs and studio shots read consistently in both themes.
 
-Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for two moments (saving to the wishlist, completing an order) and never repeats on back navigation. Hover is a signature on product cards and section rows (see The Hover Rule); the theme switch is instant.
+Motion is physical and short: things press, slide from the edge they live on, and settle. Delight is reserved for two moments (saving to the wishlist, completing an order) and never repeats on back navigation. Hover is a signature on product cards and section rows (see The Hover Rule); a grid or list that re-arranges lets its pieces glide to their new places (see Re-arranging); the theme switch is instant.
 
 **Key Characteristics:**
 
@@ -248,6 +248,7 @@ Pills (999px) for every button, chip, size, nav item, search field and badge. Ph
 - **Size pills:** six equal pills, 52px tall. The selected pill is a single ink capsule that slides between sizes (220ms ease-in-out); out-of-stock sizes are dashed and struck through.
 - **Colour variants:** 20px-radius chips with a 48×60 thumbnail, name and stock line; the selected one has a 1.5px ink border and an 8% wash. Selection updates the product imagery and availability using the current theme's neutral controls.
 - **Filters:** 40px pills; selected is ink-filled.
+- **Grid density:** a two-pill switch (3 / 4 columns); one ink capsule slides between them (220ms ease-in-out), as on the size pills.
 
 ### Cards / Containers
 
@@ -289,6 +290,17 @@ Edge-to-edge rows in giant type on the home page. Ink pours in from the edge the
 
 A 460px panel that slides in from the right edge over a 32% scrim, items staggered 50ms. On mobile, an "Added" panel rises from the bottom and can be dragged down to dismiss. Closing the drawer, the search or a phone panel gives focus back to the control that opened it (`useFocusReturn`).
 
+### Re-arranging (signature)
+
+When a grid or list changes its arrangement, nothing teleports: each piece glides from where it was to where it now is (`useFlip`). It covers the listing going from three columns to four, a new sort or size filter, the gap a removed wishlist piece or bag line leaves.
+
+- **Glide:** 500ms on the drawer curve, each piece setting off 20ms after the one before (the tenth waits longest), so the grid ripples instead of moving as a block. A photo tile follows its box in place and size; text follows its corner and never stretches; the heart on a tile keeps its own size and its distance from the corner.
+- **Interruption:** a second change mid-flight carries on from where each piece is, with no jump and no wait.
+- **Arriving and leaving:** a piece that was not there before rises 12px and fades in (400ms ease-out). A piece that leaves just goes: removals stay instant, only the ones left behind move.
+- **Off screen:** pieces that neither start nor end on screen do not move.
+- **Figures:** a quantity, a line total, the bag total or a count rolls when it changes: the new figure comes up from below when it grew, down from above when it shrank (220ms ease-out). It plays once, for the change that caused it; coming back to the page does not replay it.
+- **Reduced motion:** the arrangement changes at once; new pieces and new figures only fade.
+
 ### Toasts
 
 Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" with Undo, "Sign in to add to your bag", "Couldn’t update your bag. Try again." They say bag and sign in, like the rest of the store. Below desktop the product and bag pages pin a purchase bar to the bottom of the screen; there a toast rises above the bar instead of covering it, and the footer ends above it (`--cta-clearance`).
@@ -296,10 +308,10 @@ Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" wit
 ### Motion (implementation map)
 
 - Tokens: CSS `--ease-out`, `--ease-in-out`, `--ease-drawer` in `globals.css`; the same curves and the drag spring for JS in `src/lib/motion.ts`.
-- CSS transitions and keyframes for predetermined motion (press, size pill, card hover, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight and the section row ink, which has to start from the edge the pointer crossed and carry on mid-way; Motion only for sheets (exits) and drag (`BottomSheet`).
+- CSS transitions and keyframes for predetermined motion (press, size pill, card hover, toasts, photo swaps, hero letters, hero deck, rotation ring, confetti, tiles); WAAPI for the add-to-bag flight, the section row ink, which has to start from the edge the pointer crossed and carry on mid-way, and the glide of a re-arranged grid (`useFlip`), which starts from wherever each piece is drawn; Motion only for sheets (exits) and drag (`BottomSheet`).
 - The light/dark switch is instant. Transitions are switched off for the swap, so the colours snap together instead of fading.
 - The hero deck moves with transitions (transform and opacity, 700ms ease-out), one place per piece, so rapid changes retarget; the rotation ring is the only linear motion. A swipe follows the finger and the card carries on from where it is let go.
-- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; sheets fade; a card's next photo cross-fades and a section row inks at once.
+- Reduced motion keeps fades and drops movement: no confetti, flight, rise or pop; no hero rotation; sheets fade; a card's next photo cross-fades and a section row inks at once; a grid re-arranges at once and new figures only fade.
 
 ## Do's and Don'ts
 
@@ -308,7 +320,7 @@ Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" wit
 - **Do** derive every surface from `--bg` and `--fg`; use `color-mix` for washes and lines.
 - **Do** write display sizes as `min(px, vw)` and keep Archivo at 62% width, weight 900, uppercase.
 - **Do** put every product photo on Photo Ground (#E4E7EA) with a 24–28px radius.
-- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, card and row hover 300–500ms.
+- **Do** use the motion tokens: `--ease-out` cubic-bezier(0.23, 1, 0.32, 1), `--ease-in-out` cubic-bezier(0.77, 0, 0.175, 1), `--ease-drawer` cubic-bezier(0.32, 0.72, 0, 1); press 120ms, pills and figures 220ms, toasts 350/250ms, drawers 420ms, scrim 200ms, card and row hover 300–500ms, a re-arranged grid 500ms.
 - **Do** keep fades and drop movement under `prefers-reduced-motion`.
 - **Do** give anything that moves by itself a visible pause control, and stop it once the visitor acts on it.
 - **Do** leave merchant facts the code does not define (delivery, returns, measurements, fit, address) as visible placeholders.
@@ -316,7 +328,8 @@ Inverted pills at the bottom centre: "Added to bag", "Removed from wishlist" wit
 ### Don't:
 
 - **Don't** derive page backgrounds or ink from a product or variant colour.
-- **Don't** animate opening search with ⌘K or "/", typing results, filters, sorting or tab switches.
+- **Don't** animate opening search with ⌘K or "/", typing results or tab switches.
+- **Don't** let a grid or list jump to a new arrangement: its pieces glide there (`useFlip`).
 - **Don't** celebrate removals: unsaving a wishlist item or emptying the bag is instant.
 - **Don't** add borders and shadows to the same element, or shadows to cards.
 - **Don't** animate the light/dark switch, or offer it anywhere but the navigation.

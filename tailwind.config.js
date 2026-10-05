@@ -109,6 +109,11 @@ module.exports = {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        // A figure that changed: the new one rolls in from --roll.
+        roll: {
+          from: { opacity: "0", transform: "translateY(var(--roll))" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
         // Display letters rise from a clipped line.
         rise: {
           from: { transform: "translateY(105%)" },
@@ -144,6 +149,7 @@ module.exports = {
         bump: "bump 320ms var(--ease-out)",
         swap: "swap 450ms var(--ease-out) both",
         "fade-in": "fade-in 450ms var(--ease-out) both",
+        roll: "roll 220ms var(--ease-out) both",
         rise: "rise 700ms var(--ease-out) both",
         "fade-scale": "fade-scale 600ms var(--ease-out) both",
         tile: "tile 600ms var(--ease-out) both",

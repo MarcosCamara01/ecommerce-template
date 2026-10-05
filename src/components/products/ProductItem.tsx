@@ -17,6 +17,8 @@ interface ProductItemProps {
 /**
  * Listing card: photo on its own pale tile with the wishlist heart on its
  * corner, then name, colour dot and price. The hover lives in PieceTile.
+ * The `data-flip-*` marks say how each part travels when its grid
+ * re-arranges (see useFlip).
  */
 export const ProductItem = ({
   product,
@@ -31,7 +33,7 @@ export const ProductItem = ({
     : `/${category}/${id}`;
 
   return (
-    <article className="group/piece flex flex-col gap-2 lg:gap-3">
+    <article data-flip-item={id} className="group/piece flex flex-col gap-2 lg:gap-3">
       <PieceTile
         product={product}
         variant={variant}
@@ -41,12 +43,15 @@ export const ProductItem = ({
         priority={priority}
         className="rounded-[18px] lg:rounded-photo"
       >
-        <span className="absolute right-1.5 top-1.5 lg:right-3 lg:top-3">
+        <span
+          data-flip-part="keep"
+          className="absolute right-1.5 top-1.5 lg:right-3 lg:top-3"
+        >
           <WishlistButton productId={id} productName={name} className="lg:size-11" />
         </span>
       </PieceTile>
       <Link href={productLink} className="flex justify-between gap-3 px-0.5 lg:px-1">
-        <span className="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
+        <span data-flip-part="move" className="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
           <span className="truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
             {displayName(name)}
           </span>
@@ -62,7 +67,7 @@ export const ProductItem = ({
             </span>
           ) : null}
         </span>
-        <span className="whitespace-nowrap tabular-nums max-lg:hidden">
+        <span data-flip-part="move" className="whitespace-nowrap tabular-nums max-lg:hidden">
           {formatPriceFromEuros(price)}
         </span>
       </Link>

@@ -3,6 +3,7 @@
 /** FUNCTIONALITY */
 import { useThrottleFn } from "ahooks";
 import { useCartMutation } from "@/hooks/cart";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { cn } from "@/lib/utils";
 /** TYPES */
 import type { CartItem } from "@/lib/db/drizzle/schema";
@@ -71,7 +72,7 @@ export const ProductCartInfo = ({
         className={cn("text-center font-medium tabular-nums", compact ? "min-w-[18px] text-13" : "min-w-6")}
       >
         <span className="sr-only">Quantity </span>
-        {quantity}
+        <RollingNumber value={quantity} />
       </span>
       <button
         type="button"
