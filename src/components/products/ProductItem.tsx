@@ -1,5 +1,5 @@
 import { displayName } from "@/utils/product-name";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import WishlistButton from "@/components/wishlist/WishlistButton";
 import { swatchBackground } from "@/constants/colors";

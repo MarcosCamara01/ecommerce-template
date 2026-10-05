@@ -2,7 +2,7 @@
 
 import { displayName } from "@/utils/product-name";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import { CloseIcon } from "@/components/icons";
 import { ButtonCheckout } from "@/components/cart/ButtonCheckout";

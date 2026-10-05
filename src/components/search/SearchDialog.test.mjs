@@ -52,7 +52,7 @@ function loadSearchInput() {
     "react/jsx-runtime": require("react/jsx-runtime"),
     "next/navigation": { useRouter: () => ({ push: (path) => navigations.push(path) }) },
     "next/image": { default: "img" },
-    "next/link": { default: "a" },
+    "@/components/ui/link": { default: "a" },
     "@radix-ui/react-dialog": { Close: "button" },
     "@/utils/product-name": { displayName: (value) => value },
     "@/components/icons": { ArrowRightIcon: "svg", SearchIcon: "svg" },

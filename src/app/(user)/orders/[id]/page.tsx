@@ -9,7 +9,7 @@ import {
   OrderSummarySkeleton,
 } from "@/components/orders";
 import { buttonClass } from "@/components/ui/button-classes";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { orderStatusPresentation } from "@/lib/orders/status";

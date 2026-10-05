@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import { buttonClass } from "@/components/ui/button-classes";
 import { getPrincipal, hasCapability } from "@/lib/identity";

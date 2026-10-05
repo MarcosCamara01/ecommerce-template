@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import { useSession } from "@/lib/auth/client";
 

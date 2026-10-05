@@ -1,7 +1,7 @@
 "use client";
 
 import { displayName } from "@/utils/product-name";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { useRef, useState } from "react";
 
 import { AddToCart } from "@/components/cart/AddToCart";

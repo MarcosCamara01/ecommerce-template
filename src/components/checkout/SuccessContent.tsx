@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { format } from "date-fns";
 
 import { buttonClass } from "@/components/ui/button-classes";

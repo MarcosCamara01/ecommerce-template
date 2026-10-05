@@ -1,7 +1,7 @@
 "use client";
 
 /** COMPONENTS */
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";

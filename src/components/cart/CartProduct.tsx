@@ -1,6 +1,6 @@
 import { displayName } from "@/utils/product-name";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import { RollingNumber } from "@/components/ui/rolling-number";
 import { swatchBackground } from "@/constants/colors";

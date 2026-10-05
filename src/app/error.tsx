@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import { Button } from "@/components/ui/button";
 import { buttonClass } from "@/components/ui/button-classes";

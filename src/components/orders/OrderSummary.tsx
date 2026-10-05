@@ -1,5 +1,5 @@
 /** COMPONENTS */
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { OrderSteps } from "./OrderSteps";
 /** TYPES */

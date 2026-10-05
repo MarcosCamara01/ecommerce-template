@@ -1,5 +1,5 @@
 import { displayName } from "@/utils/product-name";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";

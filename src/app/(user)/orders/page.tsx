@@ -1,7 +1,7 @@
 import { getUserOrders } from "./action";
 import { getAllProducts } from "@/app/actions";
 import { getPrincipal } from "@/lib/identity";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { Suspense } from "react";
 import { AccountGreeting, AccountNav } from "@/components/account/AccountNav";
 import { OrderCard } from "@/components/orders";

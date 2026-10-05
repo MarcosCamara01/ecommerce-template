@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 
 import { openBag, useBagUi } from "@/components/bag/bag-ui";
 import { RollingNumber } from "@/components/ui/rolling-number";
