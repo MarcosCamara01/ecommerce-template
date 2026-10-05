@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@/lib/auth/client";
-import {
-  cartItemWithDetailsSchema,
-  type CartItemWithDetails,
-} from "@/lib/db/drizzle/schema";
+import type { CartItemWithDetails } from "@/lib/db/drizzle/schema";
 import { CART_QUERY_KEYS } from "../keys";
 import type { CartDetailsResponse } from "../types";
 
@@ -26,9 +23,10 @@ export const useCartDetails = () => {
         throw new Error("Failed to fetch cart details");
       }
 
-      const data = await response.json();
+      const data: { items?: unknown } = await response.json();
+      if (!Array.isArray(data.items)) throw new Error("Failed to fetch cart details");
       return {
-        items: cartItemWithDetailsSchema.array().parse(data.items),
+        items: data.items as CartItemWithDetails[],
       } satisfies CartDetailsResponse;
     },
   });

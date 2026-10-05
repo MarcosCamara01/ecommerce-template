@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { CART_QUERY_KEYS } from "../keys";
-import { selectCartItemSchema, type CartItem } from "@/lib/db/drizzle/schema";
+import type { CartItem } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 import type { CartListResponse } from "../types";
 
@@ -23,10 +23,9 @@ export const useCart = () => {
         throw new Error("Failed to fetch cart");
       }
 
-      const data = await response.json();
-      return {
-        items: selectCartItemSchema.array().parse(data.items),
-      } satisfies CartListResponse;
+      const data: { items?: unknown } = await response.json();
+      if (!Array.isArray(data.items)) throw new Error("Failed to fetch cart");
+      return { items: data.items as CartItem[] } satisfies CartListResponse;
     },
   });
 

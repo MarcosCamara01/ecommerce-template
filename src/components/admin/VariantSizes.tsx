@@ -1,7 +1,8 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { ProductSizeZod, type ProductSize } from "@/lib/db/drizzle/schema";
+import { PRODUCT_SIZES } from "@/constants/sizes";
+import type { ProductSize } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -41,7 +42,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
     return (
       <div className="space-y-3 pb-2">
         <div className="flex flex-wrap gap-2">
-          {ProductSizeZod.options.map((size) => {
+          {PRODUCT_SIZES.map((size) => {
             const isSelected = selectedSizeSet.has(size);
             return (
               <button

@@ -1,9 +1,10 @@
 "use client";
 
-import { ProductSizeZod, type ProductSize } from "@/lib/db/drizzle/schema";
+import { PRODUCT_SIZES } from "@/constants/sizes";
+import type { ProductSize } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 
-const SIZES = ProductSizeZod.options;
+const SIZES = PRODUCT_SIZES;
 
 /**
  * Equal pills (the full run by default); one ink capsule slides to the selected size (transform

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { ProductSizeZod, type ProductSize } from "@/lib/db/drizzle/schema";
+import { PRODUCT_SIZES } from "@/constants/sizes";
+import type { ProductSize } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,7 +21,7 @@ export function SizeChart({ rows }: { rows: readonly string[] }) {
             <th scope="col" className="pb-2.5 pr-2 text-left text-13 font-medium">
               Size
             </th>
-            {ProductSizeZod.options.map((size) => (
+            {PRODUCT_SIZES.map((size) => (
               <th key={size} scope="col" className="pb-2.5">
                 <button
                   type="button"
@@ -40,7 +41,7 @@ export function SizeChart({ rows }: { rows: readonly string[] }) {
               <th scope="row" className="border-t border-line py-3 pr-2 text-left font-medium">
                 {name}
               </th>
-              {ProductSizeZod.options.map((size) => (
+              {PRODUCT_SIZES.map((size) => (
                 <td
                   key={size}
                   className={cn(

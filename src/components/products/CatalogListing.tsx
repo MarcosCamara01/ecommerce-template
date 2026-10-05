@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BottomSheet, BottomSheetClose } from "@/components/ui/bottom-sheet";
 import type { ShopSection } from "@/constants/navigation";
+import { PRODUCT_SIZES } from "@/constants/sizes";
 import { useFlip } from "@/hooks/useFlip";
-import {
-  ProductSizeZod,
-  type ProductSize,
-  type ProductWithVariants,
+import type {
+  ProductSize,
+  ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 
@@ -125,7 +125,7 @@ export function CatalogListing({
                 }
               >
                 <DropdownMenuRadioItem value="any">Any size</DropdownMenuRadioItem>
-                {ProductSizeZod.options.map((option) => (
+                {PRODUCT_SIZES.map((option) => (
                   <DropdownMenuRadioItem key={option} value={option}>
                     {option}
                   </DropdownMenuRadioItem>
@@ -219,7 +219,7 @@ export function CatalogListing({
         <fieldset className="flex flex-col gap-2.5">
           <legend className="mb-2.5 text-sm font-medium">Size</legend>
           <div className="flex flex-wrap gap-1.5">
-            {[null, ...ProductSizeZod.options].map((option) => (
+            {[null, ...PRODUCT_SIZES].map((option) => (
               <button
                 key={option ?? "any"}
                 type="button"

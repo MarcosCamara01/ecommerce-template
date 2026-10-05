@@ -1,9 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  cartItemWithDetailsSchema,
-  type ProductSize,
-  selectCartItemSchema,
-} from "@/lib/db/drizzle/schema";
+import type { CartItem, ProductSize } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { CART_QUERY_KEYS } from "../keys";
@@ -35,7 +31,7 @@ export const useCartMutation = () => {
       }
 
       const { item } = await response.json();
-      return selectCartItemSchema.parse(item);
+      return item as CartItem;
     },
     onMutate: async (params: {
       variantId: number;
@@ -56,7 +52,7 @@ export const useCartMutation = () => {
         CART_QUERY_KEYS.cartList(userId),
       )?.items.find((item) => item.variantId === variantId && item.size === size);
 
-      const tempItem = selectCartItemSchema.parse({
+      const tempItem: CartItem = {
         id: -Math.floor(Math.random() * 1e9),
         userId: "temp",
         variantId,
@@ -67,7 +63,7 @@ export const useCartMutation = () => {
         stripeId: "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      });
+      };
 
       queryClient.setQueryData<CartListResponse>(
         CART_QUERY_KEYS.cartList(userId),
@@ -167,7 +163,7 @@ export const useCartMutation = () => {
       }
 
       const { item } = await response.json();
-      return selectCartItemSchema.parse(item);
+      return item as CartItem;
     },
     onMutate: async (params: { itemId: number; quantity: number }) => {
       if (!userId) {
@@ -240,10 +236,7 @@ export const useCartMutation = () => {
         (current = { items: [] }) => ({
           items: current.items.map((item) =>
             item.id === data.id
-              ? cartItemWithDetailsSchema.parse({
-                  ...item,
-                  ...data,
-                })
+              ? { ...item, ...data }
               : item,
           ),
         }),

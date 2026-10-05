@@ -1,8 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  selectWishlistItemSchema,
-  type WishlistItem,
-} from "@/lib/db/drizzle/schema";
+import type { WishlistItem } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { WISHLIST_QUERY_KEYS } from "../keys";
@@ -28,7 +25,7 @@ export const useWishlistMutation = () => {
       }
 
       const { item } = await response.json();
-      return selectWishlistItemSchema.parse(item);
+      return item as WishlistItem;
     },
     onMutate: async (productId: number) => {
       if (!userId) {
