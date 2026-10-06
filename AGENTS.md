@@ -26,6 +26,7 @@ Skills live in `.agents/skills/`. Invoke with `$skill-name`.
 | React Doctor audit (`npm run doctor`) | `$react-doctor` |
 | Component composition APIs | `$vercel-composition-patterns` |
 | Visual QA in a real browser | `$agent-browser` |
+| End-to-end tests in `tests/`: write, run, debug | `$e2e` |
 | Stripe Checkout, tax, webhooks | `$stripe-best-practices` |
 | Better Auth server, client, adapters | `$better-auth-best-practices` |
 | Better Auth secrets, CSRF, cookies | `$better-auth-security-best-practices` |
