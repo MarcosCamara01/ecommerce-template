@@ -9,7 +9,8 @@
     "files": [
       "src/app/favicon.ico",
       "public/main-image.webp",
-      "public/qa-seed/**"
+      "public/qa-seed/**",
+      ".e2e/**"
     ]
   }
 }

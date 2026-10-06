@@ -44,7 +44,7 @@ whether Fluid compute is on.
 
 **Reason:** it is on. `vercel.json` sets `"fluid": true`.
 
-## `vercel-large-static-asset` — three paths
+## `vercel-large-static-asset` — four paths
 
 The rule reports every image, font or media file of 4 KB or more anywhere in the
 tree and asks for it to be served from another CDN. The catalog photos already are:
@@ -55,3 +55,5 @@ catches a large asset added later.
 - `public/main-image.webp` (6 KB): the placeholder photo of the database probes
   (`scripts/database/verify-fulfillment-concurrency.ts`).
 - `public/qa-seed/**`: local QA fixtures. Untracked, so never deployed.
+- `.e2e/**`: what an end-to-end run leaves behind (screenshots, traces). Ignored
+  by git, so never deployed.
