@@ -11,13 +11,7 @@ type LoadingButtonProps = ButtonProps & {
 
 const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
   ({ loading, children, icon, iconPosition = "left", ...props }, ref) => {
-    const iconElement = loading ? (
-      <span className="ml-4">
-        <SVGLoadingIcon />
-      </span>
-    ) : icon ? (
-      <span className={iconPosition === "left" ? "mr-2" : "ml-4"}>{icon}</span>
-    ) : null;
+    const iconElement = loading ? <SVGLoadingIcon /> : icon ? icon : null;
 
     return (
       <Button
@@ -31,7 +25,7 @@ const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
         {iconPosition === "right" && iconElement}
       </Button>
     );
-  }
+  },
 );
 
 LoadingButton.displayName = "LoadingButton";

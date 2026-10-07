@@ -1,77 +1,166 @@
 "use client";
 
-import Link from "next/link";
-
 import { useCartDetails } from "@/hooks/cart";
-import { SVGLoadingIcon } from "@/components/ui/loader";
+import { RollingNumber } from "@/components/ui/rolling-number";
+import { Skeleton } from "@/components/ui/skeleton";
+import { swatchBackground } from "@/constants/colors";
+import { merchantPlaceholders } from "@/constants/merchant";
+import { useFlip } from "@/hooks/useFlip";
+import type { CartItemWithDetails } from "@/lib/db/drizzle/schema";
+import { formatPriceFromEuros } from "@/utils/formatters";
 
 import { ButtonCheckout } from "./ButtonCheckout";
 import { CartProduct } from "./CartProduct";
-import { GridProducts } from "../products/GridProducts";
 
-export const CartProducts = () => {
+const LockIcon = () => (
+  <svg
+    aria-hidden="true"
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinejoin="round"
+  >
+    <rect x="5" y="11" width="14" height="9" rx="2" />
+    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+  </svg>
+);
+
+/** A bar split by the colour of each line, weighted by quantity. */
+const ColourBar = ({ items, className }: { items: CartItemWithDetails[]; className?: string }) => (
+  <div
+    aria-hidden="true"
+    className={`flex gap-[3px] overflow-hidden rounded-pill p-0.5 shadow-[inset_0_0_0_1px_var(--line)] ${className ?? ""}`}
+  >
+    {items.map((item) => (
+      <span
+        key={item.id}
+        className="rounded-pill shadow-[inset_0_0_0_1px_var(--line)]"
+        style={{ flexGrow: item.quantity, background: swatchBackground(item.variant.color) }}
+      />
+    ))}
+  </div>
+);
+
+export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) => {
   const { items, isPending } = useCartDetails();
+  // Removing a line is instant; the ones below slide up into its place.
+  const linesRef = useFlip<HTMLDivElement>();
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-91px)]">
-        <SVGLoadingIcon height={30} width={30} />
-      </div>
-    );
-  }
-
-  if (items.length > 0) {
-    const totalPrice = items
-      .reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-      .toFixed(2);
-
-    return (
-      <div className="pt-12">
-        <h2 className="mb-5 text-xl font-bold sm:text-2xl">
-          YOUR SHOPPING CART
-        </h2>
-        <GridProducts className="grid-cols-1">
-          {items.map(({ id, product, size, quantity, variant }) => (
-            <CartProduct
-              key={id}
-              product={product}
-              cartItemId={id}
-              size={size}
-              quantity={quantity}
-              variant={variant}
-            />
-          ))}
-        </GridProducts>
-
-        <div className="fixed bottom-4 left-[50%] z-10 flex h-min w-[90%] translate-x-[-50%] overflow-hidden rounded-xl border border-solid border-border-primary bg-background-primary sm:w-[360px]">
-          <div className="flex w-1/2 flex-col justify-center gap-2 p-2.5 text-center">
-            <div className="flex justify-center gap-2.5 text-sm">
-              <span>Total:</span>
-              <span>{totalPrice} EUR</span>
+      <div aria-busy="true" aria-label="Loading your bag" className="flex flex-col border-t border-line">
+        {[0, 1].map((key) => (
+          <div key={key} className="grid grid-cols-[80px_1fr] gap-3 border-b border-line py-3 lg:grid-cols-[150px_1fr] lg:gap-6 lg:py-5">
+            <Skeleton className="h-[104px] rounded-field lg:h-[196px] lg:rounded-toast" />
+            <div className="flex flex-col gap-2 pt-1">
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-3.5 w-1/4" />
             </div>
-            <span className="text-xs">+ TAX INCL.</span>
           </div>
-          <div className="w-1/2 border-l border-solid border-border-primary bg-background-secondary">
-            <ButtonCheckout cartItemIds={items.map((item) => item.id)} />
-          </div>
-        </div>
+        ))}
       </div>
     );
   }
+
+  if (items.length === 0) return <>{emptyState}</>;
+
+  const amount = items.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0,
+  );
+  // The figure rolls when a quantity or a removal changes it.
+  const subtotal = (
+    <RollingNumber value={amount}>{formatPriceFromEuros(amount)}</RollingNumber>
+  );
+  const cartItemIds = items.map((item) => item.id);
 
   return (
-    <div className="flex h-[calc(100vh-91px)] w-full flex-col items-center justify-center gap-2 px-4">
-      <h2 className="mb-6 text-4xl font-bold">YOUR CART IS EMPTY</h2>
-      <p className="mb-4 text-lg">
-        When you have added something to your cart, it will appear here. Want to
-        get started?
-      </p>
-      <Link
-        className="flex h-[40px] min-w-[160px] max-w-[160px] items-center justify-center rounded-md border border-solid border-[#2E2E2E] bg-[#0C0C0C] px-[10px] text-sm font-medium transition-colors hover:border-[#454545] hover:bg-background-tertiary"
-        href="/"
+    <div
+      // Activity retains hidden pages in the DOM. Reserve room for the fixed
+      // checkout bar only while the bag is the page on screen.
+      ref={(page) => {
+        if (!page) return;
+        page.setAttribute("data-fixed-cta", "summary");
+        return () => page.removeAttribute("data-fixed-cta");
+      }}
+      data-fixed-cta="summary"
+      className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_440px]"
+    >
+      <div ref={linesRef} className="flex flex-col border-t border-line">
+        {items.map(({ id, product, size, quantity, variant }) => (
+          <CartProduct
+            key={id}
+            product={product}
+            cartItemId={id}
+            size={size}
+            quantity={quantity}
+            variant={variant}
+          />
+        ))}
+      </div>
+
+      {/* Desktop summary */}
+      <aside
+        aria-label="Order summary"
+        className="sticky top-[100px] hidden flex-col gap-[18px] rounded-photo-lg border border-line bg-fg/5 p-6 lg:flex"
       >
-        Start
-      </Link>
+        <div className="flex flex-col gap-2">
+          <ColourBar items={items} className="h-3" />
+          <span className="text-xs text-muted">The colors in your bag</span>
+        </div>
+        <dl className="flex flex-col gap-2.5 tabular-nums">
+          <div className="flex justify-between">
+            <dt className="text-muted">Subtotal</dt>
+            <dd>{subtotal}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted">Shipping</dt>
+            <dd className="text-right">{merchantPlaceholders.shipping}</dd>
+          </div>
+          <div className="flex items-baseline justify-between border-t border-line pt-4">
+            <dt className="font-medium">Total</dt>
+            <dd className="font-display-75 text-[44px] font-extrabold leading-none">{subtotal}</dd>
+          </div>
+        </dl>
+        <ButtonCheckout
+          cartItemIds={cartItemIds}
+          icon={<LockIcon />}
+          className="h-16 text-base"
+        >
+          Checkout securely
+        </ButtonCheckout>
+        <p className="text-center text-xs text-muted">
+          You&apos;ll pay on Stripe&apos;s secure page, then come back here.
+        </p>
+      </aside>
+
+      {/* Phone checkout bar */}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-3 border-t border-line bg-bg px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-4 lg:hidden">
+        <ColourBar items={items} className="h-2.5" />
+        <div className="flex justify-between text-13 text-muted">
+          <span>Shipping</span>
+          <span>{merchantPlaceholders.shipping}</span>
+        </div>
+        <ButtonCheckout cartItemIds={cartItemIds} className="h-[60px] text-base">
+          Checkout securely · {subtotal}
+        </ButtonCheckout>
+      </div>
     </div>
+  );
+};
+
+/** Title suffix with the live piece count: "Bag (3)". */
+export const BagCount = () => {
+  const { items, isSuccess } = useCartDetails();
+  if (!isSuccess) return null;
+  const count = items.reduce((total, item) => total + item.quantity, 0);
+  return (
+    <span className="opacity-60">
+      {" "}
+      (<RollingNumber value={count} />)
+    </span>
   );
 };

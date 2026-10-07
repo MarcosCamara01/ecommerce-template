@@ -3,23 +3,24 @@
 /** FUNCTIONALITY */
 import { useThrottleFn } from "ahooks";
 import { useCartMutation } from "@/hooks/cart";
-/** ICONS */
-import { IoAdd, IoRemove } from "react-icons/io5";
+import { RollingNumber } from "@/components/ui/rolling-number";
+import { cn } from "@/lib/utils";
 /** TYPES */
-import type { ProductVariant, CartItem } from "@/lib/db/drizzle/schema";
+import type { CartItem } from "@/lib/db/drizzle/schema";
 
 interface ProductCartInfoProps {
   cartItemId: CartItem["id"];
-  size: CartItem["size"];
   quantity: CartItem["quantity"];
-  color: ProductVariant["color"];
+  productName: string;
+  compact?: boolean;
 }
 
+/** − n + stepper. Going below one removes the line. */
 export const ProductCartInfo = ({
   cartItemId,
-  size,
   quantity,
-  color,
+  productName,
+  compact = false,
 }: ProductCartInfoProps) => {
   const { update: editQuantity, remove: removeFromCart } = useCartMutation();
 
@@ -51,68 +52,36 @@ export const ProductCartInfo = ({
     },
   );
 
+  const step = cn(
+    "grid place-items-center text-lg",
+    compact ? "h-9 w-10 text-base" : "size-11",
+  );
+
   return (
-    <>
-      <div className="flex sm:hidden">
-        <div className="text-sm pr-2.5 border-r">{size}</div>
-        <div className="text-sm pl-2.5">{color}</div>
-      </div>
-      <div className="flex items-center justify-between sm:hidden">
-        <div className="flex bg-background-primary w-min">
-          <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
-            onClick={throttledDecrease}
-            disabled={false}
-            aria-label="Decrease quantity"
-          >
-            <IoRemove className="w-4 h-4" />
-          </button>
-          <span
-            className="flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary"
-            aria-label={`Current quantity: ${quantity}`}
-          >
-            {quantity}
-          </span>
-          <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
-            onClick={throttledIncrease}
-            disabled={false}
-            aria-label="Increase quantity"
-          >
-            <IoAdd className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-      <div className="items-center justify-between hidden sm:flex">
-        <div className="flex bg-background-primary w-min">
-          <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-l text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
-            onClick={throttledDecrease}
-            disabled={false}
-            aria-label="Decrease quantity"
-          >
-            <IoRemove className="w-4 h-4" />
-          </button>
-          <span
-            className="flex items-center justify-center w-8 h-8 p-2 text-sm border-solid border-y border-border-primary"
-            aria-label={`Current quantity: ${quantity}`}
-          >
-            {quantity}
-          </span>
-          <button
-            className="flex items-center justify-center w-8 h-8 p-2 border border-solid rounded-r text-color-secondary transition-[color,opacity] hover:text-white border-border-primary disabled:opacity-50"
-            onClick={throttledIncrease}
-            disabled={false}
-            aria-label="Increase quantity"
-          >
-            <IoAdd className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="flex">
-          <div className="text-sm pr-2.5 border-r">{size}</div>
-          <div className="text-sm pl-2.5">{color}</div>
-        </div>
-      </div>
-    </>
+    <div className="flex items-center self-start rounded-pill border border-line">
+      <button
+        type="button"
+        className={step}
+        onClick={throttledDecrease}
+        aria-label={`Remove one ${productName}`}
+      >
+        −
+      </button>
+      <span
+        aria-live="polite"
+        className={cn("text-center font-medium tabular-nums", compact ? "min-w-[18px] text-13" : "min-w-6")}
+      >
+        <span className="sr-only">Quantity </span>
+        <RollingNumber value={quantity} />
+      </span>
+      <button
+        type="button"
+        className={step}
+        onClick={throttledIncrease}
+        aria-label={`Add one ${productName}`}
+      >
+        +
+      </button>
+    </div>
   );
 };

@@ -3,7 +3,7 @@ import {
   type FulfillmentState,
 } from "./fulfillment-state-machine.ts";
 
-export type ReplayAuditRecord = Readonly<{
+type ReplayAuditRecord = Readonly<{
   targetKind: "work" | "effect";
   targetId: string;
   priorState: FulfillmentState;
@@ -11,13 +11,13 @@ export type ReplayAuditRecord = Readonly<{
   reason: string;
 }>;
 
-export type ReplayTransactionPort = {
+type ReplayTransactionPort = {
   lockTarget: () => Promise<{ id: number; priorState: FulfillmentState } | null>;
   transitionTarget: (id: number) => Promise<boolean>;
   appendAudit: (record: ReplayAuditRecord) => Promise<void>;
 };
 
-export type ReplayTransactionRunner = <Result>(
+type ReplayTransactionRunner = <Result>(
   operation: (port: ReplayTransactionPort) => Promise<Result>,
 ) => Promise<Result>;
 

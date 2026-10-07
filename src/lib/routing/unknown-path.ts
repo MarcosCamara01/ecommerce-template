@@ -7,6 +7,7 @@ import { parsePositiveIntegerId } from "./positive-integer-id.ts";
 const PRODUCT_CATEGORY_SLUGS = new Set(["t-shirts", "pants", "sweatshirts"]);
 
 const ROOT_ONLY_SEGMENTS = new Set([
+  "new-in",
   "login",
   "register",
   "search",

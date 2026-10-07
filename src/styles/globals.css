@@ -2,157 +2,270 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 0, 0, 0;
-  --background-end-rgb: 0, 0, 0;
-
-  --primary-glow: radial-gradient(rgba(1, 65, 255, 0.4), rgba(1, 65, 255, 0));
-  --secondary-glow: linear-gradient(
-    to bottom right,
-    rgba(1, 65, 255, 0),
-    rgba(1, 65, 255, 0),
-    rgba(1, 65, 255, 0.3)
-  );
-
-  --tile-start-rgb: 2, 13, 46;
-  --tile-end-rgb: 2, 5, 19;
-  --tile-border: conic-gradient(
-    #ffffff80,
-    #ffffff40,
-    #ffffff30,
-    #ffffff20,
-    #ffffff10,
-    #ffffff10,
-    #ffffff80
-  );
-
-  --callout-rgb: 20, 20, 20;
-  --callout-border-rgb: 108, 108, 108;
-  --card-rgb: 100, 100, 100;
-  --card-border-rgb: 200, 200, 200;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-html,
-body {
-  max-width: 100vw;
-}
-
-body {
-  color: #ededed;
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-main {
-  padding: 0 48px 102px;
-  min-height: calc(100vh - 97px);
-}
-
-/* Safe area for mobile devices with notch/home indicator */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-.orders-img div {
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.orders-img img {
-  width: 80px;
-}
-
-.swiper-wrapper {
-  max-width: 250px;
-}
-
-.swiper-wrapper img {
-  width: 100%;
-  display: block;
-  height: auto;
-}
-
-.swiper-pagination-clickable .swiper-pagination-bullet {
-  width: 15px;
-  height: 1px;
-  background-color: #000;
-  opacity: 1;
-  border-radius: 0;
-}
-
-.swiper-pagination-clickable .swiper-pagination-bullet-active {
-  height: 3px;
-}
-
-@keyframes shine {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-@media (max-width: 1080px) {
-  .transition-card:hover {
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 640px) {
-  main {
-    padding: 0 24px 102px;
-  }
-}
-
-@media (max-width: 350px) {
-  main {
-    padding: 0 14px 102px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
+/*
+ * Chromatic design tokens. DESIGN.md is the source of truth for values and
+ * rules; this file only wires them to the page.
+ */
 
 @layer base {
   :root {
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    color-scheme: light;
+
+    --bg: #e4e7ea;
+    --fg: #111214;
+    --panel: #f6f7f8;
+    --field: #f3f4f5;
+    --hover: #2e3034;
+    --photo: #e4e7ea;
+    /* The navigation pill: over the ground it reads as the canvas glass
+       (white at 45%), but it is a denser tint so the controls stay legible
+       when a photo scrolls behind it. */
+    --glass: rgba(244, 245, 247, 0.78);
+    --scrim: rgba(0, 0, 0, 0.32);
+
+    --line: color-mix(in srgb, var(--fg) 20%, transparent);
+    --line-soft: color-mix(in srgb, var(--fg) 15%, transparent);
+    --card: color-mix(in srgb, var(--fg) 8%, transparent);
+    --ring: color-mix(in srgb, var(--fg) 15%, transparent);
+    --skel: color-mix(in srgb, var(--fg) 10%, transparent);
+    --muted: color-mix(in srgb, var(--fg) 75%, var(--bg));
+
+    --err-bg: #fbe3e2;
+    --err-fg: #8c1d18;
+    --err-line: #b3261e;
+
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+    --shadow-float: 0 10px 40px rgba(0, 0, 0, 0.12);
+    --shadow-lift: 0 20px 50px rgba(0, 0, 0, 0.2);
+    --shadow-hero: 0 40px 100px rgba(0, 0, 0, 0.28);
   }
-  .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+
+  :root.dark {
+    color-scheme: dark;
+
+    --bg: #141516;
+    --fg: #ecedee;
+    --panel: #1c1d20;
+    --field: #1c1d1f;
+    --hover: #c9cbce;
+    --glass: rgba(46, 47, 50, 0.8);
+    --scrim: rgba(0, 0, 0, 0.5);
+
+    --err-bg: #2a1215;
+    --err-fg: #ffb3b6;
+    --err-line: #ff8d92;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+
+  input,
+  textarea {
+    caret-color: var(--fg);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+
+  * {
+    scrollbar-color: var(--line) transparent;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  :where(table, .tabular) {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Condensed display voice: Archivo at 62% width, black, uppercase. */
+  .font-display {
+    font-family: var(--font-archivo), "Arial Narrow", sans-serif;
+    font-stretch: 62%;
+    font-variation-settings: "wdth" 62;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  /* Semi-condensed variant for product names under a giant headline. */
+  .font-display-75 {
+    font-family: var(--font-archivo), "Arial Narrow", sans-serif;
+    font-stretch: 75%;
+    font-variation-settings: "wdth" 75;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* Home hero on desktop: one screen tall under the 76px navigation, from
+     560px up to the 880px of the canvas. --hero-u is one canvas pixel at
+     that height; the hero writes its offsets and sizes in it. */
+  @media (min-width: 1024px) {
+    .hero {
+      --hero-h: clamp(560px, calc(100vh - 76px), 880px);
+      --hero-u: calc(var(--hero-h) / 880);
+    }
+
+    @supports (height: 100svh) {
+      .hero {
+        --hero-h: clamp(560px, calc(100svh - 76px), 880px);
+      }
+    }
+  }
+
+  /* Press feedback for every pill button (120ms, ease-out). */
+  .press {
+    transition: transform 120ms var(--ease-out);
+  }
+
+  .press:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+/* Items that arrive with a panel: 50ms stagger via --i, after the panel. */
+.stagger-in {
+  transition:
+    opacity 300ms var(--ease-out),
+    transform 300ms var(--ease-out);
+  transition-delay: calc(140ms + var(--i, 0) * 50ms);
+}
+
+@starting-style {
+  .stagger-in {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* Theme switch: instant. While the theme flips nothing transitions, because
+   every colour on the page changes at once and they would all fade together
+   and smear. */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+
+  @starting-style {
+    .stagger-in {
+      transform: none;
+    }
+  }
+
+  /* Keep fades, drop movement. */
+  .animate-pop,
+  .animate-bump {
+    animation: none;
+  }
+
+  .animate-spark {
+    display: none;
+  }
+
+  .animate-swap,
+  .animate-fade-scale,
+  .animate-roll {
+    animation-name: opacity-in;
+  }
+
+  .animate-rise {
+    animation: none;
+  }
+
+  .animate-tile {
+    animation-name: opacity-in;
+  }
+
+  .animate-fall {
+    display: none;
+  }
+}
+
+@keyframes opacity-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Toasts enter and leave through the bottom: transitions, so a repeated
+   trigger retargets instead of restarting. */
+[data-sonner-toast] {
+  transition:
+    transform 350ms var(--ease-out),
+    opacity 350ms var(--ease-out),
+    height 350ms var(--ease-out) !important;
+}
+
+[data-sonner-toast][data-removed="true"] {
+  transition-duration: 250ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast] {
+    transition-property: opacity !important;
+  }
+}
+
+/* Below desktop the product and bag pages pin their purchase bar to the
+   bottom of the screen. --cta-clearance is its height plus a 12px gap, over
+   the bar's own bottom inset: toasts rise above the bar instead of covering
+   it, and the footer ends above it. */
+@media (max-width: 1023px) {
+  body:has([data-fixed-cta]) {
+    --cta-clearance: 72px;
+  }
+
+  /* The bag's bar also carries the colour bar and the shipping line. */
+  body:has([data-fixed-cta="summary"]) {
+    --cta-clearance: 142px;
+  }
+
+  body:has([data-fixed-cta]) [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: calc(
+      max(24px, env(safe-area-inset-bottom)) + var(--cta-clearance)
+    );
   }
 }

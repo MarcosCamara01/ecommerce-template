@@ -1,0 +1,27 @@
+{
+  "name": "@ecommerce-template/braces-depth-safe",
+  "version": "3.0.4-depth-guard.1",
+  "private": true,
+  "description": "Private backport of the braces 3.0.3 depth and cycle guards",
+  "license": "MIT",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "lib",
+    "LICENSE",
+    "provenance.json"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "dependencies": {
+    "fill-range": "^7.1.1"
+  },
+  "upstream": {
+    "package": "braces@3.0.3",
+    "source": "https://github.com/micromatch/braces/tree/74b2db2938fad48a2ea54a9c8bf27a37a62c350d",
+    "patch": "https://github.com/micromatch/braces/pull/72",
+    "advisory": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+    "maintenance": "Track upstream advisories and replace this override when a compatible patched release is published."
+  }
+}

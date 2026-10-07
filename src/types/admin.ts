@@ -45,6 +45,3 @@ export interface ProductApiResponse {
   syncState?: string;
   retryable?: boolean;
 }
-
-// Alias for clarity in API routes
-export type VariantApiData = VariantSubmitData;

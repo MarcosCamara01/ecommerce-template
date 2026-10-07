@@ -59,7 +59,7 @@ type Snapshot = {
   enums: Record<string, SnapshotEnum>;
 };
 
-export type SchemaContract = {
+type SchemaContract = {
   tables: string[];
   sequences: string[];
   sequenceBindings: string[];

@@ -30,15 +30,16 @@ test("cart actions stay disabled until client hydration", async () => {
 });
 
 test("icon-only controls expose accessible names and sheet descriptions", async () => {
-  const [password, navbar, variant] = await Promise.all([
+  const [password, navbar, mobileMenu, variant] = await Promise.all([
     source("src/components/ui/form/PasswordInput.tsx"),
     source("src/components/layout/navbar/Navbar.tsx"),
+    source("src/components/layout/navbar/MobileMenu.tsx"),
     source("src/components/admin/VariantForm.tsx"),
   ]);
   assert.match(password, /aria-label=\{showPassword \? "Hide password" : "Show password"\}/);
   assert.match(password, /aria-pressed=\{showPassword\}/);
   assert.match(navbar, /aria-label="Open navigation menu"/);
-  assert.match(navbar, /<SheetDescription/);
+  assert.match(mobileMenu, /<SheetDescription/);
   assert.match(variant, /aria-label=\{`Move variant \$\{index \+ 1\} up`\}/);
   assert.match(variant, /aria-label=\{`Remove variant \$\{index \+ 1\}`\}/);
 });
@@ -97,7 +98,7 @@ test("primary routes keep exactly one accessible heading across data states", as
     wishlistContent: "src/components/wishlist/WishlistProducts.tsx",
     orders: "src/app/(user)/orders/page.tsx",
     orderDetails: "src/app/(user)/orders/[id]/page.tsx",
-    product: "src/components/product/SingleProduct.tsx",
+    product: "src/components/product/ProductView.tsx",
     error: "src/app/error.tsx",
   };
   const entries = await Promise.all(
@@ -120,7 +121,12 @@ test("primary routes keep exactly one accessible heading across data states", as
   }
   assert.equal(h1Count(sources.cartContent), 0);
   assert.equal(h1Count(sources.wishlistContent), 0);
-  assert.match(sources.product, /<h1 className="sr-only">\{product\.name\}<\/h1>/);
+  // The product name is the page's visible display headline.
+  // Its size depends on the name, so the class may be an expression.
+  assert.match(
+    sources.product,
+    /<h1 className=(?:"[^"]*"|\{[^>]*\})>\s*\{product\.name\}\s*<\/h1>/,
+  );
   assert.doesNotMatch(sources.search, /<h3[^>]*>\s*No products found/);
 });
 
@@ -144,9 +150,11 @@ test("remaining route shells and result states preserve heading hierarchy", asyn
   const sources = Object.fromEntries(entries);
   const h1Count = (value) => (value.match(/<h1\b/g) ?? []).length;
 
-  for (const name of ["category", "result", "auth", "help", "admin", "notFound"]) {
+  for (const name of ["result", "auth", "help", "admin", "notFound"]) {
     assert.equal(h1Count(sources[name]), 1, `${name} must own one h1`);
   }
+  // The category title (the h1) lives in SectionHeading, rendered once.
+  assert.equal((sources.category.match(/<SectionHeading\b/g) ?? []).length, 1);
   for (const name of ["success", "status", "noSession"]) {
     assert.equal(h1Count(sources[name]), 0, `${name} must use the result route h1`);
   }
@@ -159,17 +167,16 @@ test("remaining route shells and result states preserve heading hierarchy", asyn
 });
 
 test("category routes identify the current collection in their accessible heading", async () => {
-  const category = await source("src/app/(store)/[category]/page.tsx");
+  const [category, heading] = await Promise.all([
+    source("src/app/(store)/[category]/page.tsx"),
+    source("src/components/products/SectionHeading.tsx"),
+  ]);
 
   assert.doesNotMatch(category, />Product collection<\/h1>/);
-  assert.match(
-    category,
-    /const categoryName = capitalizeFirstLetter\(parsedCategory\.data\)/,
-  );
-  assert.match(
-    category,
-    /<h1 className="sr-only">\{categoryName\} products<\/h1>/,
-  );
+  assert.match(category, /const section = sectionFor\(parsedCategory\.data\)/);
+  // The visible giant title is the h1 and names the collection.
+  assert.match(category, /<SectionHeading\s+title=\{section\.label\}/);
+  assert.match(heading, /<h1[\s\S]*?\{title\}\s*<\/h1>/);
 });
 
 test("product editing exposes archive and explicit restore controls", async () => {

@@ -1,115 +1,111 @@
 "use client";
 
-import { useRef } from "react";
+import { displayName } from "@/utils/product-name";
+import { useState } from "react";
 
 import { useThrottleFn } from "ahooks";
 
+import { AddedSheet, type AddedItem } from "@/components/bag/AddedSheet";
+import { bumpBag, openBag } from "@/components/bag/bag-ui";
+import { flyToBag } from "@/components/bag/fly-to-bag";
+import { Button } from "@/components/ui/button";
 import { useCartMutation } from "@/hooks/cart";
+import { useHydrated } from "@/hooks/useHydrated";
 import {
+  type ProductSize,
   type ProductVariant,
   type ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
+import { cn } from "@/lib/utils";
+import { formatPriceFromEuros } from "@/utils/formatters";
 
-import { Button } from "@/components/ui/button";
-import { useHydrated } from "@/hooks/useHydrated";
+const DESKTOP = "(min-width: 1024px)";
 
-import { Colors } from "./Colors";
-import { Sizes, type SizesRef } from "./Sizes";
-
-interface BaseAddToCartProps {
+interface AddToCartProps {
   product: ProductWithVariants;
-  selectedVariant?: ProductVariant;
+  selectedVariant: ProductVariant;
+  size: ProductSize | undefined;
+  /** The photo that flies to the bag pill on desktop. */
+  flySource: () => HTMLElement | null;
+  /** Short label ("Add to bag") for cards. */
+  compact?: boolean;
+  className?: string;
 }
 
-function useAddToCartAction(selectedVariant?: ProductVariant) {
+/**
+ * Add to bag. Desktop: the photo flies to the Bag pill (600ms), the counter
+ * bumps, then the drawer opens. Phones: the "Added" panel rises instead.
+ * Each new size or colour starts a fresh "Add" (keyed by the parent).
+ */
+export function AddToCart({
+  product,
+  selectedVariant,
+  size,
+  flySource,
+  compact = false,
+  className,
+}: AddToCartProps) {
   const { add: addToCart, isAdding } = useCartMutation();
   const isHydrated = useHydrated();
-  const sizesRef = useRef<SizesRef>(null!);
+  const [added, setAdded] = useState(false);
+  const [sheetItem, setSheetItem] = useState<AddedItem | null>(null);
 
   const { run: throttledAddToCart } = useThrottleFn(
     () => {
-      if (!selectedVariant) return;
-
-      addToCart({
-        size: sizesRef.current.selectedSize,
-        variantId: selectedVariant.id,
+      if (!size) return;
+      addToCart({ size, variantId: selectedVariant.id }, {
+        onSuccess: () => {
+          const line = { name: displayName(product.name), color: selectedVariant.color, size };
+          if (window.matchMedia(DESKTOP).matches) {
+            void flyToBag(flySource()).then(() => {
+              bumpBag();
+              setAdded(true);
+              window.setTimeout(() => openBag(line), 160);
+            });
+          } else {
+            setSheetItem({
+              ...line,
+              price: product.price,
+              image: selectedVariant.images[0],
+            });
+          }
+        },
       });
     },
     { wait: 300 },
   );
 
-  return {
-    sizesRef,
-    throttledAddToCart,
-    isDisabled: !isHydrated || !selectedVariant || isAdding,
-    isHydrated,
-    isAdding,
-  };
-}
-
-export function AddToCart({
-  product,
-  selectedVariant,
-}: BaseAddToCartProps) {
-  const { sizesRef, throttledAddToCart, isDisabled, isHydrated, isAdding } =
-    useAddToCartAction(selectedVariant);
+  const price = formatPriceFromEuros(product.price);
+  const soldOut = selectedVariant.sizes.length === 0;
 
   return (
     <>
-      <div className="p-5">
-        <Sizes ref={sizesRef} productSizes={selectedVariant?.sizes ?? []} />
-        <Colors
-          variants={product.variants}
-          selectedVariantColor={selectedVariant?.color}
-        />
-      </div>
-
-      <div className="border-t border-solid border-border-primary">
-        <Button
-          type="button"
-          variant="default"
-          disabled={!isHydrated || isDisabled}
-          onClick={() => throttledAddToCart()}
-          className="w-full rounded-none bg-background-secondary p-2 text-13 transition duration-150 ease hover:bg-background-tertiary"
-        >
-          {isAdding ? "Adding…" : "Add to cart"}
-        </Button>
-      </div>
-    </>
-  );
-}
-
-export function MobileAddToCart({
-  product,
-  selectedVariant,
-}: BaseAddToCartProps) {
-  const { sizesRef, throttledAddToCart, isDisabled, isHydrated, isAdding } =
-    useAddToCartAction(selectedVariant);
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3.5">
-        <Sizes
-          ref={sizesRef}
-          productSizes={selectedVariant?.sizes ?? []}
-          compact
-        />
-        <Colors
-          variants={product.variants}
-          selectedVariantColor={selectedVariant?.color}
-          compact
-        />
-      </div>
-
       <Button
         type="button"
-        variant="default"
-        disabled={!isHydrated || isDisabled}
-        onClick={() => throttledAddToCart()}
-        className="w-full rounded-md bg-white py-3 text-sm font-medium text-black transition-colors hover:bg-gray-100"
+        size={compact ? "xs" : "lg"}
+        disabled={!isHydrated || soldOut}
+        // Busy rather than disabled while the request runs: a disabled
+        // button drops keyboard focus to the top of the page.
+        aria-busy={isAdding || undefined}
+        aria-disabled={isAdding || undefined}
+        onClick={() => {
+          if (isAdding) return;
+          if (added) openBag();
+          else throttledAddToCart();
+        }}
+        className={cn("w-full", className)}
       >
-        {isAdding ? "Adding…" : "Add to cart"}
+        {soldOut
+          ? "Sold out"
+          : added
+            ? compact
+              ? "Added ✓"
+              : "Added ✓ — view bag"
+            : compact
+              ? "Add to bag"
+              : `Add ${size ?? ""} to bag — ${price}`}
       </Button>
-    </div>
+      <AddedSheet item={sheetItem} onClose={() => setSheetItem(null)} />
+    </>
   );
 }

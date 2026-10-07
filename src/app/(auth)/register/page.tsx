@@ -51,6 +51,7 @@ function RegisterContent() {
 
   return (
     <AuthShell
+      word="Join"
       title="Create your account"
       description="Create your account in seconds with your email and password."
       footerText="Already have an account?"
@@ -61,24 +62,27 @@ function RegisterContent() {
         method="post"
         action="/api/auth/email-form"
         onSubmit={handleSubmit}
-        className="space-y-5"
+        className="flex flex-col gap-4"
       >
-        <input type="hidden" name="mode" value="sign-up" />
-        <input type="hidden" name="callbackURL" value={callbackURL} />
+        <Input type="hidden" name="mode" value="sign-up" className="hidden" />
+        <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
         {error && (
-          <div className="flex items-start gap-2.5 rounded-xl border border-[#4a1f23] bg-[#1a0b0d] px-3.5 py-2.5 text-[#ff8d92]">
-            <MdError className="mt-0.5 shrink-0" size={16} />
-            <p className="text-[13px] leading-5">
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 rounded-field bg-err-bg px-3.5 py-3 text-sm text-err-fg"
+          >
+            <MdError className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
+            <p>
               {error instanceof Error ? error.message : error}
             </p>
           </div>
         )}
 
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
             <Label
               htmlFor="register-name"
-              className="text-[13px] text-color-tertiary"
+              className="text-sm font-medium"
             >
               Full name
             </Label>
@@ -88,17 +92,18 @@ function RegisterContent() {
               ref={nameRef}
               required
               placeholder="Alex Morgan"
-              className="h-11 rounded-md border-border-primary bg-background-primary px-3.5 text-sm text-white placeholder:text-color-secondary focus-visible:ring-white/20 focus-visible:ring-offset-0"
+
               name="name"
               autoComplete="name"
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-1.5">
             <Label
               htmlFor="register-email"
-              className="text-[13px] text-color-tertiary"
+              className="text-sm font-medium"
             >
               Email
             </Label>
@@ -108,26 +113,31 @@ function RegisterContent() {
               ref={emailRef}
               required
               placeholder="name@example.com"
-              className="h-11 rounded-md border-border-primary bg-background-primary px-3.5 text-sm text-white placeholder:text-color-secondary focus-visible:ring-white/20 focus-visible:ring-offset-0"
+
               name="email"
               autoComplete="email"
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="register-password"
-              className="text-[13px] text-color-tertiary"
-            >
-              Password
-            </Label>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between">
+              <Label htmlFor="register-password" className="text-sm font-medium">
+                Password
+              </Label>
+              <span id="register-password-hint" className="text-13 text-muted">
+                At least 8 characters
+              </span>
+            </div>
             <PasswordInput
               id="register-password"
               ref={passwordRef}
               name="password"
               autoComplete="new-password"
+              aria-describedby="register-password-hint"
               required
+              aria-invalid={Boolean(error) || undefined}
               disabled={isLoading}
             />
           </div>
@@ -135,7 +145,7 @@ function RegisterContent() {
 
         <LoadingButton
           type="submit"
-          className="h-11 w-full rounded-md bg-white text-sm font-semibold text-black transition-colors hover:bg-neutral-200 focus-visible:ring-white/20 focus-visible:ring-offset-0"
+          className="mt-1.5 w-full text-base"
           loading={isSubmitting}
           disabled={isLoading}
         >
@@ -144,21 +154,19 @@ function RegisterContent() {
 
         {googleAuthEnabled && (
           <>
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-x-0 h-px bg-border-primary" />
-              <span className="relative bg-background-secondary px-3 text-[10px] uppercase tracking-[0.28em] text-color-secondary">
-                Or
-              </span>
+            <div aria-hidden="true" className="flex items-center gap-3 text-13 text-muted">
+              <span className="h-px grow bg-fg/25" />
+              <span>or</span>
+              <span className="h-px grow bg-fg/25" />
             </div>
             <Button
               type="button"
               variant="outline"
-              size="lg"
               onClick={() => signInWithGoogle.mutate({ callbackURL })}
               disabled={isLoading}
-              className="h-11 w-full rounded-md border-border-primary bg-background-primary text-sm font-medium text-white hover:border-[#3b3b3b] hover:bg-background-tertiary"
+              className="w-full"
             >
-              <FaGoogle className="mr-2.5 size-4" aria-hidden="true" />
+              <FaGoogle className="size-4" aria-hidden="true" />
               {isGoogleLoading ? "Connecting to Google…" : "Continue with Google"}
             </Button>
           </>

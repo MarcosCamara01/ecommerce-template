@@ -9,7 +9,7 @@ import {
 import { getProduct } from "@/app/actions";
 import { ProductCategoryZod } from "@/lib/db/drizzle/schema";
 import { pickFirst } from "@/utils/pickFirst";
-import { capitalizeFirstLetter } from "@/utils/capitalizeFirstLetter";
+import { displayName } from "@/utils/product-name";
 import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
 type PageProps = {
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${capitalizeFirstLetter(product.name)} | Ecommerce Template`,
+    title: `${displayName(product.name)} | Ecommerce Template`,
     description: product.description,
   };
 }
@@ -75,7 +75,7 @@ async function DynamicProductContent({
 
 export default async function ProductPage({ params, searchParams }: PageProps) {
   return (
-    <section className="pt-14">
+    <section>
       <Suspense fallback={<SingleProductSkeleton />}>
         <DynamicProductContent params={params} searchParams={searchParams} />
       </Suspense>

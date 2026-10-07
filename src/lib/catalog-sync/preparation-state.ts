@@ -3,8 +3,8 @@ import { CATALOG_SYNC_MAX_ATTEMPTS } from "./state-machine.ts";
 
 export const CATALOG_PREPARATION_LEASE_MS = 15 * 60 * 1000;
 export const CATALOG_PREPARATION_TIMEOUT_MS = 15 * 60 * 1000;
-export const CATALOG_PREPARATION_RETRY_MS = 5 * 60 * 1000;
-export const CATALOG_PREPARATION_SETTLE_MS = 15 * 60 * 1000;
+const CATALOG_PREPARATION_RETRY_MS = 5 * 60 * 1000;
+const CATALOG_PREPARATION_SETTLE_MS = 15 * 60 * 1000;
 
 type CatalogPreparationTarget = Extract<CatalogSyncTarget, { kind: "preparing" }>;
 

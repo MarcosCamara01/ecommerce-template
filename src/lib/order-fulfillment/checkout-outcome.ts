@@ -11,7 +11,7 @@ export type CheckoutOutcome =
       cartCleanup: CartCleanupOutcome;
     };
 
-export type CheckoutOutcomeRecord = Readonly<{
+type CheckoutOutcomeRecord = Readonly<{
   workState: "pending" | "processing" | "succeeded" | "needs_attention" | null;
   orderId: number | null;
   customerEmailState:

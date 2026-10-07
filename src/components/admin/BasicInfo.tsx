@@ -65,10 +65,10 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
       price,
       category,
       reset: () => {
-        setName("");
-        setDescription("");
-        setPrice("");
-        setCategory("");
+        setName(initialData?.name || "");
+        setDescription(initialData?.description || "");
+        setPrice(initialData?.price?.toString() || "");
+        setCategory(initialData?.category || "");
       },
     }));
 
@@ -78,9 +78,9 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
         <div className="space-y-2">
           <Label
             htmlFor="name"
-            className="text-sm font-medium text-color-secondary"
+            className="text-sm font-medium"
           >
-            Product Name <span className="text-red-400">*</span>
+            Product Name <span className="text-err-fg">*</span>
           </Label>
           <Input
             id="name"
@@ -95,11 +95,11 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             placeholder="Enter product name"
             className={cn(
               "h-11",
-              errors?.name && "border-red-500 focus-visible:ring-red-500",
+              errors?.name && "border-err-line",
             )}
           />
           {errors?.name && (
-            <p id="name-error" className="text-sm text-red-400 font-medium">{errors.name[0]}</p>
+            <p id="name-error" className="text-sm font-medium text-err-fg">{errors.name[0]}</p>
           )}
         </div>
 
@@ -107,9 +107,9 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
         <div className="space-y-2">
           <Label
             htmlFor="description"
-            className="text-sm font-medium text-color-secondary"
+            className="text-sm font-medium"
           >
-            Description <span className="text-red-400">*</span>
+            Description <span className="text-err-fg">*</span>
           </Label>
           <Textarea
             id="description"
@@ -125,11 +125,11 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             className={cn(
               "min-h-[120px] resize-none",
               errors?.description &&
-                "border-red-500 focus-visible:ring-red-500",
+                "border-err-line",
             )}
           />
           {errors?.description && (
-            <p id="description-error" className="text-sm text-red-400 font-medium">
+            <p id="description-error" className="text-sm font-medium text-err-fg">
               {errors.description[0]}
             </p>
           )}
@@ -141,12 +141,12 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
           <div className="space-y-2">
             <Label
               htmlFor="price"
-              className="text-sm font-medium text-color-secondary"
+              className="text-sm font-medium"
             >
-              Price (€) <span className="text-red-400">*</span>
+              Price (€) <span className="text-err-fg">*</span>
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-color-tertiary">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">
                 €
               </span>
               <Input
@@ -166,12 +166,12 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
                 placeholder="0.00"
                 className={cn(
                   "h-11 pl-8",
-                  errors?.price && "border-red-500 focus-visible:ring-red-500",
+                  errors?.price && "border-err-line",
                 )}
               />
             </div>
             {errors?.price && (
-              <p id="price-error" className="text-sm text-red-400 font-medium">
+              <p id="price-error" className="text-sm font-medium text-err-fg">
                 {errors.price[0]}
               </p>
             )}
@@ -181,9 +181,9 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
           <div className="space-y-2">
             <Label
               htmlFor="category"
-              className="text-sm font-medium text-color-secondary"
+              className="text-sm font-medium"
             >
-              Category <span className="text-red-400">*</span>
+              Category <span className="text-err-fg">*</span>
             </Label>
             <Select
               value={category}
@@ -199,7 +199,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
                 className={cn(
                   "h-11",
                   errors?.category &&
-                    "border-red-500 focus-visible:ring-red-500",
+                    "border-err-line",
                 )}
               >
                 <SelectValue placeholder="Select a category" />
@@ -213,7 +213,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
               </SelectContent>
             </Select>
             {errors?.category && (
-              <p id="category-error" className="text-sm text-red-400 font-medium">
+              <p id="category-error" className="text-sm font-medium text-err-fg">
                 {errors.category[0]}
               </p>
             )}

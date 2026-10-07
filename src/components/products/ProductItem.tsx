@@ -1,46 +1,76 @@
-/** COMPONENTS */
-import { ProductImage } from "./ProductImage";
-import Link from "next/link";
-/** FUNCTIONALITY */
-import { cn } from "@/lib/utils";
-import dynamic from "next/dynamic";
-/** TYPES */
-import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
+import { displayName } from "@/utils/product-name";
+import Link from "@/components/ui/link";
 
-const WishlistButton = dynamic(() => import("../wishlist/WishlistButton"));
+import WishlistButton from "@/components/wishlist/WishlistButton";
+import { swatchBackground } from "@/constants/colors";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
+import { formatPriceFromEuros } from "@/utils/formatters";
+
+import { PieceTile } from "./PieceTile";
 
 interface ProductItemProps {
   product: ProductWithVariants;
   priority?: boolean;
+  sizes?: string;
 }
 
-export const ProductItem = ({ product, priority = false }: ProductItemProps) => {
+/**
+ * Listing card: photo on its own pale tile with the wishlist heart on its
+ * corner, then name, colour dot and price. The hover lives in PieceTile.
+ * The `data-flip-*` marks say how each part travels when its grid
+ * re-arranges (see useFlip).
+ */
+export const ProductItem = ({
+  product,
+  priority = false,
+  sizes = "(max-width: 1023px) 50vw, 25vw",
+}: ProductItemProps) => {
   const { name, id, img, price, category, variants } = product;
-
-  const productLink = `/${category}/${id}?variant=${variants[0].color}`;
+  const variant = variants[0];
+  const color = variant?.color;
+  const productLink = color
+    ? `/${category}/${id}?variant=${encodeURIComponent(color)}`
+    : `/${category}/${id}`;
 
   return (
-    <div className="flex flex-col justify-between border border-solid border-border-primary rounded-md overflow-hidden">
-      <Link href={productLink} className={cn("hover:scale-105 transition-all")}>
-        <ProductImage
-          image={img}
-          name={name}
-          width={280}
-          height={425}
-          priority={priority}
-          sizes="(max-width: 640px) 100vw, (max-width: 1154px) 33vw, (max-width: 1536px) 25vw, 20vw"
-        />
+    <article data-flip-item={id} className="group/piece flex flex-col gap-2 lg:gap-3">
+      <PieceTile
+        product={product}
+        variant={variant}
+        href={productLink}
+        src={img}
+        sizes={sizes}
+        priority={priority}
+        className="rounded-[18px] lg:rounded-photo"
+      >
+        <span
+          data-flip-part="keep"
+          className="absolute right-1.5 top-1.5 lg:right-3 lg:top-3"
+        >
+          <WishlistButton productId={id} productName={name} className="lg:size-11" />
+        </span>
+      </PieceTile>
+      <Link href={productLink} className="flex justify-between gap-3 px-0.5 lg:px-1">
+        <span data-flip-part="move" className="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
+          <span className="truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
+            {displayName(name)}
+          </span>
+          {color ? (
+            <span className="flex items-center gap-1.5 text-xs lg:text-13">
+              <span
+                aria-hidden="true"
+                className="size-2.5 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)] lg:size-3.5"
+                style={{ background: swatchBackground(color) }}
+              />
+              <span className="text-muted max-lg:hidden">{color}</span>
+              <span className="tabular-nums lg:hidden">{formatPriceFromEuros(price)}</span>
+            </span>
+          ) : null}
+        </span>
+        <span data-flip-part="move" className="whitespace-nowrap tabular-nums max-lg:hidden">
+          {formatPriceFromEuros(price)}
+        </span>
       </Link>
-      <div className="flex justify-between flex-col gap-2.5 p-3.5 bg-background-secondary z-10">
-        <div className="flex justify-between w-full">
-          <Link href={productLink} className="w-10/12">
-            <h2 className="text-sm font-semibold truncate">{name}</h2>
-          </Link>
-
-          <WishlistButton productId={id} />
-        </div>
-        <div className="text-sm">{price.toFixed(2)} €</div>
-      </div>
-    </div>
+    </article>
   );
 };

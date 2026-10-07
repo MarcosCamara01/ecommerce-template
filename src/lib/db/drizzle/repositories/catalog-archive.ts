@@ -1,15 +1,15 @@
-export type ExistingCatalogVariant = Readonly<{
+type ExistingCatalogVariant = Readonly<{
   id: number;
   color: string;
   archivedAt: Date | null;
 }>;
 
-export type IncomingCatalogVariant = Readonly<{
+type IncomingCatalogVariant = Readonly<{
   id?: number;
   color: string;
 }>;
 
-export type CatalogVariantMutationPlan = Readonly<{
+type CatalogVariantMutationPlan = Readonly<{
   archiveIds: readonly number[];
   mutations: readonly Readonly<{
     incomingIndex: number;

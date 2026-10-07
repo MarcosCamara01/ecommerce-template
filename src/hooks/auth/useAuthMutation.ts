@@ -96,15 +96,19 @@ export const useAuthMutation = () => {
   const signInWithGoogle = useMutation({
     mutationFn: async ({ callbackURL }: { callbackURL?: string }) => {
       const destination = safeLocalCallback(callbackURL);
-      return await authClient.signIn.social({
+      const result = await authClient.signIn.social({
         provider: "google",
         callbackURL: destination,
       });
+
+      if (result.error) {
+        throw new Error(result.error.message || "Error signing in with Google");
+      }
+
+      return result;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       resetIdentityCache();
-      router.push(safeLocalCallback(variables.callbackURL));
-      router.refresh();
     },
     onError: (error) => {
       console.error(error);
@@ -114,7 +118,10 @@ export const useAuthMutation = () => {
 
   const signOut = useMutation({
     mutationFn: async () => {
-      await authClient.signOut();
+      const result = await authClient.signOut();
+      if (result.error) {
+        throw new Error(result.error.message || "Error signing out");
+      }
     },
     onSuccess: () => {
       resetIdentityCache();

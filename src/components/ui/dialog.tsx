@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-background-primary/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-scrim data-[state=open]:animate-in data-[state=open]:duration-200 data-[state=closed]:duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -38,14 +38,22 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[#2E2E2E] bg-background-secondary p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg dark:border-slate-800 dark:bg-slate-950",
+        // Phones: a sheet on the bottom edge (420ms drawer curve). Desktop: a
+        // centred panel that fades and settles from 0.98 (200ms).
+        "fixed inset-x-0 bottom-0 z-50 grid max-h-[92dvh] gap-[18px] overflow-y-auto rounded-t-[28px] bg-panel px-4 pb-7 pt-2.5 text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom data-[state=open]:duration-[420ms] data-[state=closed]:duration-[420ms] data-[state=open]:ease-drawer data-[state=closed]:ease-drawer",
+        "sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(520px,calc(100%-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[32px] sm:p-7 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:zoom-in-[0.98] sm:data-[state=closed]:zoom-out-[0.98] sm:data-[state=open]:duration-200 sm:data-[state=closed]:duration-200 sm:data-[state=open]:ease-out",
+        "motion-reduce:slide-in-from-bottom-0 motion-reduce:slide-out-to-bottom-0 motion-reduce:data-[state=open]:fade-in-0 motion-reduce:data-[state=closed]:fade-out-0",
         className
       )}
       {...props}
     >
+      <span
+        aria-hidden="true"
+        className="h-[5px] w-10 justify-self-center rounded-pill bg-fg/25 sm:hidden"
+      />
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 data-[state=open]:bg-slate-100 data-[state=open]:text-slate-500 dark:ring-offset-slate-950 dark:focus:ring-slate-300 dark:data-[state=open]:bg-slate-800 dark:data-[state=open]:text-slate-400">
-        <LuX className="w-4 h-4" />
+      <DialogPrimitive.Close className="press absolute right-4 top-6 grid size-11 place-items-center rounded-pill border border-line text-fg sm:right-7 sm:top-7">
+        <LuX aria-hidden="true" className="size-3.5" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
@@ -59,7 +67,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
+      "flex flex-col gap-1 text-left",
       className
     )}
     {...props}
@@ -73,7 +81,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      "mt-1.5 flex gap-2 [&>*]:grow",
       className
     )}
     {...props}
@@ -88,7 +96,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
+      "pr-14 font-display text-[44px] leading-[0.85] sm:text-[56px]",
       className
     )}
     {...props}
@@ -102,22 +110,11 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-color-secondary", className)}
+    className={cn("text-[15px] text-muted", className)}
     {...props}
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-};
+export { Dialog, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription };
 

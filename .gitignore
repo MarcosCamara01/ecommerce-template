@@ -7,6 +7,8 @@
 
 # testing
 /coverage
+# end-to-end runs: reports, traces, saved sessions and the replay cache
+/.e2e/
 
 # next.js
 /.next/

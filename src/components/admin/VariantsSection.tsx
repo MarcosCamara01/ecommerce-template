@@ -144,7 +144,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
         type="button"
         variant="outline"
         onClick={addVariant}
-        className="w-full h-12 border-dashed border-2 border-border-secondary hover:border-white hover:bg-white/5 transition-colors text-color-secondary hover:text-white"
+        className="h-[52px] w-full rounded-pill border-[1.5px] border-dashed border-line font-medium text-fg hover:border-fg"
       >
         <FiPlus className="mr-2 h-4 w-4" />
         Add Another Variant

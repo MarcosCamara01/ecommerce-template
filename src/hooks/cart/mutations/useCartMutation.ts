@@ -1,10 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  cartItemWithDetailsSchema,
-  type CartItem,
-  type ProductSize,
-  selectCartItemSchema,
-} from "@/lib/db/drizzle/schema";
+import type { CartItem, ProductSize } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 import { toast } from "sonner";
 import { CART_QUERY_KEYS } from "../keys";
@@ -36,7 +31,7 @@ export const useCartMutation = () => {
       }
 
       const { item } = await response.json();
-      return selectCartItemSchema.parse(item);
+      return item as CartItem;
     },
     onMutate: async (params: {
       variantId: number;
@@ -44,7 +39,6 @@ export const useCartMutation = () => {
       quantity?: number;
     }) => {
       if (!userId) {
-        toast.info("Login first to add to cart");
         throw new Error("Unauthorized");
       }
 
@@ -54,11 +48,11 @@ export const useCartMutation = () => {
         queryKey: CART_QUERY_KEYS.cartList(userId),
       });
 
-      const previousData = queryClient.getQueryData<CartListResponse>(
+      const previousItem = queryClient.getQueryData<CartListResponse>(
         CART_QUERY_KEYS.cartList(userId),
-      );
+      )?.items.find((item) => item.variantId === variantId && item.size === size);
 
-      const tempItem = selectCartItemSchema.parse({
+      const tempItem: CartItem = {
         id: -Math.floor(Math.random() * 1e9),
         userId: "temp",
         variantId,
@@ -69,7 +63,7 @@ export const useCartMutation = () => {
         stripeId: "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      });
+      };
 
       queryClient.setQueryData<CartListResponse>(
         CART_QUERY_KEYS.cartList(userId),
@@ -90,17 +84,18 @@ export const useCartMutation = () => {
         },
       );
 
-      return { previousData, tempItem };
+      const optimisticItem = queryClient.getQueryData<CartListResponse>(
+        CART_QUERY_KEYS.cartList(userId),
+      )?.items.find((item) => item.variantId === variantId && item.size === size);
+
+      return { tempItem, previousItem, optimisticItem };
     },
-    onSuccess: (data, _, context) => {
-      if (!userId) {
+    onSuccess: async (data, _, context) => {
+      if (!userId || !context) {
         return;
       }
 
-      const { tempItem } = context as {
-        previousData?: CartListResponse;
-        tempItem: CartItem;
-      };
+      const { tempItem } = context;
 
       queryClient.setQueryData<CartListResponse>(
         CART_QUERY_KEYS.cartList(userId),
@@ -117,25 +112,37 @@ export const useCartMutation = () => {
         },
       );
 
-      void queryClient.invalidateQueries({
-        queryKey: CART_QUERY_KEYS.cartDetails(userId),
+      await queryClient.invalidateQueries({
+        queryKey: CART_QUERY_KEYS.cartList(userId),
+        refetchType: "all",
       });
     },
-    onError: (error, _, context) => {
-      const { previousData } = context as {
-        previousData?: CartListResponse;
-        tempItem: CartItem;
-      };
-
-      if (previousData && userId) {
+    onError: async (error, _, context) => {
+      if (context && userId) {
         queryClient.setQueryData<CartListResponse>(
           CART_QUERY_KEYS.cartList(userId),
-          previousData,
+          (current = { items: [] }) => ({
+            items: current.items.flatMap((item) => {
+              if (item !== context.optimisticItem) return [item];
+              return context.previousItem ? [context.previousItem] : [];
+            }),
+          }),
         );
+        // Another addition may have confirmed this line; refetch its quantity
+        // instead of overwriting that result with an older snapshot.
+        await queryClient.invalidateQueries({
+          queryKey: CART_QUERY_KEYS.cartList(userId),
+          refetchType: "all",
+        });
+      }
+
+      if (error.message === "Unauthorized" || error.message === "authentication_required") {
+        toast.info("Sign in to add to your bag");
+        return;
       }
 
       console.error("Error adding to cart:", error);
-      toast.error("Error adding to cart");
+      toast.error("Couldn’t add to your bag. Try again.");
     },
   });
 
@@ -156,7 +163,7 @@ export const useCartMutation = () => {
       }
 
       const { item } = await response.json();
-      return selectCartItemSchema.parse(item);
+      return item as CartItem;
     },
     onMutate: async (params: { itemId: number; quantity: number }) => {
       if (!userId) {
@@ -229,20 +236,14 @@ export const useCartMutation = () => {
         (current = { items: [] }) => ({
           items: current.items.map((item) =>
             item.id === data.id
-              ? cartItemWithDetailsSchema.parse({
-                  ...item,
-                  ...data,
-                })
+              ? { ...item, ...data }
               : item,
           ),
         }),
       );
     },
     onError: (error, _, context) => {
-      const { previousData, previousDetails } = context as {
-        previousData?: CartListResponse;
-        previousDetails?: CartDetailsResponse;
-      };
+      const { previousData, previousDetails } = context ?? {};
 
       if (previousData && userId) {
         queryClient.setQueryData<CartListResponse>(
@@ -259,7 +260,7 @@ export const useCartMutation = () => {
       }
 
       console.error("Error updating cart:", error);
-      toast.error("Error updating cart");
+      toast.error("Couldn’t update your bag. Try again.");
     },
   });
 
@@ -317,10 +318,7 @@ export const useCartMutation = () => {
       return { previousData, previousDetails };
     },
     onError: (error, _, context) => {
-      const { previousData, previousDetails } = context as {
-        previousData?: CartListResponse;
-        previousDetails?: CartDetailsResponse;
-      };
+      const { previousData, previousDetails } = context ?? {};
 
       if (previousData && userId) {
         queryClient.setQueryData<CartListResponse>(
@@ -337,7 +335,7 @@ export const useCartMutation = () => {
       }
 
       console.error("Error removing from cart:", error);
-      toast.error("Error removing from cart");
+      toast.error("Couldn’t update your bag. Try again.");
     },
   });
 
@@ -384,10 +382,7 @@ export const useCartMutation = () => {
       return { previousData, previousDetails };
     },
     onError: (error, _, context) => {
-      const { previousData, previousDetails } = context as {
-        previousData?: CartListResponse;
-        previousDetails?: CartDetailsResponse;
-      };
+      const { previousData, previousDetails } = context ?? {};
 
       if (previousData && userId) {
         queryClient.setQueryData<CartListResponse>(
@@ -404,7 +399,7 @@ export const useCartMutation = () => {
       }
 
       console.error("Error clearing cart:", error);
-      toast.error("Error clearing cart");
+      toast.error("Couldn’t update your bag. Try again.");
     },
   });
 

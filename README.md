@@ -151,6 +151,7 @@ The live webhook endpoint is `/api/stripe/webhooks`.
 | `npm run dev` | Next.js dev server |
 | `npm run build` / `npm start` | Production build and server |
 | `npm test` | Node.js test runner |
+| `npm run test:e2e` | End-to-end tests in a browser; see [End-to-end tests](#end-to-end-tests) |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run verify:architecture` | Import-boundary and layering checks |
@@ -173,6 +174,59 @@ Drizzle journal.
 allowlist and the public `product-images` bucket (5 MiB, JPEG/PNG/WebP). It
 needs `SUPABASE_ACCESS_TOKEN` and `SUPABASE_SERVICE_ROLE_KEY`. The service-role
 key is withheld from the CLI config-push subprocess.
+
+## End-to-end tests
+
+`tests/` holds a browser suite written with [e2e](https://e2e.tester.army/docs),
+and an agent does most of it. A test says what a shopper wants ("add this piece
+to the bag in size M"); the agent does it in a real browser and is then asked
+whether it happened. No goal says how a page is built and no check names a
+label of it, so a redesign that keeps the store working keeps the suite green.
+
+- **What the shopper sees** is judged by the agent, in words.
+- **What the store recorded** (the lines of a bag, a saved piece, who is signed
+  in) is read from its API and compared exactly: money and quantities are not
+  left to a model.
+- **A few tests are exact from end to end**, because the exact interface is
+  their subject: the keyboard, focus, notices that come and go, who may see
+  what. Those name today's labels and say so.
+
+It assumes no catalog: it reads the pieces the store shows and works with those.
+
+The agent is Claude, through the Claude Code CLI and the account `claude` is
+signed in to ([the bridge](tests/support/claude-cli.ts)); no key is involved.
+The first run asks the model for every goal. A goal whose outcome was confirmed
+is recorded in `.e2e/cache/` and replayed afterwards without the model, which
+takes over again only where the interface has changed. The judgments are asked
+on every run: about 75 calls and four to five minutes for the whole suite.
+
+Start the store, then run the suite against the origin the store is served
+from (`APP_URL`; the proxy redirects any other host):
+
+```bash
+E2E_APP_URL=http://localhost:3000 npm run test:e2e
+```
+
+| Variable | Effect |
+| --- | --- |
+| `E2E_APP_URL` | The store under test. Default `http://localhost:3000`. |
+| `E2E_ALLOW_WRITES=1` | Also runs the tests that sign up shoppers, fill bags and save pieces. **Only against a disposable database.** Without it a run changes nothing. |
+| `E2E_USER_CUSTOMER_USERNAME`, `E2E_USER_CUSTOMER_PASSWORD` | A shopper with past orders, for the order pages. |
+| `E2E_USER_ADMIN_USERNAME`, `E2E_USER_ADMIN_PASSWORD` | An admin, for the product forms. They are opened, never saved. |
+| `E2E_MODEL` | The model the CLI runs. Default `sonnet`. |
+
+- The tests tagged `agent` need the CLI. The rest need nothing:
+  `npm exec -- e2e run --exclude-tag agent`.
+- The catalog needs pieces in every section, in stock in two sizes. The tests
+  of colors and of the photo viewer skip when no piece has them.
+- The cards of a listing are read straight from the page. If a redesign leaves
+  that reading with nothing, the agent reads the listing instead; the suite
+  gets slower, not red.
+- A production build allows three sign-ins every ten seconds. The suite opens
+  its sessions through the auth API and waits a refusal out.
+- Checkout is covered up to the hand-off: the test stands in for Stripe.
+- A run writes its report, traces and replay cache to `.e2e/`, which is
+  ignored.
 
 ## Architecture
 

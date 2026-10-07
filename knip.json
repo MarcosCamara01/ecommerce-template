@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "scripts/**/*.{ts,mjs}",
+    "src/**/*.test.mjs",
+    "src/**/*.test-d.ts",
+    "*.test.mjs",
+    "e2e.config.ts",
+    "tests/**/*.e2e.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "scripts/**/*.{ts,mjs}",
+    "e2e.config.ts",
+    "tests/**/*.ts"
+  ],
+  "ignore": ["vendor/**", ".agents/**", ".claude/**"]
+}

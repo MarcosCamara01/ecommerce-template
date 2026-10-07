@@ -10,7 +10,7 @@ const WORK_EVENTS = new Set([
   "checkout.session.expired",
 ]);
 
-export interface EventReceiptResult {
+interface EventReceiptResult {
   success: true;
   handled: boolean;
 }

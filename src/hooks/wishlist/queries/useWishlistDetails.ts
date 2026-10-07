@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@/lib/auth/client";
-import {
-  wishlistItemWithProductSchema,
-  type WishlistItemWithProduct,
-} from "@/lib/db/drizzle/schema";
+import type { WishlistItemWithProduct } from "@/lib/db/drizzle/schema";
 import { WISHLIST_QUERY_KEYS } from "../keys";
 import type { WishlistDetailsResponse } from "../types";
 
@@ -26,9 +23,10 @@ export const useWishlistDetails = () => {
         throw new Error("Failed to fetch wishlist details");
       }
 
-      const data = await response.json();
+      const data: { items?: unknown } = await response.json();
+      if (!Array.isArray(data.items)) throw new Error("Failed to fetch wishlist details");
       return {
-        items: wishlistItemWithProductSchema.array().parse(data.items),
+        items: data.items as WishlistItemWithProduct[],
       } satisfies WishlistDetailsResponse;
     },
   });

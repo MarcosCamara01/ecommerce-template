@@ -17,3 +17,17 @@ test("order consumers share one totals and dates projection", () => {
   assert.equal(view.orderDate.toISOString(), "2026-08-19T00:00:00.000Z");
   assert.equal(view.status.label, "Confirmed");
 });
+
+test("delivery reads as expected, done or absent, by order status", () => {
+  const order = (status) => orderViewModel({
+    status,
+    deliveryDate: "2026-08-26T00:00:00.000Z",
+    createdAt: "2026-08-19T00:00:00.000Z",
+    customerInfo: { totalPrice: 4995 },
+    orderProducts: [{ quantity: 1 }],
+  });
+  assert.equal(order("shipped").delivery.label, "Expected delivery");
+  assert.equal(order("delivered").delivery.label, "Delivered");
+  assert.equal(order("delivered").delivery.date.toISOString(), "2026-08-26T00:00:00.000Z");
+  assert.equal(order("cancelled").delivery, null, "a cancelled order expects no delivery");
+});

@@ -3,11 +3,11 @@ type CapabilityResolver<Principal> = (
   capability: "catalog:manage",
 ) => Promise<Principal>;
 
-export type CatalogRouteAuthorization<Principal> =
+type CatalogRouteAuthorization<Principal> =
   | Readonly<{ ok: true; principal: Principal }>
   | Readonly<{ ok: false; response: Response }>;
 
-export async function authorizeCatalogRoute<Principal>(
+async function authorizeCatalogRoute<Principal>(
   headers: Headers,
   resolveCapability: CapabilityResolver<Principal>,
   classifyError: (error: unknown) => 401 | 403 | null,

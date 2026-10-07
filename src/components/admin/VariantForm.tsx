@@ -71,14 +71,14 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
     }));
 
     return (
-      <Card className="overflow-hidden">
-        <CardHeader className="py-3 px-4 bg-bg-tertiary/50">
+      <Card className="overflow-hidden rounded-toast bg-field">
+        <CardHeader className="px-[18px] py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="font-mono">
                 {index + 1}
               </Badge>
-              <span className="font-medium text-sm text-color-primary">Variant</span>
+              <span className="font-medium text-sm text-fg">Variant</span>
             </div>
             <div className="flex items-center gap-1">
               {/* Move buttons */}
@@ -92,7 +92,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                       size="icon"
                       onClick={onMoveUp}
                       disabled={!onMoveUp}
-                      className="h-8 w-8 text-color-secondary hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="h-8 w-8 text-muted hover:text-fg hover:bg-card disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <FiChevronUp className="h-4 w-4" aria-hidden="true" />
                     </Button>
@@ -112,7 +112,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                       size="icon"
                       onClick={onMoveDown}
                       disabled={!onMoveDown}
-                      className="h-8 w-8 text-color-secondary hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="h-8 w-8 text-muted hover:text-fg hover:bg-card disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <FiChevronDown className="h-4 w-4" aria-hidden="true" />
                     </Button>
@@ -133,7 +133,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                         variant="ghost"
                         size="icon"
                         onClick={onRemove}
-                        className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="h-8 w-8 text-err-fg hover:bg-err-bg"
                       >
                         <FiTrash2 className="h-4 w-4" aria-hidden="true" />
                       </Button>
@@ -147,10 +147,10 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-4 space-y-4">
+        <CardContent className="space-y-4 px-[18px] pb-[18px] pt-0">
           {/* Color */}
           <div className="space-y-2">
-            <Label htmlFor={`color-${index}`} className="text-sm font-medium text-color-secondary">
+            <Label htmlFor={`color-${index}`} className="text-sm font-medium">
               Color
             </Label>
             <Input
@@ -164,7 +164,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
               className="h-10"
             />
             {errors?.[`variants.${index}.color`] && (
-              <p id={`variant-${index}-color-error`} className="text-sm font-medium text-red-400">
+              <p id={`variant-${index}-color-error`} className="text-sm font-medium text-err-fg">
                 {errors[`variants.${index}.color`][0]}
               </p>
             )}
@@ -172,9 +172,9 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
 
           {/* Sizes and Images in Accordion */}
           <Accordion type="multiple" defaultValue={["sizes", "images"]} className="w-full">
-            <AccordionItem value="sizes" className="border border-border-primary rounded-lg px-4 bg-bg-primary/50">
+            <AccordionItem value="sizes" className="rounded-field border border-line bg-panel px-4">
               <AccordionTrigger className="hover:no-underline">
-                <span className="text-sm font-medium text-color-secondary">Available Sizes</span>
+                <span className="text-sm font-medium">Available Sizes</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
                 <VariantSizes
@@ -185,9 +185,9 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                 />
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="images" className="border border-border-primary rounded-lg px-4 mt-2 bg-bg-primary/50">
+            <AccordionItem value="images" className="mt-2 rounded-field border border-line bg-panel px-4">
               <AccordionTrigger className="hover:no-underline">
-                <span className="text-sm font-medium text-color-secondary">Variant Images</span>
+                <span className="text-sm font-medium">Variant Images</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
                 <VariantImages

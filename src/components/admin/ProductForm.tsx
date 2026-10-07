@@ -5,15 +5,7 @@ import { useProductMutation } from "@/hooks/product/mutations/useProductMutation
 import { Button } from "@/components/ui/button";
 import LoadingButton from "@/components/ui/loadingButton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { FiArchive, FiCheck, FiX, FiPackage, FiImage, FiLayers } from "react-icons/fi";
+import { FiArchive, FiCheck, FiX } from "react-icons/fi";
 import { BasicInfo, type BasicInfoRef } from "./BasicInfo";
 import { MainImage, type MainImageRef } from "./MainImage";
 import { VariantsSection, type VariantsSectionRef } from "./VariantsSection";
@@ -21,9 +13,9 @@ import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
 import { useCatalogCreateCommand } from "@/hooks/product/useCatalogCreateCommand";
 import { encodeProductFormData } from "./product-form-data";
+import { readImagePreview } from "./image-preview";
+import { StorefrontPreview, type PreviewValues } from "./StorefrontPreview";
 import { catalogImageBatchErrors } from "@/lib/catalog-sync/image-file-contract";
-
-export type { ProductFormData };
 
 interface FormState {
   success: boolean;
@@ -38,6 +30,8 @@ interface ProductFormProps {
   initialData?: ProductFormData;
   restoreArchived?: boolean;
   onSuccess?: (product: ProductWithVariants) => void;
+  /** Rendered under the variants, e.g. the archive control. */
+  footer?: React.ReactNode;
 }
 
 export function ProductForm({
@@ -45,6 +39,7 @@ export function ProductForm({
   initialData,
   restoreArchived = false,
   onSuccess,
+  footer,
 }: ProductFormProps) {
   const { createAsync, updateAsync, isPending, isUpdatePending } =
     useProductMutation();
@@ -54,6 +49,36 @@ export function ProductForm({
     message: "",
     errors: undefined,
   });
+
+  const initialPreview: PreviewValues = {
+    name: initialData?.basicInfo.name ?? "",
+    price: initialData?.basicInfo.price ? String(initialData.basicInfo.price) : "",
+    color: initialData?.variants[0]?.color ?? "",
+    image: initialData?.mainImageUrl ?? null,
+  };
+  const [preview, setPreview] = useState<PreviewValues>(initialPreview);
+
+  // The form's fields own their values; the preview reads them as they change.
+  const readPreview = (form: HTMLFormElement, target: EventTarget) => {
+    const field = (name: string) =>
+      (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? "";
+    const picked =
+      target instanceof HTMLInputElement &&
+      target.name === "mainImagePicker" &&
+      target.files?.[0];
+    setPreview((current) => ({
+      ...current,
+      name: field("name"),
+      price: field("price"),
+      color: (form.querySelector<HTMLInputElement>("#color-0")?.value ?? "").trim(),
+    }));
+    if (picked) {
+      // Same data-URL preview the main image picker uses.
+      void readImagePreview(picked)
+        .then((image) => setPreview((current) => ({ ...current, image })))
+        .catch(() => {});
+    }
+  };
 
   const basicInfoRef = useRef<BasicInfoRef>(null!);
   const mainImageRef = useRef<MainImageRef>(null!);
@@ -167,11 +192,12 @@ export function ProductForm({
     basicInfoRef.current.reset();
     mainImageRef.current.reset();
     variantsSectionRef.current.reset();
+    setPreview(initialPreview);
     if (mode === "create") createCommand.clear();
     setState({ success: false, message: "", errors: undefined });
   };
 
-  const title = mode === "create" ? "Create Product" : "Edit Product";
+  const title = mode === "create" ? "New product" : "Edit product";
   const subtitle =
     mode === "create"
       ? "Add a new product with variants and images to your store"
@@ -183,20 +209,21 @@ export function ProductForm({
       ? "Create Product"
       : restoreArchived ? "Restore Product" : "Update Product";
 
+  const section = "flex flex-col gap-3.5 rounded-photo-lg border border-line bg-fg/5 p-[22px]";
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-3xl mx-auto p-6 md:p-8 space-y-6"
+      onInput={(event) => readPreview(event.currentTarget, event.target)}
+      onChange={(event) => readPreview(event.currentTarget, event.target)}
+      className="flex flex-col gap-6 pb-24"
     >
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-color-primary">
+      <div className="flex flex-col gap-2.5 pt-6 lg:pt-10">
+        <h1 className="font-display text-[64px] leading-[0.82] lg:text-[min(160px,11vw)]">
           {title}
         </h1>
-        <p className="text-color-tertiary">{subtitle}</p>
+        <p className="text-muted">{subtitle}</p>
       </div>
-
-      <Separator />
 
       {restoreArchived && (
         <Alert>
@@ -234,107 +261,63 @@ export function ProductForm({
         </Alert>
       )}
 
-      {/* Basic Information Card */}
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-white/10">
-              <FiPackage className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Basic Information</CardTitle>
-              <CardDescription>
-                Product name, description, price and category
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <BasicInfo
-            ref={basicInfoRef}
-            errors={state.errors}
-            initialData={initialData?.basicInfo}
-            onFieldChange={clearFieldError}
-          />
-        </CardContent>
-      </Card>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="flex flex-col gap-4">
+          <section aria-labelledby="basic-info-title" className={section}>
+            <h2 id="basic-info-title" className="text-lg font-semibold">
+              Basic Information
+            </h2>
+            <BasicInfo
+              ref={basicInfoRef}
+              errors={state.errors}
+              initialData={initialData?.basicInfo}
+              onFieldChange={clearFieldError}
+            />
+          </section>
 
-      {/* Main Image Card */}
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-white/10">
-              <FiImage className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Main Image</CardTitle>
-              <CardDescription>
-                Primary product image displayed in listings
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <MainImage
-            ref={mainImageRef}
-            errors={state.errors}
-            initialImageUrl={initialData?.mainImageUrl}
-            onFieldChange={clearFieldError}
-          />
-        </CardContent>
-      </Card>
+          <section aria-labelledby="main-image-title" className={section}>
+            <h2 id="main-image-title" className="text-lg font-semibold">
+              Main Image
+            </h2>
+            <MainImage
+              ref={mainImageRef}
+              errors={state.errors}
+              initialImageUrl={initialData?.mainImageUrl}
+              onFieldChange={clearFieldError}
+            />
+          </section>
 
-      {/* Variants Card */}
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-white/10">
-              <FiLayers className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Product Variants</CardTitle>
-              <CardDescription>
-                Add color variations with sizes and images
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <VariantsSection
-            ref={variantsSectionRef}
-            initialVariants={initialData?.variants}
-            errors={state.errors}
-            onFieldChange={clearFieldError}
-          />
-        </CardContent>
-      </Card>
+          <section aria-labelledby="variants-title" className={section}>
+            <h2 id="variants-title" className="text-lg font-semibold">
+              Product Variants
+            </h2>
+            <VariantsSection
+              ref={variantsSectionRef}
+              initialVariants={initialData?.variants}
+              errors={state.errors}
+              onFieldChange={clearFieldError}
+            />
+          </section>
 
-      {/* Action Buttons */}
-      <Card className="border-dashed">
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              type="reset"
-              onClick={handleReset}
-              variant="outline"
-              className="flex-1"
-              size="lg"
-            >
-              <FiX className="mr-2 h-4 w-4" />
-              {mode === "create" ? "Clear Form" : "Reset Changes"}
-            </Button>
-            <LoadingButton
-              loading={isLoading}
-              className="flex-1 bg-white text-black hover:bg-white/90"
-              size="lg"
-              icon={<FiCheck className="h-4 w-4" />}
-              iconPosition="left"
-            >
-              {submitButtonText}
-            </LoadingButton>
-          </div>
-        </CardContent>
-      </Card>
+          {footer}
+        </div>
+
+        <aside className="flex flex-col gap-3.5 max-lg:order-first lg:sticky lg:top-[88px]">
+          <StorefrontPreview values={preview} />
+          <LoadingButton loading={isLoading} className="w-full text-base">
+            {submitButtonText}
+          </LoadingButton>
+          <Button
+            type="reset"
+            onClick={handleReset}
+            variant="outline"
+            size="sm"
+            className="w-full"
+          >
+            {mode === "create" ? "Clear Form" : "Reset Changes"}
+          </Button>
+        </aside>
+      </div>
     </form>
   );
 }

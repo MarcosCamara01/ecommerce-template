@@ -15,10 +15,10 @@ export async function proxy(request: NextRequest) {
   );
   if (canonicalRedirect) return NextResponse.redirect(canonicalRedirect);
 
-  const protectedRoutes = ["/orders", "/admin"];
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route),
-  );
+  const pathname = request.nextUrl.pathname;
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isProtectedRoute =
+    isAdminRoute || pathname === "/orders" || pathname.startsWith("/orders/");
 
   if (isProtectedRoute) {
     const principal = await getPrincipalFromHeaders(request.headers);
@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
     }
 
     if (
-      request.nextUrl.pathname.startsWith("/admin") &&
+      isAdminRoute &&
       !hasCapability(principal, "catalog:manage")
     ) {
       const url = request.nextUrl.clone();

@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { WISHLIST_QUERY_KEYS } from "../keys";
-import {
-  selectWishlistItemSchema,
-  type WishlistItem,
-} from "@/lib/db/drizzle/schema";
+import type { WishlistItem } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
 import type { WishlistListResponse } from "../types";
 
@@ -26,10 +23,9 @@ export const useWishlist = () => {
         throw new Error("Error al cargar el wishlist");
       }
 
-      const data = await response.json();
-      return {
-        items: selectWishlistItemSchema.array().parse(data.items),
-      } satisfies WishlistListResponse;
+      const data: { items?: unknown } = await response.json();
+      if (!Array.isArray(data.items)) throw new Error("Error al cargar el wishlist");
+      return { items: data.items as WishlistItem[] } satisfies WishlistListResponse;
     },
   });
 

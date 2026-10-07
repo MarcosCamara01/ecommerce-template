@@ -1,19 +1,36 @@
 "use client";
 
+import Link from "@/components/ui/link";
+
+import { Button } from "@/components/ui/button";
+import { buttonClass } from "@/components/ui/button-classes";
+
 export default function Error({ reset }: { reset: () => void }) {
   return (
-    <div className="mx-auto my-4 flex max-w-xl flex-col rounded-lg border border-solid border-border-primary bg-background-secondary p-8 md:p-12">
-      <h1 className="text-xl font-bold">Something went wrong</h1>
-      <p className="my-2 text-muted-foreground">
-        There was an issue with our storefront. This could be a temporary issue,
-        please try your action again.
-      </p>
-      <button
-        className="mt-4 inline-flex h-11 items-center justify-center rounded-md border border-solid border-border-primary bg-background-tertiary px-6 text-sm font-medium transition-colors hover:bg-border-secondary"
-        onClick={() => reset()}
+    <div data-error-page="" className="pb-12 lg:pb-24">
+      <section className="flex flex-col items-start gap-[18px] pt-2">
+      <span
+        aria-hidden="true"
+        className="font-display text-[150px] leading-[0.78] lg:text-[min(480px,33vw)]"
       >
-        Try Again
-      </button>
+        Oops
+      </span>
+      <h1 className="text-[28px] font-semibold tracking-[-0.02em] lg:text-[40px]">
+        Something went wrong
+      </h1>
+      <p className="max-w-[520px] text-[17px] opacity-90">
+        An unexpected error stopped this page from loading. Try again in a
+        moment.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" onClick={() => reset()}>
+          Try again
+        </Button>
+        <Link href="/" className={buttonClass({ variant: "secondary" })}>
+          Back to home
+        </Link>
+      </div>
+      </section>
     </div>
   );
 }

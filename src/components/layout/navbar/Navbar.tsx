@@ -1,247 +1,186 @@
 "use client";
 
 /** COMPONENTS */
-import Link from "next/link";
-import { LinksDesktop } from "./LinksDesktop";
+import Link from "@/components/ui/link";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { BagDrawer } from "@/components/bag/BagDrawer";
+import { SearchDialog } from "@/components/search/SearchDialog";
+import { openSearch } from "@/components/search/search-ui";
+import { BagLink } from "./BagLink";
+import { NavLink } from "./NavLink";
+import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
-import { SearchInput } from "./SearchInput";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetClose,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import { WishlistLink } from "./WishlistLink";
-import { CartLink } from "./CartLink";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 /** FUNCTIONALITY */
 import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
-import { useRef } from "react";
-import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-/** ICONS */
-import { FiUser, FiMenu, FiCreditCard } from "react-icons/fi";
-import { RiLogoutBoxLine } from "react-icons/ri";
+import { useEffect, useRef, useState } from "react";
+import { shopSections } from "@/constants/navigation";
+import type { ShopSectionSummary } from "@/lib/catalog/sections";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
+import { cn } from "@/lib/utils";
+import { EDIT_PROFILE_EVENT } from "@/components/account/AccountNav";
 
 const EditProfile = dynamic(() => import("./EditProfile"), {
   ssr: false,
 });
 
-const linksData = [
-  { path: "/t-shirts", name: "T-SHIRTS" },
-  { path: "/pants", name: "PANTS" },
-  { path: "/sweatshirts", name: "SWEATSHIRTS" },
-];
+const iconButton =
+  "press grid size-11 place-items-center rounded-pill text-fg hover:bg-card";
 
-export const Navbar = () => {
-  const { data: session, isPending } = useSession();
+export const Navbar = ({
+  sectionSummaries,
+  searchCatalog,
+}: {
+  sectionSummaries: Promise<ShopSectionSummary[]>;
+  searchCatalog: Promise<ProductWithVariants[]>;
+}) => {
+  const { data: session } = useSession();
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const editProfileManager = useManager();
-  const { signOut } = useAuthMutation();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
   const profileReturnFocusRef = useRef<HTMLElement | null>(null);
   const skipMobileMenuCloseAutoFocusRef = useRef(false);
+  const searchAfterMenuCloseRef = useRef(false);
+
+  // Account pages ask for the dialog from their own "Edit profile" pill.
+  useEffect(() => {
+    const open = (event: Event) => {
+      const trigger = (event as CustomEvent<HTMLElement | null>).detail;
+      profileReturnFocusRef.current = trigger;
+      editProfileManager.open();
+    };
+    window.addEventListener(EDIT_PROFILE_EVENT, open);
+    return () => window.removeEventListener(EDIT_PROFILE_EVENT, open);
+  }, [editProfileManager]);
 
   return (
     <>
-      <header className="pointer-events-auto w-full px-3.5 gap-4 xs:px-6 sm:px-12 py-6 flex items-center justify-between bg-background-secondary border-b border-solid border-border-primary">
-        {/* Mobile Menu Trigger */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <button
-              ref={mobileMenuTriggerRef}
-              type="button"
-              aria-label="Open navigation menu"
-              className="flex px-4 py-2 lg:hidden hover:opacity-75 transition-opacity"
-            >
-              <FiMenu size={24} aria-hidden="true" />
-            </button>
-          </SheetTrigger>
-
-          <SheetContent
-            side="left"
-            className="w-full sm:w-80 p-0"
-            onCloseAutoFocus={(event) => {
-              if (!skipMobileMenuCloseAutoFocusRef.current) return;
-              event.preventDefault();
-              skipMobileMenuCloseAutoFocusRef.current = false;
-              queueMicrotask(editProfileManager.open);
-            }}
+      {/* Desktop: a floating glass pill. The header around it has no surface
+          and lets clicks through, so the page scrolls behind and beside the
+          pill; the glass is dense enough to read over any photo. */}
+      <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
+        <nav
+          aria-label="Main"
+          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] backdrop-saturate-150 transition-[background-color] duration-600 ease-out"
+        >
+          <Link
+            href="/"
+            className="px-[18px] font-display text-[26px] font-extrabold leading-[44px]"
           >
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-border-primary">
-                <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Browse product collections and account actions.
-                </SheetDescription>
-              </div>
-
-              {/* Navigation Links */}
-              <nav className="flex-1 overflow-y-auto">
-                <ul className="flex flex-col gap-2 p-4">
-                  {/* Category Links */}
-                  {linksData.map((link) => (
-                    <li key={link.path}>
-                      <SheetClose asChild>
-                        <Link
-                          href={link.path}
-                          className="flex items-center px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                        >
-                          {link.name}
-                        </Link>
-                      </SheetClose>
-                    </li>
-                  ))}
-
-                  {/* Separator */}
-                  {(session?.user || isPending) && (
-                    <Separator className="my-2" />
-                  )}
-
-                  {/* User Links Skeleton */}
-                  {isPending && (
-                    <>
-                      <li>
-                        <div className="flex items-center px-4 py-2">
-                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                          <Skeleton className="h-4 w-24" />
-                        </div>
-                      </li>
-                      <li>
-                        <div className="flex items-center px-4 py-2">
-                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                          <Skeleton className="h-4 w-20" />
-                        </div>
-                      </li>
-                      <li>
-                        <Separator className="my-2" />
-                      </li>
-                      <li>
-                        <div className="flex items-center px-4 py-2">
-                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                          <Skeleton className="h-4 w-16" />
-                        </div>
-                      </li>
-                    </>
-                  )}
-
-                  {/* User Links */}
-                  {session?.user && !isPending && (
-                    <>
-                      <li>
-                        <SheetClose asChild>
-                          <Link
-                            href="/orders"
-                            className="flex items-center px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                          >
-                            <FiCreditCard className="mr-2" size={16} />
-                            <span>View orders</span>
-                          </Link>
-                        </SheetClose>
-                      </li>
-
-                      <li>
-                        <SheetClose asChild>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              skipMobileMenuCloseAutoFocusRef.current = true;
-                              profileReturnFocusRef.current =
-                                mobileMenuTriggerRef.current;
-                            }}
-                            className="flex items-center w-full px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                          >
-                            <FiUser className="mr-2" size={16} />
-                            <span>Edit profile</span>
-                          </button>
-                        </SheetClose>
-                      </li>
-
-                      <li>
-                        <Separator className="my-2" />
-                      </li>
-
-                      <li>
-                        <button
-                          onClick={() => signOut.mutate()}
-                          className="flex gap-2 items-center w-full px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                        >
-                          <RiLogoutBoxLine size={16} />
-                          <span>Log out</span>
-                        </button>
-                      </li>
-                    </>
-                  )}
-
-                  {/* Login Link for non-authenticated users */}
-                  {!session?.user && !isPending && (
-                    <li>
-                      <SheetClose asChild>
-                        <Link
-                          href="/login"
-                          className="flex items-center px-4 py-2 rounded-md hover:bg-color-secondary transition-colors text-sm font-medium"
-                        >
-                          Login
-                        </Link>
-                      </SheetClose>
-                    </li>
-                  )}
-                </ul>
-              </nav>
-            </div>
-          </SheetContent>
-        </Sheet>
-
-        {/* Desktop Navigation */}
-        <ul className="justify-between hidden gap-2 text-sm lg:flex">
-          {isPending ? (
-            <li className="items-center justify-center hidden lg:flex">
-              <Skeleton className="w-24 h-9 rounded-md" />
-            </li>
-          ) : session?.user ? (
-            <li className="items-center justify-center hidden lg:flex">
-              <UserMenu
-                triggerRef={accountTriggerRef}
-                onEditProfile={() => {
-                  profileReturnFocusRef.current = accountTriggerRef.current;
-                  editProfileManager.open();
-                }}
-              />
-            </li>
+            Store
+          </Link>
+          {shopSections.map((section) => (
+            <NavLink
+              key={section.key}
+              href={section.href}
+              className="flex h-11 items-center rounded-pill px-4 text-sm hover:bg-card aria-[current=page]:bg-fg aria-[current=page]:text-bg"
+            >
+              {section.label}
+            </NavLink>
+          ))}
+          <button
+            type="button"
+            aria-label="Search"
+            aria-keyshortcuts="Meta+K /"
+            onClick={() => openSearch()}
+            className={iconButton}
+          >
+            <SearchIcon />
+          </button>
+          <NavLink
+            href="/wishlist"
+            aria-label="Wishlist"
+            className={cn(iconButton, "aria-[current=page]:bg-fg aria-[current=page]:text-bg")}
+          >
+            <HeartIcon />
+          </NavLink>
+          {session?.user ? (
+            <UserMenu
+              triggerRef={accountTriggerRef}
+              onEditProfile={() => {
+                profileReturnFocusRef.current = accountTriggerRef.current;
+                editProfileManager.open();
+              }}
+            />
           ) : (
-            <li className="flex items-center justify-center">
-              <Link
-                href="/login"
-                className="w-24 h-9 text-sm flex items-center justify-center text-color-secondary transition-colors hover:text-white font-medium"
-              >
-                Login
-              </Link>
-            </li>
+            <Link
+              href="/login"
+              aria-label="Account"
+              className={iconButton}
+            >
+              <UserIcon />
+            </Link>
           )}
-          <li>
-            <LinksDesktop />
-          </li>
-        </ul>
-
-        {/* Search Input */}
-        <SearchInput />
-
-        {/* Cart and Wishlist Buttons */}
-        <ul className="flex gap-2">
-          <li className="flex items-center justify-center">
-            <CartLink />
-          </li>
-          <li className="flex items-center justify-center">
-            <WishlistLink />
-          </li>
-        </ul>
+          <ThemeToggle />
+          <BagLink opensDrawer className="h-11 px-[18px] text-sm" />
+        </nav>
       </header>
+
+      {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between bg-bg pl-4 pr-2 lg:hidden">
+        <Link
+          href="/"
+          className="font-display text-[26px] font-extrabold leading-none"
+        >
+          Store
+        </Link>
+        <div className="flex items-center gap-0.5">
+          <ThemeToggle />
+          <button
+            type="button"
+            aria-label="Search"
+            aria-keyshortcuts="Meta+K /"
+            onClick={() => openSearch()}
+            className={iconButton}
+          >
+            <SearchIcon />
+          </button>
+          <BagLink className="mx-1 h-10 px-3.5 text-13" />
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                ref={mobileMenuTriggerRef}
+                type="button"
+                aria-label="Open navigation menu"
+                className={iconButton}
+              >
+                <MenuIcon />
+              </button>
+            </SheetTrigger>
+            <MobileMenu
+              sectionSummaries={sectionSummaries}
+              onEditProfile={() => {
+                skipMobileMenuCloseAutoFocusRef.current = true;
+                profileReturnFocusRef.current = mobileMenuTriggerRef.current;
+              }}
+              onSearch={() => {
+                searchAfterMenuCloseRef.current = true;
+              }}
+              onCloseAutoFocus={(event) => {
+                if (searchAfterMenuCloseRef.current) {
+                  // The menu button takes focus back first, so closing the
+                  // search returns there.
+                  searchAfterMenuCloseRef.current = false;
+                  queueMicrotask(() => openSearch());
+                  return;
+                }
+                if (!skipMobileMenuCloseAutoFocusRef.current) return;
+                event.preventDefault();
+                skipMobileMenuCloseAutoFocusRef.current = false;
+                queueMicrotask(editProfileManager.open);
+              }}
+            />
+          </Sheet>
+        </div>
+      </header>
+
+      <BagDrawer />
+      <SearchDialog catalog={searchCatalog} />
 
       <EditProfile
         manager={editProfileManager}

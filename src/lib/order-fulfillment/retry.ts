@@ -31,7 +31,7 @@ export class FulfillmentFailure extends Error {
   }
 }
 
-export type PermanentReconciliationFailureCode =
+type PermanentReconciliationFailureCode =
   | "durable_snapshot_corrupt"
   | "stripe_evidence_incomplete"
   | "stripe_evidence_mismatch"

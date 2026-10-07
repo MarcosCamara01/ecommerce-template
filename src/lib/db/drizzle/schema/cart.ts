@@ -70,14 +70,14 @@ export const selectCartItemSchema = createSelectSchema(cartItems, {
 });
 
 export const insertCartItemSchema = createInsertSchema(cartItems, {
-  quantity: z.number().int().positive("Quantity must be greater than 0"),
+  quantity: z.int32().positive("Quantity must be greater than 0"),
   stripeId: z.string().min(1, "Stripe ID is required"),
   size: ProductSizeZod,
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
 export const updateCartItemSchema = z.object({
-  id: z.number(),
-  quantity: z.number().int().positive("Quantity must be greater than 0"),
+  id: z.number().int().positive(),
+  quantity: z.int32().positive("Quantity must be greater than 0"),
 });
 
 export const addToCartSchema = insertCartItemSchema.omit({
@@ -88,7 +88,7 @@ export const addToCartSchema = insertCartItemSchema.omit({
 export const minimalCartItemSchema = z.object({
   variantId: z.number(),
   size: ProductSizeZod,
-  quantity: z.number().int().positive("Quantity must be greater than 0"),
+  quantity: z.int32().positive("Quantity must be greater than 0"),
   stripeId: z.string().min(1, "Stripe ID is required"),
 });
 

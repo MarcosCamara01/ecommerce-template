@@ -1,6 +1,6 @@
 // String and data formatters
 
-const euroCurrencyFormatter = new Intl.NumberFormat("es-ES", {
+const euroCurrencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "EUR",
 });
@@ -17,7 +17,7 @@ export function formatPriceFromMinorUnits(
   amount: number,
   currency: string,
 ): string {
-  const formatter = new Intl.NumberFormat("es-ES", {
+  const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency.toUpperCase(),
   });

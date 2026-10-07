@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
           .array()
           .parse(await wishlist.listWithDetails())
       : selectWishlistItemSchema.array().parse(await wishlist.list());
-    return NextResponse.json({ items });
+    // One shopper's wishlist: no cache may keep it.
+    return NextResponse.json({ items }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     return wishlistRouteError(error);
   }

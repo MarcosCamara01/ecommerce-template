@@ -7,42 +7,42 @@ import {
 
 export const ProductInfo = () => {
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full border-t border-line">
       <AccordionItem value="item-1">
-        <AccordionTrigger headingLevel={2} className="text-sm">
-          COMPOSITION
+        <AccordionTrigger headingLevel={2}>
+          Composition
         </AccordionTrigger>
         <AccordionContent>
           <p>
-            We work with monitoring programmes to ensure compliance with our
+            We work with monitoring programs to ensure compliance with our
             social, environmental and health and safety standards for our
-            products. To assess compliance, we have developed a programme of
+            products. To assess compliance, we have developed a program of
             audits and continuous improvement plans.
           </p>
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-2">
-        <AccordionTrigger headingLevel={2} className="text-sm">
-          CARE
+        <AccordionTrigger headingLevel={2}>
+          Care
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-2">
           <p> Caring for your clothes is caring for the environment.</p>
           <p>
             Lower temperature washes and delicate spin cycles are gentler on
-            garments and help to protect the colour, shape and structure of the
+            garments and help to protect the color, shape and structure of the
             fabric. Furthermore, they reduce the amount of energy used in care
             processes.
           </p>
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-3">
-        <AccordionTrigger headingLevel={2} className="text-sm">
-          ORIGIN
+        <AccordionTrigger headingLevel={2}>
+          Origin
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-2">
           <p>
             We work with our suppliers, workers, unions and international
-            organisations to develop a supply chain in which human rights are
+            organizations to develop a supply chain in which human rights are
             respected and promoted, contributing to the United Nations
             Sustainable Development Goals.
           </p>

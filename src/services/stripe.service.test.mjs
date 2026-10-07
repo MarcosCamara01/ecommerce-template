@@ -154,6 +154,34 @@ test("paid checkout exposes durable fulfillment state instead of immediate succe
   }
 });
 
+test("completed delayed payments are pending until Stripe confirms success or failure", async () => {
+  for (const [paymentIntent, status] of [
+    [{ status: "processing" }, "pending"],
+    [null, "pending"],
+    ["pi_not_expanded", "pending"],
+    [{ status: "requires_payment_method" }, "failed"],
+    [{ status: "canceled" }, "canceled"],
+  ]) {
+    const session = {
+      id: "cs_delayed",
+      status: "complete",
+      payment_status: "unpaid",
+      payment_intent: paymentIntent,
+    };
+    const service = loadServiceHarness(createFakeStripe(), { session });
+
+    assert.deepEqual(await service.fetchCheckoutData(session.id), { status, session });
+  }
+});
+
+test("open and expired checkout sessions keep their own states", async () => {
+  for (const [sessionStatus, status] of [["open", "pending"], ["expired", "expired"]]) {
+    const session = { id: "cs_unpaid", status: sessionStatus, payment_status: "unpaid" };
+    const service = loadServiceHarness(createFakeStripe(), { session });
+    assert.deepEqual(await service.fetchCheckoutData(session.id), { status, session });
+  }
+});
+
 function loadServiceHarness(fakeStripe, { session = null, outcome } = {}) {
   class StripeError extends Error {}
   const modules = {

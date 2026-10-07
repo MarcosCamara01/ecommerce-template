@@ -3,16 +3,17 @@ import type {
   ProductWithVariants,
   OrderProductWithDetails,
 } from "@/lib/db/drizzle/schema";
-import { GridProducts } from "@/components/products";
 import {
   OrderProduct,
   OrderSummary,
   OrderSummarySkeleton,
 } from "@/components/orders";
-import { HiArrowLeft } from "react-icons/hi";
-import Link from "next/link";
+import { buttonClass } from "@/components/ui/button-classes";
+import Link from "@/components/ui/link";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { orderStatusPresentation } from "@/lib/orders/status";
+import { cn } from "@/lib/utils";
 import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
 export async function generateMetadata() {
@@ -37,12 +38,30 @@ async function DynamicOrderContent({
 
 const OrderDetails = async ({ params }: Props) => {
   return (
-    <>
+    <section data-account-page="" className="flex flex-col gap-3.5 pb-24 pt-2 lg:pt-6">
+      <Link
+        href="/orders"
+        className="flex h-10 items-center gap-2 self-start text-sm"
+      >
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        >
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+        All orders
+      </Link>
       <h1 className="sr-only">Order details</h1>
-      <Suspense fallback={<OrderDetailsSkeleton items={6} />}>
+      <Suspense fallback={<OrderDetailsSkeleton items={3} />}>
         <DynamicOrderContent params={params} />
       </Suspense>
-    </>
+    </section>
   );
 };
 
@@ -52,18 +71,16 @@ const OrderProducts = async ({ id }: { id: string }) => {
 
   if (!order) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] gap-4">
-        <h2 className="text-2xl font-bold">Order Not Found</h2>
-        <p className="text-muted-foreground">
+      <div className="flex min-h-[50vh] flex-col items-start justify-center gap-4">
+        <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(120px,8.3vw)]">
+          Order not found
+        </h2>
+        <p className="max-w-[520px] text-muted">
           The order you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to
           it.
         </p>
-        <Link
-          href="/orders"
-          className="flex items-center gap-2 px-4 py-2 transition-colors rounded-lg bg-background-secondary hover:bg-background-tertiary"
-        >
-          <HiArrowLeft className="w-4 h-4" />
-          Back to Orders
+        <Link href="/orders" className={buttonClass()}>
+          Back to orders
         </Link>
       </div>
     );
@@ -108,58 +125,65 @@ const OrderProducts = async ({ id }: { id: string }) => {
     },
   );
 
-  return (
-    <div className="pt-8 pb-20">
-      {/* Main content */}
-      <div className="flex flex-col-reverse gap-8 lg:flex-row">
-        {/* Products */}
-        <div className="flex-1">
-          <h2 className="mb-6 text-2xl font-bold">Order Items</h2>
-          <GridProducts className="cart-ord-mobile">
-            {allProducts.map(({ orderProductId, product, size, quantity, unitAmount, currency, productName, variantColor, imageUrl, priority }) => (
-              <OrderProduct
-                key={orderProductId}
-                product={product}
-                size={size}
-                quantity={quantity}
-                unitAmount={unitAmount}
-                currency={currency}
-                productName={productName}
-                variantColor={variantColor}
-                imageUrl={imageUrl}
-                priority={priority}
-              />
-            ))}
-          </GridProducts>
-        </div>
+  const status = orderStatusPresentation(order.status);
+  const itemCount = allProducts.reduce((total, line) => total + line.quantity, 0);
 
-        {/* Order Summary Sidebar */}
-        <div className="lg:w-[400px] lg:sticky lg:top-8 h-fit">
+  return (
+    <>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <p className="font-display text-[76px] leading-[0.8] lg:text-[min(200px,14vw)]">
+          Order #{order.orderNumber}
+        </p>
+        <span
+          className={cn(
+            "flex h-9 items-center rounded-pill px-4 text-sm font-semibold",
+            status.className,
+          )}
+        >
+          {status.label}
+        </span>
+      </div>
+      <div className="grid items-start gap-5 pt-4 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-12">
+        <div className="lg:order-2 lg:sticky lg:top-[100px]">
           <OrderSummary order={order} />
         </div>
+        <div className="flex flex-col lg:order-1">
+          <h2 className="mb-1.5 text-lg font-semibold">Items · {itemCount}</h2>
+          {allProducts.map(({ orderProductId, product, size, quantity, unitAmount, currency, productName, variantColor, imageUrl, priority }) => (
+            <OrderProduct
+              key={orderProductId}
+              product={product}
+              size={size}
+              quantity={quantity}
+              unitAmount={unitAmount}
+              currency={currency}
+              productName={productName}
+              variantColor={variantColor}
+              imageUrl={imageUrl}
+              priority={priority}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
 const OrderDetailsSkeleton = ({ items }: { items: number }) => {
   return (
-    <div className="pt-8 pb-20 w-full">
-      {/* Main content */}
-      <div className="flex flex-col-reverse gap-8 lg:flex-row">
-        {/* Products */}
-        <div className="flex-1">
-          <h2 className="mb-6 text-2xl font-bold">Order Items</h2>
-          <GridProducts className="cart-ord-mobile">
-            {Array.from({ length: items }).map((_, index) => (
-              <Skeleton key={index} className="h-[300px] w-full" />
-            ))}
-          </GridProducts>
-        </div>
-
-        {/* Order Summary Sidebar */}
-        <div className="lg:w-[400px] lg:sticky lg:top-8 h-fit">
+    <div aria-busy="true" aria-label="Loading order" className="flex flex-col gap-5">
+      <Skeleton className="h-[min(160px,12vw)] min-h-16 w-2/3 rounded-photo" />
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-12">
+        <div className="lg:order-2">
           <OrderSummarySkeleton />
+        </div>
+        <div className="flex flex-col lg:order-1">
+          {Array.from({ length: items }).map((_, index) => (
+            <div key={index} className="grid grid-cols-[96px_1fr] gap-[18px] border-b border-line py-4 lg:grid-cols-[140px_1fr]">
+              <Skeleton className="aspect-[3/4] rounded-chip" />
+              <Skeleton className="h-5 w-2/3" />
+            </div>
+          ))}
         </div>
       </div>
     </div>

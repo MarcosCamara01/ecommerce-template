@@ -94,6 +94,17 @@ export async function fetchCheckoutData(sessionId: string): Promise<CheckoutResu
     }
     if (session.status === "expired") return { status: "expired", session };
     if (session.status === "open") return { status: "pending", session };
+    if (session.status === "complete" && session.payment_status === "unpaid") {
+      const paymentIntent = typeof session.payment_intent === "object"
+        ? session.payment_intent
+        : null;
+      const status = paymentIntent?.status === "canceled"
+        ? "canceled"
+        : paymentIntent?.status === "requires_payment_method"
+          ? "failed"
+          : "pending";
+      return { status, session };
+    }
     if (session.payment_status === "unpaid") return { status: "canceled", session };
     return { status: "failed", session };
   } catch (error) {
