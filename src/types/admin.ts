@@ -45,4 +45,3 @@ export interface ProductApiResponse {
   syncState?: string;
   retryable?: boolean;
 }
-

@@ -5,4 +5,3 @@ export const UpdateProfileSchema = z.object({
   email: z.email("Invalid email address").optional(),
   phone: z.string().optional(),
 });
-

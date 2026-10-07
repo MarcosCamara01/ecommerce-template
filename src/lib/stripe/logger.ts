@@ -147,5 +147,3 @@ export const stripeLogger = {
     });
   },
 };
-
-
