@@ -1,3 +1,5 @@
+import { randomBytes, randomInt } from "node:crypto";
+
 import { test as base } from "@e2e-dev/web";
 import type { Browser, Cookie } from "@e2e-dev/web";
 import { expect } from "e2e";
@@ -171,18 +173,17 @@ export async function pieceOnScreen(
 }
 
 /** An address nobody else in the run has: 10.x.y.z, picked at random. */
-const visitorAddress = () =>
-  `10.${[0, 0, 0].map(() => 1 + Math.floor(Math.random() * 254)).join(".")}`;
+const visitorAddress = () => `10.${[0, 0, 0].map(() => randomInt(1, 255)).join(".")}`;
 
 type Account = { name: string; email: string; password: string };
 
 /** A shopper nobody has seen before: every run signs up its own. */
 export const newAccount = (label: string): Account => {
-  const stamp = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  const stamp = `${Date.now().toString(36)}${randomBytes(3).toString("hex")}`;
   return {
     name: `E2E ${label}`,
     email: `e2e-${label}-${stamp}@example.test`,
-    password: `e2e-${stamp}-${Math.random().toString(36).slice(2, 12)}`,
+    password: `e2e-${randomBytes(16).toString("hex")}`,
   };
 };
 
