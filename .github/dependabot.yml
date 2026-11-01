@@ -23,8 +23,9 @@ updates:
         update-types:
           - minor
           - patch
+    # Major upgrades are planned by hand. Security updates still open PRs.
     ignore:
-      - dependency-name: tailwind-merge
+      - dependency-name: "*"
         update-types:
           - version-update:semver-major
 
