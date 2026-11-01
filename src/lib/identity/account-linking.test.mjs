@@ -40,13 +40,27 @@ test("OAuth cannot reclaim or rewrite an unverified credential account", () => {
 });
 
 test("every explicit provider-link create runs the configured account hook", async () => {
-  const [explicitLink, callback, withHooks] = await Promise.all([
-    readFile("node_modules/better-auth/dist/api/routes/account.mjs", "utf8"),
-    readFile("node_modules/better-auth/dist/api/routes/callback.mjs", "utf8"),
-    readFile("node_modules/better-auth/dist/db/with-hooks.mjs", "utf8"),
-  ]);
+  const [explicitLink, callback, oauthLinking, internalAdapter, withHooks] =
+    await Promise.all([
+      readFile("node_modules/better-auth/dist/api/routes/account.mjs", "utf8"),
+      readFile("node_modules/better-auth/dist/api/routes/callback.mjs", "utf8"),
+      readFile("node_modules/better-auth/dist/oauth2/link-account.mjs", "utf8"),
+      readFile("node_modules/better-auth/dist/db/internal-adapter.mjs", "utf8"),
+      readFile("node_modules/better-auth/dist/db/with-hooks.mjs", "utf8"),
+    ]);
   assert.match(explicitLink, /linkSocialAccount[\s\S]*?internalAdapter\.createAccount/);
-  assert.match(callback, /if \(link\)[\s\S]*?internalAdapter\.createAccount/);
+  assert.match(callback, /if \(link\)[\s\S]*?linkOAuthAccount\(c,/);
+  assert.match(
+    oauthLinking,
+    /async function linkOAuthAccount[\s\S]*?internalAdapter\.createAccount/,
+  );
+  for (const method of ["createAccount", "linkAccount"]) {
+    assert.match(
+      internalAdapter,
+      new RegExp(`${method}: async \\(account\\) => \\{\\s*return await createWithHooks\\([\\s\\S]*?"account"`),
+      `${method} must persist through the account hooks`,
+    );
+  }
   const beforeHook = withHooks.indexOf("hooks[model]?.create?.before");
   const hookCall = withHooks.indexOf("toRun(actualData, context)", beforeHook);
   const adapterCreate = withHooks.indexOf(
@@ -64,17 +78,12 @@ test("installed Better Auth keeps identical provider links on its native path", 
     "node_modules/better-auth/dist/oauth2/link-account.mjs",
     "utf8",
   );
-  const explicitCallback = await readFile(
-    "node_modules/better-auth/dist/api/routes/callback.mjs",
-    "utf8",
-  );
-
   assert.match(
     oauthLinking,
     /const linkedAccount =[\s\S]*?if \(!linkedAccount\) \{[\s\S]*?internalAdapter\.linkAccount/,
   );
   assert.match(
-    explicitCallback,
+    oauthLinking,
     /if \(existingAccount\) \{[\s\S]*?existingAccount\.userId[\s\S]*?\} else if \(!await c\.context\.internalAdapter\.createAccount/,
   );
 });

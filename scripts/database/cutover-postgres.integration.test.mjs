@@ -110,7 +110,7 @@ const EXPECTED_LEGACY_STATE = {
   accounts: [
     {
       id: "legacy-account",
-      accountId: "legacy-rehearsal@example.test",
+      accountId: "legacy-rehearsal-user",
       providerId: "credential",
       userId: "legacy-rehearsal-user",
       accessToken: "synthetic-access-token",

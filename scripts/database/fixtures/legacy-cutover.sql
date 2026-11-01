@@ -207,7 +207,7 @@ INSERT INTO public.account (
   scope, password, created_at, updated_at
 ) VALUES (
   'legacy-account',
-  'legacy-rehearsal@example.test',
+  'legacy-rehearsal-user',
   'credential',
   'legacy-rehearsal-user',
   'synthetic-access-token',

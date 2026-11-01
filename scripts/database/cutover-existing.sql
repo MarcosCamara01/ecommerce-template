@@ -750,6 +750,17 @@ BEGIN
       'OAuth account uniqueness cutover aborted: duplicate provider_id/account_id rows require explicit operator resolution';
   END IF;
 
+  -- Better Auth 1.7 only signs in a credential account whose account_id is the user id.
+  IF EXISTS (
+    SELECT 1
+    FROM app_private.account
+    WHERE provider_id = 'credential'
+      AND account_id <> user_id
+  ) THEN
+    RAISE EXCEPTION
+      'Credential account cutover aborted: credential rows whose account_id differs from user_id cannot sign in and require explicit operator resolution';
+  END IF;
+
   FOR expected_index IN
     SELECT * FROM (VALUES
       ('idx_account_user_id', 'account', ARRAY['user_id']::text[]),
