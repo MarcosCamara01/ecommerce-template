@@ -67,8 +67,9 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
           STRIPE_SECRET_KEY: ci-only-placeholder
           SUPABASE_SERVICE_ROLE_KEY: ci-only-placeholder
+      # Dev-only tooling fails on high and critical; production stays at low below.
       - name: Audit all dependencies
-        run: npm audit --audit-level=low
+        run: npm audit --audit-level=high
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=low
       - name: Validate dependency tree
