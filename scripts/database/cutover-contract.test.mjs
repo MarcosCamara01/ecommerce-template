@@ -163,6 +163,10 @@ test("fresh migrations and existing-database cutover enforce OAuth account uniqu
   );
   assert.match(
     cutover,
+    /provider_id = 'credential'\s+AND account_id <> user_id[\s\S]*?Credential account cutover aborted/i,
+  );
+  assert.match(
+    cutover,
     /expected_index\.index_name = 'idx_account_provider_account'/i,
   );
   assert.match(

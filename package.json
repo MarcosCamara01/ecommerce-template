@@ -99,7 +99,7 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "husky": "9.1.7",
     "portless": "^0.15.3",
-    "react-doctor": "0.9.21",
+    "react-doctor": "0.9.12",
     "supabase": "2.122.0",
     "tsx": "4.23.15",
     "typescript": "5.9.3"
