@@ -235,7 +235,6 @@ export function ProductForm({
         </Alert>
       )}
 
-      {/* Alert Message */}
       {state.message && (
         <Alert variant={state.success ? "success" : "destructive"}>
           {state.success ? (

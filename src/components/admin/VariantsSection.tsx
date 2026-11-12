@@ -65,10 +65,8 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
     const newIndex = direction === "up" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= variants.length) return;
     
-    // Capture current state before reordering
     const currentState = captureCurrentState();
-    
-    // Swap positions
+
     const newVariants = [...currentState];
     [newVariants[index], newVariants[newIndex]] = [newVariants[newIndex], newVariants[index]];
     setVariants(newVariants);

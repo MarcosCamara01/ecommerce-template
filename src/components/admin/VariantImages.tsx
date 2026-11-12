@@ -148,7 +148,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
 
   return (
     <div className="space-y-3 pb-2">
-      {/* Image Grid - Existing Images */}
       {existingImages.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
           {existingImages.map((imageUrl, index) => (
@@ -181,7 +180,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
         </div>
       )}
 
-      {/* Image Grid - New Images */}
       {newImages.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
           {newImages.map(({ key, preview }, index) => (
@@ -214,7 +212,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
         </div>
       )}
 
-      {/* Upload Area */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -267,7 +264,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
         </div>
       </div>
 
-      {/* Image Count */}
       {totalImages > 0 && (
         <p className="text-xs text-muted">
           {totalImages} image{totalImages !== 1 ? "s" : ""} total

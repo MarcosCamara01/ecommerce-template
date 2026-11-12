@@ -81,7 +81,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
               <span className="font-medium text-sm text-fg">Variant</span>
             </div>
             <div className="flex items-center gap-1">
-              {/* Move buttons */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -122,7 +121,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              {/* Delete button */}
               {canRemove && (
                 <TooltipProvider>
                   <Tooltip>
@@ -148,7 +146,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
           </div>
         </CardHeader>
         <CardContent className="space-y-4 px-[18px] pb-[18px] pt-0">
-          {/* Color */}
           <div className="space-y-2">
             <Label htmlFor={`color-${index}`} className="text-sm font-medium">
               Color
@@ -170,7 +167,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
             )}
           </div>
 
-          {/* Sizes and Images in Accordion */}
           <Accordion type="multiple" defaultValue={["sizes", "images"]} className="w-full">
             <AccordionItem value="sizes" className="rounded-field border border-line bg-panel px-4">
               <AccordionTrigger className="hover:no-underline">

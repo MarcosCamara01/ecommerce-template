@@ -4,13 +4,11 @@ import type {
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
 
-// Derived from Product schema
 export type BasicInfoData = Pick<
   Product,
   "name" | "description" | "price" | "category"
 >;
 
-// Derived from ProductVariant - form state representation
 export type VariantFormData = Pick<
   ProductVariant,
   "color" | "sizes" | "images"
@@ -18,7 +16,6 @@ export type VariantFormData = Pick<
   id?: ProductVariant["id"];
 };
 
-// Variant data for form submission, including UI image state.
 export interface VariantSubmitData {
   id?: ProductVariant["id"];
   color: ProductVariant["color"];
