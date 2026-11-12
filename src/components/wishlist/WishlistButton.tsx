@@ -1,17 +1,13 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-/** FUNCTIONALITY */
 import { useWishlist } from "@/hooks/wishlist";
 import { useThrottleFn } from "ahooks";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-/** ICONS */
 import { HeartIcon } from "@/components/icons";
-/** COMPONENTS */
 import { Skeleton } from "@/components/ui/skeleton";
-/** TYPES */
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { useWishlistMutation } from "@/hooks/wishlist/mutations/useWishlistMutation";
 

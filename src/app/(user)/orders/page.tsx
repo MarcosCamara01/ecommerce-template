@@ -15,10 +15,6 @@ export async function generateMetadata() {
   };
 }
 
-/**
- * Orders page with PPR: static shell + dynamic user content
- * The user check and orders content stream in via Suspense
- */
 const UserOrders = () => {
   return (
     <section data-account-page="" className="flex flex-col gap-5 pb-24">
@@ -89,10 +85,7 @@ async function Starters() {
   );
 }
 
-/**
- * Dynamic component that checks user and renders orders
- * This streams at request time (uses headers() via getUser)
- */
+// getPrincipal reads the request headers, so this part streams in at request time.
 const OrdersContent = async () => {
   const user = await getPrincipal();
 

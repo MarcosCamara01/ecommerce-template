@@ -23,7 +23,8 @@ export const useProductMutation = () => {
     mutationFn: updateProduct,
     onSuccess: () => {
       // Cart and wishlist details embed the full product and variant rows, so
-      // editing a product leaves them stale until they are invalidated.
+      // editing a product leaves them stale until they are invalidated. Each
+      // list key is a prefix of its details key, so one call covers both.
       if (!userId) return;
       void queryClient.invalidateQueries({
         queryKey: CART_QUERY_KEYS.cartList(userId),
@@ -38,14 +39,12 @@ export const useProductMutation = () => {
   });
 
   return {
-    // Create mutations
     create: create.mutate,
     createAsync: create.mutateAsync,
     isPending: create.isPending,
     isError: create.isError,
     isSuccess: create.isSuccess,
     error: create.error,
-    // Update mutations
     update: update.mutate,
     updateAsync: update.mutateAsync,
     isUpdatePending: update.isPending,

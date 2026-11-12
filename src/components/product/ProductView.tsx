@@ -48,7 +48,7 @@ const NAME_BUDGET_PX = 2 * NAME_STEPS[0].px * NAME_STEPS[0].leading;
 
 /**
  * Picking a variant swaps photos and sizes in place; the URL follows with
- * replaceState while the page keeps the selected light or dark theme.
+ * replaceState, so the page never navigates.
  */
 export function ProductView({
   product,

@@ -102,7 +102,6 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
         ))}
       </div>
 
-      {/* Desktop summary */}
       <aside
         aria-label="Order summary"
         className="sticky top-[100px] hidden flex-col gap-[18px] rounded-photo-lg border border-line bg-fg/5 p-6 lg:flex"
@@ -137,7 +136,6 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
         </p>
       </aside>
 
-      {/* Phone checkout bar */}
       <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-3 border-t border-line bg-bg px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-4 lg:hidden">
         <ColourBar items={items} className="h-2.5" />
         <div className="flex justify-between text-13 text-muted">

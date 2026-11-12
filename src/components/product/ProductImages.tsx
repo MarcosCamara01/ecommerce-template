@@ -6,7 +6,6 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { PhotoViewer } from "./PhotoViewer";
-/** TYPES */
 import type { Product, ProductVariant } from "@/lib/db/drizzle/schema";
 
 interface ProductImagesProps {
@@ -14,7 +13,7 @@ interface ProductImagesProps {
   selectedVariant: ProductVariant;
   /** Blur placeholders, available for the variant the page loaded with. */
   blurDataURLs: Record<string, string | null>;
-  /** Mobile overlay controls (back, theme, wishlist). */
+  /** Mobile overlay controls (back, wishlist). */
   overlay?: React.ReactNode;
   /** Fade the photos in: true after a colour change, not on first load. */
   fadeIn: boolean;

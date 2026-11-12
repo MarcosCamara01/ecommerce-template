@@ -1,10 +1,7 @@
-/** COMPONENTS */
 import Link from "@/components/ui/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { OrderSteps } from "./OrderSteps";
-/** TYPES */
 import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
-/** UTILS */
 import { format } from "date-fns";
 import { orderViewModel } from "@/lib/orders/view-model";
 import { formatPriceFromCents } from "@/utils/formatters";
@@ -13,7 +10,6 @@ interface OrderSummaryProps {
   order: OrderWithDetails;
 }
 
-/** Status, dates, totals and the delivery address for one order. */
 export function OrderSummary({ order }: OrderSummaryProps) {
   const { totalItems, totalPrice, delivery, orderDate, status } =
     orderViewModel(order);

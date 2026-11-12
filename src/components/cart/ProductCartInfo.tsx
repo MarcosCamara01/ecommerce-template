@@ -1,11 +1,9 @@
 "use client";
 
-/** FUNCTIONALITY */
 import { useThrottleFn } from "ahooks";
 import { useCartMutation } from "@/hooks/cart";
 import { RollingNumber } from "@/components/ui/rolling-number";
 import { cn } from "@/lib/utils";
-/** TYPES */
 import type { CartItem } from "@/lib/db/drizzle/schema";
 
 interface ProductCartInfoProps {

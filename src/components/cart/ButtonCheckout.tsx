@@ -1,12 +1,9 @@
 "use client";
 
-/** FUNCTIONALITY */
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth/client";
 import { useMutation } from "@tanstack/react-query";
-/** COMPONENTS */
 import LoadingButton from "@/components/ui/loadingButton";
-/** TYPES */
 import type { CartItem } from "@/lib/db/drizzle/schema";
 
 interface ButtonCheckoutProps {

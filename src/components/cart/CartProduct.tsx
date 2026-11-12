@@ -22,7 +22,6 @@ interface CartProductProps {
   variant: ProductVariant;
 }
 
-/** One bag line: photo, name, colour and size, stepper, remove, line total. */
 export const CartProduct = ({
   product,
   cartItemId,
