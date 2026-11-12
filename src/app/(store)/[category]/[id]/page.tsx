@@ -6,7 +6,7 @@ import { SingleProductSkeleton } from "@/components/product/SingleProductSkeleto
 import { SuspenseRandomProducts } from "@/components/product/RandomProducts";
 import { getProduct } from "@/app/actions";
 import { ProductCategoryZod } from "@/lib/db/drizzle/schema";
-import { pickFirst } from "@/utils/pickFirst";
+import { pickFirst } from "@/utils/pick-first";
 import { displayName } from "@/utils/product-name";
 import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 

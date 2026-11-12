@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { pickFirst } from "@/utils/pickFirst";
+import { pickFirst } from "@/utils/pick-first";
 import { searchProducts } from "@/utils/search";
 import { ProductItem } from "@/components/products/ProductItem";
 import { ProductsSkeleton } from "@/components/products/ProductsSkeleton";

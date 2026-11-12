@@ -9,7 +9,7 @@ import { useFlip } from "@/hooks/useFlip";
 import type { CartItemWithDetails } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
-import { ButtonCheckout } from "./ButtonCheckout";
+import { CheckoutButton } from "./CheckoutButton";
 import { CartProduct } from "./CartProduct";
 
 const LockIcon = () => (
@@ -124,13 +124,13 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
             <dd className="font-display-75 text-[44px] font-extrabold leading-none">{subtotal}</dd>
           </div>
         </dl>
-        <ButtonCheckout
+        <CheckoutButton
           cartItemIds={cartItemIds}
           icon={<LockIcon />}
           className="h-16 text-base"
         >
           Checkout securely
-        </ButtonCheckout>
+        </CheckoutButton>
         <p className="text-center text-xs text-muted">
           You&apos;ll pay on Stripe&apos;s secure page, then come back here.
         </p>
@@ -142,9 +142,9 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
           <span>Shipping</span>
           <span>{merchantPlaceholders.shipping}</span>
         </div>
-        <ButtonCheckout cartItemIds={cartItemIds} className="h-[60px] text-base">
+        <CheckoutButton cartItemIds={cartItemIds} className="h-[60px] text-base">
           Checkout securely · {subtotal}
-        </ButtonCheckout>
+        </CheckoutButton>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { getRandomProducts } from "@/app/actions";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { RailCard } from "../products/RailCard";
+import { RailCard } from "@/components/products/RailCard";
 
 // Four pieces share one row from the smallest desktop width (1024px) up;
 // a wider minimum left the fourth alone on a second row below 1232px.

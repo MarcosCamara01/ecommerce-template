@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 
 import { fitDisplaySize } from "../../../lib/display-type.ts";
-import { pickFirst } from "../../../utils/pickFirst.ts";
+import { pickFirst } from "../../../utils/pick-first.ts";
 
 const nativeRequire = createRequire(import.meta.url);
 const source = await readFile(new URL("./page.tsx", import.meta.url), "utf8");
@@ -17,7 +17,7 @@ test("long search queries keep a readable heading and reach search unchanged", a
   let searchedQuery;
   const modules = {
     "@/app/actions": { getAllProducts: async () => [] },
-    "@/utils/pickFirst": { pickFirst },
+    "@/utils/pick-first": { pickFirst },
     "@/utils/search": {
       searchProducts: (_, value) => { searchedQuery = value; return []; },
     },

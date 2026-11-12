@@ -12,7 +12,7 @@ import type {
 import { formatPriceFromEuros } from "@/utils/formatters";
 
 import { DeleteButton } from "./DeleteButton";
-import { ProductCartInfo } from "./ProductCartInfo";
+import { QuantityStepper } from "./QuantityStepper";
 
 interface CartProductProps {
   product: Product;
@@ -73,7 +73,7 @@ export const CartProduct = ({
         </div>
         <div className="flex items-center gap-3">
           <span className="lg:hidden">
-            <ProductCartInfo
+            <QuantityStepper
               cartItemId={cartItemId}
               quantity={quantity}
               productName={lineName}
@@ -81,7 +81,7 @@ export const CartProduct = ({
             />
           </span>
           <span className="max-lg:hidden">
-            <ProductCartInfo cartItemId={cartItemId} quantity={quantity} productName={lineName} />
+            <QuantityStepper cartItemId={cartItemId} quantity={quantity} productName={lineName} />
           </span>
           <span className="max-lg:hidden">
             <DeleteButton cartItemId={cartItemId} productName={lineName} />

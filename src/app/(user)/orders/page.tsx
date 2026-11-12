@@ -1,4 +1,4 @@
-import { getUserOrders } from "./action";
+import { getUserOrders } from "./actions";
 import { getAllProducts } from "@/app/actions";
 import { getPrincipal } from "@/lib/identity";
 import Link from "@/components/ui/link";

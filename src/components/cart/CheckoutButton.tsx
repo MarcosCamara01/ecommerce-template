@@ -6,19 +6,19 @@ import { useMutation } from "@tanstack/react-query";
 import LoadingButton from "@/components/ui/loadingButton";
 import type { CartItem } from "@/lib/db/drizzle/schema";
 
-interface ButtonCheckoutProps {
+interface CheckoutButtonProps {
   cartItemIds: CartItem["id"][];
   className?: string;
   children?: React.ReactNode;
   icon?: React.ReactNode;
 }
 
-export const ButtonCheckout = ({
+export const CheckoutButton = ({
   cartItemIds,
   className,
   children = "Checkout",
   icon,
-}: ButtonCheckoutProps) => {
+}: CheckoutButtonProps) => {
   const { data: session } = useSession();
 
   const { mutate: buyProducts, isPending } = useMutation({

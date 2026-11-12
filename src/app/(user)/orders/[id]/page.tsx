@@ -1,4 +1,4 @@
-import { getOrder } from "../action";
+import { getOrder } from "../actions";
 import type {
   ProductWithVariants,
   OrderProductWithDetails,
