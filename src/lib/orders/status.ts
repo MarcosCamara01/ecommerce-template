@@ -1,12 +1,4 @@
-const orderStatuses = [
-  "confirmed",
-  "processing",
-  "shipped",
-  "delivered",
-  "cancelled",
-] as const;
-
-type OrderStatus = (typeof orderStatuses)[number];
+import type { OrderStatus } from "../db/drizzle/schema/orders.ts";
 
 /** The four steps of the order progress bar, in order. */
 export const orderSteps = ["Confirmed", "Processing", "Shipped", "Delivered"] as const;
