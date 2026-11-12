@@ -11,8 +11,6 @@ import { retrieveOwnedCheckoutSession } from "@/lib/order-fulfillment/owned-chec
 import { stripe, Stripe } from "@/lib/stripe";
 import { stripeLogger } from "@/lib/stripe/logger";
 
-export { stripe };
-
 type StripeCustomerClient = Pick<typeof stripe, "customers">;
 
 export async function getOrCreateStripeCustomerWithClient(
@@ -68,7 +66,7 @@ export type CheckoutStatus =
   | "not_found"
   | "error";
 
-export interface CheckoutResult {
+interface CheckoutResult {
   status: CheckoutStatus;
   session?: Stripe.Checkout.Session;
   outcome?: CheckoutOutcome;
@@ -117,11 +115,4 @@ export async function fetchCheckoutData(sessionId: string): Promise<CheckoutResu
     stripeLogger.error("Error fetching checkout data", error);
     return { status: "error", error: "Could not verify payment state" };
   }
-}
-
-export async function handleExpiredSession(session: Stripe.Checkout.Session) {
-  stripeLogger.info("Checkout session expired", {
-    sessionId: session.id,
-    details: { userId: session.metadata?.userId, amount: session.amount_total },
-  });
 }
