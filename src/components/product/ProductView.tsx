@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { AddToCart } from "@/components/cart/AddToCart";
 import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { merchantPlaceholders } from "@/constants/merchant";
+import { PRODUCT_SIZES } from "@/constants/sizes";
 import type {
   ProductSize,
   ProductVariant,
@@ -19,12 +20,10 @@ import { formatPriceFromEuros } from "@/utils/formatters";
 import { ProductImages } from "./ProductImages";
 import { SizePicker } from "./SizePicker";
 
-const ALL_SIZES = 6;
-
 const stockLine = (variant: ProductVariant) =>
   variant.sizes.length === 0
     ? "Sold out"
-    : variant.sizes.length === ALL_SIZES
+    : variant.sizes.length === PRODUCT_SIZES.length
       ? "All sizes"
       : variant.sizes.join(" · ");
 
