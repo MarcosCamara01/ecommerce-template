@@ -8,7 +8,6 @@ import { restorableVariantIdsFromArchiveTarget } from "./catalog-archive";
 import type {
   ProductWithVariants,
   ProductCategory,
-  ProductVariant,
 } from "@/lib/db/drizzle/schema";
 
 export const productsRepository = {
@@ -82,29 +81,6 @@ export const productsRepository = {
       ...product,
       variants: product.variants.filter((variant) => allowed.has(variant.id)),
     };
-  },
-
-  async findVariantById(id: number): Promise<ProductVariant | null> {
-    const [result] = await db
-      .select({ variant: productsVariants })
-      .from(productsVariants)
-      .innerJoin(productsItems, eq(productsVariants.productId, productsItems.id))
-      .where(
-        and(
-          eq(productsVariants.id, id),
-          isNull(productsVariants.archivedAt),
-          isNull(productsItems.archivedAt),
-        ),
-      );
-
-    return result ? transformVariant(result.variant) : null;
-  },
-
-  async findVariantByIdIncludingArchived(id: number): Promise<ProductVariant | null> {
-    const result = await db.query.productsVariants.findFirst({
-      where: eq(productsVariants.id, id),
-    });
-    return result ? transformVariant(result) : null;
   },
 
   async findVariantWithProductByIdIncludingArchived(id: number) {

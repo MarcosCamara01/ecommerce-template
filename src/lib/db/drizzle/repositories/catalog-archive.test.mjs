@@ -134,7 +134,7 @@ test("public catalog paths hide archives while historical lookup retains them", 
 
   assert.match(source, /where:\s*isNull\(productsItems\.archivedAt\)/);
   assert.match(source, /where:\s*isNull\(productsVariants\.archivedAt\)/);
-  assert.match(source, /findVariantByIdIncludingArchived/);
+  assert.match(source, /findVariantWithProductByIdIncludingArchived/);
   assert.match(source, /archivedAt:\s*row\.archivedAt\?\.toISOString\(\)\s*\?\?\s*null/);
   assert.doesNotMatch(source, /\.delete\(productsVariants\)/);
   assert.doesNotMatch(source, /\.delete\(productsItems\)/);
@@ -207,7 +207,7 @@ test("catalog additions lock products first through the write transaction", asyn
   ]);
   const cartAdd = cartSource.slice(
     cartSource.indexOf("async upsertAvailable"),
-    cartSource.indexOf("async upsert(data"),
+    cartSource.indexOf("async updateQuantity"),
   );
   const wishlistAdd = wishlistSource.slice(
     wishlistSource.indexOf("async createAvailable"),

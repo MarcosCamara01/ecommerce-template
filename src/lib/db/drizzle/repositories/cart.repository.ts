@@ -136,10 +136,6 @@ export const cartRepository = {
     });
   },
 
-  async upsert(data: InsertCartItem): Promise<CartItem | null> {
-    return db.transaction((tx) => upsertInternal(tx, data));
-  },
-
   async updateQuantity(userId: string, id: number, quantity: number) {
     return updateQuantityInternal(db, userId, id, quantity);
   },
