@@ -11,8 +11,14 @@
   "project": [
     "src/**/*.{ts,tsx}",
     "scripts/**/*.{ts,mjs}",
-    "e2e.config.ts",
     "tests/**/*.ts"
   ],
-  "ignore": ["vendor/**", ".agents/**", ".claude/**"]
+  "ignoreDependencies": [
+    "agent-browser",
+    "emulate",
+    "eslint-plugin-react-hooks",
+    "portless",
+    "postcss",
+    "supabase"
+  ]
 }
