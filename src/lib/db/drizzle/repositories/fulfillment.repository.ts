@@ -446,9 +446,7 @@ export const fulfillmentRepository = {
     await db.transaction(async (tx) => {
       const [claimed] = await tx
         .update(fulfillmentEffects)
-        .set({
-          ...releasedTransitionValues(fulfillmentTransitions.succeed.to),
-        })
+        .set(releasedTransitionValues(fulfillmentTransitions.succeed.to))
         .where(
           leasedProcessingPredicate({
             idColumn: fulfillmentEffects.id,

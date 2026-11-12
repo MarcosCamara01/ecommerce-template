@@ -136,8 +136,17 @@ export const cartRepository = {
     });
   },
 
-  async updateQuantity(userId: string, id: number, quantity: number) {
-    return updateQuantityInternal(db, userId, id, quantity);
+  async updateQuantity(
+    userId: string,
+    id: number,
+    quantity: number,
+  ): Promise<CartItem | null> {
+    const [result] = await db
+      .update(cartItems)
+      .set({ quantity, updatedAt: new Date() })
+      .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
+      .returning();
+    return result ? transformCartItem(result) : null;
   },
 
   async delete(userId: string, id: number): Promise<boolean> {
@@ -151,7 +160,6 @@ export const cartRepository = {
   async clearByUserId(userId: string): Promise<void> {
     await db.delete(cartItems).where(eq(cartItems.userId, userId));
   },
-
 };
 
 export async function consumePurchasedInTransaction(
@@ -216,22 +224,6 @@ async function upsertInternal(
         updatedAt: new Date(),
       },
     })
-    .returning();
-  return result ? transformCartItem(result) : null;
-}
-
-type QueryExecutor = Pick<DatabaseTransaction, "update">;
-
-async function updateQuantityInternal(
-  executor: QueryExecutor,
-  userId: string,
-  id: number,
-  quantity: number,
-): Promise<CartItem | null> {
-  const [result] = await executor
-    .update(cartItems)
-    .set({ quantity, updatedAt: new Date() })
-    .where(and(eq(cartItems.id, id), eq(cartItems.userId, userId)))
     .returning();
   return result ? transformCartItem(result) : null;
 }
