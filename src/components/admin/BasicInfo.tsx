@@ -33,7 +33,7 @@ export type BasicInfoRef = {
   reset: () => void;
 };
 
-export interface BasicInfoInitialData {
+interface BasicInfoInitialData {
   name?: string;
   description?: string;
   price?: number;

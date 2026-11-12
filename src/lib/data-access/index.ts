@@ -188,7 +188,7 @@ export const dataAccess = {
   forFulfillmentOperator,
 };
 
-export type UserDataAccess = {
+type UserDataAccess = {
   checkout: {
     createIntent: (
       items: import("@/lib/db/drizzle/schema").CheckoutIntentItem[],

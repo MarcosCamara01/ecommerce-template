@@ -5,12 +5,6 @@ import {
   catalogImageFileErrors,
 } from "./image-file-contract.ts";
 
-export {
-  CATALOG_IMAGE_ALLOWED_MIME_TYPES,
-  CATALOG_IMAGE_BATCH_MAX_BYTES,
-  CATALOG_IMAGE_MAX_BYTES,
-} from "./image-file-contract.ts";
-
 export const CATALOG_PRODUCT_NAME_MAX_LENGTH = 255;
 export const CATALOG_PRODUCT_DESCRIPTION_MAX_LENGTH = 10_000;
 export const CATALOG_VARIANT_COLOR_MAX_LENGTH = 100;
