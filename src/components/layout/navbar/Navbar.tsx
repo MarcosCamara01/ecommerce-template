@@ -12,7 +12,7 @@ import { NavLink } from "./NavLink";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
 import { useSession } from "@/lib/auth/client";
-import { useManager } from "@/hooks/useManager";
+import { useDisclosure } from "@/hooks/useDisclosure";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { shopSections } from "@/constants/navigation";
@@ -38,7 +38,7 @@ export const Navbar = ({
   const { data: session } = useSession();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const editProfileManager = useManager();
+  const editProfileManager = useDisclosure();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
   const profileReturnFocusRef = useRef<HTMLElement | null>(null);
