@@ -119,25 +119,6 @@ const OrdersContent = async () => {
 const Orders = async () => {
   const orders = await getUserOrders();
 
-  if (!orders) {
-    return (
-      <OrdersMessage
-        title="Error loading orders"
-        body="There was a problem loading your orders. Please make sure the database tables are created."
-        actions={
-          <>
-            <Link href="/orders" className={buttonClass()}>
-              Retry
-            </Link>
-            <Link href="/" className={buttonClass({ variant: "secondary" })}>
-              Go home
-            </Link>
-          </>
-        }
-      />
-    );
-  }
-
   if (orders.length === 0) {
     return (
       <OrdersMessage

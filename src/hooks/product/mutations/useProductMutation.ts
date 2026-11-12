@@ -39,17 +39,9 @@ export const useProductMutation = () => {
   });
 
   return {
-    create: create.mutate,
     createAsync: create.mutateAsync,
     isPending: create.isPending,
-    isError: create.isError,
-    isSuccess: create.isSuccess,
-    error: create.error,
-    update: update.mutate,
     updateAsync: update.mutateAsync,
     isUpdatePending: update.isPending,
-    isUpdateError: update.isError,
-    isUpdateSuccess: update.isSuccess,
-    updateError: update.error,
   };
 };

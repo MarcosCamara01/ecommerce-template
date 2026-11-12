@@ -10,13 +10,7 @@ import { PieceTile } from "./PieceTile";
  * A plain product card for rails ("Wear it with", "Goes with"): 24px photo
  * tile, name and price below. The hover lives in PieceTile.
  */
-export function RailCard({
-  product,
-  sizes = "(max-width: 1023px) 50vw, 25vw",
-}: {
-  product: ProductWithVariants;
-  sizes?: string;
-}) {
+export function RailCard({ product }: { product: ProductWithVariants }) {
   const variant = product.variants[0];
   const href = variant
     ? `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`
@@ -29,7 +23,7 @@ export function RailCard({
         variant={variant}
         href={href}
         src={variant?.images[0] ?? product.img}
-        sizes={sizes}
+        sizes="(max-width: 1023px) 50vw, 25vw"
       />
       <Link href={href} className="flex justify-between gap-3 px-1">
         <span className="font-medium">{displayName(product.name)}</span>

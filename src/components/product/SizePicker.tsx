@@ -4,8 +4,6 @@ import { PRODUCT_SIZES } from "@/constants/sizes";
 import type { ProductSize } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 
-const SIZES = PRODUCT_SIZES;
-
 /**
  * Equal pills (the full run by default); one ink capsule slides to the
  * selected size (transform 220ms ease-in-out, no bounce). Sizes the variant
@@ -16,7 +14,7 @@ export function SizePicker({
   value,
   onChange,
   compact = false,
-  options = SIZES,
+  options = PRODUCT_SIZES,
 }: {
   available: readonly ProductSize[];
   value: ProductSize | undefined;

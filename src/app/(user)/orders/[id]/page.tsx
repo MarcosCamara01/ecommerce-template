@@ -24,7 +24,6 @@ export async function generateMetadata() {
 
 interface Props {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 async function DynamicOrderContent({
@@ -93,8 +92,6 @@ const OrderProducts = async ({ id }: { id: string }) => {
 
       const productWithVariants: ProductWithVariants = {
         ...product,
-        // Show the bought variant image (like in the cart)
-        img: variant.images[0] ?? product.img,
         variants: [
           {
             id: variant.id,
