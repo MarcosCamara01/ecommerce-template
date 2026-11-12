@@ -8,7 +8,7 @@ description: Configure email verification, implement password reset flows, set p
 1. Enable email/password: `emailAndPassword: { enabled: true }`
 2. Configure `emailVerification.sendVerificationEmail`
 3. Add `sendResetPassword` for password reset flows
-4. Run `npx @better-auth/cli@latest migrate`
+4. Run `npx auth@latest migrate`
 5. Verify: attempt sign-up and confirm verification email triggers
 
 ---
