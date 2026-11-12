@@ -5,7 +5,7 @@ import Link from "@/components/ui/link";
 import { useEffect, useRef, useState } from "react";
 
 import { AddToCart } from "@/components/cart/AddToCart";
-import WishlistButton from "@/components/wishlist/WishlistButton";
+import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { merchantPlaceholders } from "@/constants/merchant";
 import type {
   ProductSize,

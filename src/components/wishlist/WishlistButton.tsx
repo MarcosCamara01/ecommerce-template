@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { useWishlist } from "@/hooks/wishlist";
+import { useWishlist, useWishlistMutation } from "@/hooks/wishlist";
 import { useThrottleFn } from "ahooks";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth/client";
@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { HeartIcon } from "@/components/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
-import { useWishlistMutation } from "@/hooks/wishlist/mutations/useWishlistMutation";
 
 /**
  * - `disc`: white disc on a product photo (cards, mobile gallery).
@@ -35,7 +34,7 @@ const subscribeToHydration = () => () => undefined;
 
 const SPARK_ANGLES = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => (Math.PI * 2 * i) / 8);
 
-const WishlistButton = ({
+export const WishlistButton = ({
   productId,
   productName,
   appearance = "disc",
@@ -160,5 +159,3 @@ const WishlistButton = ({
     </span>
   );
 };
-
-export default WishlistButton;

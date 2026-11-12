@@ -15,7 +15,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { ProductSize, ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
-import WishlistButton from "./WishlistButton";
+import { WishlistButton } from "./WishlistButton";
 
 /** A saved piece with quick add: pick a size, add it to the bag. */
 function SavedPiece({ product }: { product: ProductWithVariants }) {
