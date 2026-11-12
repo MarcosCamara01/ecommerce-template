@@ -16,6 +16,7 @@ import { createCatalogSyncEngine } from "./engine";
 import {
   CatalogSyncError,
   type CatalogSyncState,
+  type CatalogSyncStripeResult,
 } from "./model";
 import { applyCatalogSyncToStripe } from "./stripe-operations";
 import { isCatalogPreparationComplete } from "./preparation-state";
@@ -71,7 +72,7 @@ export function createCatalogSyncManager(principal: UserPrincipal) {
     replay: (
       id: string,
       reason: string,
-      reconciledStripeResult?: import("./model").CatalogSyncStripeResult,
+      reconciledStripeResult?: CatalogSyncStripeResult,
     ) => catalogSyncRepository.replay(
       id,
       principal.userId,

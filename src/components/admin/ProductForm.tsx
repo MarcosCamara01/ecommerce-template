@@ -178,7 +178,7 @@ export function ProductForm({
       if (result.success && result.data && onSuccess) {
         onSuccess(result.data);
       }
-    } catch (error) {
+    } catch {
       setState({
         success: false,
         message: "An unexpected error occurred",

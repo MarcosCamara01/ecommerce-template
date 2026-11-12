@@ -101,21 +101,16 @@ export type CatalogSyncOperationRecord = {
   completedAt: Date | null;
 };
 
-export class CatalogSyncError extends Error {
-  readonly code:
-    | "not_found"
-    | "conflict"
-    | "invalid_target"
-    | "reconciliation_required";
+type CatalogSyncErrorCode =
+  | "not_found"
+  | "conflict"
+  | "invalid_target"
+  | "reconciliation_required";
 
-  constructor(
-    code:
-      | "not_found"
-      | "conflict"
-      | "invalid_target"
-      | "reconciliation_required",
-    message: string,
-  ) {
+export class CatalogSyncError extends Error {
+  readonly code: CatalogSyncErrorCode;
+
+  constructor(code: CatalogSyncErrorCode, message: string) {
     super(message);
     this.code = code;
     this.name = "CatalogSyncError";

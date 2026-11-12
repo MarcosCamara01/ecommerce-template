@@ -17,10 +17,7 @@ interface EditProductPageProps {
 async function DynamicEditProductContent({
   params,
   searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ restore?: string }>;
-}) {
+}: EditProductPageProps) {
   const { id } = await params;
   const { restore } = await searchParams;
   const productId = parsePositiveIntegerId(id);

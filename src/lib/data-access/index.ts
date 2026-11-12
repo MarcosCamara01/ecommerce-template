@@ -9,6 +9,7 @@ import {
 } from "@/lib/identity";
 import type {
   AddToCartInput,
+  CheckoutIntentItem,
   ProductCategory,
   ProductSize,
 } from "@/lib/db/drizzle/schema";
@@ -191,7 +192,7 @@ export const dataAccess = {
 type UserDataAccess = {
   checkout: {
     createIntent: (
-      items: import("@/lib/db/drizzle/schema").CheckoutIntentItem[],
+      items: CheckoutIntentItem[],
     ) => ReturnType<typeof checkoutRepository.create>;
     bindIntent: (
       intentId: string,
