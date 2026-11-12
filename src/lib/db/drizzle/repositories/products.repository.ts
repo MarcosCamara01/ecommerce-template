@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, desc, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, desc, isNotNull, isNull } from "drizzle-orm";
 import { db } from "../connection";
 import { catalogSyncOperations } from "../schema/catalog-sync";
 import { productsItems, productsVariants } from "../schema/products";
@@ -105,30 +105,6 @@ export const productsRepository = {
       ),
       with: { variants: { where: isNull(productsVariants.archivedAt) } },
       orderBy: [desc(productsItems.createdAt)],
-    });
-
-    return result.map(transformProduct);
-  },
-
-  async search(query: string): Promise<ProductWithVariants[]> {
-    const result = await db.query.productsItems.findMany({
-      where: and(
-        sql`${productsItems.name} ILIKE ${"%" + query + "%"}`,
-        isNull(productsItems.archivedAt),
-      ),
-      with: { variants: { where: isNull(productsVariants.archivedAt) } },
-      orderBy: [desc(productsItems.createdAt)],
-    });
-
-    return result.map(transformProduct);
-  },
-
-  async findRandom(limit: number = 4): Promise<ProductWithVariants[]> {
-    const result = await db.query.productsItems.findMany({
-      where: isNull(productsItems.archivedAt),
-      with: { variants: { where: isNull(productsVariants.archivedAt) } },
-      orderBy: sql`RANDOM()`,
-      limit,
     });
 
     return result.map(transformProduct);

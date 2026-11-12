@@ -20,9 +20,15 @@ function loadPage() {
     "next/navigation": { notFound: () => { throw new Error("NOT_FOUND"); } },
     "@/components/admin": { EditProductForm: "edit-product-form" },
     "@/lib/identity": { requireCapability: async () => ({ kind: "user" }) },
-    "@/services/products.service": {
-      getProductByIdForManager: readProduct,
-      getArchivedProductForRestoration: readProduct,
+    "@/lib/data-access": {
+      dataAccess: {
+        forCatalogManager: () => ({
+          catalog: {
+            findEditableById: (id) => readProduct(null, id),
+            findArchivedByIdForRestoration: (id) => readProduct(null, id),
+          },
+        }),
+      },
     },
     "@/components/ui/skeleton": { Skeleton: "skeleton" },
     "@/lib/routing/positive-integer-id": { parsePositiveIntegerId },
