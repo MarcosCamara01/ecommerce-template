@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useProductMutation } from "@/hooks/product/mutations/useProductMutation";
 import { Button } from "@/components/ui/button";
-import LoadingButton from "@/components/ui/loadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FiArchive, FiCheck, FiX } from "react-icons/fi";
 import { BasicInfo, type BasicInfoRef } from "./BasicInfo";

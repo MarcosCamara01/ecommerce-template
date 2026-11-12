@@ -4,7 +4,7 @@ import { forwardRef } from "react";
 type SpinnerProps = React.ComponentPropsWithoutRef<"span">;
 
 /** Ring spinner from CStates. */
-export const SVGLoadingIcon = forwardRef<React.ElementRef<"span">, SpinnerProps>(
+export const Spinner = forwardRef<React.ElementRef<"span">, SpinnerProps>(
   ({ className, ...props }, ref) => {
     return (
       <span
@@ -20,4 +20,4 @@ export const SVGLoadingIcon = forwardRef<React.ElementRef<"span">, SpinnerProps>
   },
 );
 
-SVGLoadingIcon.displayName = "SVGLoadingIcon";
+Spinner.displayName = "Spinner";

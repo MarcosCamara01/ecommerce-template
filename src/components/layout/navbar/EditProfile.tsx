@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import LoadingButton from "@/components/ui/loadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import type { Disclosure } from "@/hooks/useDisclosure";
 import { useSession } from "@/lib/auth/client";
 

@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { ButtonProps, Button } from "@/components/ui/button";
-import { SVGLoadingIcon } from "./loader";
+import { Spinner } from "./loader";
 
 type LoadingButtonProps = ButtonProps & {
   loading: boolean;
@@ -17,7 +17,7 @@ const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
         aria-busy={loading || undefined}
         disabled={Boolean(props.disabled || loading)}
       >
-        {loading ? <SVGLoadingIcon /> : icon || null}
+        {loading ? <Spinner /> : icon || null}
         <span>{children}</span>
       </Button>
     );

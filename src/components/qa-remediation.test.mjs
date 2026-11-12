@@ -31,7 +31,7 @@ test("cart actions stay disabled until client hydration", async () => {
 
 test("icon-only controls expose accessible names and sheet descriptions", async () => {
   const [password, navbar, mobileMenu, variant] = await Promise.all([
-    source("src/components/ui/form/PasswordInput.tsx"),
+    source("src/components/ui/password-input.tsx"),
     source("src/components/layout/navbar/Navbar.tsx"),
     source("src/components/layout/navbar/MobileMenu.tsx"),
     source("src/components/admin/VariantForm.tsx"),

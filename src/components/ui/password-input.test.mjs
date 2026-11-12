@@ -7,9 +7,9 @@ import { tsImport } from "tsx/esm/api";
 import ts from "typescript";
 
 const require = createRequire(import.meta.url);
-const group = await tsImport("../input-group.tsx", import.meta.url);
-const utils = await tsImport("../../../lib/utils.ts", import.meta.url);
-const source = readFileSync(new URL("./PasswordInput.tsx", import.meta.url), "utf8");
+const group = await tsImport("./input-group.tsx", import.meta.url);
+const utils = await tsImport("../../lib/utils.ts", import.meta.url);
+const source = readFileSync(new URL("./password-input.tsx", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
     jsx: ts.JsxEmit.ReactJSX,

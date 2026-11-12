@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { bumpBag, openBag } from "@/components/bag/bag-ui";
 import { flyToBag } from "@/components/bag/fly-to-bag";
-import { SVGLoadingIcon } from "@/components/ui/loader";
+import { Spinner } from "@/components/ui/loader";
 import { useCartMutation } from "@/hooks/cart";
 import type {
   ProductSize,
@@ -126,7 +126,7 @@ export function QuickAdd({
             className="grid translate-y-1.5 place-items-center opacity-0 transition-[transform,opacity] duration-300 ease-out group-has-[:focus-visible]/piece:translate-y-0 group-has-[:focus-visible]/piece:opacity-100 group-hover/piece:translate-y-0 group-hover/piece:opacity-100 group-hover/piece:[transition-delay:calc(110ms_+_var(--i)_*_30ms)] motion-reduce:translate-y-0"
           >
             {pending === size ? (
-              <SVGLoadingIcon className="size-3.5" />
+              <Spinner className="size-3.5" />
             ) : done === size ? (
               "✓"
             ) : (

@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth/client";
 import { useMutation } from "@tanstack/react-query";
-import LoadingButton from "@/components/ui/loadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import type { CartItem } from "@/lib/db/drizzle/schema";
 
 interface CheckoutButtonProps {

@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import LoadingButton from "@/components/ui/loadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import { CART_QUERY_KEYS } from "@/hooks/cart/keys";
 import { archiveProduct } from "@/hooks/product/mutations/productMutations";
 import { WISHLIST_QUERY_KEYS } from "@/hooks/wishlist/keys";
