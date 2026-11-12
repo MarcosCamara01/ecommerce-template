@@ -5,7 +5,6 @@ import Link from "@/components/ui/link";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 import { useHydrated } from "@/hooks/useHydrated";
 import { useSession } from "@/lib/auth/client";
-import { cn } from "@/lib/utils";
 
 /** Asks the navigation to open the Edit profile dialog (it owns it). */
 export const EDIT_PROFILE_EVENT = "store:edit-profile";
@@ -61,7 +60,7 @@ export function AccountNav({ current }: { current: "orders" | "wishlist" }) {
       <button
         type="button"
         onClick={() => signOut.mutate()}
-        className={cn(pill)}
+        className={pill}
       >
         Log out
       </button>
