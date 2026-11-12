@@ -185,8 +185,8 @@ export async function consumePurchasedInTransaction(
     if (currentQuantity === undefined) continue;
     const remaining = remainingCartQuantity(currentQuantity, purchase.quantity);
     if (remaining === null) {
-      // Inside db.transaction: concurrent statements on one Postgres connection
-      // are not safe, so these stay sequential.
+      // Sequential by choice. postgres.js could pipeline these writes inside
+      // the transaction.
       // react-doctor-disable-next-line react-doctor/async-await-in-loop
       await tx
         .delete(cartItems)
