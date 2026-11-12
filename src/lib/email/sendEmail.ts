@@ -5,8 +5,6 @@ import type { OrderEmailDelivery } from "@/lib/order-fulfillment/email-effect";
 
 import { escapeHtml, getContactEmailAddress, sendMail } from "./mailer";
 
-type OrderDetails = OrderWithDetails;
-
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "EUR",
@@ -24,7 +22,7 @@ function formatOrderDate(date: string) {
   });
 }
 
-function formatAddress(address: OrderDetails["customerInfo"]["address"]) {
+function formatAddress(address: OrderWithDetails["customerInfo"]["address"]) {
   return [
     address.line1,
     address.line2,
@@ -37,7 +35,7 @@ function formatAddress(address: OrderDetails["customerInfo"]["address"]) {
     .join(", ");
 }
 
-function formatOrderEmail(orderDetails: OrderDetails): string {
+function formatOrderEmail(orderDetails: OrderWithDetails): string {
   const totalPrice = formatCurrency(orderDetails.customerInfo.totalPrice / 100);
   const deliveryDate = formatOrderDate(orderDetails.deliveryDate);
 
@@ -119,7 +117,7 @@ function formatOrderEmail(orderDetails: OrderDetails): string {
   `;
 }
 
-function formatOwnerEmail(orderDetails: OrderDetails): string {
+function formatOwnerEmail(orderDetails: OrderWithDetails): string {
   const productsCount = orderDetails.orderProducts.reduce(
     (sum, item) => sum + item.quantity,
     0,
@@ -157,7 +155,7 @@ function formatOwnerEmail(orderDetails: OrderDetails): string {
   `;
 }
 
-async function sendCustomerEmail(orderDetails: OrderDetails, messageId: string) {
+async function sendCustomerEmail(orderDetails: OrderWithDetails, messageId: string) {
   if (!orderDetails.customerInfo.email) {
     console.warn("Skipping customer email: missing customer email address");
     return;
@@ -171,7 +169,7 @@ async function sendCustomerEmail(orderDetails: OrderDetails, messageId: string) 
   });
 }
 
-async function sendOwnerEmail(orderDetails: OrderDetails, messageId: string) {
+async function sendOwnerEmail(orderDetails: OrderWithDetails, messageId: string) {
   await sendMail({
     to: getContactEmailAddress(),
     subject: `New Order #${orderDetails.orderNumber}`,
@@ -189,7 +187,7 @@ async function sendOwnerEmail(orderDetails: OrderDetails, messageId: string) {
  * effect completion can cause this same message to be retried.
  */
 export const sendEmail = async (
-  orderDetails: OrderDetails,
+  orderDetails: OrderWithDetails,
   delivery: OrderEmailDelivery,
   idempotencyKey: string,
 ) => {
@@ -205,5 +203,3 @@ export const sendEmail = async (
   }
   throw new Error(`Unsupported order email delivery: ${String(delivery)}`);
 };
-
-export type { OrderDetails };
