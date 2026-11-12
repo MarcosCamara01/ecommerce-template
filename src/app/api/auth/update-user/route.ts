@@ -22,9 +22,7 @@ export async function POST(request: Request) {
       }
       throw error;
     }
-    const input = UpdateProfileSchema.pick({ name: true })
-      .required({ name: true })
-      .parse(payload);
+    const input = UpdateProfileSchema.parse(payload);
     const updatedUser = await updateIdentityProfileFromHeaders(
       request.headers,
       { name: input.name },
