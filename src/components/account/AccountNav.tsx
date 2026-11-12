@@ -12,7 +12,6 @@ export const EDIT_PROFILE_EVENT = "store:edit-profile";
 const pill =
   "press flex h-11 shrink-0 items-center rounded-pill border border-line px-[18px] text-sm aria-[current=page]:border-fg aria-[current=page]:bg-fg aria-[current=page]:text-bg";
 
-/** "Hi, Alex" above an account page title. */
 export function AccountGreeting() {
   const { data: session } = useSession();
   // The session is only known in the browser; wait for hydration so the
@@ -23,7 +22,7 @@ export function AccountGreeting() {
   return <span className="text-sm text-muted">Hi, {firstName}</span>;
 }
 
-/** Orders · Wishlist · Edit profile · Log out. Tab changes never animate. */
+/** Tab changes never animate. */
 export function AccountNav({ current }: { current: "orders" | "wishlist" }) {
   const { signOut } = useAuthMutation();
 

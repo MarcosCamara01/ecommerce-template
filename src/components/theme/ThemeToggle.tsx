@@ -19,9 +19,9 @@ const ThemeIcon = () => (
 );
 
 /**
- * Icon button that switches between the light and dark themes. It lives in
- * the navigation and is the only theme control in the store, so it is also
- * what keeps the page following the OS theme until the visitor picks one.
+ * The store's only theme control and the only `useTheme` subscriber, so it
+ * is also what keeps the page following the OS theme until the visitor
+ * picks one.
  */
 export function ThemeToggle() {
   const theme = useTheme();

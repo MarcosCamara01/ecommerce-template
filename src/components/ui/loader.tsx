@@ -3,7 +3,7 @@ import { forwardRef } from "react";
 
 type SpinnerProps = React.ComponentPropsWithoutRef<"span">;
 
-/** Ring spinner from CStates: currentColor with a transparent top, 0.8s. */
+/** Ring spinner from CStates. */
 export const SVGLoadingIcon = forwardRef<React.ElementRef<"span">, SpinnerProps>(
   ({ className, ...props }, ref) => {
     return (

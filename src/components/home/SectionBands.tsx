@@ -2,7 +2,6 @@ import { getShopSectionSummaries } from "@/lib/catalog/sections";
 
 import { SectionRow } from "./SectionRow";
 
-/** Edge-to-edge section rows in giant type; the hover lives in SectionRow. */
 export async function SectionBands() {
   const sections = (await getShopSectionSummaries()).filter(
     (section) => section.key !== "new-in",

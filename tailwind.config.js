@@ -81,7 +81,7 @@ module.exports = {
           "0%, 100%": { opacity: "0.55" },
           "50%": { opacity: "1" },
         },
-        // Wishlist save: 1 → 1.32 → 0.9 → 1.06 → 1.
+        // Wishlist save.
         pop: {
           "0%": { transform: "scale(1)" },
           "30%": { transform: "scale(1.32)" },
@@ -94,7 +94,7 @@ module.exports = {
           from: { transform: "translate(0, 0) scale(1)", opacity: "1" },
           to: { transform: "translate(var(--dx), var(--dy)) scale(0.3)", opacity: "0" },
         },
-        // Bag counter: 1 → 1.2 → 1.
+        // Bag counter.
         bump: {
           "0%": { transform: "scale(1)" },
           "40%": { transform: "scale(1.2)" },

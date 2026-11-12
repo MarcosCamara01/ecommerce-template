@@ -70,7 +70,6 @@ export function HomeShowcase({
   const size =
     pickedSize && variant.sizes.includes(pickedSize) ? pickedSize : variant.sizes[0];
   const productHref = `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`;
-  // The photo that flies to the bag is the card in front.
   const frontCard = () =>
     deckRef.current?.querySelector<HTMLElement>('[data-deck-slot="0"]') ?? null;
 

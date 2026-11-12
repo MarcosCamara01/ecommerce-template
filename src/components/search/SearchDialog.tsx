@@ -39,7 +39,6 @@ const productHref = (product: ProductWithVariants) => {
 const categoryLabel = (category: string) =>
   shopSections.find((section) => section.key === category)?.label ?? category;
 
-/** Underlines the part of the name that matched the query. */
 function Highlight({ text, query }: { text: string; query: string }) {
   const at = text.toLowerCase().indexOf(query.trim().toLowerCase());
   if (!query.trim() || at < 0) return <>{text}</>;
@@ -86,7 +85,6 @@ export function SearchDialog({
   const { open, instant } = useSearchUi();
   const focusReturn = useFocusReturn();
 
-  // ⌘K / Ctrl+K anywhere, and "/" when not typing in a field.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;

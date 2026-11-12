@@ -58,9 +58,8 @@ export const Navbar = ({
 
   return (
     <>
-      {/* Desktop: a floating glass pill. The header around it has no surface
-          and lets clicks through, so the page scrolls behind and beside the
-          pill; the glass is dense enough to read over any photo. */}
+      {/* The header has no surface and lets clicks through, so the page
+          scrolls behind and beside the pill. */}
       <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
         <nav
           aria-label="Main"
