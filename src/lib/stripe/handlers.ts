@@ -2,7 +2,7 @@ import type Stripe from "stripe";
 
 import type { SystemPrincipal } from "@/lib/identity";
 import { registerStripeEvent } from "@/lib/order-fulfillment";
-import { handleExpiredSession } from "@/services/stripe.service";
+import { stripeLogger } from "@/lib/stripe/logger";
 
 const WORK_EVENTS = new Set([
   "checkout.session.completed",
@@ -10,18 +10,17 @@ const WORK_EVENTS = new Set([
   "checkout.session.expired",
 ]);
 
-interface EventReceiptResult {
-  success: true;
-  handled: boolean;
-}
-
 export async function registerEventReceipt(
   systemPrincipal: SystemPrincipal,
   event: Stripe.Event,
-): Promise<EventReceiptResult> {
+): Promise<{ handled: boolean }> {
   await registerStripeEvent(systemPrincipal, event);
   if (event.type === "checkout.session.expired") {
-    await handleExpiredSession(event.data.object as Stripe.Checkout.Session);
+    const session = event.data.object;
+    stripeLogger.info("Checkout session expired", {
+      sessionId: session.id,
+      details: { userId: session.metadata?.userId, amount: session.amount_total },
+    });
   }
-  return { success: true, handled: WORK_EVENTS.has(event.type) };
+  return { handled: WORK_EVENTS.has(event.type) };
 }

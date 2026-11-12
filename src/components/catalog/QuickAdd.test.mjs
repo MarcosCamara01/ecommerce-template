@@ -128,7 +128,7 @@ function loadHarness({ sizes = ["S", "M", "L"] } = {}) {
     "@/components/bag/fly-to-bag": {
       flyToBag: () => { effects.flights += 1; return Promise.resolve(); },
     },
-    "@/components/ui/loader": { SVGLoadingIcon: "spinner" },
+    "@/components/ui/loader": { Spinner: "spinner" },
     "@/hooks/cart": {
       useCartMutation: () => ({
         add: (variables, callbacks) => {

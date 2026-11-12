@@ -1,11 +1,11 @@
-import { getUserOrders } from "./action";
+import { getUserOrders } from "./actions";
 import { getAllProducts } from "@/app/actions";
 import { getPrincipal } from "@/lib/identity";
 import Link from "@/components/ui/link";
 import { Suspense } from "react";
 import { AccountGreeting, AccountNav } from "@/components/account/AccountNav";
-import { OrderCard } from "@/components/orders";
-import { RailCard } from "@/components/products/RailCard";
+import { OrderCard } from "@/components/orders/OrderCard";
+import { RailCard } from "@/components/catalog/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -15,10 +15,6 @@ export async function generateMetadata() {
   };
 }
 
-/**
- * Orders page with PPR: static shell + dynamic user content
- * The user check and orders content stream in via Suspense
- */
 const UserOrders = () => {
   return (
     <section data-account-page="" className="flex flex-col gap-5 pb-24">
@@ -89,10 +85,7 @@ async function Starters() {
   );
 }
 
-/**
- * Dynamic component that checks user and renders orders
- * This streams at request time (uses headers() via getUser)
- */
+// getPrincipal reads the request headers, so this part streams in at request time.
 const OrdersContent = async () => {
   const user = await getPrincipal();
 
@@ -125,25 +118,6 @@ const OrdersContent = async () => {
 
 const Orders = async () => {
   const orders = await getUserOrders();
-
-  if (!orders) {
-    return (
-      <OrdersMessage
-        title="Error loading orders"
-        body="There was a problem loading your orders. Please make sure the database tables are created."
-        actions={
-          <>
-            <Link href="/orders" className={buttonClass()}>
-              Retry
-            </Link>
-            <Link href="/" className={buttonClass({ variant: "secondary" })}>
-              Go home
-            </Link>
-          </>
-        }
-      />
-    );
-  }
 
   if (orders.length === 0) {
     return (

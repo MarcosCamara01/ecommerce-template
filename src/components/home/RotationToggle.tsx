@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import { HERO_DWELL_MS } from "./useHeroRotation";
 
 /**
- * Pauses and resumes the hero rotation. While it runs, the ring fills over
- * the time each piece stays up, so the next change never comes as a surprise.
+ * While the rotation runs, the ring fills over the time each piece stays
+ * up, so the next change never comes as a surprise.
  */
 export function RotationToggle({
   playing,

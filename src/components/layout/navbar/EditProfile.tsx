@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import LoadingButton from "@/components/ui/loadingButton";
-import type { Manager } from "@/hooks/useManager";
+import LoadingButton from "@/components/ui/loading-button";
+import type { Disclosure } from "@/hooks/useDisclosure";
 import { useSession } from "@/lib/auth/client";
 
 type UpdateProfileResponse = {
@@ -29,7 +29,7 @@ export default function EditProfile({
   manager,
   returnFocusRef,
 }: {
-  manager: Manager;
+  manager: Disclosure;
   returnFocusRef: RefObject<HTMLElement | null>;
 }) {
   const { data: session, refetch: refetchSession } = useSession();

@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { ProductsSkeleton } from "@/components/products";
-import { CatalogListing } from "@/components/products/CatalogListing";
+import { ProductsSkeleton } from "@/components/catalog/ProductsSkeleton";
+import { CatalogListing } from "@/components/catalog/CatalogListing";
 import {
   SectionCount,
   SectionHeading,
-} from "@/components/products/SectionHeading";
+} from "@/components/catalog/SectionHeading";
 import { getShopSectionSummaries } from "@/lib/catalog/sections";
 
 export const metadata = {

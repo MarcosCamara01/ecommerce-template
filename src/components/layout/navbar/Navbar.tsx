@@ -1,6 +1,5 @@
 "use client";
 
-/** COMPONENTS */
 import Link from "@/components/ui/link";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
@@ -12,9 +11,8 @@ import { BagLink } from "./BagLink";
 import { NavLink } from "./NavLink";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
-/** FUNCTIONALITY */
 import { useSession } from "@/lib/auth/client";
-import { useManager } from "@/hooks/useManager";
+import { useDisclosure } from "@/hooks/useDisclosure";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { shopSections } from "@/constants/navigation";
@@ -40,7 +38,7 @@ export const Navbar = ({
   const { data: session } = useSession();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const editProfileManager = useManager();
+  const editProfileManager = useDisclosure();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
   const profileReturnFocusRef = useRef<HTMLElement | null>(null);
@@ -60,9 +58,8 @@ export const Navbar = ({
 
   return (
     <>
-      {/* Desktop: a floating glass pill. The header around it has no surface
-          and lets clicks through, so the page scrolls behind and beside the
-          pill; the glass is dense enough to read over any photo. */}
+      {/* The header has no surface and lets clicks through, so the page
+          scrolls behind and beside the pill. */}
       <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
         <nav
           aria-label="Main"
@@ -121,7 +118,6 @@ export const Navbar = ({
         </nav>
       </header>
 
-      {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between bg-bg pl-4 pr-2 lg:hidden">
         <Link
           href="/"

@@ -1,14 +1,12 @@
 "use client";
 
-/** FUNCTIONALITY */
 import { useThrottleFn } from "ahooks";
 import { useCartMutation } from "@/hooks/cart";
 import { RollingNumber } from "@/components/ui/rolling-number";
 import { cn } from "@/lib/utils";
-/** TYPES */
 import type { CartItem } from "@/lib/db/drizzle/schema";
 
-interface ProductCartInfoProps {
+interface QuantityStepperProps {
   cartItemId: CartItem["id"];
   quantity: CartItem["quantity"];
   productName: string;
@@ -16,12 +14,12 @@ interface ProductCartInfoProps {
 }
 
 /** − n + stepper. Going below one removes the line. */
-export const ProductCartInfo = ({
+export const QuantityStepper = ({
   cartItemId,
   quantity,
   productName,
   compact = false,
-}: ProductCartInfoProps) => {
+}: QuantityStepperProps) => {
   const { update: editQuantity, remove: removeFromCart } = useCartMutation();
 
   const { run: throttledIncrease } = useThrottleFn(

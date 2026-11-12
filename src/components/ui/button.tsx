@@ -4,11 +4,11 @@ import { type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-import { buttonClass as buttonVariants } from "./button-classes";
+import { buttonClass } from "./button-classes";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+    VariantProps<typeof buttonClass> {
   asChild?: boolean;
 }
 
@@ -17,7 +17,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonClass({ variant, size, className }))}
         ref={ref}
         {...props}
       />

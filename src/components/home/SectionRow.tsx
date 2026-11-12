@@ -4,12 +4,12 @@ import Link from "@/components/ui/link";
 import { useRef } from "react";
 
 import { ArrowUpRightIcon } from "@/components/icons";
-import { prefersReducedMotion } from "@/lib/motion";
+import { EASE_OUT, prefersReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type Edge = "top" | "bottom";
 
-const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
+const POUR_EASING = `cubic-bezier(${EASE_OUT.join(", ")})`;
 const POUR_IN_MS = 450;
 const POUR_OUT_MS = 350;
 
@@ -57,7 +57,7 @@ export function SectionRow({
       { clipPath: start ? [start, to] : [to] },
       {
         duration: prefersReducedMotion() ? 0 : ms,
-        easing: EASE_OUT,
+        easing: POUR_EASING,
         fill: "forwards",
       },
     );

@@ -33,15 +33,8 @@ export const useWishlistDetails = () => {
 
   const items = query.data?.items ?? [];
 
-  const getWishlistItemById = (
-    id: WishlistItemWithProduct["id"],
-  ): WishlistItemWithProduct | undefined => {
-    return items.find((item) => item.id === id);
-  };
-
   return {
     ...query,
     items,
-    getWishlistItemById,
   };
 };

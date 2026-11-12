@@ -10,16 +10,14 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
-  containerClassName?: string;
-}
+type PasswordInputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className, containerClassName, ...props }, ref) => {
+  ({ className, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
-      <InputGroup className={containerClassName}>
+      <InputGroup>
         <InputGroupInput
           {...props}
           ref={ref}

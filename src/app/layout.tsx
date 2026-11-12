@@ -4,10 +4,10 @@ import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { Navbar } from "@/components/layout/navbar";
+import { Navbar } from "@/components/layout/navbar/Navbar";
 import { getSearchCatalog } from "@/lib/catalog/search-index";
 import { getShopSectionSummaries } from "@/lib/catalog/sections";
-import { Footer } from "@/components/layout/footer";
+import { Footer } from "@/components/layout/footer/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/providers";
 import { themeInitScript } from "@/lib/theme";

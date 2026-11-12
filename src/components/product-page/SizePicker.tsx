@@ -4,19 +4,17 @@ import { PRODUCT_SIZES } from "@/constants/sizes";
 import type { ProductSize } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 
-const SIZES = PRODUCT_SIZES;
-
 /**
- * Equal pills (the full run by default); one ink capsule slides to the selected size (transform
- * 220ms ease-in-out, no bounce). Sizes the variant does not stock are
- * dashed, struck through and disabled.
+ * Equal pills (the full run by default); one ink capsule slides to the
+ * selected size (transform 220ms ease-in-out, no bounce). Sizes the variant
+ * does not stock are dashed, struck through and disabled.
  */
 export function SizePicker({
   available,
   value,
   onChange,
   compact = false,
-  options = SIZES,
+  options = PRODUCT_SIZES,
 }: {
   available: readonly ProductSize[];
   value: ProductSize | undefined;

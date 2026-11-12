@@ -86,13 +86,13 @@ for (const kind of ["cart", "wishlist"]) {
     const { client, mutations, notices, fetchCalls } = await loadMutation(kind, { authenticated: false });
     try {
       const variables = kind === "cart"
-        ? [{ variantId: 1, size: "M" }, { itemId: 1, quantity: 2 }, { itemId: 1 }, undefined]
+        ? [{ variantId: 1, size: "M" }, { itemId: 1, quantity: 2 }, { itemId: 1 }]
         : [1, { itemId: 1 }];
       for (const [index, mutation] of mutations.entries()) {
         await assert.rejects(mutation.mutate(variables[index]), { message: "Unauthorized" });
       }
       assert.deepEqual(notices, kind === "cart"
-        ? [SIGN_IN.cart, BAG_ERROR, BAG_ERROR, BAG_ERROR]
+        ? [SIGN_IN.cart, BAG_ERROR, BAG_ERROR]
         : [SIGN_IN.wishlist, "Couldn’t update your wishlist. Try again."]);
       assert.equal(fetchCalls(), 0, "unauthenticated mutations stop before fetching");
     } finally {

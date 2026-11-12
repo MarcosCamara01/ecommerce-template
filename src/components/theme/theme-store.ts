@@ -41,7 +41,6 @@ function applyTheme(theme: Theme) {
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  // Follow the OS while the visitor has not picked a theme themselves.
   const media = matchMedia("(prefers-color-scheme: dark)");
   const onSystemChange = () => {
     if (hasStoredTheme()) return;

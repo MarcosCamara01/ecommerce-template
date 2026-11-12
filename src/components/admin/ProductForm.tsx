@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useProductMutation } from "@/hooks/product/mutations/useProductMutation";
 import { Button } from "@/components/ui/button";
-import LoadingButton from "@/components/ui/loadingButton";
+import LoadingButton from "@/components/ui/loading-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FiArchive, FiCheck, FiX } from "react-icons/fi";
 import { BasicInfo, type BasicInfoRef } from "./BasicInfo";
@@ -178,7 +178,7 @@ export function ProductForm({
       if (result.success && result.data && onSuccess) {
         onSuccess(result.data);
       }
-    } catch (error) {
+    } catch {
       setState({
         success: false,
         message: "An unexpected error occurred",
@@ -235,7 +235,6 @@ export function ProductForm({
         </Alert>
       )}
 
-      {/* Alert Message */}
       {state.message && (
         <Alert variant={state.success ? "success" : "destructive"}>
           {state.success ? (

@@ -30,8 +30,7 @@ test.describe("signing in", { tags: ["auth", "agent"] }, () => {
 
 test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? undefined : NEEDS_WRITES }, () => {
   test("a visitor creates an account, logs out and signs back in", async ({ app, api, agent, browser }) => {
-    // A shopper nobody has seen before, with a password made up for this run.
-    // The values are new on every run: marked so, the recording still replays.
+    // unique() marks values that change every run, so the recording still replays.
     const account = newAccount("signup");
     const email = unique(account.email);
     const password = unique(account.password);
@@ -40,7 +39,6 @@ test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? un
     await agent.act("create an account for {name} with the email {email} and the password {password}", {
       params: { name: account.name, email, password },
     });
-    // The new shopper lands in the store, already signed in.
     await expect(browser).toHaveURL("/");
     expect(await shopperInStore(api)).toMatchObject({ email: account.email, name: account.name });
 

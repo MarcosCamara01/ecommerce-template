@@ -1,10 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-
 import { toggleTheme, useTheme } from "./theme-store";
 
-const ThemeIcon = ({ className }: { className?: string }) => (
+const ThemeIcon = () => (
   <svg
     aria-hidden="true"
     width="18"
@@ -14,7 +12,6 @@ const ThemeIcon = ({ className }: { className?: string }) => (
     stroke="currentColor"
     strokeWidth="1.8"
     strokeLinejoin="round"
-    className={className}
   >
     <circle cx="12" cy="12" r="8" />
     <path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" />
@@ -22,11 +19,11 @@ const ThemeIcon = ({ className }: { className?: string }) => (
 );
 
 /**
- * Icon button that switches between the light and dark themes. It lives in
- * the navigation and is the only theme control in the store, so it is also
- * what keeps the page following the OS theme until the visitor picks one.
+ * The store's only theme control and the only `useTheme` subscriber, so it
+ * is also what keeps the page following the OS theme until the visitor
+ * picks one.
  */
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle() {
   const theme = useTheme();
   return (
     <button
@@ -39,10 +36,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             : "Switch color theme"
       }
       onClick={() => toggleTheme()}
-      className={cn(
-        "press grid size-11 place-items-center rounded-pill text-fg",
-        className,
-      )}
+      className="press grid size-11 place-items-center rounded-pill text-fg"
     >
       <ThemeIcon />
     </button>

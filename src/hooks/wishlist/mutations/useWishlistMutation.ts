@@ -190,12 +190,5 @@ export const useWishlistMutation = () => {
   return {
     add: add.mutate,
     remove: remove.mutate,
-    addAsync: add.mutateAsync,
-    removeAsync: remove.mutateAsync,
-    error: add.error || remove.error,
-    isAddingToWishlist: add.isPending,
-    isRemovingFromWishlist: remove.isPending,
-    addError: add.error,
-    removeError: remove.error,
   };
 };

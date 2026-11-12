@@ -6,7 +6,6 @@ import { formatEuros, named, type Piece, pieceOnScreen, piecesOnScreen, settled,
 test.describe("product page", { tags: ["product", "agent"] }, () => {
   let piece: Piece;
 
-  // Whatever the store lists first, in at least two sizes.
   test.beforeEach(async ({ app, agent, browser }) => {
     await app.open("/new-in");
     piece = await pieceOnScreen({ browser, agent }, (candidate) => candidate.sizes.length > 1, "piece in two sizes");
@@ -26,7 +25,7 @@ test.describe("product page", { tags: ["product", "agent"] }, () => {
     await agent.assert(
       "the page lets a shopper pick a color and a size, and has one clear button to add the piece to the bag that states its price; a size that is out of stock, if there is one, cannot be chosen",
     );
-    // What only eyes can tell: the photo is a real photo, laid out properly.
+    // Only a screenshot can show a broken, blank or stretched photo.
     await agent.assert(
       "the product photo in view is loaded and shows the piece of clothing clearly; it is not broken, blank or stretched, and the name, price and button beside it are not cut off",
       { vision: true },
@@ -43,7 +42,6 @@ test.describe("product page", { tags: ["product", "agent"] }, () => {
   });
 
   test("choosing a color shows that color and keeps it in the address", async ({ app, agent, browser }) => {
-    // The page of the first piece that comes in two colors.
     await app.open("/new-in");
     let colors: string[] = [];
     for (const candidate of (await piecesOnScreen({ browser, agent })).slice(0, 3)) {
@@ -127,7 +125,6 @@ test.describe("product page, to the letter", { tags: ["product"] }, () => {
     await browser.keyboard.press("ArrowLeft");
     await expect(strip.getByRole("button", "Photo 2")).toHaveAttribute("aria-current", "true");
 
-    // Escape closes it and hands focus back to the photo it came from.
     await browser.keyboard.press("Escape");
     await expect(viewer).toBeHidden();
     await expect(second).toBeFocused();

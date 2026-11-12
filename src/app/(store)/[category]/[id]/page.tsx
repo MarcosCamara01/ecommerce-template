@@ -1,14 +1,12 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
-import {
-  SingleProduct,
-  SingleProductSkeleton,
-  SuspenseRandomProducts,
-} from "@/components/product";
+import { SingleProduct } from "@/components/product-page/SingleProduct";
+import { SingleProductSkeleton } from "@/components/product-page/SingleProductSkeleton";
+import { SuspenseRandomProducts } from "@/components/product-page/RandomProducts";
 import { getProduct } from "@/app/actions";
 import { ProductCategoryZod } from "@/lib/db/drizzle/schema";
-import { pickFirst } from "@/utils/pickFirst";
+import { pickFirst } from "@/utils/pick-first";
 import { displayName } from "@/utils/product-name";
 import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 

@@ -11,9 +11,8 @@ const pill =
   "press flex items-center whitespace-nowrap rounded-pill bg-fg font-semibold text-bg";
 
 /**
- * Ink "Bag · n" pill. On desktop it opens the bag drawer and is the landing
- * point for the add-to-bag flight; on phones it links to the bag page. The
- * count rolls when it changes, like the figures on the bag page.
+ * On desktop the pill is where the add-to-bag flight lands: fly-to-bag.ts
+ * finds it by `data-bag-target`.
  */
 export function BagLink({
   opensDrawer = false,

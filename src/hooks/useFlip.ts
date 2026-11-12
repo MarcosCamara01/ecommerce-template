@@ -48,7 +48,6 @@ function partsOf(container: HTMLElement): Part[] {
   for (const item of Array.from(container.querySelectorAll<HTMLElement>(ITEM))) {
     const id = item.dataset.flipItem ?? "";
     const own = Array.from(item.querySelectorAll<HTMLElement>(PARTS));
-    // An item with no parts of its own moves as one piece.
     if (own.length === 0) {
       parts.push({ element: item, key: id, mode: "morph", item });
       continue;

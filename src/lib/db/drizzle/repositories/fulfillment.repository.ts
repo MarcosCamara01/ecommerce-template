@@ -33,7 +33,7 @@ import {
 import { replayTerminalWithAudit } from "./fulfillment-replay";
 import { FulfillmentLeaseLostError } from "@/lib/order-fulfillment/lease-race";
 
-export type ClaimedEffect = FulfillmentEffectRow & {
+type ClaimedEffect = FulfillmentEffectRow & {
   orderId: number;
   checkoutSessionId: string;
   checkoutIntentId: string;
@@ -56,9 +56,9 @@ export const fulfillmentRepository = {
       if (Number.isNaN(paymentConfirmedAt.getTime())) {
         throw new Error("PostgreSQL returned an invalid confirmation timestamp");
       }
-      // Not a deferrable read: this insert is the idempotency and audit ledger
-      // for *every* Stripe event, so it must run before the guard below that
-      // returns early for non-checkout event types.
+      // Not deferrable: this insert records every Stripe event for idempotency
+      // and audit, so it runs before the guard below returns early for
+      // non-checkout events.
       // react-doctor-disable-next-line react-doctor/async-defer-await
       const [insertedReceipt] = await tx
         .insert(stripeEventReceipts)
@@ -446,9 +446,7 @@ export const fulfillmentRepository = {
     await db.transaction(async (tx) => {
       const [claimed] = await tx
         .update(fulfillmentEffects)
-        .set({
-          ...releasedTransitionValues(fulfillmentTransitions.succeed.to),
-        })
+        .set(releasedTransitionValues(fulfillmentTransitions.succeed.to))
         .where(
           leasedProcessingPredicate({
             idColumn: fulfillmentEffects.id,

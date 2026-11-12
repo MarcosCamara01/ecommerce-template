@@ -21,7 +21,6 @@ import {
 test.describe("bag", { ...asShopper("bag"), tags: ["bag", "agent", "shopper", "writes"] }, () => {
   let piece: Piece;
 
-  // Every test starts with an empty bag, on the listing, with a piece in two sizes.
   test.beforeEach(async ({ app, api, agent, browser }) => {
     await emptyBag(api);
     await app.open("/new-in");

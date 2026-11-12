@@ -6,10 +6,7 @@ import { PRODUCT_SIZES } from "@/constants/sizes";
 import type { ProductSize } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 
-/**
- * Size chart with a tappable size row: the chosen column is highlighted.
- * Measurements stay as placeholders until the merchant defines them.
- */
+/** Measurements stay as placeholders until the merchant defines them. */
 export function SizeChart({ rows }: { rows: readonly string[] }) {
   const [selected, setSelected] = useState<ProductSize>("M");
 

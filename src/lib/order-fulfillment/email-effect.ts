@@ -9,14 +9,17 @@ export function orderEmailDeliveryFromIdempotencyKey(
     : null;
 }
 
+// Work completed before order emails were split per recipient left one
+// `order:<id>:email` effect for both messages. The sweep marks it done and
+// queues one effect per recipient in its place instead of sending it.
 export function isLegacyBundledEmailEffect(idempotencyKey: string): boolean {
   return /^order:\d+:email$/.test(idempotencyKey);
 }
 
 /**
- * Runs one claimed delivery and records completion only after the SMTP call.
- * This deliberately provides at-least-once, not exactly-once, delivery across
- * the unavoidable SMTP-acceptance/durable-completion crash window.
+ * Sends one claimed email effect, then records it complete. Delivery is at
+ * least once: a crash after SMTP accepts the message and before the completion
+ * is stored sends it again on the next claim.
  */
 export async function executeOrderEmailEffect(
   effect: Readonly<{ id: number; idempotencyKey: string }>,

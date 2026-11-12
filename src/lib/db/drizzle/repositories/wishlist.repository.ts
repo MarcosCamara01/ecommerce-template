@@ -69,19 +69,6 @@ export const wishlistRepository = {
     }));
   },
 
-  async create(userId: string, productId: number): Promise<WishlistItem> {
-    const [result] = await db
-      .insert(wishlist)
-      .values({ userId, productId })
-      .onConflictDoUpdate({
-        target: [wishlist.userId, wishlist.productId],
-        set: { updatedAt: new Date() },
-      })
-      .returning();
-    if (!result) throw new Error("Wishlist insert returned no row");
-    return transformWishlistItem(result);
-  },
-
   async createAvailable(
     userId: string,
     productId: number,

@@ -1,7 +1,5 @@
-/** COMPONENTS */
 import Image from "next/image";
 import Link from "@/components/ui/link";
-/** TYPES */
 import type {
   OrderProductWithDetails,
   ProductWithVariants,

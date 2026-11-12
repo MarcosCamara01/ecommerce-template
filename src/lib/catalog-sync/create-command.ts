@@ -1,3 +1,5 @@
+// Deterministic command planning lives here. admin-mutations.ts only adapts
+// multipart input and Storage URLs to this boundary.
 import "server-only";
 
 import { createHash } from "node:crypto";
@@ -7,10 +9,6 @@ import {
   type CatalogProductDraft,
   type CatalogVariantDraft,
 } from "./model";
-/*
- * This module owns deterministic command planning. The route only adapts
- * multipart input and Storage URLs into this domain boundary.
- */
 import type {
   ProductSize,
 } from "../db/drizzle/schema";

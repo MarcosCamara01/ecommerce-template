@@ -7,11 +7,11 @@ import { MdError } from "react-icons/md";
 
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
-import { PasswordInput } from "@/components/ui/form/PasswordInput";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import LoadingButton from "@/components/ui/loadingButton";
-import { useAuthMutation } from "@/hooks/auth";
+import LoadingButton from "@/components/ui/loading-button";
+import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
 
 function RegisterContent() {

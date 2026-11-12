@@ -1,17 +1,3 @@
-/**
- * Single point of truth for turning cart rows into Stripe line items.
- *
- * Security invariant (REPORT-1627): the price charged is ALWAYS read from the
- * joined `products_variants.stripe_id`, never from `cart_items.stripe_id`.
- * The cart row's own `stripe_id` was historically supplied by the client, so a
- * caller could pair an expensive `variantId` with a cheap price id and be
- * charged the cheap one while the webhook recorded the expensive product.
- * Deriving the price from the variant makes the charge and the resulting order
- * both functions of `variantId`, so they cannot diverge.
- *
- * Intentionally dependency-free so it can be unit tested in isolation.
- */
-
 interface VariantPricedCartItem {
   variantId: number;
   quantity: number | null;
@@ -23,6 +9,14 @@ interface StripeLineItem {
   quantity: number;
 }
 
+/**
+ * The charged price always comes from the variant's
+ * `products_variants.stripe_id`, never from the cart row's own
+ * `cart_items.stripe_id`. Clients once supplied that column, so a buyer could
+ * pair an expensive variant with a cheap price id, pay the cheap price and get
+ * an order for the expensive product. Pricing from the variant ties the charge
+ * and the order to the same `variantId`.
+ */
 export function buildLineItems(
   cartItems: VariantPricedCartItem[],
 ): StripeLineItem[] {

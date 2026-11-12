@@ -134,7 +134,7 @@ test("public catalog paths hide archives while historical lookup retains them", 
 
   assert.match(source, /where:\s*isNull\(productsItems\.archivedAt\)/);
   assert.match(source, /where:\s*isNull\(productsVariants\.archivedAt\)/);
-  assert.match(source, /findVariantByIdIncludingArchived/);
+  assert.match(source, /findVariantWithProductByIdIncludingArchived/);
   assert.match(source, /archivedAt:\s*row\.archivedAt\?\.toISOString\(\)\s*\?\?\s*null/);
   assert.doesNotMatch(source, /\.delete\(productsVariants\)/);
   assert.doesNotMatch(source, /\.delete\(productsItems\)/);
@@ -154,7 +154,7 @@ test("cart and wishlist reads hide archived catalog identities", async () => {
 });
 
 test("public additions reject archives and admin restoration is explicit", async () => {
-  const [dataAccessSource, adminRouteSource, productsSource, adminPageSource, productServiceSource] = await Promise.all([
+  const [dataAccessSource, adminRouteSource, productsSource, adminPageSource] = await Promise.all([
     readFile(new URL("../../../data-access/index.ts", import.meta.url), "utf8"),
     readFile(
       new URL("../../../catalog-sync/admin-mutations.ts", import.meta.url),
@@ -165,7 +165,6 @@ test("public additions reject archives and admin restoration is explicit", async
       new URL("../../../../app/admin/products/[id]/edit/page.tsx", import.meta.url),
       "utf8",
     ),
-    readFile(new URL("../../../../services/products.service.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(
@@ -187,17 +186,10 @@ test("public additions reject archives and admin restoration is explicit", async
   );
   assert.match(adminRouteSource, /manager\.findByIdIncludingArchived\(id\)/);
   assert.match(adminPageSource, /requireCapability\("catalog:manage"\)/);
-  assert.match(adminPageSource, /getProductByIdForManager\(principal, productId\)/);
-  assert.match(adminPageSource, /getArchivedProductForRestoration/);
+  assert.match(adminPageSource, /dataAccess\.forCatalogManager\(principal\)/);
+  assert.match(adminPageSource, /catalog\.findEditableById\(productId\)/);
+  assert.match(adminPageSource, /catalog\.findArchivedByIdForRestoration\(productId\)/);
   assert.match(adminPageSource, /restore\s*===\s*"1"/);
-  assert.match(
-    productServiceSource,
-    /forCatalogManager\(principal\)\.catalog\.findEditableById\(id\)/,
-  );
-  assert.match(
-    productServiceSource,
-    /forCatalogManager\(principal\)[\s\S]*?findArchivedByIdForRestoration\(id\)/,
-  );
 });
 
 test("catalog additions lock products first through the write transaction", async () => {
@@ -207,7 +199,7 @@ test("catalog additions lock products first through the write transaction", asyn
   ]);
   const cartAdd = cartSource.slice(
     cartSource.indexOf("async upsertAvailable"),
-    cartSource.indexOf("async upsert(data"),
+    cartSource.indexOf("async updateQuantity"),
   );
   const wishlistAdd = wishlistSource.slice(
     wishlistSource.indexOf("async createAvailable"),
@@ -273,7 +265,6 @@ test("soft archive preserves storage assets for history and restoration", async 
   assert.match(repositorySource, /kind === "upsert"[\s\S]*?archivedAt:\s*null/);
   assert.match(repositorySource, /else \{[\s\S]*?archivedAt:\s*now/);
   assert.doesNotMatch(repositorySource, /\.delete\(productsItems\)|\.delete\(productsVariants\)/);
-  assert.match(compensationSource, /if \(input\.operationPersisted\) return/);
   assert.match(compensationSource, /input\.uploadedImageUrls/);
   assert.doesNotMatch(compensationSource, /priorSnapshot|existingImages/);
 });

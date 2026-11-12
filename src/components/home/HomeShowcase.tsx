@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "@/components/ui/link";
 import { useEffect, useRef, useState } from "react";
 
-import { AddToCart } from "@/components/cart/AddToCart";
+import { AddToCart } from "@/components/bag/AddToCart";
 import { ArrowRightIcon } from "@/components/icons";
-import { SizePicker } from "@/components/product/SizePicker";
-import { RailCard } from "@/components/products/RailCard";
+import { SizePicker } from "@/components/product-page/SizePicker";
+import { RailCard } from "@/components/catalog/RailCard";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { shopSections } from "@/constants/navigation";
 import { swatchBackground } from "@/constants/colors";
@@ -70,7 +70,6 @@ export function HomeShowcase({
   const size =
     pickedSize && variant.sizes.includes(pickedSize) ? pickedSize : variant.sizes[0];
   const productHref = `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`;
-  // The photo that flies to the bag is the card in front.
   const frontCard = () =>
     deckRef.current?.querySelector<HTMLElement>('[data-deck-slot="0"]') ?? null;
 
@@ -132,7 +131,6 @@ export function HomeShowcase({
           />
         </div>
 
-        {/* Piece details: under the photo on phones, bottom-left on desktop. */}
         <div
           data-hero-hold=""
           className="flex flex-col gap-3.5 lg:absolute lg:bottom-[calc(var(--hero-u)*48)] lg:left-8 lg:w-[min(340px,25vw)] lg:gap-[max(12px,calc(var(--hero-u)*18))]"
@@ -164,7 +162,6 @@ export function HomeShowcase({
             </div>
           </div>
 
-          {/* Phones: the pieces as colour dots. */}
           <div className="flex items-center gap-1 lg:hidden">
             {pieces.map((option, position) => (
               <button
@@ -210,7 +207,6 @@ export function HomeShowcase({
           </div>
         </div>
 
-        {/* Desktop: piece counter, rotation toggle and next. */}
         <div className="absolute bottom-[calc(var(--hero-u)*48)] right-8 hidden flex-col items-end gap-4 lg:flex">
           <span className="font-display text-[length:max(40px,calc(var(--hero-u)*64))] font-extrabold leading-none tabular-nums">
             {String(index + 1).padStart(2, "0")}
@@ -229,7 +225,6 @@ export function HomeShowcase({
           </div>
         </div>
 
-        {/* Phones: sections and quick add pinned under the hero. */}
         <div className="mt-8 flex flex-col gap-3 lg:hidden">
           <nav aria-label="Sections" className="grid grid-cols-3 gap-1.5">
             {CATEGORY_SECTIONS.map((section) => (

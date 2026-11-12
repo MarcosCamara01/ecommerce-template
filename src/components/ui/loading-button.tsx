@@ -1,18 +1,15 @@
 import { forwardRef } from "react";
 import { ButtonProps, Button } from "@/components/ui/button";
-import { SVGLoadingIcon } from "./loader";
+import { Spinner } from "./loader";
 
 type LoadingButtonProps = ButtonProps & {
   loading: boolean;
   children: React.ReactNode;
   icon?: React.ReactNode;
-  iconPosition?: "left" | "right";
 };
 
 const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
-  ({ loading, children, icon, iconPosition = "left", ...props }, ref) => {
-    const iconElement = loading ? <SVGLoadingIcon /> : icon ? icon : null;
-
+  ({ loading, children, icon, ...props }, ref) => {
     return (
       <Button
         {...props}
@@ -20,9 +17,8 @@ const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
         aria-busy={loading || undefined}
         disabled={Boolean(props.disabled || loading)}
       >
-        {iconPosition === "left" && iconElement}
+        {loading ? <Spinner /> : icon || null}
         <span>{children}</span>
-        {iconPosition === "right" && iconElement}
       </Button>
     );
   },

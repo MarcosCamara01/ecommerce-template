@@ -36,7 +36,6 @@ export const useWishlist = () => {
   return {
     ...query,
     items,
-    count: items.length,
     isInWishlist,
   };
 };

@@ -1,5 +1,3 @@
-// String and data formatters
-
 const euroCurrencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "EUR",

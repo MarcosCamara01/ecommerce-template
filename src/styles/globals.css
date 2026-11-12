@@ -116,7 +116,6 @@
 }
 
 @layer components {
-  /* Condensed display voice: Archivo at 62% width, black, uppercase. */
   .font-display {
     font-family: var(--font-archivo), "Arial Narrow", sans-serif;
     font-stretch: 62%;
@@ -150,7 +149,6 @@
     }
   }
 
-  /* Press feedback for every pill button (120ms, ease-out). */
   .press {
     transition: transform 120ms var(--ease-out);
   }

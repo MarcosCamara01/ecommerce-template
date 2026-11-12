@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const credentialFailure = internalCredentialFailure(request.headers);
   if (credentialFailure) return credentialFailure;
   const systemPrincipal = getOrderFulfillmentSystemPrincipal();
-  // The answer of a sweep is never worth keeping.
+  // Each call runs a sweep, so no cache may keep its answer.
   return NextResponse.json(
     await runFulfillmentSweep(systemPrincipal, { limit: 10 }),
     { headers: { "Cache-Control": "private, no-store" } },

@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 export type VariantSizesRef = {
   sizes: ProductSize[];
   reset: () => void;
-  setSizes: (sizes: ProductSize[]) => void;
 };
 
 interface VariantSizesProps {
@@ -27,7 +26,6 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
     useImperativeHandle(ref, () => ({
       sizes: selectedSizes,
       reset: () => setSelectedSizes(initialSizes || []),
-      setSizes: (sizes: ProductSize[]) => setSelectedSizes(sizes),
     }));
 
     const toggleSize = (size: ProductSize) => {

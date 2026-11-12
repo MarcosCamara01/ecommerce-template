@@ -1,6 +1,5 @@
 "use client";
 
-/** COMPONENTS */
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,10 +15,8 @@ import {
   OrdersIcon,
   UserIcon,
 } from "@/components/icons";
-/** FUNCTIONALITY */
 import { useSession } from "@/lib/auth/client";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-import { cn } from "@/lib/utils";
 import { useRef, type RefObject } from "react";
 
 const initialsOf = (name: string) =>
@@ -33,11 +30,9 @@ const initialsOf = (name: string) =>
 export function UserMenu({
   triggerRef,
   onEditProfile,
-  className,
 }: {
   triggerRef: RefObject<HTMLButtonElement | null>;
   onEditProfile: () => void;
-  className?: string;
 }) {
   const { data: session } = useSession();
   const { signOut } = useAuthMutation();
@@ -52,10 +47,7 @@ export function UserMenu({
           ref={triggerRef}
           type="button"
           aria-label="Account"
-          className={cn(
-            "press grid size-11 place-items-center rounded-pill text-fg hover:bg-card data-[state=open]:bg-fg data-[state=open]:text-bg",
-            className,
-          )}
+          className="press grid size-11 place-items-center rounded-pill text-fg hover:bg-card data-[state=open]:bg-fg data-[state=open]:text-bg"
         >
           <UserIcon />
         </button>

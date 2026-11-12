@@ -1,6 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Grid placeholder from CStates: photo tile and two text bars per card. */
 export const ProductsSkeleton = ({ items }: { items: number }) => (
   <div
     aria-busy="true"

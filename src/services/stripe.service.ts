@@ -11,8 +11,6 @@ import { retrieveOwnedCheckoutSession } from "@/lib/order-fulfillment/owned-chec
 import { stripe, Stripe } from "@/lib/stripe";
 import { stripeLogger } from "@/lib/stripe/logger";
 
-export { stripe };
-
 type StripeCustomerClient = Pick<typeof stripe, "customers">;
 
 export async function getOrCreateStripeCustomerWithClient(
@@ -29,6 +27,8 @@ export async function getOrCreateStripeCustomerWithClient(
   });
   if (owned.data[0]) return owned.data[0].id;
 
+  // Stripe search lags new customers by up to a minute, so a listing by email
+  // still finds one this user created moments ago.
   const existing = await client.customers.list({ email, limit: 100 });
   const ownedCustomer = existing.data.find(
     (customer) => customer.metadata?.userId === principal.userId,
@@ -68,7 +68,7 @@ export type CheckoutStatus =
   | "not_found"
   | "error";
 
-export interface CheckoutResult {
+interface CheckoutResult {
   status: CheckoutStatus;
   session?: Stripe.Checkout.Session;
   outcome?: CheckoutOutcome;
@@ -117,11 +117,4 @@ export async function fetchCheckoutData(sessionId: string): Promise<CheckoutResu
     stripeLogger.error("Error fetching checkout data", error);
     return { status: "error", error: "Could not verify payment state" };
   }
-}
-
-export async function handleExpiredSession(session: Stripe.Checkout.Session) {
-  stripeLogger.info("Checkout session expired", {
-    sessionId: session.id,
-    details: { userId: session.metadata?.userId, amount: session.amount_total },
-  });
 }

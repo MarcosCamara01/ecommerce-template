@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "@/components/ui/link";
 
 import { CloseIcon } from "@/components/icons";
-import { ButtonCheckout } from "@/components/cart/ButtonCheckout";
+import { CheckoutButton } from "@/components/bag/CheckoutButton";
 import { buttonClass } from "@/components/ui/button-classes";
 import {
   Sheet,
@@ -120,7 +120,7 @@ export function BagDrawer() {
               </span>
             </div>
             <div className="flex flex-col gap-2">
-              <ButtonCheckout
+              <CheckoutButton
                 cartItemIds={items.map((item) => item.id)}
                 className="h-[60px] w-full text-base"
               />
