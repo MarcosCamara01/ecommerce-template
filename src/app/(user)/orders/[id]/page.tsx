@@ -3,11 +3,9 @@ import type {
   ProductWithVariants,
   OrderProductWithDetails,
 } from "@/lib/db/drizzle/schema";
-import {
-  OrderProduct,
-  OrderSummary,
-  OrderSummarySkeleton,
-} from "@/components/orders";
+import { OrderProduct } from "@/components/orders/OrderProduct";
+import { OrderSummary } from "@/components/orders/OrderSummary";
+import { OrderSummarySkeleton } from "@/components/orders/OrderSummarySkeleton";
 import { buttonClass } from "@/components/ui/button-classes";
 import Link from "@/components/ui/link";
 import { Suspense } from "react";

@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { pickFirst, searchProducts } from "@/utils";
-import { ProductItem, ProductsSkeleton } from "@/components/products";
+import { pickFirst } from "@/utils/pickFirst";
+import { searchProducts } from "@/utils/search";
+import { ProductItem } from "@/components/products/ProductItem";
+import { ProductsSkeleton } from "@/components/products/ProductsSkeleton";
 import { RailCard } from "@/components/products/RailCard";
 import { SearchPill } from "@/components/search/SearchPill";
 import { fitDisplaySize } from "@/lib/display-type";

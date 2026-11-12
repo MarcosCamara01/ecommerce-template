@@ -2,8 +2,7 @@ import Link from "@/components/ui/link";
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { CartProducts } from "@/components/cart";
-import { BagCount } from "@/components/cart/CartProducts";
+import { BagCount, CartProducts } from "@/components/cart/CartProducts";
 import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";

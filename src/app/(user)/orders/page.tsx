@@ -4,7 +4,7 @@ import { getPrincipal } from "@/lib/identity";
 import Link from "@/components/ui/link";
 import { Suspense } from "react";
 import { AccountGreeting, AccountNav } from "@/components/account/AccountNav";
-import { OrderCard } from "@/components/orders";
+import { OrderCard } from "@/components/orders/OrderCard";
 import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";

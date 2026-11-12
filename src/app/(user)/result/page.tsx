@@ -2,14 +2,12 @@ import { Suspense } from "react";
 
 import { fetchCheckoutData } from "@/services/stripe.service";
 import { pickFirst } from "@/utils/pickFirst";
-import {
-  ResultSkeleton,
-  NoSessionError,
-  StatusContent,
-  AutoRefreshStatus,
-  SuccessContent,
-  FulfilledCheckoutSync,
-} from "@/components/checkout";
+import { ResultSkeleton } from "@/components/checkout/ResultSkeleton";
+import { NoSessionError } from "@/components/checkout/NoSessionError";
+import { StatusContent } from "@/components/checkout/StatusContent";
+import { AutoRefreshStatus } from "@/components/checkout/AutoRefreshStatus";
+import { SuccessContent } from "@/components/checkout/SuccessContent";
+import { FulfilledCheckoutSync } from "@/components/checkout/FulfilledCheckoutSync";
 import { getOrder } from "../orders/action";
 
 export async function generateMetadata() {

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { ProductsSkeleton } from "@/components/products";
+import { ProductsSkeleton } from "@/components/products/ProductsSkeleton";
 import { CatalogListing } from "@/components/products/CatalogListing";
 import {
   SectionCount,

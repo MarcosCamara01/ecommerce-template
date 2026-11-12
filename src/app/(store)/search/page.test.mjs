@@ -17,11 +17,12 @@ test("long search queries keep a readable heading and reach search unchanged", a
   let searchedQuery;
   const modules = {
     "@/app/actions": { getAllProducts: async () => [] },
-    "@/utils": {
-      pickFirst,
+    "@/utils/pickFirst": { pickFirst },
+    "@/utils/search": {
       searchProducts: (_, value) => { searchedQuery = value; return []; },
     },
-    "@/components/products": { ProductItem: "article", ProductsSkeleton: "div" },
+    "@/components/products/ProductItem": { ProductItem: "article" },
+    "@/components/products/ProductsSkeleton": { ProductsSkeleton: "div" },
     "@/components/products/RailCard": { RailCard: "article" },
     "@/components/search/SearchPill": { SearchPill: () => null },
     "@/lib/display-type": { fitDisplaySize },

@@ -6,8 +6,10 @@ import { HeartIcon } from "@/components/icons";
 import { RailCard } from "@/components/products/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { WishlistProducts } from "@/components/wishlist";
-import { WishlistCount } from "@/components/wishlist/WishlistProducts";
+import {
+  WishlistCount,
+  WishlistProducts,
+} from "@/components/wishlist/WishlistProducts";
 import { getPrincipal } from "@/lib/identity";
 
 export async function generateMetadata() {
