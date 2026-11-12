@@ -40,8 +40,6 @@ const catalog = {
   findById: (id: number) => productsRepository.findById(id),
   findByCategory: (category: ProductCategory) =>
     productsRepository.findByCategory(category),
-  search: (query: string) => productsRepository.search(query),
-  random: (limit = 4) => productsRepository.findRandom(limit),
 };
 
 const fulfillmentSystemAccess = {
@@ -136,7 +134,6 @@ function forCatalogManager(value: Principal) {
   assertCapability(value, "catalog:manage");
   return {
     catalog: {
-      ...catalog,
       findByIdIncludingArchived: (id: number) =>
         productsRepository.findByIdIncludingArchived(id),
       findEditableById: (id: number) => productsRepository.findEditableById(id),
