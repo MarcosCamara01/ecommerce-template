@@ -33,7 +33,7 @@ import {
 import { replayTerminalWithAudit } from "./fulfillment-replay";
 import { FulfillmentLeaseLostError } from "@/lib/order-fulfillment/lease-race";
 
-export type ClaimedEffect = FulfillmentEffectRow & {
+type ClaimedEffect = FulfillmentEffectRow & {
   orderId: number;
   checkoutSessionId: string;
   checkoutIntentId: string;
