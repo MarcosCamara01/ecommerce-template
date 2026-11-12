@@ -3,8 +3,6 @@ import { describe, it } from "node:test";
 
 import { buildLineItems } from "./line-items.ts";
 
-// Mirrors the REPORT-1627 PoC: "Camiseta PoC" (29,99 €) and
-// "Chaqueta Cara PoC" (999 €).
 const CHEAP_PRICE_ID = "price_camiseta_2999";
 const EXPENSIVE_PRICE_ID = "price_chaqueta_99900";
 

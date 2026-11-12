@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (item.outcome === "succeeded") ids.add(item.productId);
   }
   await Promise.all(Array.from(ids, revalidateProducts));
-  // The answer of a sweep is never worth keeping.
+  // Each call runs a sweep, so no cache may keep its answer.
   return NextResponse.json(
     { processed: results.length, results },
     { headers: { "Cache-Control": "private, no-store" } },

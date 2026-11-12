@@ -27,6 +27,8 @@ export async function getOrCreateStripeCustomerWithClient(
   });
   if (owned.data[0]) return owned.data[0].id;
 
+  // Stripe search lags new customers by up to a minute, so a listing by email
+  // still finds one this user created moments ago.
   const existing = await client.customers.list({ email, limit: 100 });
   const ownedCustomer = existing.data.find(
     (customer) => customer.metadata?.userId === principal.userId,

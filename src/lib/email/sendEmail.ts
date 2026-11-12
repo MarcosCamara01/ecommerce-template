@@ -180,11 +180,10 @@ async function sendOwnerEmail(orderDetails: OrderWithDetails, messageId: string)
 }
 
 /**
- * Sends one externally visible message for one durable fulfillment effect.
- *
- * The stable Message-ID helps downstream deduplication, but SMTP remains an
- * at-least-once boundary: a crash after SMTP acceptance and before durable
- * effect completion can cause this same message to be retried.
+ * Sends the message for one fulfillment effect. SMTP delivery is at least
+ * once, so a crash can resend it. The Message-ID derives from the effect's
+ * idempotency key, so a resend carries the same id and receivers can drop the
+ * duplicate.
  */
 export const sendEmail = async (
   orderDetails: OrderWithDetails,

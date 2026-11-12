@@ -74,6 +74,8 @@ export async function requestFulfillment(
       "Checkout payment is not complete and paid",
     );
   }
+  // The shopper can return before the webhook arrives. Ownership and payment
+  // are proven above, so the System Principal queues the work the webhook would.
   const system = getOrderFulfillmentSystemPrincipal();
   await dataAccess.forSystem(system).fulfillment.ensureWork(session.id);
   const record = await dataAccess.forUser(principal).checkout.outcome(session.id);
@@ -234,6 +236,8 @@ async function processWork(
       (total, item) => total + item.unitAmount * item.quantity,
       0,
     );
+    // Sessions are created without tax, shipping or discounts, so the total
+    // must equal the subtotal.
     if (
       chargedSubtotal !== session.amount_subtotal ||
       session.amount_total !== session.amount_subtotal ||
