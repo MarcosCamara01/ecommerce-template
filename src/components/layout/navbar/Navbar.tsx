@@ -1,6 +1,5 @@
 "use client";
 
-/** COMPONENTS */
 import Link from "@/components/ui/link";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
@@ -12,7 +11,6 @@ import { BagLink } from "./BagLink";
 import { NavLink } from "./NavLink";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
-/** FUNCTIONALITY */
 import { useSession } from "@/lib/auth/client";
 import { useManager } from "@/hooks/useManager";
 import dynamic from "next/dynamic";
@@ -121,7 +119,6 @@ export const Navbar = ({
         </nav>
       </header>
 
-      {/* Phones and tablets: a plain bar and a full-screen menu sheet. */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between bg-bg pl-4 pr-2 lg:hidden">
         <Link
           href="/"

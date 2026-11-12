@@ -1,6 +1,5 @@
 "use client";
 
-/** COMPONENTS */
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +15,6 @@ import {
   OrdersIcon,
   UserIcon,
 } from "@/components/icons";
-/** FUNCTIONALITY */
 import { useSession } from "@/lib/auth/client";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 import { cn } from "@/lib/utils";
