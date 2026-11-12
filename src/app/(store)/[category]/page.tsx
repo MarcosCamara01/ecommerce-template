@@ -3,12 +3,12 @@ import { notFound } from "next/navigation";
 import Link from "@/components/ui/link";
 
 import { getCategoryProducts } from "@/app/actions";
-import { ProductsSkeleton } from "@/components/products/ProductsSkeleton";
-import { CatalogListing } from "@/components/products/CatalogListing";
+import { ProductsSkeleton } from "@/components/catalog/ProductsSkeleton";
+import { CatalogListing } from "@/components/catalog/CatalogListing";
 import {
   SectionCount,
   SectionHeading,
-} from "@/components/products/SectionHeading";
+} from "@/components/catalog/SectionHeading";
 import { buttonClass } from "@/components/ui/button-classes";
 import { shopSections } from "@/constants/navigation";
 import { getShopSectionSummaries } from "@/lib/catalog/sections";

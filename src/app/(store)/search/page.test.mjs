@@ -21,9 +21,9 @@ test("long search queries keep a readable heading and reach search unchanged", a
     "@/utils/search": {
       searchProducts: (_, value) => { searchedQuery = value; return []; },
     },
-    "@/components/products/ProductItem": { ProductItem: "article" },
-    "@/components/products/ProductsSkeleton": { ProductsSkeleton: "div" },
-    "@/components/products/RailCard": { RailCard: "article" },
+    "@/components/catalog/ProductItem": { ProductItem: "article" },
+    "@/components/catalog/ProductsSkeleton": { ProductsSkeleton: "div" },
+    "@/components/catalog/RailCard": { RailCard: "article" },
     "@/components/search/SearchPill": { SearchPill: () => null },
     "@/lib/display-type": { fitDisplaySize },
   };

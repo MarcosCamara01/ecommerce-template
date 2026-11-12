@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
 import { HeartIcon } from "@/components/icons";
-import { RailCard } from "@/components/products/RailCard";
+import { RailCard } from "@/components/catalog/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";
 import {

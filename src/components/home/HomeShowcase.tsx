@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "@/components/ui/link";
 import { useEffect, useRef, useState } from "react";
 
-import { AddToCart } from "@/components/cart/AddToCart";
+import { AddToCart } from "@/components/bag/AddToCart";
 import { ArrowRightIcon } from "@/components/icons";
-import { SizePicker } from "@/components/product/SizePicker";
-import { RailCard } from "@/components/products/RailCard";
+import { SizePicker } from "@/components/product-page/SizePicker";
+import { RailCard } from "@/components/catalog/RailCard";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { shopSections } from "@/constants/navigation";
 import { swatchBackground } from "@/constants/colors";

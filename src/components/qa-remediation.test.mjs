@@ -23,7 +23,7 @@ test("auth forms have a safe native POST fallback", async () => {
 });
 
 test("cart actions stay disabled until client hydration", async () => {
-  const addToCart = await source("src/components/cart/AddToCart.tsx");
+  const addToCart = await source("src/components/bag/AddToCart.tsx");
   assert.match(addToCart, /useHydrated/);
   assert.match(addToCart, /disabled=\{[^}]*!isHydrated/);
   assert.doesNotMatch(addToCart, /type="submit"/);
@@ -79,7 +79,7 @@ test("empty categories and footer links provide real recovery paths", async () =
 });
 
 test("product images use one responsive render tree", async () => {
-  const images = await source("src/components/product/ProductImages.tsx");
+  const images = await source("src/components/product-page/ProductImages.tsx");
   assert.equal(
     (images.match(/selectedVariant\.images\.map\(\(image, index\)/g) ?? []).length,
     1,
@@ -93,12 +93,12 @@ test("primary routes keep exactly one accessible heading across data states", as
     home: "src/app/page.tsx",
     search: "src/app/(store)/search/page.tsx",
     cartPage: "src/app/(user)/cart/page.tsx",
-    cartContent: "src/components/cart/CartProducts.tsx",
+    cartContent: "src/components/bag/CartProducts.tsx",
     wishlistPage: "src/app/(user)/wishlist/page.tsx",
     wishlistContent: "src/components/wishlist/WishlistProducts.tsx",
     orders: "src/app/(user)/orders/page.tsx",
     orderDetails: "src/app/(user)/orders/[id]/page.tsx",
-    product: "src/components/product/ProductView.tsx",
+    product: "src/components/product-page/ProductView.tsx",
     error: "src/app/error.tsx",
   };
   const entries = await Promise.all(
@@ -141,7 +141,7 @@ test("remaining route shells and result states preserve heading hierarchy", asyn
     help: "src/app/(store)/help/[topic]/page.tsx",
     admin: "src/components/admin/ProductForm.tsx",
     notFound: "src/app/not-found.tsx",
-    productInfo: "src/components/product/ProductInfo.tsx",
+    productInfo: "src/components/product-page/ProductInfo.tsx",
     accordion: "src/components/ui/accordion.tsx",
   };
   const entries = await Promise.all(
@@ -169,7 +169,7 @@ test("remaining route shells and result states preserve heading hierarchy", asyn
 test("category routes identify the current collection in their accessible heading", async () => {
   const [category, heading] = await Promise.all([
     source("src/app/(store)/[category]/page.tsx"),
-    source("src/components/products/SectionHeading.tsx"),
+    source("src/components/catalog/SectionHeading.tsx"),
   ]);
 
   assert.doesNotMatch(category, />Product collection<\/h1>/);

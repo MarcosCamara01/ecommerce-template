@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "@/components/ui/link";
 import { useEffect, useRef, useState } from "react";
 
-import { AddToCart } from "@/components/cart/AddToCart";
+import { AddToCart } from "@/components/bag/AddToCart";
 import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { merchantPlaceholders } from "@/constants/merchant";
 import { PRODUCT_SIZES } from "@/constants/sizes";

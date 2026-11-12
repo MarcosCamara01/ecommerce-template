@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
-import { SingleProduct } from "@/components/product/SingleProduct";
-import { SingleProductSkeleton } from "@/components/product/SingleProductSkeleton";
-import { SuspenseRandomProducts } from "@/components/product/RandomProducts";
+import { SingleProduct } from "@/components/product-page/SingleProduct";
+import { SingleProductSkeleton } from "@/components/product-page/SingleProductSkeleton";
+import { SuspenseRandomProducts } from "@/components/product-page/RandomProducts";
 import { getProduct } from "@/app/actions";
 import { ProductCategoryZod } from "@/lib/db/drizzle/schema";
 import { pickFirst } from "@/utils/pick-first";

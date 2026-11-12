@@ -4,8 +4,8 @@ import { displayName } from "@/utils/product-name";
 import Link from "@/components/ui/link";
 import { useRef, useState } from "react";
 
-import { AddToCart } from "@/components/cart/AddToCart";
-import { PieceTile } from "@/components/products/PieceTile";
+import { AddToCart } from "@/components/bag/AddToCart";
+import { PieceTile } from "@/components/catalog/PieceTile";
 import { swatchBackground } from "@/constants/colors";
 import { useFlip } from "@/hooks/useFlip";
 import { useWishlistDetails } from "@/hooks/wishlist";

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "@/components/ui/link";
 
 import { CloseIcon } from "@/components/icons";
-import { CheckoutButton } from "@/components/cart/CheckoutButton";
+import { CheckoutButton } from "@/components/bag/CheckoutButton";
 import { buttonClass } from "@/components/ui/button-classes";
 import {
   Sheet,

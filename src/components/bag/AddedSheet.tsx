@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { CheckoutButton } from "@/components/cart/CheckoutButton";
+import { CheckoutButton } from "@/components/bag/CheckoutButton";
 import { BottomSheet, BottomSheetClose } from "@/components/ui/bottom-sheet";
 import { useCartDetails } from "@/hooks/cart";
 import { formatPriceFromEuros } from "@/utils/formatters";
