@@ -27,7 +27,6 @@ export default {
       app,
     },
   ],
-  // A trace is only worth its weight when a test went wrong.
   trace: "retain-on-failure",
   // A test is a few goals, and the agent takes its time over each.
   timeout: 300_000,

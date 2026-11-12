@@ -23,7 +23,6 @@ test.describe("account", { ...asShopper("account"), tags: ["account", "agent", "
     await agent.act("change the name on my profile to {name} and save it", { params: { name: unique(name) } });
     await expect(browser).toHaveURL("/");
 
-    // The store knows the shopper by the new name.
     await expect.poll(async () => (await shopperInStore(api))?.name).toBe(name);
   });
 });

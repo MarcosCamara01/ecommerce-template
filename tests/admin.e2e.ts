@@ -22,7 +22,6 @@ test.describe(
         "this is a form to create a product: it asks for a name, a description, a price, a category and a main image, and it has exactly one variant, with a color, sizes and images",
       );
 
-      // Variants can be added and taken away before anything is saved.
       await agent.act("add another variant to the product");
       await agent.assert("the form now has exactly two variants");
 

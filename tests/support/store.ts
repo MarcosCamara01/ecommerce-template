@@ -20,7 +20,6 @@ export const HAS_CUSTOMER = Boolean(process.env.E2E_USER_CUSTOMER_PASSWORD);
 export const NEEDS_CUSTOMER =
   "set E2E_USER_CUSTOMER_USERNAME and E2E_USER_CUSTOMER_PASSWORD to a shopper with orders";
 
-/** An account that may manage the catalog. */
 export const HAS_ADMIN = Boolean(process.env.E2E_USER_ADMIN_PASSWORD);
 export const NEEDS_ADMIN =
   "set E2E_USER_ADMIN_USERNAME and E2E_USER_ADMIN_PASSWORD to an admin";
@@ -61,7 +60,6 @@ export type Piece = {
   sizes: string[];
 };
 
-/** What a test can look at the page with: the browser, and the agent when it has one. */
 type Page = { browser: Browser; agent?: Agent };
 
 /**
@@ -172,7 +170,6 @@ export async function pieceOnScreen(
   return piece;
 }
 
-/** An address nobody else in the run has: 10.x.y.z, picked at random. */
 const visitorAddress = () => `10.${[0, 0, 0].map(() => randomInt(1, 255)).join(".")}`;
 
 type Account = { name: string; email: string; password: string };
