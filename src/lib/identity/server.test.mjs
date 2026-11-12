@@ -27,7 +27,7 @@ test("a verified Better Auth session becomes the expected Principal", async () =
   assert.equal(Object.isFrozen(identity), true);
 });
 
-function loadServerHarness({ emailVerified, onCreatePrincipal = () => undefined }) {
+function loadServerHarness({ emailVerified }) {
   class IdentityError extends Error {}
   const modules = {
     "server-only": {},
@@ -50,10 +50,11 @@ function loadServerHarness({ emailVerified, onCreatePrincipal = () => undefined 
     "./principal-authority": {
       IdentityError,
       assertCapability: (principal) => principal,
-      createUserPrincipalForIdentityModule: ({ userId, role }) => {
-        onCreatePrincipal();
-        return { kind: "user", userId, role };
-      },
+      createUserPrincipalForIdentityModule: ({ userId, role }) => ({
+        kind: "user",
+        userId,
+        role,
+      }),
     },
   };
   const compiled = ts.transpileModule(source, {

@@ -11,7 +11,7 @@ import {
   type UserPrincipal,
 } from "./principal-authority";
 
-export type AuthenticatedIdentity = Readonly<{
+type AuthenticatedIdentity = Readonly<{
   principal: UserPrincipal;
   email: string;
 }>;
@@ -34,10 +34,6 @@ export async function getPrincipalFromHeaders(
   requestHeaders: Headers,
 ): Promise<UserPrincipal | null> {
   return (await getIdentityFromHeaders(requestHeaders))?.principal ?? null;
-}
-
-export async function getIdentity(): Promise<AuthenticatedIdentity | null> {
-  return getIdentityFromHeaders(await headers());
 }
 
 export async function getPrincipal(): Promise<UserPrincipal | null> {
