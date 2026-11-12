@@ -1,0 +1,3 @@
+# Vendored agent skills are installed byte-for-byte by the skills CLI and
+# hashed in skills-lock.json, so whitespace fixes would break their hashes.
+.agents/skills/** -whitespace
