@@ -77,6 +77,7 @@ function fly(
     element.style.transformOrigin = "";
   };
   flight.finished.then(land, land);
+  return flight;
 }
 
 /**
@@ -110,6 +111,7 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
   const boxes = new Map<string, Box>();
   const moved: { part: Part; from: Box; to: Box }[] = [];
   const entered = new Set<HTMLElement>();
+  const started: Animation[] = [];
 
   for (const part of partsOf(container)) {
     // A piece may still be in flight: its transform tells its layout box
@@ -162,38 +164,56 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
       delay: flights.has(part.element) ? 0 : turn(part.item),
       easing: GLIDE_EASING,
     };
-    fly(
-      part.element,
-      [{ transform: toTransform(invert) }, { transform: "none" }],
-      timing,
+    started.push(
+      fly(
+        part.element,
+        [{ transform: toTransform(invert) }, { transform: "none" }],
+        timing,
+      ),
     );
     if (invert.scaleX === 1 && invert.scaleY === 1) continue;
     part.element.querySelectorAll<HTMLElement>(KEPT).forEach((kept) =>
-      fly(
-        kept,
-        [{ transform: counterTransform(invert) }, { transform: "none" }],
-        timing,
-        pinOf(kept, part.element),
+      started.push(
+        fly(
+          kept,
+          [{ transform: counterTransform(invert) }, { transform: "none" }],
+          timing,
+          pinOf(kept, part.element),
+        ),
       ),
     );
   }
 
   entered.forEach((item) =>
-    fly(
-      item,
-      reduced
-        ? [{ opacity: 0 }, { opacity: 1 }]
-        : [
-            { opacity: 0, transform: "translateY(12px)" },
-            { opacity: 1, transform: "none" },
-          ],
-      {
-        duration: reduced ? 200 : ENTER_MS,
-        delay: turn(item),
-        easing: ENTER_EASING,
-      },
+    started.push(
+      fly(
+        item,
+        reduced
+          ? [{ opacity: 0 }, { opacity: 1 }]
+          : [
+              { opacity: 0, transform: "translateY(12px)" },
+              { opacity: 1, transform: "none" },
+            ],
+        {
+          duration: reduced ? 200 : ENTER_MS,
+          delay: turn(item),
+          easing: ENTER_EASING,
+        },
+      ),
     ),
   );
+
+  if (started.length > 0) {
+    // Cards keep their resting look while the grid glides under a resting
+    // pointer (PieceTile, .quick-add); the hover is theirs again once it lands.
+    container.dataset.flipping = "";
+    Promise.allSettled(started.map((flight) => flight.finished)).then(() => {
+      const flying = Array.from(
+        container.querySelectorAll<HTMLElement>("[data-flip-item], [data-flip-part]"),
+      ).some((element) => flights.has(element));
+      if (!flying) delete container.dataset.flipping;
+    });
+  }
 
   return boxes;
 }
