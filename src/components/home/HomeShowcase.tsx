@@ -80,13 +80,15 @@ export function HomeShowcase({
 
   const animate = (firstLoad || moves > 0) && played !== moves;
   const word = heroLetters(piece.word);
-  const toggle = rotation.rotates ? (
+  // Rendered for every visitor and hidden by CSS under reduced motion (no
+  // rotation, no toggle): removing it after hydration shifted the layout.
+  const toggle = pieces.length > 1 ? (
     <RotationToggle
       playing={rotation.playing}
       stopped={rotation.stopped}
       cycle={moves}
       onToggle={rotation.toggle}
-      className="size-11 lg:size-[52px]"
+      className="size-11 lg:size-[52px] motion-reduce:hidden"
     />
   ) : null;
 

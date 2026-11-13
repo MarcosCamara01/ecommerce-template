@@ -231,14 +231,15 @@ export function HeroDeck({
             key={place}
             data-deck-slot={slot}
             className={cn(
-              "absolute inset-0 transition-[transform,opacity] duration-700 ease-out motion-reduce:transition-opacity",
+              // Under reduced motion one timing with the details' 450ms fade.
+              "absolute inset-0 transition-[transform,opacity] duration-700 ease-out motion-reduce:transition-opacity motion-reduce:duration-450 motion-reduce:ease-out",
               placement(slot, queue),
             )}
           >
             <div
               className={cn(
                 "size-full overflow-hidden rounded-photo bg-photo shadow-hero lg:rounded-photo-lg",
-                settles && "animate-fade-scale",
+                settles && "animate-fade-scale motion-reduce:![animation-delay:0ms]",
               )}
               style={settles ? { animationDelay: `${200 + place * 120}ms` } : undefined}
             >

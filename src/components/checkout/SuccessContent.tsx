@@ -105,7 +105,7 @@ export function SuccessContent({
             {lines.slice(0, 3).map((line, index) => (
               <figure
                 key={line.id}
-                className="flex animate-tile flex-col overflow-hidden rounded-photo bg-field"
+                className="flex animate-tile flex-col overflow-hidden rounded-photo bg-field motion-reduce:![animation-delay:0ms]"
                 style={{ animationDelay: `${420 + index * 80}ms` }}
               >
                 <Image
