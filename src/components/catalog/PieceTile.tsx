@@ -85,7 +85,7 @@ export function PieceTile({
               sizes={sizes}
               // Never ahead of the photos that are on show.
               fetchPriority="low"
-              className="scale-110 object-cover transition-transform duration-300 ease-out group-has-[:focus-visible]/piece:scale-100 group-hover/piece:scale-100 group-hover/piece:duration-700 motion-reduce:scale-100"
+              className="scale-110 object-cover transition-transform duration-300 ease-out group-has-[:focus-visible]/piece:scale-100 group-hover/piece:scale-100 group-hover/piece:duration-500 motion-reduce:scale-100"
             />
           </span>
         ) : null}

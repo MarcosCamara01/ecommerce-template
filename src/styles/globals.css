@@ -264,6 +264,64 @@
   }
 }
 
+/* Quick-add capsule (QuickAdd.tsx). At rest it is hidden, has no glass and
+   takes no clicks. Hovered, it shows with its glass at once but takes clicks
+   only from 120ms, when it is about 0.6 opaque; keyboard focus shows it at
+   once. It turns visible as the hover starts because a fade that starts on
+   a visibility: hidden element runs on the main thread. */
+.quick-add {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition:
+    transform 200ms var(--ease-out),
+    opacity 200ms var(--ease-out),
+    visibility 0s linear 200ms,
+    -webkit-backdrop-filter 0s linear 200ms,
+    backdrop-filter 0s linear 200ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group\/piece:hover .quick-add {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    backdrop-filter: blur(20px) saturate(1.5);
+    transition:
+      transform 350ms var(--ease-out) 75ms,
+      opacity 350ms var(--ease-out) 75ms,
+      pointer-events 0s linear 120ms,
+      visibility 0s,
+      -webkit-backdrop-filter 0s,
+      backdrop-filter 0s;
+    transition-behavior: allow-discrete;
+  }
+}
+
+.group\/piece:has(:focus-visible) .quick-add {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  transition:
+    transform 200ms var(--ease-out),
+    opacity 200ms var(--ease-out),
+    visibility 0s,
+    -webkit-backdrop-filter 0s,
+    backdrop-filter 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-add {
+    transform: none;
+  }
+}
+
 /* Theme switch: instant. While the theme flips nothing transitions, because
    every colour on the page changes at once and they would all fade together
    and smear. */
