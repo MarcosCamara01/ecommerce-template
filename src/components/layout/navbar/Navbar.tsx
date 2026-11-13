@@ -136,7 +136,7 @@ export const Navbar = ({
           >
             <SearchIcon />
           </button>
-          <BagLink className="mx-1 h-10 px-3.5 text-13" />
+          <BagLink className="mx-1 h-11 px-3.5 text-13" />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <button

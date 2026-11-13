@@ -51,8 +51,8 @@ export const QuantityStepper = ({
   );
 
   const step = cn(
-    "grid place-items-center text-lg",
-    compact ? "h-9 w-10 text-base" : "size-11",
+    "press grid size-11 place-items-center rounded-pill transition-[transform,background-color] duration-120 ease-out active:bg-card",
+    compact ? "text-base" : "text-lg",
   );
 
   return (
