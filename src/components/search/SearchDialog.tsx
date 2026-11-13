@@ -110,7 +110,7 @@ export function SearchDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] backdrop-blur-[6px] dark:bg-black/55",
+            "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] lg:backdrop-blur-[6px] dark:bg-black/55",
             !instant &&
               "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-150 data-[state=open]:duration-150 ease-out",
           )}
