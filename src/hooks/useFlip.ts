@@ -110,7 +110,7 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
   const base = container.getBoundingClientRect();
   const boxes = new Map<string, Box>();
   const moved: { part: Part; from: Box; to: Box }[] = [];
-  const entered = new Set<HTMLElement>();
+  const entered = new Map<HTMLElement, Box>();
   const started: Animation[] = [];
 
   for (const part of partsOf(container)) {
@@ -130,8 +130,9 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
     boxes.set(part.key, to);
     if (!memory) continue;
     const before = memory.get(part.key);
-    if (!before) entered.add(part.item);
-    else if (!sameBox(before, to)) {
+    if (!before) {
+      if (!entered.has(part.item)) entered.set(part.item, to);
+    } else if (!sameBox(before, to)) {
       moved.push({ part, from: drawnBox(before, matrix), to });
     }
   }
@@ -142,17 +143,37 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
   const top = -base.top;
   const bottom = window.innerHeight - base.top;
   const onScreen = (box: Box) => box.top < bottom && box.top + box.height > top;
+  const flying = moved.map(({ part, from, to }) => ({
+    part,
+    to,
+    invert:
+      !reduced && (onScreen(from) || onScreen(to))
+        ? inversion(from, to, part.mode)
+        : null,
+  }));
+
+  // Turns go by where pieces land, top to bottom then left to right, movers
+  // and newcomers together, so the grid ripples as one wave. Only pieces
+  // that set off from rest take a turn, or the wave would have gaps.
+  const landing = new Map<HTMLElement, Box>();
+  for (const { part, to, invert } of flying) {
+    if (invert && !flights.has(part.element) && !landing.has(part.item)) {
+      landing.set(part.item, to);
+    }
+  }
+  entered.forEach((to, item) => {
+    if (!landing.has(item)) landing.set(item, to);
+  });
   const order = new Map<HTMLElement, number>();
+  Array.from(landing)
+    .sort(([, a], [, b]) => a.top - b.top || a.left - b.left)
+    .forEach(([item]) => order.set(item, order.size));
   const turn = (item: HTMLElement) => {
     if (!order.has(item)) order.set(item, order.size);
     return Math.min(order.get(item) ?? 0, STAGGERED) * STAGGER_MS;
   };
 
-  for (const { part, from, to } of moved) {
-    const invert =
-      !reduced && (onScreen(from) || onScreen(to))
-        ? inversion(from, to, part.mode)
-        : null;
+  for (const { part, invert } of flying) {
     if (!invert) {
       ground(part.element);
       continue;
@@ -184,7 +205,7 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
     );
   }
 
-  entered.forEach((item) =>
+  entered.forEach((_, item) =>
     started.push(
       fly(
         item,
@@ -196,7 +217,7 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
             ],
         {
           duration: reduced ? 200 : ENTER_MS,
-          delay: turn(item),
+          delay: reduced ? 0 : turn(item),
           easing: ENTER_EASING,
         },
       ),
