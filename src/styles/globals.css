@@ -196,20 +196,157 @@
     min-height: 0;
     overflow: hidden;
   }
+
+  /* The Bag pill's count arrives after the session: the pill widens instead of snapping. */
+  .count-reveal {
+    display: inline-grid;
+    grid-template-columns: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-columns 220ms var(--ease-out),
+      opacity 220ms var(--ease-out);
+  }
+
+  .count-reveal[data-open="true"] {
+    grid-template-columns: 1fr;
+    opacity: 1;
+  }
+
+  /* clip, not hidden, so the count's vertical roll still shows; min-width 0
+     is what lets the 0fr track close. */
+  .count-reveal > span {
+    min-width: 0;
+    overflow-x: clip;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .count-reveal {
+      transition-property: opacity;
+    }
+  }
+
+  .greet-in {
+    transition: opacity 200ms var(--ease-out);
+  }
+
+  @starting-style {
+    .greet-in {
+      opacity: 0;
+    }
+  }
+
+  /* A busy spinner waits 120ms, so a fast add never flashes it. */
+  .busy-in {
+    transition: opacity 150ms var(--ease-out) 120ms;
+  }
+
+  @starting-style {
+    .busy-in {
+      opacity: 0;
+    }
+  }
 }
 
-/* Items that arrive with a panel: 50ms stagger via --i, after the panel. */
+/* Items that arrive with a panel: 50ms stagger via --i, after the panel.
+   Capped at the fifth line: about three show before the list scrolls. */
 .stagger-in {
   transition:
     opacity 300ms var(--ease-out),
     transform 300ms var(--ease-out);
-  transition-delay: calc(140ms + var(--i, 0) * 50ms);
+  transition-delay: calc(140ms + min(var(--i, 0), 4) * 50ms);
 }
 
 @starting-style {
   .stagger-in {
     opacity: 0;
     transform: translateY(12px);
+  }
+}
+
+/* Quick-add capsule (QuickAdd.tsx). At rest it is hidden, has no glass and
+   takes no clicks. Hovered, it shows with its glass at once but takes clicks
+   only from 120ms, when it is about 0.6 opaque; keyboard focus shows it at
+   once. It turns visible as the hover starts because a fade that starts on
+   a visibility: hidden element runs on the main thread. */
+.quick-add {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition:
+    transform 200ms var(--ease-out),
+    opacity 200ms var(--ease-out),
+    visibility 0s linear 200ms,
+    -webkit-backdrop-filter 0s linear 200ms,
+    backdrop-filter 0s linear 200ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group\/piece:hover .quick-add {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    backdrop-filter: blur(20px) saturate(1.5);
+    transition:
+      transform 350ms var(--ease-out) 75ms,
+      opacity 350ms var(--ease-out) 75ms,
+      pointer-events 0s linear 120ms,
+      visibility 0s,
+      -webkit-backdrop-filter 0s,
+      backdrop-filter 0s;
+    transition-behavior: allow-discrete;
+  }
+}
+
+.group\/piece:has(:focus-visible) .quick-add {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  transition:
+    transform 200ms var(--ease-out),
+    opacity 200ms var(--ease-out),
+    visibility 0s,
+    -webkit-backdrop-filter 0s,
+    backdrop-filter 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-add {
+    transform: none;
+  }
+}
+
+/* Moving with the keyboard (InputModality), a card shows and hides its
+   capsule at once: no half-shown card left behind on every Tab. Only
+   visibility keeps its wait on the way out: while focus passes from the
+   heart to the sizes nothing in the card is :focus-visible, and a hidden
+   size cannot take focus. */
+[data-input="keyboard"] .quick-add {
+  transition: visibility 0s linear 200ms !important;
+}
+
+[data-input="keyboard"] .group\/piece:hover .quick-add,
+[data-input="keyboard"] .group\/piece:has(:focus-visible) .quick-add {
+  transition: none !important;
+}
+
+/* While a grid glides (useFlip), cards keep their resting look: a card
+   carried under a resting pointer does not open. */
+[data-flipping] .quick-add {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-flipping] .quick-add {
+    transform: translateY(12px) !important;
   }
 }
 
@@ -237,9 +374,12 @@
     }
   }
 
+  .stagger-in {
+    transition-delay: 0ms;
+  }
+
   /* Keep fades, drop movement. */
-  .animate-pop,
-  .animate-bump {
+  .animate-pop {
     animation: none;
   }
 

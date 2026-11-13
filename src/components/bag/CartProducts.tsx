@@ -37,7 +37,9 @@ const ColourBar = ({ items, className }: { items: CartItemWithDetails[]; classNa
     {items.map((item) => (
       <span
         key={item.id}
-        className="rounded-pill shadow-[inset_0_0_0_1px_var(--line)]"
+        // flex-grow is layout, on purpose: scaleX would squash the pill ends,
+        // and it is a 12px bar of a few spans.
+        className="min-w-1 rounded-pill shadow-[inset_0_0_0_1px_var(--line)] transition-[flex-grow] duration-220 ease-out motion-reduce:transition-none"
         style={{ flexGrow: item.quantity, background: swatchBackground(item.variant.color) }}
       />
     ))}

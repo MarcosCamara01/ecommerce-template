@@ -25,6 +25,10 @@ for (const desktop of [true, false]) {
       await new Promise(setImmediate);
       assert.equal(harness.render().button["aria-busy"], true);
       assert.equal(harness.render().button.disabled, false, "a busy button keeps keyboard focus");
+      assert.equal(harness.effects.held, desktop, "on desktop the pill keeps its count while the photo flies");
+      const [spinner, busyLabel] = harness.render().button.children.props.children;
+      assert.equal(spinner.type, "spinner", "a ring spinner before the label");
+      assert.equal(busyLabel, "Adding…");
       harness.render().button.onClick();
       assert.equal(harness.submissions.length, 1, "a click while adding adds nothing");
       harness.assertNoConfirmation();
@@ -32,6 +36,8 @@ for (const desktop of [true, false]) {
       harness.reject(new Error("Request rejected"));
       await assert.rejects(harness.completion(), { message: "Request rejected" });
       assert.equal(harness.render().button["aria-busy"], undefined);
+      assert.equal(harness.effects.held, false, "a failed add lets the pill show the bag as it is");
+      assert.match(harness.render().button.children, /^Add M to bag/);
       harness.assertNoConfirmation();
 
       harness.render().button.onClick();
@@ -52,14 +58,31 @@ test("desktop success flies the photo, confirms the addition and opens the bag",
     assert.deepEqual(harness.submissions, [{ size: "M", variantId: 2 }]);
     assert.equal(harness.effects.flights, 1);
     assert.equal(harness.effects.bumps, 1);
+    assert.equal(harness.effects.held, false, "the count changes as the photo lands");
     assert.equal(harness.render().button.children, "Added ✓ — view bag");
     assert.equal(harness.render().sheet.item, null);
+    assert.deepEqual(harness.delays, [160], "the bump reads before the drawer covers the pill");
     harness.runTimers();
     assert.deepEqual(harness.effects.opened, [{ name: "T-Shirt", color: "Blue", size: "M" }]);
 
     harness.render().button.onClick();
     assert.equal(harness.submissions.length, 1);
     assert.equal(harness.effects.opened.length, 2);
+  } finally {
+    harness.dispose();
+  }
+});
+
+test("desktop success with nothing to fly opens the bag at once", async () => {
+  const harness = loadHarness({ desktop: true, flew: false });
+  try {
+    harness.render().button.onClick();
+    harness.resolve({ id: 7 });
+    await harness.completion();
+    assert.equal(harness.effects.bumps, 1);
+    assert.deepEqual(harness.delays, [0]);
+    harness.runTimers();
+    assert.deepEqual(harness.effects.opened, [{ name: "T-Shirt", color: "Blue", size: "M" }]);
   } finally {
     harness.dispose();
   }
@@ -74,7 +97,7 @@ test("mobile success opens the Added sheet with the bought item", async () => {
     assert.deepEqual(harness.render().sheet.item, {
       name: "T-Shirt", color: "Blue", size: "M", price: 25, image: "/photo.jpg",
     });
-    assert.deepEqual(harness.effects, { flights: 0, bumps: 0, opened: [] });
+    assert.deepEqual(harness.effects, { flights: 0, bumps: 0, opened: [], held: false });
   } finally {
     harness.dispose();
   }
@@ -91,12 +114,13 @@ test("an attempt without a selected size submits nothing", () => {
   }
 });
 
-function loadHarness({ desktop, ...options }) {
+function loadHarness({ desktop, flew = true, ...options }) {
   const client = new QueryClient({ defaultOptions: { mutations: { gcTime: 0 } } });
   const states = [];
   const timers = [];
+  const delays = [];
   const submissions = [];
-  const effects = { flights: 0, bumps: 0, opened: [] };
+  const effects = { flights: 0, bumps: 0, opened: [], held: false };
   let stateIndex = 0;
   let completion;
   let resolve;
@@ -117,13 +141,16 @@ function loadHarness({ desktop, ...options }) {
     "@/utils/product-name": { displayName: (name) => name },
     "@/components/bag/AddedSheet": { AddedSheet: "added-sheet" },
     "@/components/bag/bag-ui": {
-      bumpBag: () => { effects.bumps += 1; },
+      bumpBag: () => { effects.bumps += 1; effects.held = false; },
+      holdBagCount: () => { effects.held = true; },
+      releaseBagCount: () => { effects.held = false; },
       openBag: (line) => { effects.opened.push(line); },
     },
     "@/components/bag/fly-to-bag": {
-      flyToBag: () => { effects.flights += 1; return Promise.resolve(); },
+      flyToBag: () => { effects.flights += 1; return Promise.resolve(flew); },
     },
     "@/components/ui/button": { Button: "button" },
+    "@/components/ui/loader": { Spinner: "spinner" },
     "@/hooks/cart": {
       useCartMutation: () => ({
         add: (variables, callbacks) => {
@@ -142,7 +169,10 @@ function loadHarness({ desktop, ...options }) {
   const componentModule = { exports: {} };
   new Function("require", "module", "exports", "window", compiled)(
     (id) => modules[id] ?? require(id), componentModule, componentModule.exports,
-    { matchMedia: () => ({ matches: desktop }), setTimeout: (callback) => timers.push(callback) },
+    {
+      matchMedia: () => ({ matches: desktop }),
+      setTimeout: (callback, ms) => { timers.push(callback); delays.push(ms); },
+    },
   );
   const render = () => {
     stateIndex = 0;
@@ -156,13 +186,18 @@ function loadHarness({ desktop, ...options }) {
     return { button: button.props, sheet: sheet.props };
   };
   return {
-    render, submissions, effects, resolve, reject,
+    render, submissions, effects, delays, resolve, reject,
     completion: () => completion,
     runTimers: () => timers.splice(0).forEach((callback) => callback()),
     assertNoConfirmation() {
-      assert.deepEqual(effects, { flights: 0, bumps: 0, opened: [] });
+      assert.deepEqual(
+        { flights: effects.flights, bumps: effects.bumps, opened: effects.opened },
+        { flights: 0, bumps: 0, opened: [] },
+      );
       assert.equal(render().sheet.item, null);
-      assert.match(render().button.children, /^Add M? ?to bag/);
+      const { children } = render().button;
+      const text = typeof children === "string" ? children : children.props.children.filter((part) => typeof part === "string").join("");
+      assert.doesNotMatch(text, /Added/);
     },
     dispose() { reject(new Error("Test cleanup")); unsubscribe(); client.clear(); },
   };

@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { bumpBag, openBag } from "@/components/bag/bag-ui";
+import {
+  bumpBag,
+  holdBagCount,
+  openBag,
+  releaseBagCount,
+} from "@/components/bag/bag-ui";
 import { flyToBag } from "@/components/bag/fly-to-bag";
 import { Spinner } from "@/components/ui/loader";
 import { useCartMutation } from "@/hooks/cart";
@@ -53,6 +58,7 @@ export function QuickAdd({
   const addSize = (size: ProductSize) => {
     if (pending) return;
     setPending(size);
+    holdBagCount();
     add(
       { size, variantId: variant.id },
       {
@@ -61,15 +67,18 @@ export function QuickAdd({
           setDone(size);
           window.clearTimeout(doneTimer.current);
           doneTimer.current = window.setTimeout(() => setDone(null), DONE_MS);
-          void flyToBag(flySource()).then(() => {
+          void flyToBag(flySource()).then((flew) => {
             bumpBag();
             window.setTimeout(
               () => openBag({ name, color: variant.color, size }),
-              160,
+              flew ? 160 : 0,
             );
           });
         },
-        onError: () => setPending(null),
+        onError: () => {
+          setPending(null);
+          releaseBagCount();
+        },
       },
     );
   };
@@ -90,12 +99,12 @@ export function QuickAdd({
         const next = (tabStop + step + sizes.length) % sizes.length;
         event.currentTarget.querySelectorAll("button")[next]?.focus();
       }}
-      className="pointer-events-none absolute inset-x-2.5 bottom-2.5 flex h-11 translate-y-3 rounded-pill border border-white/50 bg-white/70 p-1 text-[#111214] opacity-0 shadow-float backdrop-blur-[20px] backdrop-saturate-150 transition-[transform,opacity] duration-200 ease-out group-has-[:focus-visible]/piece:pointer-events-auto group-has-[:focus-visible]/piece:translate-y-0 group-has-[:focus-visible]/piece:opacity-100 group-hover/piece:pointer-events-auto group-hover/piece:translate-y-0 group-hover/piece:opacity-100 group-hover/piece:delay-75 group-hover/piece:duration-350 motion-reduce:translate-y-0"
+      className="quick-add absolute inset-x-2.5 bottom-2.5 flex h-11 rounded-pill border border-white/50 bg-white/70 p-1 text-[#111214] shadow-float"
     >
       {pointed !== null ? (
         <span
           aria-hidden="true"
-          className="absolute inset-y-1 left-1 animate-fade-in rounded-pill bg-[#111214] transition-transform duration-220 ease-in-out [animation-duration:150ms] motion-reduce:transition-none"
+          className="absolute inset-y-1 left-1 animate-fade-in rounded-pill bg-[#111214] transition-transform duration-220 ease-in-out [animation-duration:150ms] motion-reduce:transition-none [[data-input=keyboard]_&]:!animate-none [[data-input=keyboard]_&]:!transition-none"
           style={{
             width: `calc((100% - 8px) / ${sizes.length})`,
             transform: `translateX(${pointed * 100}%)`,
@@ -116,14 +125,17 @@ export function QuickAdd({
           }}
           onClick={() => addSize(size)}
           className={cn(
-            "relative grid h-full min-w-0 flex-1 place-items-center rounded-pill text-13 font-medium transition-colors duration-150 ease-out focus-visible:outline-[#111214]",
+            "relative grid h-full min-w-0 flex-1 place-items-center rounded-pill text-13 font-medium transition-colors duration-150 ease-out focus-visible:outline-[#111214] [[data-input=keyboard]_&]:!transition-none",
             pointed === position && "text-white",
           )}
         >
-          {/* The sizes arrive one after another, just behind the capsule. */}
+          {/* The sizes arrive one after another, just behind the capsule.
+              They leave inside its fade and reset once it has gone: a fade
+              of their own ran on the main thread, because the capsule they
+              sit in is visibility: hidden at rest. */}
           <span
             style={{ "--i": position } as React.CSSProperties}
-            className="grid translate-y-1.5 place-items-center opacity-0 transition-[transform,opacity] duration-300 ease-out group-has-[:focus-visible]/piece:translate-y-0 group-has-[:focus-visible]/piece:opacity-100 group-hover/piece:translate-y-0 group-hover/piece:opacity-100 group-hover/piece:[transition-delay:calc(110ms_+_var(--i)_*_30ms)] motion-reduce:translate-y-0"
+            className="grid translate-y-1.5 place-items-center opacity-0 transition-[transform,opacity] delay-200 duration-0 ease-out group-has-[:focus-visible]/piece:translate-y-0 group-has-[:focus-visible]/piece:opacity-100 group-has-[:focus-visible]/piece:delay-0 group-has-[:focus-visible]/piece:duration-300 group-hover/piece:translate-y-0 group-hover/piece:opacity-100 group-hover/piece:duration-300 group-hover/piece:[transition-delay:calc(110ms_+_var(--i)_*_30ms)] motion-reduce:translate-y-0 motion-reduce:group-hover/piece:!delay-0 [[data-input=keyboard]_&]:!duration-0 [[data-input=keyboard]_&]:!delay-0 [[data-flipping]_&]:!opacity-0 motion-safe:[[data-flipping]_&]:!translate-y-1.5"
           >
             {pending === size ? (
               <Spinner className="size-3.5" />

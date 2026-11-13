@@ -71,7 +71,8 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
     }));
 
     return (
-      <Card className="overflow-hidden rounded-toast bg-field">
+      // When the list re-arranges (useFlip) the card follows its corner: text never stretches.
+      <Card data-flip-part="move" className="overflow-hidden rounded-toast bg-field">
         <CardHeader className="px-[18px] py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
