@@ -248,12 +248,13 @@
   }
 }
 
-/* Items that arrive with a panel: 50ms stagger via --i, after the panel. */
+/* Items that arrive with a panel: 50ms stagger via --i, after the panel.
+   Capped at the fifth line: about three show before the list scrolls. */
 .stagger-in {
   transition:
     opacity 300ms var(--ease-out),
     transform 300ms var(--ease-out);
-  transition-delay: calc(140ms + var(--i, 0) * 50ms);
+  transition-delay: calc(140ms + min(var(--i, 0), 4) * 50ms);
 }
 
 @starting-style {
@@ -285,6 +286,10 @@
     .stagger-in {
       transform: none;
     }
+  }
+
+  .stagger-in {
+    transition-delay: 0ms;
   }
 
   /* Keep fades, drop movement. */
