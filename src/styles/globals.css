@@ -63,6 +63,22 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Taps answer at once (no double-tap zoom wait), and a long press on a
+     control does not select its label. Links and text stay selectable. */
+  button,
+  a,
+  [role="button"],
+  summary,
+  label {
+    touch-action: manipulation;
+  }
+
+  button,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   body {
     min-height: 100dvh;
     background: var(--bg);

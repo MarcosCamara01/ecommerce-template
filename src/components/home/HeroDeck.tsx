@@ -144,7 +144,7 @@ export function HeroDeck({
       }}
       onPointerUp={(event) => endDrag(event, false)}
       onPointerCancel={(event) => endDrag(event, true)}
-      className="absolute left-1/2 top-[70px] aspect-[2/3] w-64 -translate-x-1/2 touch-pan-y select-none lg:top-[calc(var(--hero-u)*150)] lg:w-[min(30vw,calc(var(--hero-u)*432))]"
+      className="absolute left-1/2 top-[70px] aspect-[2/3] w-64 -translate-x-1/2 touch-pan-y select-none [-webkit-touch-callout:none] lg:top-[calc(var(--hero-u)*150)] lg:w-[min(30vw,calc(var(--hero-u)*432))]"
     >
       {slots.map((slot) => {
         const place = step + slot;
