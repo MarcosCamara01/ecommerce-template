@@ -71,7 +71,7 @@ export function BottomSheet({
           <Dialog.Portal forceMount>
             <Dialog.Overlay forceMount asChild>
               <m.div
-                className="fixed inset-0 z-50 bg-black/35"
+                className="fixed inset-0 z-50 bg-black/35 data-[state=closed]:!pointer-events-none"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -87,7 +87,7 @@ export function BottomSheet({
               <m.div
                 ref={panelRef}
                 className={cn(
-                  "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col gap-4 overflow-y-auto rounded-t-[28px] bg-bg px-4 pb-7 pt-2.5 text-fg shadow-[0_-20px_60px_rgba(0,0,0,.3)] outline-none",
+                  "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col gap-4 overflow-y-auto rounded-t-[28px] bg-bg px-4 pb-7 pt-2.5 text-fg shadow-[0_-20px_60px_rgba(0,0,0,.3)] outline-none data-[state=closed]:!pointer-events-none",
                   className,
                 )}
                 drag="y"

@@ -92,9 +92,14 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
       <AnimatePresence>
         {open ? (
           <SheetPrimitive.Portal forceMount>
+            {/* While they leave, the scrim and panel stop catching clicks;
+                `!` beats the inline pointer-events Radix sets. */}
             <SheetPrimitive.Overlay forceMount asChild>
               <m.div
-                className={cn("fixed inset-0 z-50 bg-scrim", overlayClassName)}
+                className={cn(
+                  "fixed inset-0 z-50 bg-scrim data-[state=closed]:!pointer-events-none",
+                  overlayClassName,
+                )}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -105,7 +110,7 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
               <m.div
                 ref={ref}
                 className={cn(
-                  "fixed z-50 flex flex-col bg-panel text-fg outline-none",
+                  "fixed z-50 flex flex-col bg-panel text-fg outline-none data-[state=closed]:!pointer-events-none",
                   sideClasses[side],
                   className,
                 )}
