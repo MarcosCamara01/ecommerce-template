@@ -9,7 +9,8 @@ export const ProductsSkeleton = ({ items }: { items: number }) => (
     {Array.from({ length: items }, (_, index) => {
       // A negative delay starts each column mid-shimmer: a positive one
       // left the tile at full opacity until it began, then it snapped.
-      const phase = { animationDelay: `${-(index % 4) * 150}ms` };
+      // Counting down from the last column keeps the wave left to right.
+      const phase = { animationDelay: `${-(3 - (index % 4)) * 150}ms` };
       return (
         <div key={index} className="flex flex-col gap-2.5">
           <Skeleton className="aspect-[3/4] rounded-[18px] lg:rounded-photo" style={phase} />

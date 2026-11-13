@@ -170,9 +170,10 @@ export const Navbar = ({
               onCloseAutoFocus={(event) => {
                 if (searchAfterMenuCloseRef.current) {
                   // The menu button takes focus back first, so closing the
-                  // search returns there.
+                  // search returns there. Both cover the screen on a phone,
+                  // so the search cuts in: a fade would flash the page.
                   searchAfterMenuCloseRef.current = false;
-                  queueMicrotask(() => openSearch());
+                  queueMicrotask(() => openSearch(true));
                   return;
                 }
                 if (!skipMobileMenuCloseAutoFocusRef.current) return;

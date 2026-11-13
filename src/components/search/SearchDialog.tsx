@@ -75,7 +75,8 @@ function popularTerms(catalog: ProductWithVariants[]) {
 
 /**
  * Search modal. Opened by click it fades and scales in (150ms); opened
- * with ⌘K or "/" it appears at once, and Esc or ⌘K close it at once.
+ * with ⌘K, "/" or from the phone menu it appears at once, and Esc or ⌘K
+ * close it at once.
  * Results update as you type without animating; ↑ ↓ move, ↵ opens.
  */
 export function SearchDialog({
