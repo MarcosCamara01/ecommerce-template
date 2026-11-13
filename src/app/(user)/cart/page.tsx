@@ -39,12 +39,14 @@ const CartPage = () => {
           </svg>
         </Link>
       </div>
-      <h1 className="font-display text-[120px] leading-[0.8] lg:pt-10 lg:text-[min(240px,16.6vw)]">
-        Bag
+      <div className="flex flex-wrap items-end justify-between gap-4 lg:pt-10">
+        <h1 className="font-display text-[120px] leading-[0.8] lg:text-[min(240px,16.6vw)]">
+          Bag
+        </h1>
         <Suspense fallback={null}>
           <BagCount />
         </Suspense>
-      </h1>
+      </div>
       <Suspense fallback={<Skeleton className="h-40 rounded-photo" />}>
         <CartContent />
       </Suspense>

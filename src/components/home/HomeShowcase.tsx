@@ -185,7 +185,9 @@ export function HomeShowcase({
                 />
               </button>
             ))}
-            <span className="ml-auto text-xs">{pieces.length} colors</span>
+            <span className="ml-auto text-xs">
+              {pieces.length} {pieces.length === 1 ? "piece" : "pieces"}
+            </span>
             {toggle}
           </div>
 

@@ -150,15 +150,19 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
   );
 };
 
-/** Title suffix with the live piece count: "Bag (3)". */
+/** The live piece count beside the title, as on the wishlist; none when the bag is empty. */
 export const BagCount = () => {
   const { items, isSuccess } = useCartDetails();
   if (!isSuccess) return null;
   const count = items.reduce((total, item) => total + item.quantity, 0);
+  if (count === 0) return null;
+  const label = count >= 1000 ? count.toLocaleString("en-US") : String(count).padStart(2, "0");
   return (
-    <span className="opacity-60">
-      {" "}
-      (<RollingNumber value={count} />)
+    <span
+      aria-label={`${count} ${count === 1 ? "piece" : "pieces"}`}
+      className="pb-1.5 font-display text-[40px] font-extrabold leading-none tabular-nums lg:text-[64px]"
+    >
+      <RollingNumber value={count}>{label}</RollingNumber>
     </span>
   );
 };

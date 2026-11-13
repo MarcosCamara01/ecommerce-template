@@ -43,12 +43,15 @@ export function BagDrawer() {
         className="w-[min(460px,100vw)] gap-5 bg-bg p-7 shadow-[-30px_0_80px_rgba(0,0,0,.25)]"
       >
         <div className="flex items-center justify-between">
-          <SheetTitle className="text-[64px]">
-            Bag {isLoading ? "" : `(${count})`}
+          <SheetTitle className="min-w-0 text-[64px]">
+            Bag{" "}
+            {isLoading ? null : (
+              <span className="whitespace-nowrap">({count.toLocaleString("en-US")})</span>
+            )}
           </SheetTitle>
           <SheetClose
             aria-label="Close bag"
-            className="press grid size-12 place-items-center rounded-pill border border-line"
+            className="press grid size-12 shrink-0 place-items-center rounded-pill border border-line"
           >
             <CloseIcon size={16} />
           </SheetClose>
