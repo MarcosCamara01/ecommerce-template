@@ -116,7 +116,7 @@ export function QuickAdd({
           }}
           onClick={() => addSize(size)}
           className={cn(
-            "relative grid h-full min-w-0 flex-1 place-items-center rounded-pill text-13 font-medium transition-colors duration-150 ease-out",
+            "relative grid h-full min-w-0 flex-1 place-items-center rounded-pill text-13 font-medium transition-colors duration-150 ease-out focus-visible:outline-[#111214]",
             pointed === position && "text-white",
           )}
         >

@@ -128,8 +128,8 @@ export const WishlistButton = ({
           "press relative grid size-full place-items-center rounded-pill transition-[background-color,color,transform] duration-200",
           appearance === "disc" &&
             (isFavorite && !showsRemove
-              ? "bg-[#111214] text-white"
-              : "bg-white/85 text-[#111214]"),
+              ? "bg-[#111214] text-white focus-visible:outline-[#111214]"
+              : "bg-white/85 text-[#111214] focus-visible:outline-[#111214]"),
           appearance === "outline" &&
             (isFavorite ? "bg-fg text-bg" : "border border-line text-fg"),
         )}

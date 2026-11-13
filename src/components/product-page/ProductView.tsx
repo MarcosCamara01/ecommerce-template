@@ -28,7 +28,7 @@ const stockLine = (variant: ProductVariant) =>
       : variant.sizes.join(" · ");
 
 const overlayButton =
-  "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214]";
+  "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214] focus-visible:outline-[#111214]";
 
 // Desktop sizes for the name, largest first. A short name is set giant; a
 // longer one steps down until it is no taller than two lines of the largest
