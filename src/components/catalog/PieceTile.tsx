@@ -76,7 +76,7 @@ export function PieceTile({
           className="object-cover"
         />
         {canHover && nextSrc && nextSrc !== src ? (
-          <span className="absolute inset-0 transition-[clip-path,opacity] duration-300 ease-out [clip-path:inset(100%_0_0_0_round_24px_24px_0_0)] group-has-[:focus-visible]/piece:[clip-path:inset(0_0_0_0_round_0px)] group-hover/piece:duration-500 group-hover/piece:[clip-path:inset(0_0_0_0_round_0px)] motion-reduce:opacity-0 motion-reduce:[clip-path:none] motion-reduce:group-has-[:focus-visible]/piece:opacity-100 motion-reduce:group-hover/piece:opacity-100">
+          <span className="absolute inset-0 transition-[clip-path,opacity] duration-300 ease-out [clip-path:inset(100%_0_0_0_round_24px_24px_0_0)] group-has-[:focus-visible]/piece:[clip-path:inset(0_0_0_0_round_0px)] group-hover/piece:duration-500 group-hover/piece:[clip-path:inset(0_0_0_0_round_0px)] motion-reduce:opacity-0 motion-reduce:[clip-path:none] motion-reduce:group-has-[:focus-visible]/piece:opacity-100 motion-reduce:group-hover/piece:opacity-100 [[data-input=keyboard]_&]:!duration-0">
             <Image
               fill
               data-fly=""
@@ -85,7 +85,7 @@ export function PieceTile({
               sizes={sizes}
               // Never ahead of the photos that are on show.
               fetchPriority="low"
-              className="scale-110 object-cover transition-transform duration-300 ease-out group-has-[:focus-visible]/piece:scale-100 group-hover/piece:scale-100 group-hover/piece:duration-500 motion-reduce:scale-100"
+              className="scale-110 object-cover transition-transform duration-300 ease-out group-has-[:focus-visible]/piece:scale-100 group-hover/piece:scale-100 group-hover/piece:duration-500 motion-reduce:scale-100 [[data-input=keyboard]_&]:!duration-0"
             />
           </span>
         ) : null}

@@ -322,6 +322,20 @@
   }
 }
 
+/* Moving with the keyboard (InputModality), a card shows and hides its
+   capsule at once: no half-shown card left behind on every Tab. Only
+   visibility keeps its wait on the way out: while focus passes from the
+   heart to the sizes nothing in the card is :focus-visible, and a hidden
+   size cannot take focus. */
+[data-input="keyboard"] .quick-add {
+  transition: visibility 0s linear 200ms !important;
+}
+
+[data-input="keyboard"] .group\/piece:hover .quick-add,
+[data-input="keyboard"] .group\/piece:has(:focus-visible) .quick-add {
+  transition: none !important;
+}
+
 /* Theme switch: instant. While the theme flips nothing transitions, because
    every colour on the page changes at once and they would all fade together
    and smear. */
