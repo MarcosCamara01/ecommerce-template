@@ -4,6 +4,7 @@ import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 
+import { usePressOutsideGuard } from "@/hooks/usePressOutsideGuard";
 import { cn } from "@/lib/utils";
 import { EASE_DRAWER, EASE_OUT } from "@/lib/motion";
 
@@ -69,10 +70,18 @@ type SheetContentProps = Omit<
 
 const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
   (
-    { side = "right", className, overlayClassName, children, ...props },
+    {
+      side = "right",
+      className,
+      overlayClassName,
+      onPointerDownOutside,
+      children,
+      ...props
+    },
     ref,
   ) => {
     const open = React.use(SheetOpenContext);
+    const guard = usePressOutsideGuard(open);
     const reduceMotion = useReducedMotion();
     const panel = reduceMotion
       ? {
@@ -106,7 +115,15 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
                 transition={{ duration: 0.2, ease: EASE_OUT }}
               />
             </SheetPrimitive.Overlay>
-            <SheetPrimitive.Content forceMount asChild {...props}>
+            <SheetPrimitive.Content
+              forceMount
+              asChild
+              {...props}
+              onPointerDownOutside={(event) => {
+                guard.onPointerDownOutside(event);
+                onPointerDownOutside?.(event);
+              }}
+            >
               <m.div
                 ref={ref}
                 className={cn(

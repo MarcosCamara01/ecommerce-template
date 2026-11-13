@@ -5,6 +5,7 @@ import { AnimatePresence, m, useReducedMotion, type PanInfo } from "motion/react
 import { useEffect, useState } from "react";
 
 import { useFocusReturn } from "@/hooks/useFocusReturn";
+import { usePressOutsideGuard } from "@/hooks/usePressOutsideGuard";
 import { DRAG_SPRING, EASE_DRAWER, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ export function BottomSheet({
 }) {
   const reduceMotion = useReducedMotion();
   const focusReturn = useFocusReturn();
+  const pressOutsideGuard = usePressOutsideGuard(open);
   const [panel, setPanel] = useState<HTMLDivElement | null>(null);
   const [release, setRelease] = useState<Release>(null);
   const [fits, setFits] = useState(true);
@@ -102,6 +104,7 @@ export function BottomSheet({
               forceMount
               asChild
               {...focusReturn}
+              {...pressOutsideGuard}
               {...(description ? {} : { "aria-describedby": undefined })}
             >
               <m.div
