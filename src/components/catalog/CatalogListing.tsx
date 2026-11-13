@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BottomSheet, BottomSheetClose } from "@/components/ui/bottom-sheet";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import type { ShopSection } from "@/constants/navigation";
 import { PRODUCT_SIZES } from "@/constants/sizes";
 import { useFlip } from "@/hooks/useFlip";
@@ -66,13 +67,27 @@ export function CatalogListing({
   const [imageColumns, setImageColumns] = useState<3 | 4>(4);
   const imageTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(imageTimer.current), []);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  // The phone sheet is open while it holds a draft of its choices. The grid
+  // re-arranges as the sheet leaves, so the glide is seen (cause, then effect).
+  const [draft, setDraft] = useState<{ size: ProductSize | null; sort: Sort } | null>(null);
   const gridRef = useFlip<HTMLDivElement>();
 
   const shown = products
     .filter((product) => !size || stocks(product, size))
     .sort(sorters[sort]);
   const sortLabel = SORTS.find((option) => option.value === sort)?.label;
+  const sheetSize = draft ? draft.size : size;
+  const sheetSort = draft ? draft.sort : sort;
+  const sheetCount = products.filter((product) => !sheetSize || stocks(product, sheetSize)).length;
+  // Closing by the button, the scrim, Escape or a drag all apply the draft.
+  const onSheetChange = (open: boolean) => {
+    if (open) setDraft({ size, sort });
+    else if (draft) {
+      setSize(draft.size);
+      setSort(draft.sort);
+      setDraft(null);
+    }
+  };
 
   return (
     <>
@@ -81,7 +96,7 @@ export function CatalogListing({
           <button
             type="button"
             aria-label="Filter and sort"
-            onClick={() => setSheetOpen(true)}
+            onClick={() => onSheetChange(true)}
             className="press grid h-10 w-11 shrink-0 place-items-center rounded-pill border border-line lg:hidden"
           >
             <svg
@@ -222,8 +237,8 @@ export function CatalogListing({
       </div>
 
       <BottomSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
+        open={draft !== null}
+        onOpenChange={onSheetChange}
         title="Filter"
       >
         <fieldset className="flex flex-col gap-2.5">
@@ -233,8 +248,8 @@ export function CatalogListing({
               <button
                 key={option ?? "any"}
                 type="button"
-                aria-pressed={size === option}
-                onClick={() => setSize(option)}
+                aria-pressed={sheetSize === option}
+                onClick={() => setDraft((last) => last && { ...last, size: option })}
                 className="press h-11 min-w-12 rounded-pill border border-line px-4 text-sm aria-pressed:border-fg aria-pressed:bg-fg aria-pressed:text-bg"
               >
                 {option ?? "Any"}
@@ -249,8 +264,8 @@ export function CatalogListing({
               <button
                 key={option.value}
                 type="button"
-                aria-pressed={sort === option.value}
-                onClick={() => setSort(option.value)}
+                aria-pressed={sheetSort === option.value}
+                onClick={() => setDraft((last) => last && { ...last, sort: option.value })}
                 className="press h-11 rounded-pill border border-line px-4 text-sm aria-pressed:border-fg aria-pressed:bg-fg aria-pressed:text-bg"
               >
                 {option.label}
@@ -259,7 +274,7 @@ export function CatalogListing({
           </div>
         </fieldset>
         <BottomSheetClose className="press mt-2 h-14 rounded-pill bg-fg font-semibold text-bg">
-          Show {shown.length} {shown.length === 1 ? "piece" : "pieces"}
+          Show <RollingNumber value={sheetCount} /> {sheetCount === 1 ? "piece" : "pieces"}
         </BottomSheetClose>
       </BottomSheet>
     </>
