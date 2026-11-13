@@ -196,6 +196,45 @@
     min-height: 0;
     overflow: hidden;
   }
+
+  /* The Bag pill's count arrives after the session: the pill widens instead of snapping. */
+  .count-reveal {
+    display: inline-grid;
+    grid-template-columns: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-columns 220ms var(--ease-out),
+      opacity 220ms var(--ease-out);
+  }
+
+  .count-reveal[data-open="true"] {
+    grid-template-columns: 1fr;
+    opacity: 1;
+  }
+
+  /* clip, not hidden, so the count's vertical roll still shows; min-width 0
+     is what lets the 0fr track close. */
+  .count-reveal > span {
+    min-width: 0;
+    overflow-x: clip;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .count-reveal {
+      transition-property: opacity;
+    }
+  }
+
+  .greet-in {
+    transition: opacity 200ms var(--ease-out);
+  }
+
+  @starting-style {
+    .greet-in {
+      opacity: 0;
+    }
+  }
 }
 
 /* Items that arrive with a panel: 50ms stagger via --i, after the panel. */

@@ -18,8 +18,12 @@ export function AccountGreeting() {
   // first client render matches the server's.
   const hydrated = useHydrated();
   const firstName = hydrated ? session?.user?.name?.split(" ")[0] : undefined;
-  if (!firstName) return null;
-  return <span className="text-sm text-muted">Hi, {firstName}</span>;
+  // The line is always there, so the title below never moves when the name arrives.
+  return (
+    <span className="block min-h-5 text-sm text-muted">
+      {firstName ? <span className="greet-in">Hi, {firstName}</span> : null}
+    </span>
+  );
 }
 
 /** Tab changes never animate. */

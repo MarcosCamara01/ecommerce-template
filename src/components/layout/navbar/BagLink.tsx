@@ -53,14 +53,18 @@ export function BagLink({
     : "Bag";
   const text = (
     <span ref={bumpRef} aria-hidden="true" className="inline-block">
-      {isSuccess ? (
-        <>
-          {/* Past 99 the pill reads 99+, and a figure that does not change does not roll. */}
-          Bag · <RollingNumber value={Math.min(shown, 100)}>{shown > 99 ? "99+" : shown}</RollingNumber>
-        </>
-      ) : (
-        "Bag"
-      )}
+      Bag
+      {/* The count arrives after the session: the pill widens instead of
+          snapping. A no-break space, or the slot's own line would drop it.
+          Past 99 it reads 99+, and a figure that does not change does not roll. */}
+      <span className="count-reveal" data-open={isSuccess}>
+        <span>
+          {" · "}
+          {isSuccess ? (
+            <RollingNumber value={Math.min(shown, 100)}>{shown > 99 ? "99+" : shown}</RollingNumber>
+          ) : null}
+        </span>
+      </span>
     </span>
   );
 
