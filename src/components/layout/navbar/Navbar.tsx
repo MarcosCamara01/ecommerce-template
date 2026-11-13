@@ -64,7 +64,7 @@ export const Navbar = ({
       <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
         <nav
           aria-label="Main"
-          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] backdrop-saturate-150 transition-[background-color] duration-600 ease-out"
+          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] backdrop-saturate-150"
         >
           <Link
             href="/"

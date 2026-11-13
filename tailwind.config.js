@@ -59,11 +59,9 @@ module.exports = {
       transitionDuration: {
         120: "120ms",
         220: "220ms",
-        250: "250ms",
         350: "350ms",
         420: "420ms",
         450: "450ms",
-        600: "600ms",
       },
       boxShadow: {
         float: "var(--shadow-float)",
