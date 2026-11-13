@@ -3,16 +3,19 @@
 import { Suspense, type FormEvent, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { FaGoogle } from "react-icons/fa6";
-import { MdError } from "react-icons/md";
 
 import { AuthShell } from "@/components/auth/AuthShell";
+import { FormError } from "@/components/auth/FormError";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loading-button";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
+import { invalidFields } from "@/lib/auth/form-errors";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
+
+const FIELDS = ["name", "email", "password"] as const;
 
 function RegisterContent() {
   const { signUp, signInWithGoogle } = useAuthMutation();
@@ -31,18 +34,29 @@ function RegisterContent() {
     ? "Could not create the account. Check the form and try again."
     : null;
 
+  // Focus goes to the field to fix, unless it is already in one of them.
+  const focusInvalid = (failure: unknown) => {
+    const refs = { name: nameRef, email: emailRef, password: passwordRef };
+    const fields = invalidFields(failure, FIELDS).map((field) => refs[field].current);
+    if (!fields.some((field) => field === document.activeElement)) fields[0]?.focus();
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    signUp.mutate({
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
-      name: nameRef.current.value,
-      callbackURL,
-    });
+    signUp.mutate(
+      {
+        email: emailRef.current.value,
+        password: passwordRef.current.value,
+        name: nameRef.current.value,
+        callbackURL,
+      },
+      { onError: focusInvalid },
+    );
   };
 
   const error = signUp.error || signInWithGoogle.error || nativeError;
+  const invalid = invalidFields(signUp.error ?? nativeError, FIELDS);
   const isSubmitting = signUp.isPending;
   const isGoogleLoading = signInWithGoogle.isPending;
   const isLoading = isSubmitting || isGoogleLoading;
@@ -66,17 +80,7 @@ function RegisterContent() {
       >
         <Input type="hidden" name="mode" value="sign-up" className="hidden" />
         <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
-        {error && (
-          <div
-            role="alert"
-            className="flex items-start gap-2.5 rounded-field bg-err-bg px-3.5 py-3 text-sm text-err-fg"
-          >
-            <MdError className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
-            <p>
-              {error instanceof Error ? error.message : error}
-            </p>
-          </div>
-        )}
+        <FormError message={error instanceof Error ? error.message : error} />
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -95,8 +99,8 @@ function RegisterContent() {
 
               name="name"
               autoComplete="name"
-              aria-invalid={Boolean(error) || undefined}
-              disabled={isLoading}
+              aria-invalid={invalid.includes("name") || undefined}
+              readOnly={isLoading}
             />
           </div>
 
@@ -116,8 +120,8 @@ function RegisterContent() {
 
               name="email"
               autoComplete="email"
-              aria-invalid={Boolean(error) || undefined}
-              disabled={isLoading}
+              aria-invalid={invalid.includes("email") || undefined}
+              readOnly={isLoading}
             />
           </div>
 
@@ -137,8 +141,9 @@ function RegisterContent() {
               autoComplete="new-password"
               aria-describedby="register-password-hint"
               required
-              aria-invalid={Boolean(error) || undefined}
-              disabled={isLoading}
+              minLength={8}
+              aria-invalid={invalid.includes("password") || undefined}
+              readOnly={isLoading}
             />
           </div>
         </div>
@@ -147,9 +152,9 @@ function RegisterContent() {
           type="submit"
           className="mt-1.5 w-full text-base"
           loading={isSubmitting}
-          disabled={isLoading}
+          disabled={isGoogleLoading}
         >
-          {isSubmitting ? "Creating account..." : "Create account"}
+          {isSubmitting ? "Creating account…" : "Create account"}
         </LoadingButton>
 
         {googleAuthEnabled && (

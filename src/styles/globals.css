@@ -172,6 +172,30 @@
   .press:active:not(:disabled) {
     transform: scale(0.97);
   }
+
+  /* A form message row: opens and closes in place instead of jumping the
+     form. The negative margin cancels the form's gap while it is closed. */
+  .reveal-row {
+    display: grid;
+    grid-template-rows: 0fr;
+    margin-bottom: calc(-1 * var(--reveal-gap, 16px));
+    opacity: 0;
+    transition:
+      grid-template-rows 220ms var(--ease-out),
+      margin-bottom 220ms var(--ease-out),
+      opacity 220ms var(--ease-out);
+  }
+
+  .reveal-row[data-open="true"] {
+    grid-template-rows: 1fr;
+    margin-bottom: 0;
+    opacity: 1;
+  }
+
+  .reveal-row > * {
+    min-height: 0;
+    overflow: hidden;
+  }
 }
 
 /* Items that arrive with a panel: 50ms stagger via --i, after the panel. */
@@ -201,6 +225,10 @@
 @media (prefers-reduced-motion: reduce) {
   .press:active:not(:disabled) {
     transform: none;
+  }
+
+  .reveal-row {
+    transition-property: opacity;
   }
 
   @starting-style {

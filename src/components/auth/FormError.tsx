@@ -1,0 +1,36 @@
+"use client";
+
+import { useState } from "react";
+import { MdError } from "react-icons/md";
+
+/**
+ * A form's error row. It opens and closes in place (`.reveal-row`) instead of
+ * jumping the form, keeps its last message while it closes, and is an alert
+ * only while open, so each failure is announced once.
+ */
+export function FormError({ message }: { message: string | null }) {
+  const [shown, setShown] = useState(message);
+  if (message && message !== shown) setShown(message);
+
+  return (
+    <div
+      className="reveal-row"
+      data-open={Boolean(message)}
+      aria-hidden={!message || undefined}
+    >
+      <div>
+        {shown ? (
+          <div
+            // A new failure mounts a new alert, so a repeated message is announced again.
+            key={message ? "open" : "closing"}
+            role={message ? "alert" : undefined}
+            className="flex items-start gap-2.5 rounded-field bg-err-bg px-3.5 py-3 text-sm text-err-fg"
+          >
+            <MdError className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
+            <p>{shown}</p>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
