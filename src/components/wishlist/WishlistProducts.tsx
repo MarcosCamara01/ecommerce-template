@@ -38,7 +38,7 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
         quickAdd={false}
       >
         <span className="absolute right-2.5 top-2.5">
-          <WishlistButton showsRemove productId={product.id} productName={product.name} />
+          <WishlistButton showsRemove productId={product.id} productName={displayName(product.name)} />
         </span>
       </PieceTile>
       <Link href={href} data-flip-part="move" className="flex justify-between gap-2.5 px-1 max-lg:flex-col max-lg:gap-0.5">
