@@ -141,6 +141,10 @@ export function HomeShowcase({
             data-hero-claim=""
             aria-live={rotation.playing ? "off" : "polite"}
             aria-atomic="true"
+            // Room for the category line and a two-line name below the
+            // price row, so pieces with longer names do not move the
+            // controls as the hero rotates, and the price stays beside the name.
+            className="min-h-[calc(1rem_+_54px)] lg:min-h-0"
           >
             <div
               key={moves}
@@ -153,7 +157,7 @@ export function HomeShowcase({
                 <span className="line-clamp-1 text-xs text-muted lg:text-13">
                   {piece.categoryLabel} · {variant.color}
                 </span>
-                <h2 className="min-h-[2em] font-display-75 text-[26px] leading-none lg:min-h-0 lg:text-[length:max(28px,calc(var(--hero-u)*44))] lg:leading-[0.95] lg:[word-spacing:0.08em]">
+                <h2 className="font-display-75 text-[26px] leading-none lg:text-[length:max(28px,calc(var(--hero-u)*44))] lg:leading-[0.95] lg:[word-spacing:0.08em]">
                   <Link
                     href={productHref}
                     title={product.name}
