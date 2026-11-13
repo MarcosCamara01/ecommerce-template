@@ -80,7 +80,11 @@ function RegisterContent() {
       >
         <Input type="hidden" name="mode" value="sign-up" className="hidden" />
         <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
-        <FormError message={error instanceof Error ? error.message : error} />
+        <FormError
+          message={error instanceof Error ? error.message : error}
+          pending={signUp.isPending}
+          attempt={signUp.submittedAt}
+        />
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">

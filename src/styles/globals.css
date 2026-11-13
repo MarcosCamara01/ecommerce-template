@@ -169,7 +169,7 @@
     transition: transform 120ms var(--ease-out);
   }
 
-  .press:active:not(:disabled) {
+  .press:active:not(:disabled):not([aria-busy="true"]) {
     transform: scale(0.97);
   }
 
@@ -223,7 +223,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .press:active:not(:disabled) {
+  .press:active:not(:disabled):not([aria-busy="true"]) {
     transform: none;
   }
 
