@@ -176,6 +176,10 @@ export function HeroDeck({
         event.stopPropagation();
       }}
       onPointerDown={(event) => {
+        // A second finger must not take over a drag that is under way. Only
+        // extra fingers are refused, so a drag whose end was never reported
+        // cannot lock the deck.
+        if (drag.current && !event.isPrimary) return;
         swiped.current = false;
         if (event.pointerType === "mouse" || count < 2) return;
         const card = event.currentTarget.querySelector<HTMLElement>('[data-deck-slot="0"]');

@@ -109,7 +109,7 @@ export function PhotoViewer({
             if (event.key === "ArrowRight") show(index + 1, false);
             if (event.key === "ArrowLeft") show(index - 1, false);
           }}
-          className="fixed inset-0 z-50 bg-photo text-[#111214] outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:[animation-duration:150ms] data-[state=open]:[animation-duration:200ms] ease-out motion-reduce:zoom-in-100 motion-reduce:zoom-out-100"
+          className="fixed inset-0 z-50 bg-photo text-[#111214] outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:[animation-duration:150ms] data-[state=open]:[animation-duration:200ms] ease-out motion-reduce:!zoom-in-100 motion-reduce:!zoom-out-100"
         >
           <DialogPrimitive.Title className="sr-only">
             {name} in {color}, photos

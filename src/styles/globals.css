@@ -310,6 +310,13 @@
   :root [data-sonner-toast][data-swiping="true"] {
     transition: none !important;
   }
+
+  /* Sonner keeps data-swiping on a toast swiped away and drops the
+     animation that faded it, so it would vanish in one frame. */
+  :root [data-sonner-toast][data-swipe-out="true"] {
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out) !important;
+  }
 }
 
 /* Below desktop the product and bag pages pin their purchase bar to the
