@@ -285,9 +285,24 @@
   transition-duration: 250ms !important;
 }
 
+/* A swipe follows the finger. */
+[data-sonner-toast][data-swiping="true"] {
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  [data-sonner-toast] {
-    transition-property: opacity !important;
+  /* Sonner injects `transition: none !important` for reduced motion after
+     this file; :root lifts these above it so the fade stays. */
+  :root [data-sonner-toast] {
+    transition: opacity 350ms var(--ease-out) !important;
+  }
+
+  :root [data-sonner-toast][data-removed="true"] {
+    transition-duration: 250ms !important;
+  }
+
+  :root [data-sonner-toast][data-swiping="true"] {
+    transition: none !important;
   }
 }
 
