@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "@/components/ui/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   DropdownMenu,
@@ -60,6 +60,12 @@ export function CatalogListing({
   const [size, setSize] = useState<ProductSize | null>(null);
   const [sort, setSort] = useState<Sort>("newest");
   const [columns, setColumns] = useState<3 | 4>(4);
+  // Photo sources follow the density once the glide has landed (500ms plus
+  // the 200ms longest stagger): a new `sizes` mid-flight sends a request and
+  // a decode per card into the glide.
+  const [imageColumns, setImageColumns] = useState<3 | 4>(4);
+  const imageTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(imageTimer.current), []);
   const [sheetOpen, setSheetOpen] = useState(false);
   const gridRef = useFlip<HTMLDivElement>();
 
@@ -169,7 +175,11 @@ export function CatalogListing({
                 type="button"
                 aria-pressed={columns === count}
                 aria-label={`${count} columns`}
-                onClick={() => setColumns(count)}
+                onClick={() => {
+                  setColumns(count);
+                  window.clearTimeout(imageTimer.current);
+                  imageTimer.current = window.setTimeout(() => setImageColumns(count), 700);
+                }}
                 className="press relative h-9 w-11 rounded-pill text-13 font-semibold [transition:color_220ms_var(--ease-in-out),transform_120ms_var(--ease-out)] aria-pressed:text-bg"
               >
                 {count}
@@ -206,7 +216,7 @@ export function CatalogListing({
             // The first row is on screen at once: four on desktop, and the
             // first two rows of two on a phone.
             priority={index < 4}
-            sizes={`(max-width: 1023px) 50vw, ${columns === 3 ? 33 : 25}vw`}
+            sizes={`(max-width: 1023px) 50vw, ${imageColumns === 3 ? 33 : 25}vw`}
           />
         ))}
       </div>
