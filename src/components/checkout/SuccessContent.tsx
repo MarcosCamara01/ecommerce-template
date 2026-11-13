@@ -4,6 +4,7 @@ import { format } from "date-fns";
 
 import { buttonClass } from "@/components/ui/button-classes";
 import { OrderSteps } from "@/components/orders/OrderSteps";
+import { PlayOnce } from "@/components/ui/play-once";
 import { swatchBackground } from "@/constants/colors";
 import { merchantPlaceholders } from "@/constants/merchant";
 import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
@@ -65,25 +66,27 @@ export function SuccessContent({
             {order ? ` · Order #${order.orderNumber}` : null}
           </span>
         </span>
-        <p
-          aria-label="Thank you."
-          className="font-display text-[96px] leading-[0.8] lg:text-[min(300px,21vw)]"
-        >
-          {THANK_YOU.map((word, wordIndex) => (
-            <span key={word} className="mr-[0.22em] inline-flex overflow-hidden align-top">
-              {word.split("").map((letter, index) => (
-                <span
-                  key={index}
-                  aria-hidden="true"
-                  className="inline-block animate-rise"
-                  style={{ animationDelay: `${(wordIndex * 6 + index) * 35}ms` }}
-                >
-                  {letter}
-                </span>
-              ))}
-            </span>
-          ))}
-        </p>
+        <PlayOnce>
+          <p
+            aria-label="Thank you."
+            className="font-display text-[96px] leading-[0.8] lg:text-[min(300px,21vw)]"
+          >
+            {THANK_YOU.map((word, wordIndex) => (
+              <span key={word} className="mr-[0.22em] inline-flex overflow-hidden align-top">
+                {word.split("").map((letter, index) => (
+                  <span
+                    key={index}
+                    aria-hidden="true"
+                    className="inline-block animate-rise"
+                    style={{ animationDelay: `${(wordIndex * 6 + index) * 35}ms` }}
+                  >
+                    {letter}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </p>
+        </PlayOnce>
         <p className="max-w-[520px] text-[17px]">
           {email ? (
             <>
@@ -97,28 +100,30 @@ export function SuccessContent({
       </div>
 
       {lines.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2.5">
-          {lines.slice(0, 3).map((line, index) => (
-            <figure
-              key={line.id}
-              className="flex animate-tile flex-col overflow-hidden rounded-photo bg-field"
-              style={{ animationDelay: `${420 + index * 80}ms` }}
-            >
-              <Image
-                src={line.imageUrl}
-                alt={line.productName}
-                width={480}
-                height={360}
-                sizes="(max-width: 1023px) 33vw, 30vw"
-                className="aspect-[3/4] w-full bg-photo object-cover lg:aspect-[4/3]"
-              />
-              <figcaption className="flex flex-col px-3.5 py-3 text-13 leading-tight">
-                <span className="font-semibold">{line.variantColor}</span>
-                <span className="text-muted">{heroWord(line.productName)}</span>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+        <PlayOnce>
+          <div className="grid grid-cols-3 gap-2.5">
+            {lines.slice(0, 3).map((line, index) => (
+              <figure
+                key={line.id}
+                className="flex animate-tile flex-col overflow-hidden rounded-photo bg-field"
+                style={{ animationDelay: `${420 + index * 80}ms` }}
+              >
+                <Image
+                  src={line.imageUrl}
+                  alt={line.productName}
+                  width={480}
+                  height={360}
+                  sizes="(max-width: 1023px) 33vw, 30vw"
+                  className="aspect-[3/4] w-full bg-photo object-cover lg:aspect-[4/3]"
+                />
+                <figcaption className="flex flex-col px-3.5 py-3 text-13 leading-tight">
+                  <span className="font-semibold">{line.variantColor}</span>
+                  <span className="text-muted">{heroWord(line.productName)}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </PlayOnce>
       ) : null}
 
       <div className="grid items-start gap-[18px] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">

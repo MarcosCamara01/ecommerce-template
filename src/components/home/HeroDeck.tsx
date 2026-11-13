@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "@/components/ui/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import type { ProductVariant, ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { prefersReducedMotion } from "@/lib/motion";
@@ -97,6 +97,9 @@ export function HeroDeck({
   );
   const drag = useRef<Gesture | null>(null);
   const swiped = useRef(false);
+  // Once the first-load settle has played its class goes, so a page re-shown
+  // from <Activity> does not settle the cards again.
+  const [settled, setSettled] = useState(false);
 
   const endDrag = (event: React.PointerEvent, cancelled: boolean) => {
     const gesture = drag.current;
@@ -157,6 +160,14 @@ export function HeroDeck({
       ref={ref}
       aria-hidden="true"
       data-hero-claim=""
+      onAnimationEnd={(event) => {
+        if (!settle || settled) return;
+        // Only CSS animations: the slots' transform transitions do not count.
+        const busy = event.currentTarget
+          .getAnimations({ subtree: true })
+          .some((animation) => animation instanceof CSSAnimation && animation.playState === "running");
+        if (!busy) setSettled(true);
+      }}
       onClickCapture={(event) => {
         if (!swiped.current) return;
         // The click that ends a swipe is not a tap on the photo.
@@ -214,7 +225,7 @@ export function HeroDeck({
         const { product, variant } = pieces[wrap(place, count)];
         const queued = slot >= 1 && slot <= queue;
         // The cards on screen at first load settle in from front to back.
-        const settles = settle && place >= 0 && place <= queue;
+        const settles = settle && !settled && place >= 0 && place <= queue;
         return (
           <div
             key={place}

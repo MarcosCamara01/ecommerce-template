@@ -60,6 +60,10 @@ export function HomeShowcase({
   const rotation = useHeroRotation(pieces.length, heroRef);
   const { index, moves } = rotation;
   const [firstLoad] = useState(() => !entrancePlayed);
+  // The change whose entrance has finished, for the letters and for the
+  // details, so a page re-shown from <Activity> does not replay it.
+  const [played, setPlayed] = useState<number | null>(null);
+  const [faded, setFaded] = useState<number | null>(null);
   const [pickedSize, setPickedSize] = useState<ProductSize | null>(null);
   const deckRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -74,7 +78,7 @@ export function HomeShowcase({
   const frontCard = () =>
     deckRef.current?.querySelector<HTMLElement>('[data-deck-slot="0"]') ?? null;
 
-  const animate = firstLoad || moves > 0;
+  const animate = (firstLoad || moves > 0) && played !== moves;
   const word = heroLetters(piece.word);
   const toggle = rotation.rotates ? (
     <RotationToggle
@@ -110,7 +114,14 @@ export function HomeShowcase({
             }
             className="absolute inset-x-0 top-0 whitespace-nowrap text-center font-display text-[length:var(--word-m)] leading-[0.85] lg:static lg:text-[length:min(var(--word-d),calc(var(--hero-u)*316))] lg:leading-[0.82]"
           >
-            <span key={moves} dir="auto" className="inline-flex overflow-hidden align-top">
+            <span
+              key={moves}
+              dir="auto"
+              onAnimationEnd={(event) => {
+                if (event.target === event.currentTarget.lastElementChild) setPlayed(moves);
+              }}
+              className="inline-flex overflow-hidden align-top"
+            >
               {word.map((letter, position) => (
                 <span
                   key={position}
@@ -148,9 +159,12 @@ export function HomeShowcase({
           >
             <div
               key={moves}
+              onAnimationEnd={(event) => {
+                if (event.target === event.currentTarget) setFaded(moves);
+              }}
               className={cn(
                 "flex items-end justify-between gap-3 lg:flex-col lg:items-start lg:gap-[max(12px,calc(var(--hero-u)*18))]",
-                moves > 0 && "animate-fade-in",
+                moves > 0 && faded !== moves && "animate-fade-in",
               )}
             >
               <div className="flex min-w-0 flex-col gap-0.5 lg:gap-[max(12px,calc(var(--hero-u)*18))]">

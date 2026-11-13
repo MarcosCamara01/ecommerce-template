@@ -272,6 +272,12 @@
   }
 }
 
+/* An entrance that has played (PlayOnce) does not replay when the page is
+   re-shown from <Activity>. */
+[data-played] :is(.animate-rise, .animate-tile) {
+  animation: none;
+}
+
 /* Toasts enter and leave through the bottom: transitions, so a repeated
    trigger retargets instead of restarting. */
 [data-sonner-toast] {
