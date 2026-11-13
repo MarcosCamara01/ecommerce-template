@@ -38,6 +38,7 @@ export const Navbar = ({
   const { data: session } = useSession();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuHandOff, setMenuHandOff] = useState(false);
   const editProfileManager = useDisclosure();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
@@ -137,7 +138,13 @@ export const Navbar = ({
             <SearchIcon />
           </button>
           <BagLink className="mx-1 h-11 px-3.5 text-13" />
-          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+          <Sheet
+            open={menuOpen}
+            onOpenChange={(open) => {
+              if (open) setMenuHandOff(false);
+              setMenuOpen(open);
+            }}
+          >
             <SheetTrigger asChild>
               <button
                 ref={mobileMenuTriggerRef}
@@ -150,12 +157,15 @@ export const Navbar = ({
             </SheetTrigger>
             <MobileMenu
               sectionSummaries={sectionSummaries}
+              handOff={menuHandOff}
               onEditProfile={() => {
                 skipMobileMenuCloseAutoFocusRef.current = true;
                 profileReturnFocusRef.current = mobileMenuTriggerRef.current;
+                setMenuHandOff(true);
               }}
               onSearch={() => {
                 searchAfterMenuCloseRef.current = true;
+                setMenuHandOff(true);
               }}
               onCloseAutoFocus={(event) => {
                 if (searchAfterMenuCloseRef.current) {

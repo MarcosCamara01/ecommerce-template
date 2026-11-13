@@ -17,7 +17,8 @@ import {
 } from "@/components/icons";
 import { useSession } from "@/lib/auth/client";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-import { useRef, type RefObject } from "react";
+import { cn } from "@/lib/utils";
+import { useRef, useState, type RefObject } from "react";
 
 const initialsOf = (name: string) =>
   name
@@ -38,12 +39,18 @@ export function UserMenu({
   const { data: session } = useSession();
   const { signOut } = useAuthMutation();
   const skipCloseAutoFocusRef = useRef(false);
+  // Edit profile takes over as the menu closes, so the menu leaves at once.
+  const [handingOff, setHandingOff] = useState(false);
   const name = session?.user?.name || "Your account";
   const email = session?.user?.email;
   const initials = initialsOf(name);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      onOpenChange={(open) => {
+        if (open) setHandingOff(false);
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <button
           ref={triggerRef}
@@ -59,7 +66,10 @@ export function UserMenu({
         align="end"
         sideOffset={12}
         aria-label="My account"
-        className="w-[300px] rounded-photo border border-line"
+        className={cn(
+          "w-[300px] rounded-photo border border-line",
+          handingOff && "data-[state=closed]:!animate-none",
+        )}
         onCloseAutoFocus={(event) => {
           if (!skipCloseAutoFocusRef.current) return;
           event.preventDefault();
@@ -91,6 +101,7 @@ export function UserMenu({
           <DropdownMenuItem
             onSelect={() => {
               skipCloseAutoFocusRef.current = true;
+              setHandingOff(true);
             }}
             className="min-h-11 rounded-[14px]"
           >
