@@ -63,7 +63,7 @@ export const OrderProduct = async ({
   );
 
   return (
-    <article className="grid grid-cols-[96px_minmax(0,1fr)_auto] items-center gap-[18px] border-b border-line py-4 lg:grid-cols-[140px_minmax(0,1fr)_auto]">
+    <article className="grid grid-cols-[96px_minmax(0,1fr)_auto] items-start gap-[18px] border-b border-line py-4 lg:grid-cols-[140px_minmax(0,1fr)_auto]">
       <div className="overflow-hidden rounded-chip bg-photo">
         {isArchived ? photo : <Link href={productLink!}>{photo}</Link>}
       </div>
@@ -92,8 +92,15 @@ export const OrderProduct = async ({
           </Link>
         )}
       </div>
-      <span className="self-start whitespace-nowrap text-lg font-medium tabular-nums">
-        {formatPriceFromMinorUnits(unitAmount, currency)}
+      <span className="flex flex-col items-end whitespace-nowrap tabular-nums">
+        <span className="text-lg font-medium">
+          {formatPriceFromMinorUnits(unitAmount * quantity, currency)}
+        </span>
+        {quantity > 1 ? (
+          <span className="text-13 text-muted">
+            {formatPriceFromMinorUnits(unitAmount, currency)} each
+          </span>
+        ) : null}
       </span>
     </article>
   );
