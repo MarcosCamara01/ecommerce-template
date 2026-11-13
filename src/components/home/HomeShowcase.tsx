@@ -16,11 +16,11 @@ import type {
   ProductVariant,
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
-import { heroLetters } from "@/lib/hero-word";
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
 import { HeroDeck } from "./HeroDeck";
+import { HeroWord } from "./HeroWord";
 import { RotationToggle } from "./RotationToggle";
 import { useHeroRotation } from "./useHeroRotation";
 
@@ -60,9 +60,8 @@ export function HomeShowcase({
   const rotation = useHeroRotation(pieces.length, heroRef);
   const { index, moves } = rotation;
   const [firstLoad] = useState(() => !entrancePlayed);
-  // The change whose entrance has finished, for the letters and for the
-  // details, so a page re-shown from <Activity> does not replay it.
-  const [played, setPlayed] = useState<number | null>(null);
+  // The change whose details have faded in, so a page re-shown from
+  // <Activity> does not replay it.
   const [faded, setFaded] = useState<number | null>(null);
   const [pickedSize, setPickedSize] = useState<ProductSize | null>(null);
   const deckRef = useRef<HTMLDivElement>(null);
@@ -78,8 +77,6 @@ export function HomeShowcase({
   const frontCard = () =>
     deckRef.current?.querySelector<HTMLElement>('[data-deck-slot="0"]') ?? null;
 
-  const animate = (firstLoad || moves > 0) && played !== moves;
-  const word = heroLetters(piece.word);
   // Rendered for every visitor and hidden by CSS under reduced motion (no
   // rotation, no toggle): removing it after hydration shifted the layout.
   const toggle = pieces.length > 1 ? (
@@ -106,36 +103,12 @@ export function HomeShowcase({
         className="hero relative isolate -mx-4 overflow-x-hidden overflow-x-clip px-4 pb-10 lg:-mx-8 lg:h-[var(--hero-h)] lg:px-8 lg:pb-0 lg:pt-6"
       >
         <div className="relative h-[470px] lg:static lg:h-auto">
-          <p
-            aria-label={piece.word}
-            style={
-              {
-                "--word-m": piece.wordSize.mobile,
-                "--word-d": piece.wordSize.desktop,
-              } as React.CSSProperties
-            }
-            className="absolute inset-x-0 top-0 whitespace-nowrap text-center font-display text-[length:var(--word-m)] leading-[0.85] lg:static lg:text-[length:min(var(--word-d),calc(var(--hero-u)*316))] lg:leading-[0.82]"
-          >
-            <span
-              key={moves}
-              dir="auto"
-              onAnimationEnd={(event) => {
-                if (event.target === event.currentTarget.lastElementChild) setPlayed(moves);
-              }}
-              className="inline-flex overflow-hidden align-top"
-            >
-              {word.map((letter, position) => (
-                <span
-                  key={position}
-                  aria-hidden="true"
-                  className={cn("inline-block whitespace-pre", animate && "animate-rise")}
-                  style={{ animationDelay: `${position * 28}ms` }}
-                >
-                  {letter}
-                </span>
-              ))}
-            </span>
-          </p>
+          <HeroWord
+            word={piece.word}
+            size={piece.wordSize}
+            moves={moves}
+            entrance={firstLoad || moves > 0}
+          />
           <HeroDeck
             ref={deckRef}
             pieces={pieces}
