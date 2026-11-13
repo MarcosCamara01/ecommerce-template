@@ -94,12 +94,6 @@ module.exports = {
           from: { transform: "translate(0, 0) scale(1)", opacity: "1" },
           to: { transform: "translate(var(--dx), var(--dy)) scale(0.3)", opacity: "0" },
         },
-        // Bag counter.
-        bump: {
-          "0%": { transform: "scale(1)" },
-          "40%": { transform: "scale(1.2)" },
-          "100%": { transform: "scale(1)" },
-        },
         // Variant photo swap.
         swap: {
           from: { opacity: "0", transform: "scale(0.98)" },
@@ -151,7 +145,6 @@ module.exports = {
         shimmer: "shimmer 1.6s ease-in-out infinite",
         pop: "pop 450ms var(--ease-out)",
         spark: "spark 520ms var(--ease-out) forwards",
-        bump: "bump 320ms var(--ease-out)",
         swap: "swap 450ms var(--ease-out) both",
         "fade-in": "fade-in 450ms var(--ease-out) both",
         roll: "roll 220ms var(--ease-out) both",

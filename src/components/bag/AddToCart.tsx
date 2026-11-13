@@ -6,7 +6,12 @@ import { useState } from "react";
 import { useThrottleFn } from "ahooks";
 
 import { AddedSheet, type AddedItem } from "@/components/bag/AddedSheet";
-import { bumpBag, openBag } from "@/components/bag/bag-ui";
+import {
+  bumpBag,
+  holdBagCount,
+  openBag,
+  releaseBagCount,
+} from "@/components/bag/bag-ui";
 import { flyToBag } from "@/components/bag/fly-to-bag";
 import { Button } from "@/components/ui/button";
 import { useCartMutation } from "@/hooks/cart";
@@ -53,14 +58,16 @@ export function AddToCart({
   const { run: throttledAddToCart } = useThrottleFn(
     () => {
       if (!size) return;
+      // Phones have no flight: there the count changes at the tap.
+      if (window.matchMedia(DESKTOP).matches) holdBagCount();
       addToCart({ size, variantId: selectedVariant.id }, {
         onSuccess: () => {
           const line = { name: displayName(product.name), color: selectedVariant.color, size };
           if (window.matchMedia(DESKTOP).matches) {
-            void flyToBag(flySource()).then(() => {
+            void flyToBag(flySource()).then((flew) => {
               bumpBag();
               setAdded(true);
-              window.setTimeout(() => openBag(line), 160);
+              window.setTimeout(() => openBag(line), flew ? 160 : 0);
             });
           } else {
             setSheetItem({
@@ -70,6 +77,7 @@ export function AddToCart({
             });
           }
         },
+        onError: releaseBagCount,
       });
     },
     { wait: 300 },

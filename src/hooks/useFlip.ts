@@ -12,11 +12,11 @@ import {
   toTransform,
   type Box,
 } from "@/lib/flip";
-import { EASE_DRAWER, EASE_OUT, prefersReducedMotion } from "@/lib/motion";
+import { cssEase, EASE_DRAWER, EASE_OUT, prefersReducedMotion } from "@/lib/motion";
 
 /** How long a piece takes to reach its new place, on the drawer curve. */
 const GLIDE_MS = 500;
-const GLIDE_EASING = `cubic-bezier(${EASE_DRAWER.join(", ")})`;
+const GLIDE_EASING = cssEase(EASE_DRAWER);
 
 /** Each piece sets off a little after the one before; the tenth waits longest. */
 const STAGGER_MS = 20;
@@ -24,7 +24,7 @@ const STAGGERED = 10;
 
 /** A piece that was not there before rises into place. */
 const ENTER_MS = 400;
-const ENTER_EASING = `cubic-bezier(${EASE_OUT.join(", ")})`;
+const ENTER_EASING = cssEase(EASE_OUT);
 
 const ITEM = "[data-flip-item]";
 const PARTS = '[data-flip-part="morph"], [data-flip-part="move"]';

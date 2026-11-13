@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { bumpBag, openBag } from "@/components/bag/bag-ui";
+import {
+  bumpBag,
+  holdBagCount,
+  openBag,
+  releaseBagCount,
+} from "@/components/bag/bag-ui";
 import { flyToBag } from "@/components/bag/fly-to-bag";
 import { Spinner } from "@/components/ui/loader";
 import { useCartMutation } from "@/hooks/cart";
@@ -53,6 +58,7 @@ export function QuickAdd({
   const addSize = (size: ProductSize) => {
     if (pending) return;
     setPending(size);
+    holdBagCount();
     add(
       { size, variantId: variant.id },
       {
@@ -61,15 +67,18 @@ export function QuickAdd({
           setDone(size);
           window.clearTimeout(doneTimer.current);
           doneTimer.current = window.setTimeout(() => setDone(null), DONE_MS);
-          void flyToBag(flySource()).then(() => {
+          void flyToBag(flySource()).then((flew) => {
             bumpBag();
             window.setTimeout(
               () => openBag({ name, color: variant.color, size }),
-              160,
+              flew ? 160 : 0,
             );
           });
         },
-        onError: () => setPending(null),
+        onError: () => {
+          setPending(null);
+          releaseBagCount();
+        },
       },
     );
   };

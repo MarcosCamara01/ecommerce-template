@@ -238,8 +238,7 @@
   }
 
   /* Keep fades, drop movement. */
-  .animate-pop,
-  .animate-bump {
+  .animate-pop {
     animation: none;
   }
 
