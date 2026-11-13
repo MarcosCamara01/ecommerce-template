@@ -38,6 +38,7 @@ export const Navbar = ({
   const { data: session } = useSession();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuHandOff, setMenuHandOff] = useState(false);
   const editProfileManager = useDisclosure();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
@@ -63,7 +64,7 @@ export const Navbar = ({
       <header className="pointer-events-none sticky top-0 z-40 hidden justify-center px-8 pt-5 lg:flex">
         <nav
           aria-label="Main"
-          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] backdrop-saturate-150 transition-[background-color] duration-600 ease-out"
+          className="pointer-events-auto flex items-center gap-2 rounded-pill bg-glass p-1.5 shadow-float backdrop-blur-[20px] backdrop-saturate-150"
         >
           <Link
             href="/"
@@ -137,7 +138,13 @@ export const Navbar = ({
             <SearchIcon />
           </button>
           <BagLink className="mx-1 h-11 px-3.5 text-13" />
-          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+          <Sheet
+            open={menuOpen}
+            onOpenChange={(open) => {
+              if (open) setMenuHandOff(false);
+              setMenuOpen(open);
+            }}
+          >
             <SheetTrigger asChild>
               <button
                 ref={mobileMenuTriggerRef}
@@ -150,19 +157,23 @@ export const Navbar = ({
             </SheetTrigger>
             <MobileMenu
               sectionSummaries={sectionSummaries}
+              handOff={menuHandOff}
               onEditProfile={() => {
                 skipMobileMenuCloseAutoFocusRef.current = true;
                 profileReturnFocusRef.current = mobileMenuTriggerRef.current;
+                setMenuHandOff(true);
               }}
               onSearch={() => {
                 searchAfterMenuCloseRef.current = true;
+                setMenuHandOff(true);
               }}
               onCloseAutoFocus={(event) => {
                 if (searchAfterMenuCloseRef.current) {
                   // The menu button takes focus back first, so closing the
-                  // search returns there.
+                  // search returns there. Both cover the screen on a phone,
+                  // so the search cuts in: a fade would flash the page.
                   searchAfterMenuCloseRef.current = false;
-                  queueMicrotask(() => openSearch());
+                  queueMicrotask(() => openSearch(true));
                   return;
                 }
                 if (!skipMobileMenuCloseAutoFocusRef.current) return;

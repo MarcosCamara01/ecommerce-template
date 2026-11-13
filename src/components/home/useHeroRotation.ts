@@ -58,6 +58,9 @@ export function useHeroRotation(
   // `step` only counts up or down, never wraps, so every card keeps its own
   // place in the deck; `moves` counts changes and replays the entrance.
   const [{ step, moves }, setPosition] = useState({ step: 0, moves: 0 });
+  // Ticks skipped for an open dialog: each one restarts the ring, so it
+  // still fills up to the next change.
+  const [laps, setLaps] = useState(0);
   const [stopped, setStopped] = useState(false);
   const [pointed, setPointed] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -127,7 +130,10 @@ export function useHeroRotation(
     const timer = window.setInterval(() => {
       // An open dialog (search, menu, bag) covers the page: keep the piece
       // until it closes.
-      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]')) {
+        setLaps((value) => value + 1);
+        return;
+      }
       lastAutoMove.current = performance.now();
       setPosition((current) => ({
         step: current.step + 1,
@@ -150,6 +156,8 @@ export function useHeroRotation(
     step,
     index,
     moves,
+    /** Restarts the ring: each change, and each tick skipped for a dialog. */
+    cycle: moves + laps,
     playing,
     stopped,
     /** Moves `delta` pieces on; the visitor took over, so the rotation stops. */

@@ -31,11 +31,14 @@ const tile =
 /** Full-screen menu sheet for phones (CMenu). */
 export function MobileMenu({
   sectionSummaries,
+  handOff,
   onCloseAutoFocus,
   onEditProfile,
   onSearch,
 }: {
   sectionSummaries: Promise<ShopSectionSummary[]>;
+  /** The menu is closing for search or Edit profile: it leaves at once. */
+  handOff: boolean;
   onCloseAutoFocus: (event: Event) => void;
   /** Runs before the sheet closes; the dialog opens once it has. */
   onEditProfile: () => void;
@@ -50,6 +53,7 @@ export function MobileMenu({
     <SheetContent
       side="top"
       className="h-dvh overflow-y-auto overscroll-contain bg-bg"
+      handOff={handOff}
       onCloseAutoFocus={onCloseAutoFocus}
     >
       <nav

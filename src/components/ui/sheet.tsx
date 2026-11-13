@@ -66,7 +66,20 @@ type SheetContentProps = Omit<
 > & {
   side?: Side;
   overlayClassName?: string;
+  /** Another dialog takes over as this one closes: leave at once. */
+  handOff?: boolean;
 };
+
+// A leaving child keeps the props of its last render, so the hand-off
+// reaches the exit through AnimatePresence's `custom`.
+const OVERLAY_VARIANTS = {
+  exit: (instant: boolean) => ({
+    opacity: 0,
+    transition: { duration: instant ? 0 : 0.2, ease: EASE_OUT },
+  }),
+};
+
+const LEAVE_AT_ONCE = { opacity: 1, transition: { duration: 0 } };
 
 const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
   (
@@ -75,6 +88,7 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
       className,
       overlayClassName,
       onPointerDownOutside,
+      handOff = false,
       children,
       ...props
     },
@@ -87,18 +101,19 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
       ? {
           initial: { opacity: 0 },
           animate: { opacity: 1 },
-          exit: { opacity: 0 },
           transition: { duration: 0.2, ease: EASE_OUT },
         }
       : {
           initial: { transform: HIDDEN[side] },
           animate: { transform: SHOWN[side] },
-          exit: { transform: HIDDEN[side] },
           transition: { duration: 0.42, ease: EASE_DRAWER },
         };
+    const leave = reduceMotion
+      ? { opacity: 0, transition: panel.transition }
+      : { transform: HIDDEN[side], transition: panel.transition };
 
     return (
-      <AnimatePresence>
+      <AnimatePresence custom={handOff}>
         {open ? (
           <SheetPrimitive.Portal forceMount>
             {/* While they leave, the scrim and panel stop catching clicks;
@@ -111,8 +126,9 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
                 )}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2, ease: EASE_OUT }}
+                variants={OVERLAY_VARIANTS}
+                exit="exit"
               />
             </SheetPrimitive.Overlay>
             <SheetPrimitive.Content
@@ -132,6 +148,10 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
                   className,
                 )}
                 {...panel}
+                variants={{
+                  exit: (instant: boolean) => (instant ? LEAVE_AT_ONCE : leave),
+                }}
+                exit="exit"
               >
                 {children}
               </m.div>

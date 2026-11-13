@@ -18,6 +18,7 @@ import { formatPriceFromEuros } from "@/utils/formatters";
 import { searchProducts } from "@/utils/search";
 
 import {
+  closeSearch,
   openSearch,
   rememberSearch,
   setSearchOpen,
@@ -74,8 +75,9 @@ function popularTerms(catalog: ProductWithVariants[]) {
 
 /**
  * Search modal. Opened by click it fades and scales in (150ms); opened
- * with ⌘K or "/" it appears at once. Results update as you type without
- * animating; ↑ ↓ move, ↵ opens, Esc closes.
+ * with ⌘K, "/" or from the phone menu it appears at once, and Esc or ⌘K
+ * close it at once.
+ * Results update as you type without animating; ↑ ↓ move, ↵ opens.
  */
 export function SearchDialog({
   catalog,
@@ -93,7 +95,7 @@ export function SearchDialog({
         ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName ?? "");
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        if (open) setSearchOpen(false);
+        if (open) closeSearch();
         else openSearch(true);
       } else if (event.key === "/" && !typing && !open) {
         event.preventDefault();
@@ -109,7 +111,7 @@ export function SearchDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] backdrop-blur-[6px] dark:bg-black/55",
+            "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] lg:backdrop-blur-[6px] dark:bg-black/55",
             !instant &&
               "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-150 data-[state=open]:duration-150 ease-out",
           )}
@@ -117,6 +119,7 @@ export function SearchDialog({
         <DialogPrimitive.Content
           aria-describedby={undefined}
           {...focusReturn}
+          onEscapeKeyDown={() => closeSearch()}
           className={cn(
             "fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none lg:inset-auto lg:inset-x-0 lg:top-24 lg:mx-auto lg:max-h-[calc(100vh-140px)] lg:w-[min(720px,calc(100%-32px))] lg:rounded-photo-lg",
             !instant &&
