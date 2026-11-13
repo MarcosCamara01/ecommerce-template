@@ -96,6 +96,14 @@ export const WishlistButton = ({
         <span
           key={celebration}
           aria-hidden="true"
+          // Once the sparks have flown the celebration is over: a listing
+          // re-shown from <Activity> must not play it again.
+          onAnimationEnd={(event) => {
+            const running = event.currentTarget
+              .getAnimations({ subtree: true })
+              .some((animation) => animation.playState === "running");
+            if (!running) setCelebration(0);
+          }}
           className="pointer-events-none absolute inset-0"
         >
           {SPARK_ANGLES.map((angle) => (
@@ -125,7 +133,7 @@ export const WishlistButton = ({
             : `Save ${productName} to wishlist`
         }
         className={cn(
-          "press relative grid size-full place-items-center rounded-pill transition-[background-color,color,transform] duration-200",
+          "press relative grid size-full place-items-center rounded-pill [transition:background-color_200ms_var(--ease-out),color_200ms_var(--ease-out),transform_120ms_var(--ease-out)]",
           appearance === "disc" &&
             (isFavorite && !showsRemove
               ? "bg-[#111214] text-white focus-visible:outline-[#111214]"

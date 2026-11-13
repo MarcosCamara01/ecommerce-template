@@ -111,16 +111,16 @@ export function SearchDialog({
           className={cn(
             "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] backdrop-blur-[6px] dark:bg-black/55",
             !instant &&
-              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-150 data-[state=open]:duration-150",
+              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-150 data-[state=open]:duration-150 ease-out",
           )}
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           {...focusReturn}
           className={cn(
-            "fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none lg:inset-auto lg:left-1/2 lg:top-24 lg:max-h-[calc(100vh-140px)] lg:w-[min(720px,calc(100%-32px))] lg:-translate-x-1/2 lg:rounded-photo-lg",
+            "fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none lg:inset-auto lg:inset-x-0 lg:top-24 lg:mx-auto lg:max-h-[calc(100vh-140px)] lg:w-[min(720px,calc(100%-32px))] lg:rounded-photo-lg",
             !instant &&
-              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:duration-150 data-[state=open]:duration-150 motion-reduce:zoom-in-100 motion-reduce:zoom-out-100",
+              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:duration-150 data-[state=open]:duration-150 ease-out motion-reduce:!zoom-in-100 motion-reduce:!zoom-out-100",
           )}
         >
           <DialogPrimitive.Title className="sr-only">Search</DialogPrimitive.Title>

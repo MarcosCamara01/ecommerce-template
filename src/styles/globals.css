@@ -272,6 +272,12 @@
   }
 }
 
+/* An entrance that has played (PlayOnce) does not replay when the page is
+   re-shown from <Activity>. */
+[data-played] :is(.animate-rise, .animate-tile) {
+  animation: none;
+}
+
 /* Toasts enter and leave through the bottom: transitions, so a repeated
    trigger retargets instead of restarting. */
 [data-sonner-toast] {
@@ -285,9 +291,31 @@
   transition-duration: 250ms !important;
 }
 
+/* A swipe follows the finger. */
+[data-sonner-toast][data-swiping="true"] {
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  [data-sonner-toast] {
-    transition-property: opacity !important;
+  /* Sonner injects `transition: none !important` for reduced motion after
+     this file; :root lifts these above it so the fade stays. */
+  :root [data-sonner-toast] {
+    transition: opacity 350ms var(--ease-out) !important;
+  }
+
+  :root [data-sonner-toast][data-removed="true"] {
+    transition-duration: 250ms !important;
+  }
+
+  :root [data-sonner-toast][data-swiping="true"] {
+    transition: none !important;
+  }
+
+  /* Sonner keeps data-swiping on a toast swiped away and drops the
+     animation that faded it, so it would vanish in one frame. */
+  :root [data-sonner-toast][data-swipe-out="true"] {
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out) !important;
   }
 }
 

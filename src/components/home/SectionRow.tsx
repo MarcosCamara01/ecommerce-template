@@ -68,7 +68,7 @@ export function SectionRow({
 
   const content = (inked: boolean) => (
     <span className="flex items-center justify-between gap-4 px-4 py-2 lg:px-8">
-      <span className="font-display text-[min(190px,13.2vw)] leading-[0.92] transition-transform duration-450 ease-out group-data-[inked=true]:translate-x-3 motion-reduce:transition-none motion-reduce:group-data-[inked=true]:translate-x-0">
+      <span className="font-display text-[min(190px,13.2vw)] leading-[0.92] transition-transform duration-350 ease-out group-data-[inked=true]:translate-x-3 group-data-[inked=true]:duration-450 motion-reduce:transition-none motion-reduce:group-data-[inked=true]:translate-x-0">
         {label}
       </span>
       <span className="flex shrink-0 items-center gap-3 whitespace-nowrap text-sm lg:gap-4 lg:text-[15px]">

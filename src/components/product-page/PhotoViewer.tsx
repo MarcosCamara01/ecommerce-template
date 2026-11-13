@@ -109,7 +109,7 @@ export function PhotoViewer({
             if (event.key === "ArrowRight") show(index + 1, false);
             if (event.key === "ArrowLeft") show(index - 1, false);
           }}
-          className="fixed inset-0 z-50 bg-photo text-[#111214] outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:[animation-duration:150ms] data-[state=open]:[animation-duration:200ms] motion-reduce:zoom-in-100 motion-reduce:zoom-out-100"
+          className="fixed inset-0 z-50 bg-photo text-[#111214] outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:[animation-duration:150ms] data-[state=open]:[animation-duration:200ms] ease-out motion-reduce:!zoom-in-100 motion-reduce:!zoom-out-100"
         >
           <DialogPrimitive.Title className="sr-only">
             {name} in {color}, photos
@@ -198,7 +198,7 @@ export function PhotoViewer({
                 onClick={() => show(index - 1, true)}
                 className={cn(
                   control,
-                  "absolute left-6 top-1/2 size-[52px] -translate-y-1/2 transition-opacity duration-200 disabled:opacity-0 max-lg:hidden",
+                  "absolute inset-y-0 left-6 my-auto size-[52px] [transition:opacity_200ms_var(--ease-out),transform_120ms_var(--ease-out)] disabled:opacity-0 max-lg:hidden",
                 )}
               >
                 <Arrow back />
@@ -210,7 +210,7 @@ export function PhotoViewer({
                 onClick={() => show(index + 1, true)}
                 className={cn(
                   control,
-                  "absolute right-6 top-1/2 size-[52px] -translate-y-1/2 transition-opacity duration-200 disabled:opacity-0 max-lg:hidden",
+                  "absolute inset-y-0 right-6 my-auto size-[52px] [transition:opacity_200ms_var(--ease-out),transform_120ms_var(--ease-out)] disabled:opacity-0 max-lg:hidden",
                 )}
               >
                 <Arrow />
@@ -228,7 +228,7 @@ export function PhotoViewer({
                     aria-label={`Photo ${thumb + 1}`}
                     aria-current={thumb === index}
                     onClick={() => show(thumb, true)}
-                    className="press relative h-[58px] w-11 overflow-hidden rounded-[14px] opacity-60 transition-opacity duration-200 focus-visible:outline-[#111214] aria-[current=true]:opacity-100 aria-[current=true]:shadow-[0_0_0_1.5px_#111214]"
+                    className="press relative h-[58px] w-11 overflow-hidden rounded-[14px] opacity-60 focus-visible:outline-[#111214] aria-[current=true]:opacity-100 aria-[current=true]:shadow-[0_0_0_1.5px_#111214]"
                   >
                     <Image fill src={image} alt="" sizes="44px" className="object-cover" />
                   </button>

@@ -24,7 +24,7 @@ export function SizeChart({ rows }: { rows: readonly string[] }) {
                   type="button"
                   aria-pressed={size === selected}
                   onClick={() => setSelected(size)}
-                  className="press h-11 w-full min-w-10 rounded-pill border border-line font-semibold transition-[background-color,color,border-color,transform] duration-120 aria-pressed:border-fg aria-pressed:bg-fg aria-pressed:text-bg"
+                  className="press h-11 w-full min-w-10 rounded-pill border border-line font-semibold transition-[background-color,color,border-color,transform] duration-120 ease-out aria-pressed:border-fg aria-pressed:bg-fg aria-pressed:text-bg"
                 >
                   {size}
                 </button>

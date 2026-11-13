@@ -150,8 +150,6 @@ export function useHeroRotation(
     step,
     index,
     moves,
-    /** Whether the hero rotates at all (more than one piece, motion allowed). */
-    rotates,
     playing,
     stopped,
     /** Moves `delta` pieces on; the visitor took over, so the rotation stops. */

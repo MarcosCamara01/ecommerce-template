@@ -4,6 +4,7 @@ import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 
+import { usePressOutsideGuard } from "@/hooks/usePressOutsideGuard";
 import { cn } from "@/lib/utils";
 import { EASE_DRAWER, EASE_OUT } from "@/lib/motion";
 
@@ -69,10 +70,18 @@ type SheetContentProps = Omit<
 
 const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
   (
-    { side = "right", className, overlayClassName, children, ...props },
+    {
+      side = "right",
+      className,
+      overlayClassName,
+      onPointerDownOutside,
+      children,
+      ...props
+    },
     ref,
   ) => {
     const open = React.use(SheetOpenContext);
+    const guard = usePressOutsideGuard(open);
     const reduceMotion = useReducedMotion();
     const panel = reduceMotion
       ? {
@@ -92,20 +101,33 @@ const SheetContent = React.forwardRef<HTMLDivElement, SheetContentProps>(
       <AnimatePresence>
         {open ? (
           <SheetPrimitive.Portal forceMount>
+            {/* While they leave, the scrim and panel stop catching clicks;
+                `!` beats the inline pointer-events Radix sets. */}
             <SheetPrimitive.Overlay forceMount asChild>
               <m.div
-                className={cn("fixed inset-0 z-50 bg-scrim", overlayClassName)}
+                className={cn(
+                  "fixed inset-0 z-50 bg-scrim data-[state=closed]:!pointer-events-none",
+                  overlayClassName,
+                )}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2, ease: EASE_OUT }}
               />
             </SheetPrimitive.Overlay>
-            <SheetPrimitive.Content forceMount asChild {...props}>
+            <SheetPrimitive.Content
+              forceMount
+              asChild
+              {...props}
+              onPointerDownOutside={(event) => {
+                guard.onPointerDownOutside(event);
+                onPointerDownOutside?.(event);
+              }}
+            >
               <m.div
                 ref={ref}
                 className={cn(
-                  "fixed z-50 flex flex-col bg-panel text-fg outline-none",
+                  "fixed z-50 flex flex-col bg-panel text-fg outline-none data-[state=closed]:!pointer-events-none",
                   sideClasses[side],
                   className,
                 )}
