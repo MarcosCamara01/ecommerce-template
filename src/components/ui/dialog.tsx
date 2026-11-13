@@ -41,9 +41,11 @@ const DialogContent = React.forwardRef<
         // Phones: a sheet on the bottom edge (420ms drawer curve). Desktop: a
         // centred panel that fades and settles from 0.98 (200ms), centred by
         // margins: the keyframes' transform would replace a centring one.
-        "fixed inset-x-0 bottom-0 z-50 grid max-h-[92dvh] gap-[18px] overflow-y-auto rounded-t-[28px] bg-panel px-4 pb-7 pt-2.5 text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom data-[state=open]:duration-[420ms] data-[state=closed]:duration-[420ms] data-[state=open]:ease-drawer data-[state=closed]:ease-drawer",
+        "fixed inset-x-0 bottom-0 z-50 grid max-h-[92dvh] gap-[18px] overflow-y-auto rounded-t-[28px] bg-panel px-4 pb-7 pt-2.5 text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom data-[state=open]:duration-420 data-[state=closed]:duration-420 data-[state=open]:ease-drawer data-[state=closed]:ease-drawer",
         "sm:inset-0 sm:m-auto sm:h-fit sm:w-[min(520px,calc(100%-32px))] sm:rounded-[32px] sm:p-7 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=open]:fade-in-0 sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:zoom-in-[0.98] sm:data-[state=closed]:zoom-out-[0.98] sm:data-[state=open]:duration-200 sm:data-[state=closed]:duration-200 sm:data-[state=open]:ease-out",
-        "motion-reduce:slide-in-from-bottom-0 motion-reduce:slide-out-to-bottom-0 motion-reduce:data-[state=open]:fade-in-0 motion-reduce:data-[state=closed]:fade-out-0",
+        // `!`: the data-[state] slide and the later sm: zoom and 200ms would
+        // otherwise win over plain motion-reduce rules.
+        "motion-reduce:!slide-in-from-bottom-0 motion-reduce:!slide-out-to-bottom-0 motion-reduce:!zoom-in-100 motion-reduce:!zoom-out-100 motion-reduce:!duration-200 motion-reduce:data-[state=open]:fade-in-0 motion-reduce:data-[state=closed]:fade-out-0",
         className
       )}
       {...props}
