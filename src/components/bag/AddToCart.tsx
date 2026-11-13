@@ -14,6 +14,7 @@ import {
 } from "@/components/bag/bag-ui";
 import { flyToBag } from "@/components/bag/fly-to-bag";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/loader";
 import { useCartMutation } from "@/hooks/cart";
 import { useHydrated } from "@/hooks/useHydrated";
 import {
@@ -103,7 +104,12 @@ export function AddToCart({
         }}
         className={cn("w-full", className)}
       >
-        {soldOut
+        {isAdding ? (
+          <>
+            <Spinner className="busy-in motion-reduce:animate-none" />
+            Adding…
+          </>
+        ) : soldOut
           ? "Sold out"
           : added
             ? compact

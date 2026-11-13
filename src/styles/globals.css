@@ -235,6 +235,17 @@
       opacity: 0;
     }
   }
+
+  /* A busy spinner waits 120ms, so a fast add never flashes it. */
+  .busy-in {
+    transition: opacity 150ms var(--ease-out) 120ms;
+  }
+
+  @starting-style {
+    .busy-in {
+      opacity: 0;
+    }
+  }
 }
 
 /* Items that arrive with a panel: 50ms stagger via --i, after the panel. */

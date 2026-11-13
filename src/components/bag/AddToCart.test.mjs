@@ -26,6 +26,9 @@ for (const desktop of [true, false]) {
       assert.equal(harness.render().button["aria-busy"], true);
       assert.equal(harness.render().button.disabled, false, "a busy button keeps keyboard focus");
       assert.equal(harness.effects.held, desktop, "on desktop the pill keeps its count while the photo flies");
+      const [spinner, busyLabel] = harness.render().button.children.props.children;
+      assert.equal(spinner.type, "spinner", "a ring spinner before the label");
+      assert.equal(busyLabel, "Adding…");
       harness.render().button.onClick();
       assert.equal(harness.submissions.length, 1, "a click while adding adds nothing");
       harness.assertNoConfirmation();
@@ -34,6 +37,7 @@ for (const desktop of [true, false]) {
       await assert.rejects(harness.completion(), { message: "Request rejected" });
       assert.equal(harness.render().button["aria-busy"], undefined);
       assert.equal(harness.effects.held, false, "a failed add lets the pill show the bag as it is");
+      assert.match(harness.render().button.children, /^Add M to bag/);
       harness.assertNoConfirmation();
 
       harness.render().button.onClick();
@@ -146,6 +150,7 @@ function loadHarness({ desktop, flew = true, ...options }) {
       flyToBag: () => { effects.flights += 1; return Promise.resolve(flew); },
     },
     "@/components/ui/button": { Button: "button" },
+    "@/components/ui/loader": { Spinner: "spinner" },
     "@/hooks/cart": {
       useCartMutation: () => ({
         add: (variables, callbacks) => {
@@ -190,7 +195,9 @@ function loadHarness({ desktop, flew = true, ...options }) {
         { flights: 0, bumps: 0, opened: [] },
       );
       assert.equal(render().sheet.item, null);
-      assert.match(render().button.children, /^Add M? ?to bag/);
+      const { children } = render().button;
+      const text = typeof children === "string" ? children : children.props.children.filter((part) => typeof part === "string").join("");
+      assert.doesNotMatch(text, /Added/);
     },
     dispose() { reject(new Error("Test cleanup")); unsubscribe(); client.clear(); },
   };
