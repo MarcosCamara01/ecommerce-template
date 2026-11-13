@@ -60,7 +60,7 @@ export function SizePicker({
             aria-label={inStock ? undefined : `${size}, out of stock`}
             onClick={() => onChange(size)}
             className={cn(
-              "press relative rounded-pill border transition-[color,transform] duration-220 ease-in-out",
+              "press relative rounded-pill border [transition:color_220ms_var(--ease-in-out),transform_120ms_var(--ease-out)]",
               compact ? "h-11 text-13" : "h-11 text-13 lg:h-[52px] lg:text-sm",
               selected
                 ? "border-transparent text-bg"

@@ -49,7 +49,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
                 aria-pressed={isSelected}
                 onClick={() => toggleSize(size)}
                 className={cn(
-                  "press h-10 w-[52px] rounded-pill border text-13 transition-[background-color,color,border-color,transform] duration-120",
+                  "press h-10 w-[52px] rounded-pill border text-13 transition-[background-color,color,border-color,transform] duration-120 ease-out",
                   isSelected
                     ? "border-fg bg-fg text-bg"
                     : "border-line text-fg hover:border-fg",

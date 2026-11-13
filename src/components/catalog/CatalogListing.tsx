@@ -170,7 +170,7 @@ export function CatalogListing({
                 aria-pressed={columns === count}
                 aria-label={`${count} columns`}
                 onClick={() => setColumns(count)}
-                className="press relative h-9 w-11 rounded-pill text-13 font-semibold transition-[color,transform] duration-220 ease-in-out aria-pressed:text-bg"
+                className="press relative h-9 w-11 rounded-pill text-13 font-semibold [transition:color_220ms_var(--ease-in-out),transform_120ms_var(--ease-out)] aria-pressed:text-bg"
               >
                 {count}
               </button>

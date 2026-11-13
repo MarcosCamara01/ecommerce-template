@@ -133,7 +133,7 @@ export const WishlistButton = ({
             : `Save ${productName} to wishlist`
         }
         className={cn(
-          "press relative grid size-full place-items-center rounded-pill transition-[background-color,color,transform] duration-200",
+          "press relative grid size-full place-items-center rounded-pill [transition:background-color_200ms_var(--ease-out),color_200ms_var(--ease-out),transform_120ms_var(--ease-out)]",
           appearance === "disc" &&
             (isFavorite && !showsRemove
               ? "bg-[#111214] text-white focus-visible:outline-[#111214]"
