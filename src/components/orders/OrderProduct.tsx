@@ -68,13 +68,13 @@ export const OrderProduct = async ({
         {isArchived ? photo : <Link href={productLink!}>{photo}</Link>}
       </div>
       <div className="flex min-w-0 flex-col gap-2">
-        <h3 className="font-display-75 text-xl leading-none lg:text-[30px] lg:[word-spacing:0.1em]">
+        <h3 className="font-display-75 text-xl leading-none [overflow-wrap:anywhere] lg:text-[30px] lg:[word-spacing:0.1em]">
           {productName}
         </h3>
         <span className="flex items-center gap-2 text-sm text-muted">
           <span
             aria-hidden="true"
-            className="size-3 rounded-pill shadow-[0_0_0_1px_var(--line)]"
+            className="size-3 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)]"
             style={{ background: swatchBackground(variantColor) }}
           />
           <span>

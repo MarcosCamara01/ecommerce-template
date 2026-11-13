@@ -63,7 +63,7 @@ async function SearchResults({ searchParams }: SearchProps) {
             <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(112px,7.8vw)]">
               Nothing matches yet
             </h2>
-            <p className="text-lg">
+            <p className="text-lg [overflow-wrap:anywhere]">
               No products found for “{q}”. Check the spelling, or start with
               what&apos;s new.
             </p>

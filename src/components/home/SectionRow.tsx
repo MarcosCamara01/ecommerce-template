@@ -73,7 +73,9 @@ export function SectionRow({
       </span>
       <span className="flex shrink-0 items-center gap-3 whitespace-nowrap text-sm lg:gap-4 lg:text-[15px]">
         {/* Phones only have room for the word and the arrow. */}
-        <span className="max-sm:sr-only">{String(count).padStart(2, "0")} styles</span>
+        <span className="max-sm:sr-only">
+          {String(count).padStart(2, "0")} {count === 1 ? "style" : "styles"}
+        </span>
         <span
           className={cn(
             "relative grid size-11 place-items-center overflow-hidden rounded-pill border lg:size-16",

@@ -218,7 +218,8 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
                     key={item}
                     type="button"
                     onClick={() => setQuery(item)}
-                    className="flex min-h-11 items-center gap-3 text-left"
+                    title={item}
+                    className="flex min-h-11 w-full min-w-0 items-center gap-3 text-left"
                   >
                     <svg
                       aria-hidden="true"
@@ -233,7 +234,7 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
                       <circle cx="12" cy="12" r="8" />
                       <path d="M12 8v4l3 2" />
                     </svg>
-                    {item}
+                    <span className="truncate">{item}</span>
                   </button>
                 ))}
               </div>
@@ -282,7 +283,7 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
                           {color ? (
                             <span
                               aria-hidden="true"
-                              className="size-2.5 rounded-pill shadow-[0_0_0_1px_var(--line)]"
+                              className="size-2.5 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)]"
                               style={{ background: swatchBackground(color) }}
                             />
                           ) : null}
@@ -304,13 +305,15 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
               onNavigate={() => setSearchOpen(false)}
               className="press mt-1.5 flex min-h-[52px] items-center justify-between rounded-pill bg-fg px-[18px] font-semibold text-bg"
             >
-              <span>See all results for “{term}”</span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">See all results for “{term}”</span>
               <ArrowRightIcon />
             </Link>
           </div>
         ) : (
           <div className="flex flex-col gap-3.5 py-3" aria-live="polite">
-            <p className="font-display text-5xl leading-[0.9]">Nothing for “{term}”</p>
+            <p className="font-display text-5xl leading-[0.9] [overflow-wrap:anywhere]">
+              Nothing for “{term}”
+            </p>
             <p className="text-muted">Check the spelling, or try one of these:</p>
             <PopularTerms terms={popular} onPick={setQuery} hideHeading />
           </div>

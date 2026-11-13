@@ -18,7 +18,7 @@ export const DeleteButton = ({
       type="button"
       onClick={() => removeFromCart({ itemId: cartItemId })}
       aria-label={`Remove ${productName} from bag`}
-      className="h-11 px-3 text-sm underline underline-offset-[3px]"
+      className="press h-11 px-3 text-sm underline underline-offset-[3px]"
     >
       Remove
     </button>

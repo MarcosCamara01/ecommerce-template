@@ -63,6 +63,22 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Taps answer at once (no double-tap zoom wait), and a long press on a
+     control does not select its label. Links and text stay selectable. */
+  button,
+  a,
+  [role="button"],
+  summary,
+  label {
+    touch-action: manipulation;
+  }
+
+  button,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   body {
     min-height: 100dvh;
     background: var(--bg);
@@ -153,8 +169,32 @@
     transition: transform 120ms var(--ease-out);
   }
 
-  .press:active:not(:disabled) {
+  .press:active:not(:disabled):not([aria-busy="true"]) {
     transform: scale(0.97);
+  }
+
+  /* A form message row: opens and closes in place instead of jumping the
+     form. The negative margin cancels the form's gap while it is closed. */
+  .reveal-row {
+    display: grid;
+    grid-template-rows: 0fr;
+    margin-bottom: calc(-1 * var(--reveal-gap, 16px));
+    opacity: 0;
+    transition:
+      grid-template-rows 220ms var(--ease-out),
+      margin-bottom 220ms var(--ease-out),
+      opacity 220ms var(--ease-out);
+  }
+
+  .reveal-row[data-open="true"] {
+    grid-template-rows: 1fr;
+    margin-bottom: 0;
+    opacity: 1;
+  }
+
+  .reveal-row > * {
+    min-height: 0;
+    overflow: hidden;
   }
 }
 
@@ -183,8 +223,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .press:active:not(:disabled) {
+  .press:active:not(:disabled):not([aria-busy="true"]) {
     transform: none;
+  }
+
+  .reveal-row {
+    transition-property: opacity;
   }
 
   @starting-style {

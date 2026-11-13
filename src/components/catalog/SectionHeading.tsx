@@ -33,8 +33,8 @@ export function SectionHeading({
 export function SectionCount({ count }: { count: number }) {
   return (
     <span className="whitespace-nowrap pb-1.5 font-display text-[28px] font-extrabold normal-case leading-none tabular-nums lg:pb-3 lg:text-[56px]">
-      {String(count).padStart(2, "0")}
-      <span className="opacity-65 max-lg:sr-only"> pieces</span>
+      {count >= 1000 ? count.toLocaleString("en-US") : String(count).padStart(2, "0")}
+      <span className="opacity-65 max-lg:sr-only"> {count === 1 ? "piece" : "pieces"}</span>
     </span>
   );
 }

@@ -21,6 +21,16 @@ function themeEnvironment(stored, { blocked = false, systemDark = false } = {}) 
   const storage = { value: stored };
   // Frames run when the test says so, to see what is on <html> in between.
   const frames = [];
+  // The two theme-color metas the root layout renders, one per system scheme.
+  const metas = ["#e4e7ea", "#141516"].map((color) => {
+    const attributes = { content: color };
+    return {
+      getAttribute: (name) => attributes[name],
+      setAttribute: (name, value) => {
+        attributes[name] = value;
+      },
+    };
+  });
   const context = {
     document: {
       documentElement: {
@@ -30,6 +40,8 @@ function themeEnvironment(stored, { blocked = false, systemDark = false } = {}) 
         },
       },
       body: { getBoundingClientRect: () => ({}) },
+      querySelectorAll: (selector) =>
+        selector === 'meta[name="theme-color"]' ? metas : [],
     },
     localStorage: {
       getItem: () => {
@@ -48,7 +60,8 @@ function themeEnvironment(stored, { blocked = false, systemDark = false } = {}) 
   const paint = () => {
     while (frames.length > 0) frames.shift()();
   };
-  return { context, classes, media, listeners, storage, paint };
+  const themeColors = () => metas.map((meta) => meta.getAttribute("content"));
+  return { context, classes, media, listeners, storage, paint, themeColors };
 }
 
 function loadThemeStore(environment) {
@@ -138,6 +151,20 @@ test("switching theme is instant: transitions are off for the swap only", () => 
   assert.equal(environment.classes.has("dark"), false);
   assert.equal(environment.storage.value, "light");
   assert.equal(environment.classes.has("theme-switching"), false);
+});
+
+test("the browser chrome takes the page's theme, stored or switched", () => {
+  const environment = themeEnvironment("dark", { systemDark: false });
+  const unsubscribe = subscribeToTheme(environment);
+  try {
+    assert.deepEqual(environment.themeColors(), ["#141516", "#141516"]);
+  } finally {
+    unsubscribe();
+  }
+
+  const { setTheme } = loadThemeStore(environment);
+  setTheme("light");
+  assert.deepEqual(environment.themeColors(), ["#e4e7ea", "#e4e7ea"]);
 });
 
 test("the theme store no longer animates the switch", () => {

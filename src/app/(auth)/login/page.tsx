@@ -3,16 +3,19 @@
 import { Suspense, type FormEvent, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { FaGoogle } from "react-icons/fa6";
-import { MdError } from "react-icons/md";
 
 import { AuthShell } from "@/components/auth/AuthShell";
+import { FormError } from "@/components/auth/FormError";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loading-button";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
+import { invalidFields } from "@/lib/auth/form-errors";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
+
+const FIELDS = ["email", "password"] as const;
 
 function LoginContent() {
   const { signIn, signInWithGoogle } = useAuthMutation();
@@ -30,17 +33,28 @@ function LoginContent() {
     ? "Invalid email or password"
     : null;
 
+  // Focus goes to the field to fix, unless it is already in one of them.
+  const focusInvalid = (failure: unknown) => {
+    const refs = { email: emailRef, password: passwordRef };
+    const fields = invalidFields(failure, FIELDS).map((field) => refs[field].current);
+    if (!fields.some((field) => field === document.activeElement)) fields[0]?.focus();
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    signIn.mutate({
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
-      callbackURL,
-    });
+    signIn.mutate(
+      {
+        email: emailRef.current.value,
+        password: passwordRef.current.value,
+        callbackURL,
+      },
+      { onError: focusInvalid },
+    );
   };
 
   const error = signIn.error || signInWithGoogle.error || nativeError;
+  const invalid = invalidFields(signIn.error ?? nativeError, FIELDS);
   const isSubmitting = signIn.isPending;
   const isGoogleLoading = signInWithGoogle.isPending;
   const isLoading = isSubmitting || isGoogleLoading;
@@ -64,17 +78,11 @@ function LoginContent() {
       >
         <Input type="hidden" name="mode" value="sign-in" className="hidden" />
         <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
-        {error && (
-          <div
-            role="alert"
-            className="flex items-start gap-2.5 rounded-field bg-err-bg px-3.5 py-3 text-sm text-err-fg"
-          >
-            <MdError className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
-            <p>
-              {error instanceof Error ? error.message : error}
-            </p>
-          </div>
-        )}
+        <FormError
+          message={error instanceof Error ? error.message : error}
+          pending={signIn.isPending}
+          attempt={signIn.submittedAt}
+        />
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -93,8 +101,8 @@ function LoginContent() {
               name="email"
               autoComplete="email"
               required
-              aria-invalid={Boolean(error) || undefined}
-              disabled={isLoading}
+              aria-invalid={invalid.includes("email") || undefined}
+              readOnly={isLoading}
             />
           </div>
 
@@ -111,8 +119,8 @@ function LoginContent() {
               name="password"
               autoComplete="current-password"
               required
-              aria-invalid={Boolean(error) || undefined}
-              disabled={isLoading}
+              aria-invalid={invalid.includes("password") || undefined}
+              readOnly={isLoading}
             />
           </div>
         </div>
@@ -121,9 +129,9 @@ function LoginContent() {
           type="submit"
           className="mt-1.5 w-full text-base"
           loading={isSubmitting}
-          disabled={isLoading}
+          disabled={isGoogleLoading}
         >
-          {isSubmitting ? "Signing in..." : "Sign in"}
+          {isSubmitting ? "Signing in…" : "Sign in"}
         </LoadingButton>
 
         {googleAuthEnabled && (

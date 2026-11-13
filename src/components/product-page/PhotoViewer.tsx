@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 const ZOOM = 2;
 
 const control =
-  "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214] backdrop-blur-sm";
+  "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214] backdrop-blur-sm focus-visible:outline-[#111214]";
 
 /** Keeps the point under the pointer in place while the photo is enlarged. */
 function follow(event: React.MouseEvent<HTMLButtonElement>) {
@@ -228,7 +228,7 @@ export function PhotoViewer({
                     aria-label={`Photo ${thumb + 1}`}
                     aria-current={thumb === index}
                     onClick={() => show(thumb, true)}
-                    className="press relative h-[58px] w-11 overflow-hidden rounded-[14px] opacity-60 transition-opacity duration-200 aria-[current=true]:opacity-100 aria-[current=true]:shadow-[0_0_0_1.5px_#111214]"
+                    className="press relative h-[58px] w-11 overflow-hidden rounded-[14px] opacity-60 transition-opacity duration-200 focus-visible:outline-[#111214] aria-[current=true]:opacity-100 aria-[current=true]:shadow-[0_0_0_1.5px_#111214]"
                   >
                     <Image fill src={image} alt="" sizes="44px" className="object-cover" />
                   </button>

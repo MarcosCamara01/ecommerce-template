@@ -12,9 +12,11 @@ const ADVANCE: Record<string, number> = {
   "%": 0.73, " ": 0.1, ".": 0.21, "&": 0.56, "'": 0.2,
 };
 
+const WIDE_GLYPH = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+
 const advance = (text: string) =>
   text.toUpperCase().split("").reduce(
-    (total, char) => total + (ADVANCE[char] ?? 0.5),
+    (total, char) => total + (ADVANCE[char] ?? (WIDE_GLYPH.test(char) ? 1 : 0.5)),
     0,
   );
 
@@ -26,7 +28,8 @@ function displayEm(text: string): number {
 /**
  * How many lines `text` takes in display type in a measure of `measureEm`
  * (the width of its column over the font size). Lines break at spaces and
- * after hyphens, as the browser breaks them.
+ * after hyphens, as the browser breaks them, and a word wider than the
+ * measure breaks anywhere (`overflow-wrap: anywhere`).
  */
 export function displayLines(text: string, measureEm: number): number {
   let lines = 1;
@@ -36,12 +39,14 @@ export function displayLines(text: string, measureEm: number): number {
     word.split(/(?<=-)/).forEach((chunk, index) => {
       const width = advance(chunk) * 1.03;
       const gap = index === 0 && used > 0 ? ADVANCE[" "] : 0;
-      if (used > 0 && used + gap + width > measureEm) {
+      let start = used + gap;
+      if (used > 0 && start + width > measureEm) {
         lines += 1;
-        used = width;
-      } else {
-        used += gap + width;
+        start = 0;
       }
+      const extra = Math.max(Math.ceil((start + width) / measureEm) - 1, 0);
+      lines += extra;
+      used = start + width - extra * measureEm;
     });
   }
   return lines;

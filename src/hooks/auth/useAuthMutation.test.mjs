@@ -52,6 +52,25 @@ for (const action of ["signInWithGoogle", "signOut"]) {
   });
 }
 
+for (const action of ["signIn", "signUp"]) {
+  test(`${action} rejects with Better Auth's code and leaves the message to the page`, async () => {
+    const { mutations, client, navigations, notices } = loadAuthMutation({
+      error: { message: "Invalid email or password", code: "INVALID_EMAIL_OR_PASSWORD" }, data: null,
+    });
+    try {
+      await assert.rejects(
+        mutations[action].mutateAsync({ email: "shopper@example.test", name: "Shopper" }),
+        { message: "Invalid email or password", code: "INVALID_EMAIL_OR_PASSWORD" },
+      );
+      assert.equal(client.getQueryData(["qa"]), "session cache");
+      assert.deepEqual(navigations, []);
+      assert.equal(notices.length, 0);
+    } finally {
+      client.clear();
+    }
+  });
+}
+
 test("Google sign-in leaves provider navigation to Better Auth", async () => {
   const { mutations, client, navigations } = loadAuthMutation({
     error: null, data: { url: "https://accounts.google.com/authorize", redirect: true },

@@ -34,7 +34,10 @@ export const useAuthMutation = () => {
       });
 
       if (result.error) {
-        throw new Error(result.error.message || "Invalid email or password");
+        throw Object.assign(
+          new Error(result.error.message || "Invalid email or password"),
+          { code: result.error.code },
+        );
       }
 
       return result;
@@ -44,9 +47,9 @@ export const useAuthMutation = () => {
       router.push(safeLocalCallback(variables.callbackURL));
       router.refresh();
     },
+    // The page shows the error inline, beside the fields.
     onError: (error) => {
       console.error(error);
-      toast.error(error.message || "Error signing in");
     },
   });
 
@@ -71,7 +74,10 @@ export const useAuthMutation = () => {
       });
 
       if (result.error) {
-        throw new Error(result.error.message || "Error creating account");
+        throw Object.assign(
+          new Error(result.error.message || "Error creating account"),
+          { code: result.error.code },
+        );
       }
 
       return result;
@@ -89,7 +95,6 @@ export const useAuthMutation = () => {
     },
     onError: (error) => {
       console.error(error);
-      toast.error(error.message || "Error signing up");
     },
   });
 

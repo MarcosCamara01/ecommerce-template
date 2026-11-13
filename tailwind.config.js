@@ -8,6 +8,8 @@ const mix = (variable) =>
 
 module.exports = {
   darkMode: ["class"],
+  // Hover only where a pointer can hover, so it never sticks after a tap.
+  future: { hoverOnlyWhenSupported: true },
   content: ["./src/**/*.{ts,tsx,js,jsx}"],
   prefix: "",
   theme: {

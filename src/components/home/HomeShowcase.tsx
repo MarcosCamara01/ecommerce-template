@@ -16,6 +16,7 @@ import type {
   ProductVariant,
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
+import { heroLetters } from "@/lib/hero-word";
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
@@ -74,7 +75,7 @@ export function HomeShowcase({
     deckRef.current?.querySelector<HTMLElement>('[data-deck-slot="0"]') ?? null;
 
   const animate = firstLoad || moves > 0;
-  const word = piece.word.toUpperCase().split("");
+  const word = heroLetters(piece.word);
   const toggle = rotation.rotates ? (
     <RotationToggle
       playing={rotation.playing}
@@ -109,7 +110,7 @@ export function HomeShowcase({
             }
             className="absolute inset-x-0 top-0 whitespace-nowrap text-center font-display text-[length:var(--word-m)] leading-[0.85] lg:static lg:text-[length:min(var(--word-d),calc(var(--hero-u)*316))] lg:leading-[0.82]"
           >
-            <span key={moves} className="inline-flex overflow-hidden align-top">
+            <span key={moves} dir="auto" className="inline-flex overflow-hidden align-top">
               {word.map((letter, position) => (
                 <span
                   key={position}
@@ -140,6 +141,10 @@ export function HomeShowcase({
             data-hero-claim=""
             aria-live={rotation.playing ? "off" : "polite"}
             aria-atomic="true"
+            // Room for the category line and a two-line name below the
+            // price row, so pieces with longer names do not move the
+            // controls as the hero rotates, and the price stays beside the name.
+            className="min-h-[calc(1rem_+_54px)] lg:min-h-0"
           >
             <div
               key={moves}
@@ -148,15 +153,21 @@ export function HomeShowcase({
                 moves > 0 && "animate-fade-in",
               )}
             >
-              <div className="flex flex-col gap-0.5 lg:gap-[max(12px,calc(var(--hero-u)*18))]">
-                <span className="text-xs text-muted lg:text-13">
+              <div className="flex min-w-0 flex-col gap-0.5 lg:gap-[max(12px,calc(var(--hero-u)*18))]">
+                <span className="line-clamp-1 text-xs text-muted lg:text-13">
                   {piece.categoryLabel} · {variant.color}
                 </span>
                 <h2 className="font-display-75 text-[26px] leading-none lg:text-[length:max(28px,calc(var(--hero-u)*44))] lg:leading-[0.95] lg:[word-spacing:0.08em]">
-                  <Link href={productHref}>{product.name}</Link>
+                  <Link
+                    href={productHref}
+                    title={product.name}
+                    className="line-clamp-2 [overflow-wrap:anywhere] lg:line-clamp-3"
+                  >
+                    {product.name}
+                  </Link>
                 </h2>
               </div>
-              <span className="whitespace-nowrap text-lg font-medium tabular-nums lg:text-[length:max(18px,calc(var(--hero-u)*22))]">
+              <span className="shrink-0 whitespace-nowrap text-lg font-medium tabular-nums lg:text-[length:max(18px,calc(var(--hero-u)*22))]">
                 {formatPriceFromEuros(product.price)}
               </span>
             </div>
@@ -178,7 +189,9 @@ export function HomeShowcase({
                 />
               </button>
             ))}
-            <span className="ml-auto text-xs">{pieces.length} colors</span>
+            <span className="ml-auto text-xs">
+              {pieces.length} {pieces.length === 1 ? "piece" : "pieces"}
+            </span>
             {toggle}
           </div>
 

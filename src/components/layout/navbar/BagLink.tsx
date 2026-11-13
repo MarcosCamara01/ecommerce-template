@@ -35,7 +35,8 @@ export function BagLink({
     >
       {isSuccess ? (
         <>
-          Bag · <RollingNumber value={count} />
+          {/* Past 99 the pill reads 99+, and a figure that does not change does not roll. */}
+          Bag · <RollingNumber value={Math.min(count, 100)}>{count > 99 ? "99+" : count}</RollingNumber>
         </>
       ) : (
         "Bag"

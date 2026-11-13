@@ -28,7 +28,7 @@ const stockLine = (variant: ProductVariant) =>
       : variant.sizes.join(" · ");
 
 const overlayButton =
-  "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214]";
+  "press grid size-11 place-items-center rounded-pill bg-white/80 text-[#111214] focus-visible:outline-[#111214]";
 
 // Desktop sizes for the name, largest first. A short name is set giant; a
 // longer one steps down until it is no taller than two lines of the largest
@@ -185,10 +185,10 @@ export function ProductView({
               {editButton}
             </div>
             <div className="flex items-end justify-between gap-3 lg:flex-col lg:items-start lg:gap-3.5">
-              <h1 className={cn("font-display text-[46px] leading-[0.86]", nameStep.className)}>
+              <h1 className={cn("min-w-0 font-display text-[46px] leading-[0.86] [overflow-wrap:anywhere]", nameStep.className)}>
                 {product.name}
               </h1>
-              <span className="whitespace-nowrap text-lg font-medium tabular-nums lg:text-[26px]">
+              <span className="shrink-0 whitespace-nowrap text-lg font-medium tabular-nums lg:text-[26px]">
                 {price}
               </span>
             </div>

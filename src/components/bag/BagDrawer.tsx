@@ -43,12 +43,15 @@ export function BagDrawer() {
         className="w-[min(460px,100vw)] gap-5 bg-bg p-7 shadow-[-30px_0_80px_rgba(0,0,0,.25)]"
       >
         <div className="flex items-center justify-between">
-          <SheetTitle className="text-[64px]">
-            Bag {isLoading ? "" : `(${count})`}
+          <SheetTitle className="min-w-0 text-[64px]">
+            Bag{" "}
+            {isLoading ? null : (
+              <span className="whitespace-nowrap">({count.toLocaleString("en-US")})</span>
+            )}
           </SheetTitle>
           <SheetClose
             aria-label="Close bag"
-            className="press grid size-12 place-items-center rounded-pill border border-line"
+            className="press grid size-12 shrink-0 place-items-center rounded-pill border border-line"
           >
             <CloseIcon size={16} />
           </SheetClose>
@@ -58,7 +61,10 @@ export function BagDrawer() {
         </SheetDescription>
 
         {added ? (
-          <span className="self-start rounded-pill bg-fg px-3 py-1.5 text-13 font-medium text-bg">
+          <span
+            title={`${added.color}, ${added.size}`}
+            className="max-w-full self-start truncate rounded-pill bg-fg px-3 py-1.5 text-13 font-medium text-bg"
+          >
             Added · {added.color}, {added.size}
           </span>
         ) : null}
@@ -102,7 +108,9 @@ export function BagDrawer() {
                     className="h-[108px] w-[84px] rounded-field bg-photo object-cover"
                   />
                   <span className="flex min-w-0 flex-col gap-1">
-                    <span className="font-medium">{displayName(item.product.name)}</span>
+                    <span className="font-medium [overflow-wrap:anywhere]">
+                      {displayName(item.product.name)}
+                    </span>
                     <span className="text-13 text-muted">
                       {item.variant.color} · {item.size} · Qty {item.quantity}
                     </span>

@@ -15,7 +15,15 @@ const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
         {...props}
         ref={ref}
         aria-busy={loading || undefined}
-        disabled={Boolean(props.disabled || loading)}
+        // Busy rather than disabled: a disabled button drops keyboard focus.
+        // Swallowing the click also stops the implicit submit Enter fires.
+        onClick={(event) => {
+          if (loading) {
+            event.preventDefault();
+            return;
+          }
+          props.onClick?.(event);
+        }}
       >
         {loading ? <Spinner /> : icon || null}
         <span>{children}</span>
