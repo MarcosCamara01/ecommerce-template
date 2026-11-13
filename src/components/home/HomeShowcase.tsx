@@ -16,6 +16,7 @@ import type {
   ProductVariant,
   ProductWithVariants,
 } from "@/lib/db/drizzle/schema";
+import { heroLetters } from "@/lib/hero-word";
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
@@ -74,7 +75,7 @@ export function HomeShowcase({
     deckRef.current?.querySelector<HTMLElement>('[data-deck-slot="0"]') ?? null;
 
   const animate = firstLoad || moves > 0;
-  const word = piece.word.toUpperCase().split("");
+  const word = heroLetters(piece.word);
   const toggle = rotation.rotates ? (
     <RotationToggle
       playing={rotation.playing}
@@ -109,7 +110,7 @@ export function HomeShowcase({
             }
             className="absolute inset-x-0 top-0 whitespace-nowrap text-center font-display text-[length:var(--word-m)] leading-[0.85] lg:static lg:text-[length:min(var(--word-d),calc(var(--hero-u)*316))] lg:leading-[0.82]"
           >
-            <span key={moves} className="inline-flex overflow-hidden align-top">
+            <span key={moves} dir="auto" className="inline-flex overflow-hidden align-top">
               {word.map((letter, position) => (
                 <span
                   key={position}
