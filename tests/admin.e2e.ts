@@ -7,7 +7,7 @@ import { HAS_ADMIN, NEEDS_ADMIN, pieceOnScreen, settled, test } from "./support/
 const admin = {
   tags: ["admin", "agent"],
   agentContext:
-    "This is the admin area of the store. Nothing may be saved here: never press Create Product, Update Product or any button that submits the form.",
+    "This is the admin area of the store. Nothing may be saved here: never press Create product, Update product or any button that submits the form.",
 };
 
 test.describe(

@@ -4,8 +4,8 @@ export function NoSessionError() {
   return (
     <ResultMessage
       icon="alert"
-      title="No Session ID Found"
-      message="Please make sure you accessed this page after completing a purchase."
+      title="Nothing to show here"
+      message="This page confirms a purchase after checkout. Your orders are all in one place."
       primary={{ href: "/orders", label: "Check orders" }}
       secondary={{ href: "/new-in", label: "Continue shopping" }}
     />

@@ -10,7 +10,7 @@ test.describe("account", { ...asShopper("account"), tags: ["account", "agent", "
     await expect(browser).toHaveURL("/orders");
     await settled(browser);
     // A shopper who signed up a moment ago has bought nothing yet.
-    await agent.assert("the page says there are no orders yet and offers a way to start shopping");
+    await agent.assert("the page says there are no orders yet and offers a way to see what is new");
 
     await agent.act("from the account links of this page, go to my wishlist");
     await expect(browser).toHaveURL("/wishlist");

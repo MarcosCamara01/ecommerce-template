@@ -54,7 +54,7 @@ export function ArchiveProductButton({ productId }: { productId: number }) {
       router.refresh();
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Error archiving product");
+      toast.error(error instanceof Error ? error.message : "Couldn’t archive this product. Try again.");
     },
   });
 
@@ -62,7 +62,7 @@ export function ArchiveProductButton({ productId }: { productId: number }) {
     <div>
       <div className="flex flex-col gap-4 rounded-photo-lg border border-err-line px-[22px] py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-semibold">Archive Product</h2>
+          <h2 className="font-semibold">Archive product</h2>
           <p className="mt-1 text-sm text-muted">
             Hide this product from the storefront while preserving orders and its durable identity.
           </p>
@@ -76,12 +76,12 @@ export function ArchiveProductButton({ productId }: { productId: number }) {
               className="border-err-line text-err-fg hover:border-err-line"
             >
               <FiArchive className="h-4 w-4" aria-hidden="true" />
-              Archive Product
+              Archive product
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Archive This Product?</DialogTitle>
+              <DialogTitle>Archive this product?</DialogTitle>
               <DialogDescription>
                 It will disappear from search, collections, carts, and wishlists. Historical orders remain available, and an administrator can restore it later.
               </DialogDescription>
@@ -98,7 +98,7 @@ export function ArchiveProductButton({ productId }: { productId: number }) {
                 onClick={() => archive.mutate()}
                 variant="destructive"
               >
-                Confirm Archive
+                Confirm archive
               </LoadingButton>
             </DialogFooter>
           </DialogContent>

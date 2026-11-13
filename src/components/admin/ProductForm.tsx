@@ -206,8 +206,8 @@ export function ProductForm({
         : "Update product information, variants and images";
   const submitButtonText =
     mode === "create"
-      ? "Create Product"
-      : restoreArchived ? "Restore Product" : "Update Product";
+      ? "Create product"
+      : restoreArchived ? "Restore product" : "Update product";
 
   const section = "flex flex-col gap-3.5 rounded-photo-lg border border-line bg-fg/5 p-[22px]";
 
@@ -228,7 +228,7 @@ export function ProductForm({
       {restoreArchived && (
         <Alert>
           <FiArchive className="h-4 w-4" />
-          <AlertTitle>Archived Product</AlertTitle>
+          <AlertTitle>Archived product</AlertTitle>
           <AlertDescription>
             Saving this form is an explicit restore action and will republish the durable product identity after catalog synchronization succeeds.
           </AlertDescription>
@@ -264,7 +264,7 @@ export function ProductForm({
         <div className="flex flex-col gap-4">
           <section aria-labelledby="basic-info-title" className={section}>
             <h2 id="basic-info-title" className="text-lg font-semibold">
-              Basic Information
+              Basic information
             </h2>
             <BasicInfo
               ref={basicInfoRef}
@@ -276,7 +276,7 @@ export function ProductForm({
 
           <section aria-labelledby="main-image-title" className={section}>
             <h2 id="main-image-title" className="text-lg font-semibold">
-              Main Image
+              Main image
             </h2>
             <MainImage
               ref={mainImageRef}
@@ -288,7 +288,7 @@ export function ProductForm({
 
           <section aria-labelledby="variants-title" className={section}>
             <h2 id="variants-title" className="text-lg font-semibold">
-              Product Variants
+              Product variants
             </h2>
             <VariantsSection
               ref={variantsSectionRef}
@@ -313,7 +313,7 @@ export function ProductForm({
             size="sm"
             className="w-full"
           >
-            {mode === "create" ? "Clear Form" : "Reset Changes"}
+            {mode === "create" ? "Clear form" : "Reset changes"}
           </Button>
         </aside>
       </div>
