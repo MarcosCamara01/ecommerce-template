@@ -149,7 +149,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
         className="h-[52px] w-full rounded-pill border-[1.5px] border-dashed border-line font-medium text-fg hover:border-fg"
       >
         <FiPlus className="mr-2 h-4 w-4" />
-        Add Another Variant
+        Add another variant
       </Button>
     </div>
   );

@@ -130,7 +130,7 @@ export function UserMenu({
           className="min-h-11 rounded-[14px]"
         >
           <LogoutIcon />
-          <span>Log out</span>
+          <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

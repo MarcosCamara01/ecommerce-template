@@ -73,7 +73,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
           Order not found
         </h2>
         <p className="max-w-[520px] text-muted">
-          The order you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to
+          The order you’re looking for doesn’t exist or you don’t have access to
           it.
         </p>
         <Link href="/orders" className={buttonClass()}>

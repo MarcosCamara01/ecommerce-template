@@ -66,7 +66,7 @@ export default function EditProfile({
       await refetchSession();
       manager.close();
       router.refresh();
-      toast.success("Profile updated successfully");
+      toast.success("Profile updated");
     },
     onError: (error) => {
       toast.error(
@@ -101,7 +101,7 @@ export default function EditProfile({
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you&apos;re done.
+            Update the name on your account.
           </DialogDescription>
         </DialogHeader>
         <form

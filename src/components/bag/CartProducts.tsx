@@ -134,7 +134,7 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
           Checkout securely
         </CheckoutButton>
         <p className="text-center text-xs text-muted">
-          You&apos;ll pay on Stripe&apos;s secure page, then come back here.
+          You’ll pay on Stripe’s secure page, then come back here.
         </p>
       </aside>
 

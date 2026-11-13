@@ -86,7 +86,7 @@ export function BagDrawer() {
             </p>
             <SheetClose asChild>
               <Link href="/new-in" className={buttonClass({ size: "sm" })}>
-                See what&apos;s new
+                See what’s new
               </Link>
             </SheetClose>
           </div>

@@ -246,7 +246,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
             aria-describedby={displayedError ? errorId : undefined}
           >
             <FiUpload className="h-3 w-3 mr-1.5" aria-hidden="true" />
-            Add Images
+            Add images
           </Button>
           <input
             id={inputId}

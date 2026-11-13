@@ -80,7 +80,7 @@ export async function archiveProduct(productId: number): Promise<ProductApiRespo
   return executeProductMutation({
     method: "DELETE",
     url: `/api/admin/products?id=${productId}`,
-    errorMessage: "Error archiving product",
+    errorMessage: "Couldn’t archive this product. Try again.",
     unexpectedErrorMessage: "Unexpected error archiving product",
     successMessage: "Product archived successfully",
     acceptedMessage: "Product archive is being synchronized",

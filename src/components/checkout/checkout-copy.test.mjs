@@ -8,12 +8,12 @@ import {
 
 test("paid checkout copy distinguishes fulfillment from order confirmation", () => {
   assert.deepEqual(checkoutStatusCopy("fulfillment_pending"), {
-    title: "Payment Received",
+    title: "Payment received",
     message:
       "Your payment is confirmed. We’re preparing your order now, and this page will update automatically.",
   });
   assert.deepEqual(checkoutStatusCopy("needs_attention"), {
-    title: "Payment Received",
+    title: "Payment received",
     message:
       "Your payment is safe, but your order needs review. No purchase information has been lost.",
   });
