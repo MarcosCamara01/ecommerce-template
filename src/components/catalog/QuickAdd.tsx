@@ -129,10 +129,13 @@ export function QuickAdd({
             pointed === position && "text-white",
           )}
         >
-          {/* The sizes arrive one after another, just behind the capsule. */}
+          {/* The sizes arrive one after another, just behind the capsule.
+              They leave inside its fade and reset once it has gone: a fade
+              of their own ran on the main thread, because the capsule they
+              sit in is visibility: hidden at rest. */}
           <span
             style={{ "--i": position } as React.CSSProperties}
-            className="grid translate-y-1.5 place-items-center opacity-0 transition-[transform,opacity] duration-300 ease-out group-has-[:focus-visible]/piece:translate-y-0 group-has-[:focus-visible]/piece:opacity-100 group-hover/piece:translate-y-0 group-hover/piece:opacity-100 group-hover/piece:[transition-delay:calc(110ms_+_var(--i)_*_30ms)] motion-reduce:translate-y-0 motion-reduce:!delay-0 [[data-input=keyboard]_&]:!duration-0 [[data-input=keyboard]_&]:!delay-0 [[data-flipping]_&]:!opacity-0 motion-safe:[[data-flipping]_&]:!translate-y-1.5"
+            className="grid translate-y-1.5 place-items-center opacity-0 transition-[transform,opacity] delay-200 duration-0 ease-out group-has-[:focus-visible]/piece:translate-y-0 group-has-[:focus-visible]/piece:opacity-100 group-has-[:focus-visible]/piece:delay-0 group-has-[:focus-visible]/piece:duration-300 group-hover/piece:translate-y-0 group-hover/piece:opacity-100 group-hover/piece:duration-300 group-hover/piece:[transition-delay:calc(110ms_+_var(--i)_*_30ms)] motion-reduce:translate-y-0 motion-reduce:group-hover/piece:!delay-0 [[data-input=keyboard]_&]:!duration-0 [[data-input=keyboard]_&]:!delay-0 [[data-flipping]_&]:!opacity-0 motion-safe:[[data-flipping]_&]:!translate-y-1.5"
           >
             {pending === size ? (
               <Spinner className="size-3.5" />

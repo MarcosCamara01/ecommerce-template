@@ -341,6 +341,7 @@
 [data-flipping] .quick-add {
   visibility: hidden !important;
   opacity: 0 !important;
+  transition: none !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
