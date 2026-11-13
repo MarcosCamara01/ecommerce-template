@@ -52,7 +52,7 @@ export function BagLink({
     ? `Bag, ${count} ${count === 1 ? "item" : "items"}`
     : "Bag";
   const text = (
-    <span ref={bumpRef} aria-hidden="true" className="inline-block">
+    <span ref={bumpRef} aria-hidden="true" className="inline-block tabular-nums">
       Bag
       {/* The count arrives after the session: the pill widens instead of
           snapping. A no-break space, or the slot's own line would drop it.

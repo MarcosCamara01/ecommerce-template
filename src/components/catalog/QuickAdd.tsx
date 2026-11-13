@@ -104,7 +104,7 @@ export function QuickAdd({
       {pointed !== null ? (
         <span
           aria-hidden="true"
-          className="absolute inset-y-1 left-1 animate-fade-in rounded-pill bg-[#111214] transition-transform duration-220 ease-in-out [animation-duration:150ms] motion-reduce:transition-none"
+          className="absolute inset-y-1 left-1 animate-fade-in rounded-pill bg-[#111214] transition-transform duration-220 ease-in-out [animation-duration:150ms] motion-reduce:transition-none [[data-input=keyboard]_&]:!animate-none [[data-input=keyboard]_&]:!transition-none"
           style={{
             width: `calc((100% - 8px) / ${sizes.length})`,
             transform: `translateX(${pointed * 100}%)`,
@@ -125,7 +125,7 @@ export function QuickAdd({
           }}
           onClick={() => addSize(size)}
           className={cn(
-            "relative grid h-full min-w-0 flex-1 place-items-center rounded-pill text-13 font-medium transition-colors duration-150 ease-out focus-visible:outline-[#111214]",
+            "relative grid h-full min-w-0 flex-1 place-items-center rounded-pill text-13 font-medium transition-colors duration-150 ease-out focus-visible:outline-[#111214] [[data-input=keyboard]_&]:!transition-none",
             pointed === position && "text-white",
           )}
         >
