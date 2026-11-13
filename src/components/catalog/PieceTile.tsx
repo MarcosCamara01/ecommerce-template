@@ -83,7 +83,9 @@ export function PieceTile({
               src={nextSrc}
               alt=""
               sizes={sizes}
-              // Never ahead of the photos that are on show.
+              // Loaded before the hover, never ahead of the photos on show.
+              // Lazy would wait for the clip to open, after the reveal.
+              loading="eager"
               fetchPriority="low"
               className="scale-110 object-cover transition-transform duration-300 ease-out group-has-[:focus-visible]/piece:scale-100 group-hover/piece:scale-100 group-hover/piece:duration-500 motion-reduce:scale-100 [[data-input=keyboard]_&]:!duration-0 [[data-flipping]_&]:!scale-110"
             />
