@@ -198,7 +198,7 @@ export function PhotoViewer({
                 onClick={() => show(index - 1, true)}
                 className={cn(
                   control,
-                  "absolute left-6 top-1/2 size-[52px] -translate-y-1/2 transition-opacity duration-200 disabled:opacity-0 max-lg:hidden",
+                  "absolute inset-y-0 left-6 my-auto size-[52px] [transition:opacity_200ms_var(--ease-out),transform_120ms_var(--ease-out)] disabled:opacity-0 max-lg:hidden",
                 )}
               >
                 <Arrow back />
@@ -210,7 +210,7 @@ export function PhotoViewer({
                 onClick={() => show(index + 1, true)}
                 className={cn(
                   control,
-                  "absolute right-6 top-1/2 size-[52px] -translate-y-1/2 transition-opacity duration-200 disabled:opacity-0 max-lg:hidden",
+                  "absolute inset-y-0 right-6 my-auto size-[52px] [transition:opacity_200ms_var(--ease-out),transform_120ms_var(--ease-out)] disabled:opacity-0 max-lg:hidden",
                 )}
               >
                 <Arrow />
