@@ -131,10 +131,15 @@ module.exports = {
           from: { opacity: "0", transform: "translateY(28px) scale(0.96)" },
           to: { opacity: "1", transform: "translateY(0) scale(1)" },
         },
-        // Hero rotation ring: fills while a piece is up (pathLength 100).
-        dwell: {
-          from: { strokeDashoffset: "100" },
-          to: { strokeDashoffset: "0" },
+        // Hero rotation ring: the right half-ring turns into view over the
+        // first half of the dwell, the left one over the second.
+        "dwell-right": {
+          "0%": { transform: "rotate(-180deg)" },
+          "50%, 100%": { transform: "rotate(0deg)" },
+        },
+        "dwell-left": {
+          "0%, 50%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(180deg)" },
         },
         // Confetti: falls from the top to --fall, drifting --dx, turning --rot.
         fall: {
@@ -157,7 +162,8 @@ module.exports = {
         tile: "tile 600ms var(--ease-out) both",
         fall: "fall var(--dur) var(--ease-in-out) var(--delay) both",
         // Constant motion; the duration is set where it is used.
-        dwell: "dwell linear both",
+        "dwell-right": "dwell-right linear both",
+        "dwell-left": "dwell-left linear both",
       },
       screens: {
         xs: "350px",
