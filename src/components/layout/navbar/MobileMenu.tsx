@@ -99,8 +99,8 @@ export function MobileMenu({
           </div>
         ) : user ? (
           <div className="flex flex-col gap-1">
-            <span className="text-13 text-muted">
-              Signed in as {user.name || user.email}
+            <span className="text-13 text-muted [overflow-wrap:anywhere]">
+              Signed in as {user.name?.trim() || user.email}
             </span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
               <SheetClose asChild>
@@ -192,12 +192,12 @@ function SectionList({
               href={section.href}
               className="flex items-center justify-between gap-3 py-2"
             >
-              <span className="font-display text-[50px] leading-[0.95]">
+              <span className="min-w-0 font-display text-[min(50px,12.8vw)] leading-[0.95]">
                 {section.label}
               </span>
-              <span className="flex items-center gap-2.5 text-sm tabular-nums">
+              <span className="flex shrink-0 items-center gap-2.5 text-sm tabular-nums">
                 {section.count !== undefined ? (
-                  <span>{String(section.count).padStart(2, "0")}</span>
+                  <span className="w-6 text-right">{String(section.count).padStart(2, "0")}</span>
                 ) : null}
                 {section.image ? (
                   <Image
@@ -206,10 +206,10 @@ function SectionList({
                     width={44}
                     height={56}
                     sizes="44px"
-                    className="h-14 w-11 rounded-[10px] bg-photo object-cover"
+                    className="h-14 w-11 shrink-0 rounded-[10px] bg-photo object-cover"
                   />
                 ) : (
-                  <span className="h-14 w-11 rounded-[10px] bg-photo" />
+                  <span className="h-14 w-11 shrink-0 rounded-[10px] bg-photo" />
                 )}
               </span>
             </Link>

@@ -58,7 +58,10 @@ export function BagDrawer() {
         </SheetDescription>
 
         {added ? (
-          <span className="self-start rounded-pill bg-fg px-3 py-1.5 text-13 font-medium text-bg">
+          <span
+            title={`${added.color}, ${added.size}`}
+            className="max-w-full self-start truncate rounded-pill bg-fg px-3 py-1.5 text-13 font-medium text-bg"
+          >
             Added · {added.color}, {added.size}
           </span>
         ) : null}
@@ -102,7 +105,9 @@ export function BagDrawer() {
                     className="h-[108px] w-[84px] rounded-field bg-photo object-cover"
                   />
                   <span className="flex min-w-0 flex-col gap-1">
-                    <span className="font-medium">{displayName(item.product.name)}</span>
+                    <span className="font-medium [overflow-wrap:anywhere]">
+                      {displayName(item.product.name)}
+                    </span>
                     <span className="text-13 text-muted">
                       {item.variant.color} · {item.size} · Qty {item.quantity}
                     </span>

@@ -148,15 +148,21 @@ export function HomeShowcase({
                 moves > 0 && "animate-fade-in",
               )}
             >
-              <div className="flex flex-col gap-0.5 lg:gap-[max(12px,calc(var(--hero-u)*18))]">
-                <span className="text-xs text-muted lg:text-13">
+              <div className="flex min-w-0 flex-col gap-0.5 lg:gap-[max(12px,calc(var(--hero-u)*18))]">
+                <span className="line-clamp-1 text-xs text-muted lg:text-13">
                   {piece.categoryLabel} · {variant.color}
                 </span>
-                <h2 className="font-display-75 text-[26px] leading-none lg:text-[length:max(28px,calc(var(--hero-u)*44))] lg:leading-[0.95] lg:[word-spacing:0.08em]">
-                  <Link href={productHref}>{product.name}</Link>
+                <h2 className="min-h-[2em] font-display-75 text-[26px] leading-none lg:min-h-0 lg:text-[length:max(28px,calc(var(--hero-u)*44))] lg:leading-[0.95] lg:[word-spacing:0.08em]">
+                  <Link
+                    href={productHref}
+                    title={product.name}
+                    className="line-clamp-2 [overflow-wrap:anywhere] lg:line-clamp-3"
+                  >
+                    {product.name}
+                  </Link>
                 </h2>
               </div>
-              <span className="whitespace-nowrap text-lg font-medium tabular-nums lg:text-[length:max(18px,calc(var(--hero-u)*22))]">
+              <span className="shrink-0 whitespace-nowrap text-lg font-medium tabular-nums lg:text-[length:max(18px,calc(var(--hero-u)*22))]">
                 {formatPriceFromEuros(product.price)}
               </span>
             </div>
