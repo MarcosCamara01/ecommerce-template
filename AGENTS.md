@@ -6,17 +6,34 @@ Auth is Better Auth (email/password + Google). Supabase is storage and Postgres,
 
 Skills live in `.agents/skills/`. Invoke with `$skill-name`.
 
+Process skills (`poteto-mode` and the rest of `pstack`) are not in the repo: they come from the `pstack` plugin, installed on each machine.
+
 ## UI, craft, and motion
+
+The design and motion skills are Emil Kowalski's (`emilkowalski/skills`). Skills marked "by name only" have `disable-model-invocation: true`: they never trigger on their own, so ask for them by name.
 
 | Intent | Skill |
 |---|---|
-| Design system, `DESIGN.md`, audit / critique / polish / typeset | `$impeccable` |
-| Visual craft: radius, press, outlines, icon weight | `$better-ui` |
-| Accessibility and interaction guidelines | `$web-design-guidelines` |
+| Design system, `DESIGN.md`, audit / critique / polish, the invisible details | `$emil-design-eng` |
 | Fix accessibility: names, keyboard, focus, contrast | `$fixing-accessibility` |
+| Stress-test a screen with worst-case data | `$break-ui` |
+| Phone feel: hover on touch, `100vh`, input zoom, safe areas | `$mobile-native` |
+| Drag, swipe, sheets, swipe to dismiss | `$gestures` |
+| Interruptible springs, materials, Apple-style motion | `$apple-design` |
 | Name a motion effect | `$animation-vocabulary` |
 | Implement a purposeful animation | `$animate` |
-| Interruptible springs, sheets, gestures | `$apple-design` |
+| Several elements moving together: stagger, sequence, crossfade | `$choreograph` |
+| Janky animation, frame budget, which property to animate | `$animation-performance` |
+| Audit the motion of the whole app and plan fixes | `$improve-animations` |
+| Find places that should animate (read-only) | `$find-animation-opportunities` |
+| Remove motion the interface does not need | `$remove-animations` |
+| Review animation code against the craft bar (by name only) | `$review-animations` |
+| Sonner toasts: setup, styling, troubleshooting | `$ask-sonner` |
+| Build several versions of a UI piece behind a picker (by name only) | `$prototype` |
+| Pick a frontend library for a job (by name only) | `$pick-ui-library` |
+| Turn this session's design corrections into rules (by name only) | `$learn-taste` |
+
+`$animate-expo` (React Native) and `$write-swift` come with the set but do not apply to this web app.
 
 ## Stack
 

@@ -5,6 +5,14 @@ description: Build an animation from scratch, making the decisions in the order 
 
 # Building Animations
 
+## Initial Response
+
+When this skill is first invoked without a specific question, respond only with:
+
+> I'm ready to build animations that feel right, my knowledge comes from Emil Kowalski's animation philosophy.
+
+Do not provide any other information until the user asks a question.
+
 A construction skill. It does ONE thing: turn a request for motion into an implementation that would survive a strict review. It does not audit a codebase (that's `improve-animations`), critique a diff (that's `review-animations`), hunt for places that could animate (that's `find-animation-opportunities`), or build for React Native (that's `animate-expo`).
 
 ## Operating Posture
@@ -78,11 +86,11 @@ If the task needs a *component* rather than an animation — a toast, a drawer, 
 - **Never `scale(0)`.** Start from `scale(0.9–0.97)` + `opacity: 0`. Nothing in the real world appears from nothing.
 - **`transform-origin` at the trigger** for popovers, dropdowns, menus, tooltips — `var(--transform-origin)` in Base UI. **Modals are exempt**; they're not anchored to a trigger, so they stay centered.
 - **Percentages in `translate()`** are relative to the element's own size — `translateY(100%)` moves by its own height whatever the content. Prefer over hardcoded pixels.
-- **In Motion, use the full transform string.** `x`/`y`/`scale` shorthands are not hardware-accelerated and drop frames under load:
+- **In Motion, newest versions hardware accelerate independent transforms like `x`/`y`/`scale`/`rotate`.**
 
 ```jsx
-<motion.div animate={{ x: 100 }} />                          // drops frames under load
-<motion.div animate={{ transform: "translateX(100px)" }} />  // hardware accelerated
+<motion.div animate={{ x: 100 }} />                          // motion 14.2+: hardware accelerated
+<motion.div animate={{ transform: "translateX(100px)" }} />  // hardware accelerated in every version
 ```
 
 - **Never drive a child's transform from a CSS variable on the parent** — it recalculates styles for every child. Set `transform` on the element directly.
@@ -179,7 +187,7 @@ Self-check before you finish. Each of these is an automatic block in `review-ani
 | `transform-origin: center` on a trigger-anchored popover | `var(--transform-origin)` (modals exempt) |
 | Keyframes on toasts, toggles, rapidly-triggered elements | CSS transitions |
 | Animating `width`/`height`/`margin`/`padding`/`top`/`left` | `transform` / `opacity` |
-| Motion `x`/`y`/`scale` props under load | Full `transform` string |
+| Motion `x`/`y`/`scale` props under load on versions before 14.2 | Upgrade to 14.2+, or a full `transform` string |
 | Ungated `:hover` motion | `@media (hover: hover) and (pointer: fine)` |
 | Missing `prefers-reduced-motion` | Gentler variant, not zero |
 | Everything entering at once | 30–80ms stagger |
