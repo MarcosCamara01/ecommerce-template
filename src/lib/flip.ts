@@ -80,7 +80,6 @@ export function inversion(
   return still ? null : invert;
 }
 
-/** `inversion` as a CSS transform. */
 export const toTransform = ({ x, y, scaleX, scaleY }: Inversion) =>
   `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`;
 

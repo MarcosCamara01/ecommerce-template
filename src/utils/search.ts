@@ -1,7 +1,6 @@
 import Fuse from "fuse.js";
 import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 
-/** Fuzzy search products by name, description, category, and variant color */
 export function searchProducts(
   products: ProductWithVariants[],
   query?: string,

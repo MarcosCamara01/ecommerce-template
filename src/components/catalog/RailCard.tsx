@@ -1,0 +1,38 @@
+import { displayName } from "@/utils/product-name";
+import Link from "@/components/ui/link";
+
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
+import { formatPriceFromEuros } from "@/utils/formatters";
+
+import { PieceTile } from "./PieceTile";
+
+/**
+ * A plain product card for rails ("Wear it with", "Goes with"): 24px photo
+ * tile, name and price below. The hover lives in PieceTile.
+ */
+export function RailCard({ product }: { product: ProductWithVariants }) {
+  const variant = product.variants[0];
+  const href = variant
+    ? `/${product.category}/${product.id}?variant=${encodeURIComponent(variant.color)}`
+    : `/${product.category}/${product.id}`;
+
+  return (
+    <article className="group/piece flex flex-col gap-3">
+      <PieceTile
+        product={product}
+        variant={variant}
+        href={href}
+        src={variant?.images[0] ?? product.img}
+        sizes="(max-width: 1023px) 50vw, 25vw"
+      />
+      <Link href={href} className="flex flex-col gap-0.5 px-1 lg:flex-row lg:justify-between lg:gap-3">
+        <span className="min-w-0 truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
+          {displayName(product.name)}
+        </span>
+        <span className="whitespace-nowrap text-xs tabular-nums lg:text-[15px]">
+          {formatPriceFromEuros(product.price)}
+        </span>
+      </Link>
+    </article>
+  );
+}

@@ -1,11 +1,8 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { EditProductForm } from "@/components/admin";
+import { dataAccess } from "@/lib/data-access";
 import { requireCapability } from "@/lib/identity";
-import {
-  getArchivedProductForRestoration,
-  getProductByIdForManager,
-} from "@/services/products.service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parsePositiveIntegerId } from "@/lib/routing/positive-integer-id";
 
@@ -17,10 +14,7 @@ interface EditProductPageProps {
 async function DynamicEditProductContent({
   params,
   searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ restore?: string }>;
-}) {
+}: EditProductPageProps) {
   const { id } = await params;
   const { restore } = await searchParams;
   const productId = parsePositiveIntegerId(id);
@@ -30,9 +24,10 @@ async function DynamicEditProductContent({
   }
 
   const principal = await requireCapability("catalog:manage");
+  const { catalog } = dataAccess.forCatalogManager(principal);
   const product = restore === "1"
-    ? await getArchivedProductForRestoration(principal, productId)
-    : await getProductByIdForManager(principal, productId);
+    ? await catalog.findArchivedByIdForRestoration(productId)
+    : await catalog.findEditableById(productId);
 
   if (!product) {
     notFound();

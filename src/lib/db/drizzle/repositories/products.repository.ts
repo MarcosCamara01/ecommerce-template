@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, desc, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, desc, isNotNull, isNull } from "drizzle-orm";
 import { db } from "../connection";
 import { catalogSyncOperations } from "../schema/catalog-sync";
 import { productsItems, productsVariants } from "../schema/products";
@@ -8,7 +8,6 @@ import { restorableVariantIdsFromArchiveTarget } from "./catalog-archive";
 import type {
   ProductWithVariants,
   ProductCategory,
-  ProductVariant,
 } from "@/lib/db/drizzle/schema";
 
 export const productsRepository = {
@@ -84,29 +83,6 @@ export const productsRepository = {
     };
   },
 
-  async findVariantById(id: number): Promise<ProductVariant | null> {
-    const [result] = await db
-      .select({ variant: productsVariants })
-      .from(productsVariants)
-      .innerJoin(productsItems, eq(productsVariants.productId, productsItems.id))
-      .where(
-        and(
-          eq(productsVariants.id, id),
-          isNull(productsVariants.archivedAt),
-          isNull(productsItems.archivedAt),
-        ),
-      );
-
-    return result ? transformVariant(result.variant) : null;
-  },
-
-  async findVariantByIdIncludingArchived(id: number): Promise<ProductVariant | null> {
-    const result = await db.query.productsVariants.findFirst({
-      where: eq(productsVariants.id, id),
-    });
-    return result ? transformVariant(result) : null;
-  },
-
   async findVariantWithProductByIdIncludingArchived(id: number) {
     const result = await db.query.productsVariants.findFirst({
       where: eq(productsVariants.id, id),
@@ -129,30 +105,6 @@ export const productsRepository = {
       ),
       with: { variants: { where: isNull(productsVariants.archivedAt) } },
       orderBy: [desc(productsItems.createdAt)],
-    });
-
-    return result.map(transformProduct);
-  },
-
-  async search(query: string): Promise<ProductWithVariants[]> {
-    const result = await db.query.productsItems.findMany({
-      where: and(
-        sql`${productsItems.name} ILIKE ${"%" + query + "%"}`,
-        isNull(productsItems.archivedAt),
-      ),
-      with: { variants: { where: isNull(productsVariants.archivedAt) } },
-      orderBy: [desc(productsItems.createdAt)],
-    });
-
-    return result.map(transformProduct);
-  },
-
-  async findRandom(limit: number = 4): Promise<ProductWithVariants[]> {
-    const result = await db.query.productsItems.findMany({
-      where: isNull(productsItems.archivedAt),
-      with: { variants: { where: isNull(productsVariants.archivedAt) } },
-      orderBy: sql`RANDOM()`,
-      limit,
     });
 
     return result.map(transformProduct);

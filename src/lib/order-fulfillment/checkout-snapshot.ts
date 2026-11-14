@@ -1,3 +1,5 @@
+import { permanentReconciliationFailure } from "./retry.ts";
+
 type CheckoutSnapshotItem = {
   cartItemId: number;
   variantId: number;
@@ -191,4 +193,3 @@ function aggregateQuantity(
   }
   return totals;
 }
-import { permanentReconciliationFailure } from "./retry.ts";

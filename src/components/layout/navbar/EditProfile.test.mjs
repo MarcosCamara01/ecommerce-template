@@ -50,7 +50,7 @@ async function profileHarness({ rejected = false } = {}) {
     ),
     "@/components/ui/input": { Input: "input" },
     "@/components/ui/label": { Label: "label" },
-    "@/components/ui/loadingButton": { __esModule: true, default: "button" },
+    "@/components/ui/loading-button": { __esModule: true, default: "button" },
   };
   const source = await readFile(new URL("./EditProfile.tsx", import.meta.url), "utf8");
   const compiled = ts.transpileModule(source, {

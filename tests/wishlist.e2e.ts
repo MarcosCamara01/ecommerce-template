@@ -18,7 +18,6 @@ import {
 test.describe("wishlist", { ...asShopper("wishlist"), tags: ["wishlist", "agent", "shopper", "writes"] }, () => {
   let piece: Piece;
 
-  // Every test starts with nothing saved and nothing in the bag.
   test.beforeEach(async ({ app, api, agent, browser }) => {
     await forgetSaved(api);
     await emptyBag(api);

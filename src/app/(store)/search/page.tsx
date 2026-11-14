@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { pickFirst, searchProducts } from "@/utils";
-import { ProductItem, ProductsSkeleton } from "@/components/products";
-import { RailCard } from "@/components/products/RailCard";
+import { pickFirst } from "@/utils/pick-first";
+import { searchProducts } from "@/utils/search";
+import { ProductItem } from "@/components/catalog/ProductItem";
+import { ProductsSkeleton } from "@/components/catalog/ProductsSkeleton";
+import { RailCard } from "@/components/catalog/RailCard";
 import { SearchPill } from "@/components/search/SearchPill";
 import { fitDisplaySize } from "@/lib/display-type";
 
@@ -59,11 +61,11 @@ async function SearchResults({ searchParams }: SearchProps) {
         <section className="flex flex-col gap-7 pb-24">
           <div className="flex max-w-[900px] flex-col gap-4">
             <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(112px,7.8vw)]">
-              Nothing matches yet
+              Nothing matches
             </h2>
-            <p className="text-lg">
+            <p className="text-lg [overflow-wrap:anywhere]">
               No products found for “{q}”. Check the spelling, or start with
-              what&apos;s new.
+              what’s new.
             </p>
           </div>
           <div className={grid}>

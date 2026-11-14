@@ -4,7 +4,6 @@ import { SearchIcon } from "@/components/icons";
 
 import { openSearch } from "./search-ui";
 
-/** The current query as a pill; tapping it reopens the search modal. */
 export function SearchPill({ query }: { query: string }) {
   return (
     <button

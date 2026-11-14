@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { FiPlus } from "react-icons/fi";
+import { useFlip } from "@/hooks/useFlip";
 import { VariantForm, type VariantFormRef } from "./VariantForm";
 import type { VariantFormData, VariantSubmitData } from "@/types/admin";
 
@@ -38,6 +39,8 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
 
   const [variants, setVariants] = useState<VariantState[]>(createInitialState);
   const variantRefs = useRef<Map<number, VariantFormRef>>(new Map());
+  // Moving a variant up or down lets the cards glide to their new places.
+  const listRef = useFlip<HTMLDivElement>();
   const nextKey = useRef(initialVariants?.length || 1);
 
   // Capture current state from refs before reordering
@@ -65,10 +68,8 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
     const newIndex = direction === "up" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= variants.length) return;
     
-    // Capture current state before reordering
     const currentState = captureCurrentState();
-    
-    // Swap positions
+
     const newVariants = [...currentState];
     [newVariants[index], newVariants[newIndex]] = [newVariants[newIndex], newVariants[index]];
     setVariants(newVariants);
@@ -122,22 +123,23 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
   };
 
   return (
-    <div className="space-y-4">
+    <div ref={listRef} className="space-y-4">
       {variants.map((variant, index) => (
-        <VariantForm
-          key={variant.key}
-          index={index}
-          ref={(el) => {
-            if (el) variantRefs.current.set(variant.key, el);
-          }}
-          onRemove={() => removeVariant(variant.key)}
-          canRemove={variants.length > 1}
-          initialData={variant.data}
-          onMoveUp={index > 0 ? () => moveVariant(index, "up") : undefined}
-          onMoveDown={index < variants.length - 1 ? () => moveVariant(index, "down") : undefined}
-          errors={errors}
-          onFieldChange={onFieldChange}
-        />
+        <div key={variant.key} data-flip-item={variant.key}>
+          <VariantForm
+            index={index}
+            ref={(el) => {
+              if (el) variantRefs.current.set(variant.key, el);
+            }}
+            onRemove={() => removeVariant(variant.key)}
+            canRemove={variants.length > 1}
+            initialData={variant.data}
+            onMoveUp={index > 0 ? () => moveVariant(index, "up") : undefined}
+            onMoveDown={index < variants.length - 1 ? () => moveVariant(index, "down") : undefined}
+            errors={errors}
+            onFieldChange={onFieldChange}
+          />
+        </div>
       ))}
 
       <Button
@@ -147,7 +149,7 @@ export const VariantsSection = forwardRef<VariantsSectionRef, VariantsSectionPro
         className="h-[52px] w-full rounded-pill border-[1.5px] border-dashed border-line font-medium text-fg hover:border-fg"
       >
         <FiPlus className="mr-2 h-4 w-4" />
-        Add Another Variant
+        Add another variant
       </Button>
     </div>
   );

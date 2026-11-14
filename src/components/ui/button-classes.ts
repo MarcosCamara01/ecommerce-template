@@ -17,7 +17,7 @@ export const buttonClass = cva(
           "border border-line bg-transparent font-medium text-fg hover:border-fg",
         ghost: "bg-transparent font-medium text-fg hover:bg-card",
         link: "h-auto rounded-none px-0 font-medium text-fg underline underline-offset-[3px] hover:opacity-80",
-        destructive: "bg-err-line text-white hover:opacity-90",
+        destructive: "bg-err-line text-bg hover:opacity-90",
       },
       size: {
         default: "h-14 px-[26px] text-[15px]",

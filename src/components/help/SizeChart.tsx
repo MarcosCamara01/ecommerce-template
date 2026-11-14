@@ -6,10 +6,7 @@ import { PRODUCT_SIZES } from "@/constants/sizes";
 import type { ProductSize } from "@/lib/db/drizzle/schema";
 import { cn } from "@/lib/utils";
 
-/**
- * Size chart with a tappable size row: the chosen column is highlighted.
- * Measurements stay as placeholders until the merchant defines them.
- */
+/** Measurements stay as placeholders until the merchant defines them. */
 export function SizeChart({ rows }: { rows: readonly string[] }) {
   const [selected, setSelected] = useState<ProductSize>("M");
 
@@ -27,7 +24,7 @@ export function SizeChart({ rows }: { rows: readonly string[] }) {
                   type="button"
                   aria-pressed={size === selected}
                   onClick={() => setSelected(size)}
-                  className="press h-11 w-full min-w-10 rounded-pill border border-line font-semibold transition-[background-color,color,border-color,transform] duration-120 aria-pressed:border-fg aria-pressed:bg-fg aria-pressed:text-bg"
+                  className="press h-11 w-full min-w-10 rounded-pill border border-line font-semibold transition-[background-color,color,border-color,transform] duration-120 ease-out aria-pressed:border-fg aria-pressed:bg-fg aria-pressed:text-bg"
                 >
                   {size}
                 </button>

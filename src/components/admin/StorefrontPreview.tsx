@@ -38,8 +38,10 @@ export function StorefrontPreview({ values }: { values: PreviewValues }) {
         )}
       </span>
       <span className="flex justify-between gap-2.5">
-        <span className="font-semibold">{values.name || "Product name"}</span>
-        <span className="whitespace-nowrap tabular-nums">
+        <span className="min-w-0 truncate text-13 font-semibold lg:whitespace-normal lg:text-[15px]">
+          {values.name || "Product name"}
+        </span>
+        <span className="shrink-0 whitespace-nowrap tabular-nums">
           {Number.isFinite(price) && price > 0 ? formatPriceFromEuros(price) : "— €"}
         </span>
       </span>

@@ -5,7 +5,6 @@ import Link from "@/components/ui/link";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
 import { useHydrated } from "@/hooks/useHydrated";
 import { useSession } from "@/lib/auth/client";
-import { cn } from "@/lib/utils";
 
 /** Asks the navigation to open the Edit profile dialog (it owns it). */
 export const EDIT_PROFILE_EVENT = "store:edit-profile";
@@ -13,18 +12,21 @@ export const EDIT_PROFILE_EVENT = "store:edit-profile";
 const pill =
   "press flex h-11 shrink-0 items-center rounded-pill border border-line px-[18px] text-sm aria-[current=page]:border-fg aria-[current=page]:bg-fg aria-[current=page]:text-bg";
 
-/** "Hi, Alex" above an account page title. */
 export function AccountGreeting() {
   const { data: session } = useSession();
   // The session is only known in the browser; wait for hydration so the
   // first client render matches the server's.
   const hydrated = useHydrated();
   const firstName = hydrated ? session?.user?.name?.split(" ")[0] : undefined;
-  if (!firstName) return null;
-  return <span className="text-sm text-muted">Hi, {firstName}</span>;
+  // The line is always there, so the title below never moves when the name arrives.
+  return (
+    <span className="block min-h-5 text-sm text-muted">
+      {firstName ? <span className="greet-in">Hi, {firstName}</span> : null}
+    </span>
+  );
 }
 
-/** Orders · Wishlist · Edit profile · Log out. Tab changes never animate. */
+/** Tab changes never animate. */
 export function AccountNav({ current }: { current: "orders" | "wishlist" }) {
   const { signOut } = useAuthMutation();
 
@@ -61,9 +63,9 @@ export function AccountNav({ current }: { current: "orders" | "wishlist" }) {
       <button
         type="button"
         onClick={() => signOut.mutate()}
-        className={cn(pill)}
+        className={pill}
       >
-        Log out
+        Sign out
       </button>
     </nav>
   );

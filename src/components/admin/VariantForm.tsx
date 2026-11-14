@@ -71,7 +71,8 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
     }));
 
     return (
-      <Card className="overflow-hidden rounded-toast bg-field">
+      // When the list re-arranges (useFlip) the card follows its corner: text never stretches.
+      <Card data-flip-part="move" className="overflow-hidden rounded-toast bg-field">
         <CardHeader className="px-[18px] py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -81,7 +82,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
               <span className="font-medium text-sm text-fg">Variant</span>
             </div>
             <div className="flex items-center gap-1">
-              {/* Move buttons */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -122,7 +122,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              {/* Delete button */}
               {canRemove && (
                 <TooltipProvider>
                   <Tooltip>
@@ -148,7 +147,6 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
           </div>
         </CardHeader>
         <CardContent className="space-y-4 px-[18px] pb-[18px] pt-0">
-          {/* Color */}
           <div className="space-y-2">
             <Label htmlFor={`color-${index}`} className="text-sm font-medium">
               Color
@@ -170,11 +168,10 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
             )}
           </div>
 
-          {/* Sizes and Images in Accordion */}
           <Accordion type="multiple" defaultValue={["sizes", "images"]} className="w-full">
             <AccordionItem value="sizes" className="rounded-field border border-line bg-panel px-4">
               <AccordionTrigger className="hover:no-underline">
-                <span className="text-sm font-medium">Available Sizes</span>
+                <span className="text-sm font-medium">Available sizes</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
                 <VariantSizes
@@ -187,7 +184,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
             </AccordionItem>
             <AccordionItem value="images" className="mt-2 rounded-field border border-line bg-panel px-4">
               <AccordionTrigger className="hover:no-underline">
-                <span className="text-sm font-medium">Variant Images</span>
+                <span className="text-sm font-medium">Variant images</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
                 <VariantImages

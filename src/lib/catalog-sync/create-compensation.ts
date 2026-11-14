@@ -1,24 +1,3 @@
-export async function compensateUnpersistedCatalogCreate(input: {
-  shellId: number | null;
-  operationPersisted: boolean;
-  uploadedImageUrls: string[];
-  archiveShell(id: number): Promise<unknown>;
-  deleteImage(url: string): Promise<unknown>;
-}) {
-  if (input.operationPersisted) return;
-  const errors: unknown[] = [];
-  if (input.shellId !== null) {
-    try { await input.archiveShell(input.shellId); } catch (error) { errors.push(error); }
-  }
-  const cleanupResults = await Promise.allSettled(
-    Array.from(new Set(input.uploadedImageUrls)).map(input.deleteImage),
-  );
-  for (const cleanup of cleanupResults) {
-    if (cleanup.status === "rejected") errors.push(cleanup.reason);
-  }
-  if (errors.length) throw new AggregateError(errors, "Catalog create compensation failed");
-}
-
 export class CatalogUploadCompensationError extends AggregateError {
   readonly cause: unknown;
 

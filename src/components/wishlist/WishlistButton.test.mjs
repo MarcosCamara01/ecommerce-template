@@ -48,8 +48,6 @@ test("saving plays the sparks without taking room from the button", async () => 
     sonner: { toast: () => {} },
     "@/hooks/wishlist": {
       useWishlist: () => ({ isInWishlist: (id) => saved.has(id), isLoading: false }),
-    },
-    "@/hooks/wishlist/mutations/useWishlistMutation": {
       useWishlistMutation: () => ({
         add: (id) => saved.add(id),
         remove: ({ productId }) => saved.delete(productId),
@@ -66,7 +64,7 @@ test("saving plays the sparks without taking room from the button", async () => 
   );
   const render = () => {
     slot = 0;
-    const root = componentModule.exports.default({ productId: 1, productName: "T-Shirt" });
+    const root = componentModule.exports.WishlistButton({ productId: 1, productName: "T-Shirt" });
     const [sparks, button] = root.props.children;
     return { root, sparks, button };
   };

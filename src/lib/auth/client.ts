@@ -3,8 +3,8 @@ import { adminClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
   plugins: [adminClient()],
-  // Prefer same-origin requests in the browser so auth keeps working even if
-  // the local dev server port changes from the env default.
+  // On a Vercel Preview the proxy keeps visitors on the branch URL, which
+  // NEXT_PUBLIC_APP_URL does not track, so the browser calls its own origin.
   baseURL:
     typeof window !== "undefined"
       ? window.location.origin

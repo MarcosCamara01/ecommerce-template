@@ -22,6 +22,13 @@ const currentTheme = (): Theme =>
 // While this class is on <html> nothing transitions (see globals.css).
 const SWITCHING = "theme-switching";
 
+/** Android tints its toolbar from theme-color, and a stored theme can differ from the system's. */
+function syncThemeColor(theme: Theme) {
+  document
+    .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+    .forEach((meta) => meta.setAttribute("content", theme === "dark" ? "#141516" : "#e4e7ea"));
+}
+
 /**
  * Puts a theme on the page at once. Every colour changes together, so
  * transitions are switched off for the swap: left on, they would all fade
@@ -37,11 +44,12 @@ function applyTheme(theme: Theme) {
   requestAnimationFrame(() =>
     requestAnimationFrame(() => root.classList.toggle(SWITCHING, false)),
   );
+  syncThemeColor(theme);
 }
 
 function subscribe(listener: () => void) {
+  syncThemeColor(currentTheme());
   listeners.add(listener);
-  // Follow the OS while the visitor has not picked a theme themselves.
   const media = matchMedia("(prefers-color-scheme: dark)");
   const onSystemChange = () => {
     if (hasStoredTheme()) return;

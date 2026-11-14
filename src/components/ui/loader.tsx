@@ -1,14 +1,11 @@
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
-type SpinnerProps = React.ComponentPropsWithoutRef<"span"> & {
-  width?: number;
-  height?: number;
-};
+type SpinnerProps = React.ComponentPropsWithoutRef<"span">;
 
-/** Ring spinner from CStates: currentColor with a transparent top, 0.8s. */
-export const SVGLoadingIcon = forwardRef<React.ElementRef<"span">, SpinnerProps>(
-  ({ className, width, height, style, ...props }, ref) => {
+/** Ring spinner from CStates. */
+export const Spinner = forwardRef<React.ElementRef<"span">, SpinnerProps>(
+  ({ className, ...props }, ref) => {
     return (
       <span
         ref={ref}
@@ -17,11 +14,10 @@ export const SVGLoadingIcon = forwardRef<React.ElementRef<"span">, SpinnerProps>
           "inline-block size-4 shrink-0 animate-spin rounded-pill border-2 border-current border-t-transparent [animation-duration:800ms]",
           className,
         )}
-        style={{ width, height, ...style }}
         {...props}
       />
     );
   },
 );
 
-SVGLoadingIcon.displayName = "SVGLoadingIcon";
+Spinner.displayName = "Spinner";

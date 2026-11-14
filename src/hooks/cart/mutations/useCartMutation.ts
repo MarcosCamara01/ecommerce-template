@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CartItem, ProductSize } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
+import { signInPath } from "@/lib/auth/local-callback";
 import { toast } from "sonner";
 import { CART_QUERY_KEYS } from "../keys";
 import type { CartDetailsResponse, CartListResponse } from "../types";
@@ -137,7 +138,13 @@ export const useCartMutation = () => {
       }
 
       if (error.message === "Unauthorized" || error.message === "authentication_required") {
-        toast.info("Sign in to add to your bag");
+        toast.info("Sign in to add to your bag", {
+          action: {
+            label: "Sign in",
+            onClick: () =>
+              window.location.assign(signInPath(window.location.pathname + window.location.search)),
+          },
+        });
         return;
       }
 
@@ -339,82 +346,10 @@ export const useCartMutation = () => {
     },
   });
 
-  const clear = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/user/cart", {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || "Error clearing cart";
-        throw new Error(errorMessage);
-      }
-
-      return true;
-    },
-    onMutate: async () => {
-      if (!userId) {
-        throw new Error("Unauthorized");
-      }
-
-      await queryClient.cancelQueries({
-        queryKey: CART_QUERY_KEYS.cartList(userId),
-      });
-
-      const previousData = queryClient.getQueryData<CartListResponse>(
-        CART_QUERY_KEYS.cartList(userId),
-      );
-      const previousDetails = queryClient.getQueryData<CartDetailsResponse>(
-        CART_QUERY_KEYS.cartDetails(userId),
-      );
-
-      queryClient.setQueryData<CartListResponse>(
-        CART_QUERY_KEYS.cartList(userId),
-        { items: [] },
-      );
-
-      queryClient.setQueryData<CartDetailsResponse>(
-        CART_QUERY_KEYS.cartDetails(userId),
-        { items: [] },
-      );
-
-      return { previousData, previousDetails };
-    },
-    onError: (error, _, context) => {
-      const { previousData, previousDetails } = context ?? {};
-
-      if (previousData && userId) {
-        queryClient.setQueryData<CartListResponse>(
-          CART_QUERY_KEYS.cartList(userId),
-          previousData,
-        );
-      }
-
-      if (previousDetails && userId) {
-        queryClient.setQueryData<CartDetailsResponse>(
-          CART_QUERY_KEYS.cartDetails(userId),
-          previousDetails,
-        );
-      }
-
-      console.error("Error clearing cart:", error);
-      toast.error("Couldn’t update your bag. Try again.");
-    },
-  });
-
   return {
     add: add.mutate,
     update: update.mutate,
     remove: remove.mutate,
-    clear: clear.mutate,
     isAdding: add.isPending,
-    isUpdating: update.isPending,
-    isRemoving: remove.isPending,
-    isClearing: clear.isPending,
-    addError: add.error,
-    updateError: update.error,
-    removeError: remove.error,
-    clearError: clear.error,
   };
 };

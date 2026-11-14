@@ -1,8 +1,4 @@
-interface ColorMapping {
-  [key: string]: string;
-}
-
-const colorMapping: ColorMapping = {
+const colorMapping: Record<string, string> = {
   anthracite: "#4A4A4A",
   "anthracite grey": "#4B525A",
   "anthracite gray": "#4B525A",

@@ -31,11 +31,14 @@ const tile =
 /** Full-screen menu sheet for phones (CMenu). */
 export function MobileMenu({
   sectionSummaries,
+  handOff,
   onCloseAutoFocus,
   onEditProfile,
   onSearch,
 }: {
   sectionSummaries: Promise<ShopSectionSummary[]>;
+  /** The menu is closing for search or Edit profile: it leaves at once. */
+  handOff: boolean;
   onCloseAutoFocus: (event: Event) => void;
   /** Runs before the sheet closes; the dialog opens once it has. */
   onEditProfile: () => void;
@@ -50,6 +53,7 @@ export function MobileMenu({
     <SheetContent
       side="top"
       className="h-dvh overflow-y-auto overscroll-contain bg-bg"
+      handOff={handOff}
       onCloseAutoFocus={onCloseAutoFocus}
     >
       <nav
@@ -99,8 +103,8 @@ export function MobileMenu({
           </div>
         ) : user ? (
           <div className="flex flex-col gap-1">
-            <span className="text-13 text-muted">
-              Signed in as {user.name || user.email}
+            <span className="text-13 text-muted [overflow-wrap:anywhere]">
+              Signed in as {user.name?.trim() || user.email}
             </span>
             <div className="mt-1.5 grid grid-cols-2 gap-1.5">
               <SheetClose asChild>
@@ -131,7 +135,7 @@ export function MobileMenu({
                 className={tile}
               >
                 <LogoutIcon />
-                <span>Log out</span>
+                <span>Sign out</span>
               </button>
             </div>
           </div>
@@ -192,12 +196,12 @@ function SectionList({
               href={section.href}
               className="flex items-center justify-between gap-3 py-2"
             >
-              <span className="font-display text-[50px] leading-[0.95]">
+              <span className="min-w-0 font-display text-[min(50px,12.8vw)] leading-[0.95]">
                 {section.label}
               </span>
-              <span className="flex items-center gap-2.5 text-sm tabular-nums">
+              <span className="flex shrink-0 items-center gap-2.5 text-sm tabular-nums">
                 {section.count !== undefined ? (
-                  <span>{String(section.count).padStart(2, "0")}</span>
+                  <span className="w-6 text-right">{String(section.count).padStart(2, "0")}</span>
                 ) : null}
                 {section.image ? (
                   <Image
@@ -206,10 +210,10 @@ function SectionList({
                     width={44}
                     height={56}
                     sizes="44px"
-                    className="h-14 w-11 rounded-[10px] bg-photo object-cover"
+                    className="h-14 w-11 shrink-0 rounded-[10px] bg-photo object-cover"
                   />
                 ) : (
-                  <span className="h-14 w-11 rounded-[10px] bg-photo" />
+                  <span className="h-14 w-11 shrink-0 rounded-[10px] bg-photo" />
                 )}
               </span>
             </Link>

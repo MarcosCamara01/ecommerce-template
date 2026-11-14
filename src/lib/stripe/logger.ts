@@ -1,10 +1,8 @@
-type LogLevel = "info" | "warn" | "error" | "debug";
+type LogLevel = "info" | "warn" | "error";
 
 interface StripeLogEntry {
   timestamp: string;
   level: LogLevel;
-  eventType?: string;
-  eventId?: string;
   sessionId?: string;
   message: string;
   details?: Record<string, unknown>;
@@ -14,24 +12,14 @@ const LOG_COLORS = {
   info: "\x1b[36m",
   warn: "\x1b[33m",
   error: "\x1b[31m",
-  debug: "\x1b[90m",
   reset: "\x1b[0m",
-} as const;
-
-const LOG_ICONS = {
-  info: "[info]",
-  warn: "[warn]",
-  error: "[error]",
-  debug: "[debug]",
 } as const;
 
 function formatConsoleLog(entry: StripeLogEntry): string {
   const color = LOG_COLORS[entry.level];
-  const icon = LOG_ICONS[entry.level];
   const reset = LOG_COLORS.reset;
 
-  let log = `${color}[Stripe] ${icon} ${entry.message}${reset}`;
-  if (entry.eventType) log += ` | Event: ${entry.eventType}`;
+  let log = `${color}[Stripe] [${entry.level}] ${entry.message}${reset}`;
   if (entry.sessionId) {
     log += ` | Session: ${entry.sessionId.substring(0, 20)}...`;
   }
@@ -101,49 +89,5 @@ export const stripeLogger = {
         console.error(`  -> ${error.message}`);
       }
     }
-  },
-
-  debug(message: string, details?: Partial<StripeLogEntry>) {
-    if (process.env.NODE_ENV !== "development") return;
-
-    const entry: StripeLogEntry = {
-      timestamp: new Date().toISOString(),
-      level: "debug",
-      message,
-      ...details,
-    };
-
-    console.log(formatConsoleLog(entry));
-  },
-
-  order(
-    orderNumber: number,
-    action: "created" | "updated" | "error",
-    details?: string,
-  ) {
-    const messages = {
-      created: `Order #${orderNumber} created`,
-      updated: `Order #${orderNumber} updated`,
-      error: `Order #${orderNumber} error`,
-    };
-
-    const level = action === "error" ? "error" : "info";
-    this[level](details || messages[action], {
-      details: { orderNumber, action },
-    });
-  },
-
-  webhook(
-    eventType: string,
-    eventId: string,
-    status: "received" | "processed" | "failed",
-    details?: Record<string, unknown>,
-  ) {
-    const level = status === "failed" ? "error" : "info";
-    this[level](`Webhook ${status}: ${eventType}`, {
-      eventType,
-      eventId,
-      details,
-    });
   },
 };

@@ -148,7 +148,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
 
   return (
     <div className="space-y-3 pb-2">
-      {/* Image Grid - Existing Images */}
       {existingImages.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
           {existingImages.map((imageUrl, index) => (
@@ -165,7 +164,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
                 aria-label={`Remove existing variant image ${index + 1}`}
                 variant="destructive"
                 size="icon"
-                className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity shadow-md z-10"
+                className="absolute -top-2 -right-2 size-8 before:absolute before:-inset-2 before:content-[''] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity shadow-md z-10"
                 onClick={() => handleRemoveExisting(index)}
               >
                 <FiX className="h-3 w-3" aria-hidden="true" />
@@ -181,7 +180,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
         </div>
       )}
 
-      {/* Image Grid - New Images */}
       {newImages.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pt-2 pr-2">
           {newImages.map(({ key, preview }, index) => (
@@ -198,7 +196,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
                 aria-label={`Remove new variant image ${index + 1}`}
                 variant="destructive"
                 size="icon"
-                className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity shadow-md z-10"
+                className="absolute -top-2 -right-2 size-8 before:absolute before:-inset-2 before:content-[''] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity shadow-md z-10"
                 onClick={() => handleRemove(index)}
               >
                 <FiX className="h-3 w-3" aria-hidden="true" />
@@ -214,7 +212,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
         </div>
       )}
 
-      {/* Upload Area */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -249,7 +246,7 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
             aria-describedby={displayedError ? errorId : undefined}
           >
             <FiUpload className="h-3 w-3 mr-1.5" aria-hidden="true" />
-            Add Images
+            Add images
           </Button>
           <input
             id={inputId}
@@ -267,7 +264,6 @@ export const VariantImages = forwardRef<VariantImagesRef, VariantImagesProps>(
         </div>
       </div>
 
-      {/* Image Count */}
       {totalImages > 0 && (
         <p className="text-xs text-muted">
           {totalImages} image{totalImages !== 1 ? "s" : ""} total

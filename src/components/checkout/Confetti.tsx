@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 const PIECES = 36;
 const noop = () => () => {};
@@ -29,7 +29,10 @@ export function Confetti({
 }) {
   // The server never renders confetti; the client decides after hydration.
   const alreadySeen = useSyncExternalStore(noop, () => seen(orderId), () => true);
-  if (alreadySeen || colours.length === 0) return null;
+  // Once the last piece has landed the pieces go, so a page re-shown from
+  // <Activity> does not drop them again.
+  const [done, setDone] = useState(false);
+  if (alreadySeen || done || colours.length === 0) return null;
 
   const remember = () => {
     try {
@@ -37,6 +40,7 @@ export function Confetti({
     } catch {
       // Private mode: it may play again on reload, which is harmless.
     }
+    setDone(true);
   };
 
   return (

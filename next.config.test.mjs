@@ -44,16 +44,13 @@ test("photos are served as AVIF or WebP, at photo quality, and cached for a mont
   );
 
   assert.deepEqual(JSON.parse(output), {
-    // AVIF is offered first; WebP is the fallback.
     formats: ["image/avif", "image/webp"],
-    // A photo with no quality of its own takes the first; 90 fills a screen.
     qualities: [85, 90],
     ttl: 31 * 24 * 60 * 60,
   });
 });
 
 test("no remote image host is open at every path", () => {
-  // The optimizer resizes, and bills, whatever a pattern lets through.
   const output = execFileSync(
     process.execPath,
     [

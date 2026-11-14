@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 export type VariantSizesRef = {
   sizes: ProductSize[];
   reset: () => void;
-  setSizes: (sizes: ProductSize[]) => void;
 };
 
 interface VariantSizesProps {
@@ -27,7 +26,6 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
     useImperativeHandle(ref, () => ({
       sizes: selectedSizes,
       reset: () => setSelectedSizes(initialSizes || []),
-      setSizes: (sizes: ProductSize[]) => setSelectedSizes(sizes),
     }));
 
     const toggleSize = (size: ProductSize) => {
@@ -51,7 +49,7 @@ export const VariantSizes = forwardRef<VariantSizesRef, VariantSizesProps>(
                 aria-pressed={isSelected}
                 onClick={() => toggleSize(size)}
                 className={cn(
-                  "press h-10 w-[52px] rounded-pill border text-13 transition-[background-color,color,border-color,transform] duration-120",
+                  "press h-10 w-[52px] rounded-pill border text-13 transition-[background-color,color,border-color,transform] duration-120 ease-out",
                   isSelected
                     ? "border-fg bg-fg text-bg"
                     : "border-line text-fg hover:border-fg",

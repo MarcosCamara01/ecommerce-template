@@ -1,7 +1,5 @@
-/** COMPONENTS */
 import Image from "next/image";
 import Link from "@/components/ui/link";
-/** TYPES */
 import type {
   OrderProductWithDetails,
   ProductWithVariants,
@@ -65,18 +63,18 @@ export const OrderProduct = async ({
   );
 
   return (
-    <article className="grid grid-cols-[96px_minmax(0,1fr)_auto] items-center gap-[18px] border-b border-line py-4 lg:grid-cols-[140px_minmax(0,1fr)_auto]">
+    <article className="grid grid-cols-[96px_minmax(0,1fr)_auto] items-start gap-[18px] border-b border-line py-4 lg:grid-cols-[140px_minmax(0,1fr)_auto]">
       <div className="overflow-hidden rounded-chip bg-photo">
         {isArchived ? photo : <Link href={productLink!}>{photo}</Link>}
       </div>
       <div className="flex min-w-0 flex-col gap-2">
-        <h3 className="font-display-75 text-xl leading-none lg:text-[30px] lg:[word-spacing:0.1em]">
+        <h3 className="font-display-75 text-xl leading-none [overflow-wrap:anywhere] lg:text-[30px] lg:[word-spacing:0.1em]">
           {productName}
         </h3>
         <span className="flex items-center gap-2 text-sm text-muted">
           <span
             aria-hidden="true"
-            className="size-3 rounded-pill shadow-[0_0_0_1px_var(--line)]"
+            className="size-3 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)]"
             style={{ background: swatchBackground(variantColor) }}
           />
           <span>
@@ -94,8 +92,15 @@ export const OrderProduct = async ({
           </Link>
         )}
       </div>
-      <span className="self-start whitespace-nowrap text-lg font-medium tabular-nums">
-        {formatPriceFromMinorUnits(unitAmount, currency)}
+      <span className="flex flex-col items-end whitespace-nowrap tabular-nums">
+        <span className="text-lg font-medium">
+          {formatPriceFromMinorUnits(unitAmount * quantity, currency)}
+        </span>
+        {quantity > 1 ? (
+          <span className="text-13 text-muted">
+            {formatPriceFromMinorUnits(unitAmount, currency)} each
+          </span>
+        ) : null}
       </span>
     </article>
   );

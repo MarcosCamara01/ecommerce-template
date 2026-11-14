@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ProductForm } from "./ProductForm";
-import type { ProductWithVariants, ProductSize } from "@/lib/db/drizzle/schema";
+import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
 import type { ProductFormData } from "@/types/admin";
 import { ArchiveProductButton } from "./ArchiveProductButton";
 
@@ -24,7 +24,7 @@ function mapProductToFormData(product: ProductWithVariants): ProductFormData {
     variants: product.variants.map((variant) => ({
       id: variant.id,
       color: variant.color,
-      sizes: variant.sizes as ProductSize[],
+      sizes: variant.sizes,
       images: variant.images,
     })),
   };

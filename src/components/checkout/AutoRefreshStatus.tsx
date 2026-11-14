@@ -3,15 +3,9 @@
 import { startTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-interface AutoRefreshStatusProps {
-  active: boolean;
-  intervalMs?: number;
-}
+const REFRESH_MS = 5000;
 
-export function AutoRefreshStatus({
-  active,
-  intervalMs = 5000,
-}: AutoRefreshStatusProps) {
+export function AutoRefreshStatus({ active }: { active: boolean }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -23,12 +17,12 @@ export function AutoRefreshStatus({
       startTransition(() => {
         router.refresh();
       });
-    }, intervalMs);
+    }, REFRESH_MS);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [active, intervalMs, router]);
+  }, [active, router]);
 
   return null;
 }

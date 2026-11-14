@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import LoadingButton from "@/components/ui/loadingButton";
-import type { Manager } from "@/hooks/useManager";
+import LoadingButton from "@/components/ui/loading-button";
+import type { Disclosure } from "@/hooks/useDisclosure";
 import { useSession } from "@/lib/auth/client";
 
 type UpdateProfileResponse = {
@@ -29,7 +29,7 @@ export default function EditProfile({
   manager,
   returnFocusRef,
 }: {
-  manager: Manager;
+  manager: Disclosure;
   returnFocusRef: RefObject<HTMLElement | null>;
 }) {
   const { data: session, refetch: refetchSession } = useSession();
@@ -66,7 +66,7 @@ export default function EditProfile({
       await refetchSession();
       manager.close();
       router.refresh();
-      toast.success("Profile updated successfully");
+      toast.success("Profile updated");
     },
     onError: (error) => {
       toast.error(
@@ -101,7 +101,7 @@ export default function EditProfile({
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you&apos;re done.
+            Update the name on your account.
           </DialogDescription>
         </DialogHeader>
         <form

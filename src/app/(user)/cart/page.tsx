@@ -2,9 +2,8 @@ import Link from "@/components/ui/link";
 import { Suspense } from "react";
 
 import { getAllProducts } from "@/app/actions";
-import { CartProducts } from "@/components/cart";
-import { BagCount } from "@/components/cart/CartProducts";
-import { RailCard } from "@/components/products/RailCard";
+import { BagCount, CartProducts } from "@/components/bag/CartProducts";
+import { RailCard } from "@/components/catalog/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPrincipal } from "@/lib/identity";
@@ -40,12 +39,14 @@ const CartPage = () => {
           </svg>
         </Link>
       </div>
-      <h1 className="font-display text-[120px] leading-[0.8] lg:pt-10 lg:text-[min(240px,16.6vw)]">
-        Bag
+      <div className="flex flex-wrap items-end justify-between gap-4 lg:pt-10">
+        <h1 className="font-display text-[120px] leading-[0.8] lg:text-[min(240px,16.6vw)]">
+          Bag
+        </h1>
         <Suspense fallback={null}>
           <BagCount />
         </Suspense>
-      </h1>
+      </div>
       <Suspense fallback={<Skeleton className="h-40 rounded-photo" />}>
         <CartContent />
       </Suspense>
@@ -67,7 +68,7 @@ const CartContent = async () => {
               Sign in
             </Link>
             <Link href="/new-in" className={buttonClass({ variant: "secondary" })}>
-              See what&apos;s new
+              See what’s new
             </Link>
           </>
         }
@@ -84,7 +85,7 @@ const CartContent = async () => {
           actions={
             <>
               <Link href="/new-in" className={buttonClass()}>
-                See what&apos;s new
+                See what’s new
               </Link>
               <Link href="/wishlist" className={buttonClass({ variant: "secondary" })}>
                 Open wishlist

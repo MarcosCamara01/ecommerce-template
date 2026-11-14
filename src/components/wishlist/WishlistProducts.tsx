@@ -4,8 +4,8 @@ import { displayName } from "@/utils/product-name";
 import Link from "@/components/ui/link";
 import { useRef, useState } from "react";
 
-import { AddToCart } from "@/components/cart/AddToCart";
-import { PieceTile } from "@/components/products/PieceTile";
+import { AddToCart } from "@/components/bag/AddToCart";
+import { PieceTile } from "@/components/catalog/PieceTile";
 import { swatchBackground } from "@/constants/colors";
 import { useFlip } from "@/hooks/useFlip";
 import { useWishlistDetails } from "@/hooks/wishlist";
@@ -15,7 +15,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { ProductSize, ProductWithVariants } from "@/lib/db/drizzle/schema";
 import { formatPriceFromEuros } from "@/utils/formatters";
 
-import WishlistButton from "./WishlistButton";
+import { WishlistButton } from "./WishlistButton";
 
 /** A saved piece with quick add: pick a size, add it to the bag. */
 function SavedPiece({ product }: { product: ProductWithVariants }) {
@@ -38,22 +38,22 @@ function SavedPiece({ product }: { product: ProductWithVariants }) {
         quickAdd={false}
       >
         <span className="absolute right-2.5 top-2.5">
-          <WishlistButton showsRemove productId={product.id} productName={product.name} />
+          <WishlistButton showsRemove productId={product.id} productName={displayName(product.name)} />
         </span>
       </PieceTile>
-      <Link href={href} data-flip-part="move" className="flex justify-between gap-2.5 px-1">
-        <span className="font-medium">{displayName(product.name)}</span>
-        <span className="whitespace-nowrap tabular-nums">{formatPriceFromEuros(product.price)}</span>
+      <Link href={href} data-flip-part="move" className="flex justify-between gap-2.5 px-1 max-lg:flex-col max-lg:gap-0.5">
+        <span className="line-clamp-2 min-w-0 font-medium [overflow-wrap:anywhere]">{displayName(product.name)}</span>
+        <span className="shrink-0 whitespace-nowrap tabular-nums">{formatPriceFromEuros(product.price)}</span>
       </Link>
       <span data-flip-part="move" className="flex items-center gap-1.5 px-1 text-13 text-muted">
         <span
           aria-hidden="true"
-          className="size-2.5 rounded-pill shadow-[0_0_0_1px_var(--line)]"
+          className="size-2.5 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)]"
           style={{ background: swatchBackground(variant.color) }}
         />
         {variant.color}
       </span>
-      <div data-flip-part="move" className="flex gap-1.5">
+      <div data-flip-part="move" className="flex flex-wrap gap-1.5">
         <label className="relative h-11 w-16 shrink-0">
           <span className="sr-only">Size for {product.name}</span>
           <NativeSelect

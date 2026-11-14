@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { ButtonCheckout } from "@/components/cart/ButtonCheckout";
+import { CheckoutButton } from "@/components/bag/CheckoutButton";
 import { BottomSheet, BottomSheetClose } from "@/components/ui/bottom-sheet";
 import { useCartDetails } from "@/hooks/cart";
 import { formatPriceFromEuros } from "@/utils/formatters";
@@ -49,7 +49,7 @@ export function AddedSheet({
             className="h-[82px] w-16 rounded-[14px] bg-photo object-cover"
           />
           <span className="flex min-w-0 flex-col">
-            <span className="font-medium">{item.name}</span>
+            <span className="font-medium [overflow-wrap:anywhere]">{item.name}</span>
             <span className="text-13">
               {item.color} · {item.size}
             </span>
@@ -69,7 +69,7 @@ export function AddedSheet({
         <BottomSheetClose className="press h-14 grow rounded-pill border border-fg font-medium">
           Keep shopping
         </BottomSheetClose>
-        <ButtonCheckout
+        <CheckoutButton
           cartItemIds={items.map((line) => line.id)}
           className="h-14 grow"
         />

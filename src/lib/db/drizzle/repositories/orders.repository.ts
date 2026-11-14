@@ -31,13 +31,6 @@ export type CompleteOrderInput = {
 };
 
 export const ordersRepository = {
-  async findByStripeSessionId(stripeSessionId: string) {
-    const customer = await db.query.customerInfo.findFirst({
-      where: eq(customerInfo.stripeOrderId, stripeSessionId),
-    });
-    return customer ? this.findById(customer.orderId) : null;
-  },
-
   async findByUserId(userId: string): Promise<OrderWithDetails[]> {
     const rows = await db.query.orderItems.findMany({
       where: eq(orderItems.userId, userId),
@@ -61,15 +54,6 @@ export const ordersRepository = {
       with: ORDER_WITH_DETAILS,
     });
     return row ? transformOrderWithDetails(row) : null;
-  },
-
-  async createComplete(input: CompleteOrderInput): Promise<OrderWithDetails> {
-    const orderId = await db.transaction((tx) =>
-      createCompleteOrderInTransaction(tx, input),
-    );
-    const order = await this.findById(orderId);
-    if (!order) throw new Error("Created order could not be read back");
-    return order;
   },
 };
 

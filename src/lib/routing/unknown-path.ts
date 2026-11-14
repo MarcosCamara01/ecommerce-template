@@ -1,8 +1,9 @@
 import { parsePositiveIntegerId } from "./positive-integer-id.ts";
 
 /**
- * Paths that `[category]` / `[category]/[id]` would otherwise swallow.
- * Keep in sync with ProductCategoryZod in schema/products.ts.
+ * The real `[category]` slugs, copied from ProductCategoryZod in
+ * src/lib/db/drizzle/schema/products.ts, which plain `node --test` cannot
+ * load (its imports have no file extension). Keep the two in sync.
  */
 const PRODUCT_CATEGORY_SLUGS = new Set(["t-shirts", "pants", "sweatshirts"]);
 

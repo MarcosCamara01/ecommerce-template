@@ -2,11 +2,7 @@
 
 import { Toaster as Sonner } from "sonner";
 
-/**
- * Inverted pill toasts from CStates. They enter and leave through the
- * bottom (350ms in, 250ms out, ease-out; see globals.css) and pause on
- * hover. Errors use the error surface.
- */
+/** Inverted pill toasts from CStates. Their transitions live in globals.css. */
 export function Toaster() {
   return (
     <Sonner

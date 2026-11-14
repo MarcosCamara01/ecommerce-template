@@ -33,15 +33,8 @@ export const useCartDetails = () => {
 
   const items = query.data?.items ?? [];
 
-  const getCartItemById = (
-    id: CartItemWithDetails["id"],
-  ): CartItemWithDetails | undefined => {
-    return items.find((item) => item.id === id);
-  };
-
   return {
     ...query,
     items,
-    getCartItemById,
   };
 };

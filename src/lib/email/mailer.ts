@@ -10,14 +10,14 @@ type MailOptions = {
   messageId?: string;
 };
 
-function getFirstEnvValue(keys: string[], trim = true) {
+function getFirstEnvValue(keys: string[]) {
   for (const key of keys) {
     const rawValue = process.env[key];
     if (!rawValue) {
       continue;
     }
 
-    const value = trim ? rawValue.trim() : rawValue;
+    const value = rawValue.trim();
     if (value) {
       return value;
     }
@@ -70,7 +70,7 @@ function getEmailConfig() {
   };
 }
 
-function escapeHtml(value: string | number | null | undefined) {
+export function escapeHtml(value: string | number | null | undefined) {
   if (value === null || value === undefined) {
     return "";
   }
@@ -127,5 +127,3 @@ export async function sendMail({
     ...(messageId ? { messageId } : {}),
   });
 }
-
-export { escapeHtml };

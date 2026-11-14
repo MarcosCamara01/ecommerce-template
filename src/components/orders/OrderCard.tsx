@@ -1,12 +1,9 @@
-/** COMPONENTS */
 import Image from "next/image";
 import Link from "@/components/ui/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { OrderSteps } from "./OrderSteps";
-/** UTILS */
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-/** TYPES */
 import type { OrderWithDetails } from "@/lib/db/drizzle/schema";
 import { orderViewModel } from "@/lib/orders/view-model";
 
@@ -14,7 +11,6 @@ interface OrderCardProps {
   order: OrderWithDetails;
 }
 
-/** Orders list row: up to three photos, number, status, progress, totals. */
 export function OrderCard({ order }: OrderCardProps) {
   const { totalItems, totalPrice, delivery, orderDate, status } =
     orderViewModel(order);
@@ -34,7 +30,7 @@ export function OrderCard({ order }: OrderCardProps) {
             width={80}
             height={106}
             sizes="80px"
-            className="h-24 w-[72px] rounded-field bg-photo object-cover lg:h-[106px] lg:w-20"
+            className="h-24 w-[72px] rounded-[12px] bg-photo object-cover lg:h-[106px] lg:w-20"
           />
         ))}
       </div>

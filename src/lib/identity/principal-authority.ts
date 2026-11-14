@@ -1,5 +1,5 @@
 export type Capability = "catalog:manage" | "fulfillment:manage";
-export type SystemPurpose = "catalog-sync" | "order-fulfillment";
+type SystemPurpose = "catalog-sync" | "order-fulfillment";
 
 type IdentityErrorCode =
   | "authentication_required"

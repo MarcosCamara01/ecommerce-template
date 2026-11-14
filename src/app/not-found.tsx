@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "@/components/ui/link";
 import { Suspense } from "react";
 
-import { RailCard } from "@/components/products/RailCard";
+import { RailCard } from "@/components/catalog/RailCard";
 import { buttonClass } from "@/components/ui/button-classes";
 import { getSearchCatalog } from "@/lib/catalog/search-index";
 

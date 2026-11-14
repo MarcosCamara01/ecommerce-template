@@ -33,7 +33,7 @@ export type BasicInfoRef = {
   reset: () => void;
 };
 
-export interface BasicInfoInitialData {
+interface BasicInfoInitialData {
   name?: string;
   description?: string;
   price?: number;
@@ -74,13 +74,12 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
 
     return (
       <div className="space-y-5">
-        {/* Product Name */}
         <div className="space-y-2">
           <Label
             htmlFor="name"
             className="text-sm font-medium"
           >
-            Product Name <span className="text-err-fg">*</span>
+            Product name <span className="text-err-fg">*</span>
           </Label>
           <Input
             id="name"
@@ -103,7 +102,6 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
           )}
         </div>
 
-        {/* Description */}
         <div className="space-y-2">
           <Label
             htmlFor="description"
@@ -135,9 +133,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
           )}
         </div>
 
-        {/* Price and Category Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Price */}
           <div className="space-y-2">
             <Label
               htmlFor="price"
@@ -177,7 +173,6 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             )}
           </div>
 
-          {/* Category */}
           <div className="space-y-2">
             <Label
               htmlFor="category"

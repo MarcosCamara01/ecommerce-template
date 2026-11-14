@@ -1,0 +1,85 @@
+"use client";
+
+import { useThrottleFn } from "ahooks";
+import { useCartMutation } from "@/hooks/cart";
+import { RollingNumber } from "@/components/ui/rolling-number";
+import { cn } from "@/lib/utils";
+import type { CartItem } from "@/lib/db/drizzle/schema";
+
+interface QuantityStepperProps {
+  cartItemId: CartItem["id"];
+  quantity: CartItem["quantity"];
+  productName: string;
+  compact?: boolean;
+}
+
+/** − n + stepper. Going below one removes the line. */
+export const QuantityStepper = ({
+  cartItemId,
+  quantity,
+  productName,
+  compact = false,
+}: QuantityStepperProps) => {
+  const { update: editQuantity, remove: removeFromCart } = useCartMutation();
+
+  const { run: throttledIncrease } = useThrottleFn(
+    () => {
+      editQuantity({
+        itemId: cartItemId,
+        quantity: quantity + 1,
+      });
+    },
+    {
+      wait: 300,
+    },
+  );
+
+  const { run: throttledDecrease } = useThrottleFn(
+    () => {
+      if (quantity > 1) {
+        editQuantity({
+          itemId: cartItemId,
+          quantity: quantity - 1,
+        });
+      } else {
+        removeFromCart({ itemId: cartItemId });
+      }
+    },
+    {
+      wait: 300,
+    },
+  );
+
+  const step = cn(
+    "press grid size-11 place-items-center rounded-pill transition-[transform,background-color] duration-120 ease-out active:bg-card",
+    compact ? "text-base" : "text-lg",
+  );
+
+  return (
+    <div className="flex items-center self-start rounded-pill border border-line">
+      <button
+        type="button"
+        className={step}
+        onClick={throttledDecrease}
+        aria-label={`Remove one ${productName}`}
+      >
+        −
+      </button>
+      <span
+        aria-live="polite"
+        className={cn("text-center font-medium tabular-nums", compact ? "min-w-[18px] text-13" : "min-w-6")}
+      >
+        <span className="sr-only">Quantity </span>
+        <RollingNumber value={quantity} />
+      </span>
+      <button
+        type="button"
+        className={step}
+        onClick={throttledIncrease}
+        aria-label={`Add one ${productName}`}
+      >
+        +
+      </button>
+    </div>
+  );
+};

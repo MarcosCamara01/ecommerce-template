@@ -4,12 +4,12 @@ import Link from "@/components/ui/link";
 import { useRef } from "react";
 
 import { ArrowUpRightIcon } from "@/components/icons";
-import { prefersReducedMotion } from "@/lib/motion";
+import { EASE_OUT, prefersReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type Edge = "top" | "bottom";
 
-const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
+const POUR_EASING = `cubic-bezier(${EASE_OUT.join(", ")})`;
 const POUR_IN_MS = 450;
 const POUR_OUT_MS = 350;
 
@@ -57,7 +57,7 @@ export function SectionRow({
       { clipPath: start ? [start, to] : [to] },
       {
         duration: prefersReducedMotion() ? 0 : ms,
-        easing: EASE_OUT,
+        easing: POUR_EASING,
         fill: "forwards",
       },
     );
@@ -68,12 +68,14 @@ export function SectionRow({
 
   const content = (inked: boolean) => (
     <span className="flex items-center justify-between gap-4 px-4 py-2 lg:px-8">
-      <span className="font-display text-[min(190px,13.2vw)] leading-[0.92] transition-transform duration-450 ease-out group-data-[inked=true]:translate-x-3 motion-reduce:transition-none motion-reduce:group-data-[inked=true]:translate-x-0">
+      <span className="font-display text-[min(190px,13.2vw)] leading-[0.92] transition-transform duration-350 ease-out group-data-[inked=true]:translate-x-3 group-data-[inked=true]:duration-450 motion-reduce:transition-none motion-reduce:group-data-[inked=true]:translate-x-0">
         {label}
       </span>
       <span className="flex shrink-0 items-center gap-3 whitespace-nowrap text-sm lg:gap-4 lg:text-[15px]">
         {/* Phones only have room for the word and the arrow. */}
-        <span className="max-sm:sr-only">{String(count).padStart(2, "0")} styles</span>
+        <span className="max-sm:sr-only">
+          {String(count).padStart(2, "0")} {count === 1 ? "style" : "styles"}
+        </span>
         <span
           className={cn(
             "relative grid size-11 place-items-center overflow-hidden rounded-pill border lg:size-16",

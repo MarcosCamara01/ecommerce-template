@@ -2,11 +2,11 @@ import { ExistingOrderMismatchError } from "../orders/existing-order-idempotency
 import { externalErrorFacts } from "../external/error-facts.ts";
 
 const RETRYABLE_POSTGRES_CODES = new Set([
-  "40001",
-  "40P01",
-  "53300",
-  "57P01",
-  "57P03",
+  "40001", // serialization_failure
+  "40P01", // deadlock_detected
+  "53300", // too_many_connections
+  "57P01", // admin_shutdown
+  "57P03", // cannot_connect_now
 ]);
 
 const RETRYABLE_STRIPE_ERROR_TYPES = new Set([

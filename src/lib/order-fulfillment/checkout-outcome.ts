@@ -11,22 +11,14 @@ export type CheckoutOutcome =
       cartCleanup: CartCleanupOutcome;
     };
 
+type FulfillmentState = "pending" | "processing" | "succeeded" | "needs_attention";
+
 type CheckoutOutcomeRecord = Readonly<{
-  workState: "pending" | "processing" | "succeeded" | "needs_attention" | null;
+  workState: FulfillmentState | null;
   orderId: number | null;
-  customerEmailState:
-    | "pending"
-    | "processing"
-    | "succeeded"
-    | "needs_attention"
-    | null;
+  customerEmailState: FulfillmentState | null;
   customerEmailLastErrorCode: string | null;
-  cartCleanupState:
-    | "pending"
-    | "processing"
-    | "succeeded"
-    | "needs_attention"
-    | null;
+  cartCleanupState: FulfillmentState | null;
 }>;
 
 export function checkoutOutcomeFromRecord(

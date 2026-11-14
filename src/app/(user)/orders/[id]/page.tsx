@@ -1,13 +1,11 @@
-import { getOrder } from "../action";
+import { getOrder } from "../actions";
 import type {
   ProductWithVariants,
   OrderProductWithDetails,
 } from "@/lib/db/drizzle/schema";
-import {
-  OrderProduct,
-  OrderSummary,
-  OrderSummarySkeleton,
-} from "@/components/orders";
+import { OrderProduct } from "@/components/orders/OrderProduct";
+import { OrderSummary } from "@/components/orders/OrderSummary";
+import { OrderSummarySkeleton } from "@/components/orders/OrderSummarySkeleton";
 import { buttonClass } from "@/components/ui/button-classes";
 import Link from "@/components/ui/link";
 import { Suspense } from "react";
@@ -24,7 +22,6 @@ export async function generateMetadata() {
 
 interface Props {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 async function DynamicOrderContent({
@@ -76,7 +73,7 @@ const OrderProducts = async ({ id }: { id: string }) => {
           Order not found
         </h2>
         <p className="max-w-[520px] text-muted">
-          The order you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to
+          The order you’re looking for doesn’t exist or you don’t have access to
           it.
         </p>
         <Link href="/orders" className={buttonClass()}>
@@ -93,8 +90,6 @@ const OrderProducts = async ({ id }: { id: string }) => {
 
       const productWithVariants: ProductWithVariants = {
         ...product,
-        // Show the bought variant image (like in the cart)
-        img: variant.images[0] ?? product.img,
         variants: [
           {
             id: variant.id,
