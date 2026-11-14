@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { displayLines, fitDisplayStep } from "./display-type.ts";
+import { displayLines, fitDisplaySize, fitDisplayStep } from "./display-type.ts";
 
 // The product page: five steps, a column 5.18 times the largest, and room
 // for two lines of the largest size.
@@ -20,8 +20,9 @@ test("display type wraps at spaces and after hyphens", () => {
   assert.equal(displayLines("BASIC HOODIE", 5.18), 2);
   // One word wider than the measure breaks after its hyphen.
   assert.equal(displayLines("QUARTER-ZIP", 3), 2);
-  // A word that cannot break stays on one line, however narrow the column.
-  assert.equal(displayLines("SWEATSHIRT", 2), 1);
+  // A word wider than the column breaks anywhere, as overflow-wrap does.
+  assert.equal(displayLines("SWEATSHIRT", 2), 3);
+  assert.ok(displayLines("KAPUZENSWEATSHIRTJACKE", 5.18) >= 3);
 });
 
 test("a short product name keeps the giant size", () => {
@@ -48,6 +49,16 @@ test("a longer name steps down until it fits in the room of two giant lines", ()
       `${name} at ${chosen.px}px takes ${lines} lines`,
     );
   }
+});
+
+test("an unbreakable word steps the name down like a long name does", () => {
+  assert.ok(step("KAPUZENSWEATSHIRTJACKE") < 104);
+});
+
+test("CJK glyphs measure about one em each", () => {
+  // Four glyphs at 1em, plus the 3% margin, fill 412px at 100px.
+  const size = fitDisplaySize("连帽卫衣", { maxPx: 1000, budgetPx: 412, vwBudget: 100 });
+  assert.match(size, /^min\(100px, /);
 });
 
 test("a name too long for every step takes the smallest", () => {

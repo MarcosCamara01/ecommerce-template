@@ -25,9 +25,11 @@ export function RailCard({ product }: { product: ProductWithVariants }) {
         src={variant?.images[0] ?? product.img}
         sizes="(max-width: 1023px) 50vw, 25vw"
       />
-      <Link href={href} className="flex justify-between gap-3 px-1">
-        <span className="font-medium">{displayName(product.name)}</span>
-        <span className="whitespace-nowrap tabular-nums">
+      <Link href={href} className="flex flex-col gap-0.5 px-1 lg:flex-row lg:justify-between lg:gap-3">
+        <span className="min-w-0 truncate text-13 font-medium lg:whitespace-normal lg:text-[15px]">
+          {displayName(product.name)}
+        </span>
+        <span className="whitespace-nowrap text-xs tabular-nums lg:text-[15px]">
           {formatPriceFromEuros(product.price)}
         </span>
       </Link>

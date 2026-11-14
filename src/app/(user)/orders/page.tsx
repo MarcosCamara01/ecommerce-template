@@ -123,10 +123,10 @@ const Orders = async () => {
     return (
       <OrdersMessage
         title="No orders yet"
-        body="Start shopping and your orders will appear here. We'll keep track of everything for you!"
+        body="Your orders will show up here."
         actions={
           <Link href="/new-in" className={buttonClass()}>
-            Start shopping
+            See what’s new
           </Link>
         }
         starters

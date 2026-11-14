@@ -37,7 +37,9 @@ const ColourBar = ({ items, className }: { items: CartItemWithDetails[]; classNa
     {items.map((item) => (
       <span
         key={item.id}
-        className="rounded-pill shadow-[inset_0_0_0_1px_var(--line)]"
+        // flex-grow is layout, on purpose: scaleX would squash the pill ends,
+        // and it is a 12px bar of a few spans.
+        className="min-w-1 rounded-pill shadow-[inset_0_0_0_1px_var(--line)] transition-[flex-grow] duration-220 ease-out motion-reduce:transition-none"
         style={{ flexGrow: item.quantity, background: swatchBackground(item.variant.color) }}
       />
     ))}
@@ -132,7 +134,7 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
           Checkout securely
         </CheckoutButton>
         <p className="text-center text-xs text-muted">
-          You&apos;ll pay on Stripe&apos;s secure page, then come back here.
+          You’ll pay on Stripe’s secure page, then come back here.
         </p>
       </aside>
 
@@ -150,15 +152,19 @@ export const CartProducts = ({ emptyState }: { emptyState: React.ReactNode }) =>
   );
 };
 
-/** Title suffix with the live piece count: "Bag (3)". */
+/** The live piece count beside the title, as on the wishlist; none when the bag is empty. */
 export const BagCount = () => {
   const { items, isSuccess } = useCartDetails();
   if (!isSuccess) return null;
   const count = items.reduce((total, item) => total + item.quantity, 0);
+  if (count === 0) return null;
+  const label = count >= 1000 ? count.toLocaleString("en-US") : String(count).padStart(2, "0");
   return (
-    <span className="opacity-60">
-      {" "}
-      (<RollingNumber value={count} />)
+    <span
+      aria-label={`${count} ${count === 1 ? "piece" : "pieces"}`}
+      className="pb-1.5 font-display text-[40px] font-extrabold leading-none tabular-nums lg:text-[64px]"
+    >
+      <RollingNumber value={count}>{label}</RollingNumber>
     </span>
   );
 };

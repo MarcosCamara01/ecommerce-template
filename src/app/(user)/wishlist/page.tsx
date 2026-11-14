@@ -110,10 +110,10 @@ const WishlistContent = async () => {
       emptyState={
         <EmptyWishlist
           title="Nothing saved yet"
-          body="Tap the heart on any piece to keep it here for later."
+          body="Save a piece with the heart to keep it here for later."
           actions={
             <Link href="/new-in" className={buttonClass()}>
-              See what&apos;s new
+              See what’s new
             </Link>
           }
         />

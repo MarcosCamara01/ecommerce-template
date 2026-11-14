@@ -23,13 +23,14 @@ test("a size adds that size, flies the photo, bumps the counter and opens the ba
     harness.size("M").onClick();
     assert.deepEqual(harness.submissions, [{ size: "M", variantId: 2 }]);
     assert.equal(harness.size("M")["aria-busy"], true);
-    assert.deepEqual(harness.effects, { flights: 0, bumps: 0, opened: [] });
+    assert.deepEqual(harness.effects, { flights: 0, bumps: 0, opened: [], held: true });
 
     harness.resolve({ id: 7 });
     await harness.completion();
     await new Promise(setImmediate);
     assert.equal(harness.effects.flights, 1);
     assert.equal(harness.effects.bumps, 1);
+    assert.equal(harness.effects.held, false, "the count changes as the photo lands");
     assert.equal(harness.size("M")["aria-busy"], undefined);
     assert.equal(harness.label("M"), "✓");
 
@@ -60,7 +61,7 @@ test("a rejected add confirms nothing and leaves the sizes ready to try again", 
     harness.size("M").onClick();
     harness.reject(new Error("Request rejected"));
     await assert.rejects(harness.completion(), { message: "Request rejected" });
-    assert.deepEqual(harness.effects, { flights: 0, bumps: 0, opened: [] });
+    assert.deepEqual(harness.effects, { flights: 0, bumps: 0, opened: [], held: false });
     assert.equal(harness.size("M")["aria-busy"], undefined);
     assert.equal(harness.label("M"), "M");
 
@@ -97,7 +98,7 @@ function loadHarness({ sizes = ["S", "M", "L"] } = {}) {
   const slots = [];
   const timers = [];
   const submissions = [];
-  const effects = { flights: 0, bumps: 0, opened: [] };
+  const effects = { flights: 0, bumps: 0, opened: [], held: false };
   let slot = 0;
   let completion;
   let resolve;
@@ -122,11 +123,13 @@ function loadHarness({ sizes = ["S", "M", "L"] } = {}) {
     },
     "@/utils/product-name": { displayName: (name) => name },
     "@/components/bag/bag-ui": {
-      bumpBag: () => { effects.bumps += 1; },
+      bumpBag: () => { effects.bumps += 1; effects.held = false; },
+      holdBagCount: () => { effects.held = true; },
+      releaseBagCount: () => { effects.held = false; },
       openBag: (line) => { effects.opened.push(line); },
     },
     "@/components/bag/fly-to-bag": {
-      flyToBag: () => { effects.flights += 1; return Promise.resolve(); },
+      flyToBag: () => { effects.flights += 1; return Promise.resolve(true); },
     },
     "@/components/ui/loader": { Spinner: "spinner" },
     "@/hooks/cart": {

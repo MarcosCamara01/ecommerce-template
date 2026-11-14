@@ -17,15 +17,17 @@ import {
 } from "@/components/icons";
 import { useSession } from "@/lib/auth/client";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-import { useRef, type RefObject } from "react";
+import { cn } from "@/lib/utils";
+import { useRef, useState, type RefObject } from "react";
 
 const initialsOf = (name: string) =>
   name
     .split(/\s+/)
+    .map((part) => Array.from(part).find((char) => /\p{L}/u.test(char)))
     .filter(Boolean)
     .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+    .join("")
+    .toUpperCase();
 
 export function UserMenu({
   triggerRef,
@@ -37,11 +39,18 @@ export function UserMenu({
   const { data: session } = useSession();
   const { signOut } = useAuthMutation();
   const skipCloseAutoFocusRef = useRef(false);
+  // Edit profile takes over as the menu closes, so the menu leaves at once.
+  const [handingOff, setHandingOff] = useState(false);
   const name = session?.user?.name || "Your account";
   const email = session?.user?.email;
+  const initials = initialsOf(name);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      onOpenChange={(open) => {
+        if (open) setHandingOff(false);
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <button
           ref={triggerRef}
@@ -57,7 +66,10 @@ export function UserMenu({
         align="end"
         sideOffset={12}
         aria-label="My account"
-        className="w-[300px] rounded-photo border border-line"
+        className={cn(
+          "w-[300px] rounded-photo border border-line",
+          handingOff && "data-[state=closed]:!animate-none",
+        )}
         onCloseAutoFocus={(event) => {
           if (!skipCloseAutoFocusRef.current) return;
           event.preventDefault();
@@ -70,12 +82,16 @@ export function UserMenu({
             aria-hidden="true"
             className="grid size-10 shrink-0 place-items-center rounded-pill bg-fg font-semibold text-bg"
           >
-            {initialsOf(name)}
+            {initials || <UserIcon />}
           </span>
           <span className="flex min-w-0 flex-col leading-[1.3]">
-            <span className="truncate font-semibold">{name}</span>
+            <span title={name} className="truncate font-semibold">
+              {name}
+            </span>
             {email ? (
-              <span className="truncate text-13 text-muted">{email}</span>
+              <span title={email} className="truncate text-13 text-muted">
+                {email}
+              </span>
             ) : null}
           </span>
         </div>
@@ -85,6 +101,7 @@ export function UserMenu({
           <DropdownMenuItem
             onSelect={() => {
               skipCloseAutoFocusRef.current = true;
+              setHandingOff(true);
             }}
             className="min-h-11 rounded-[14px]"
           >
@@ -113,7 +130,7 @@ export function UserMenu({
           className="min-h-11 rounded-[14px]"
         >
           <LogoutIcon />
-          <span>Log out</span>
+          <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

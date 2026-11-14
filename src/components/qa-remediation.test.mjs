@@ -186,7 +186,7 @@ test("product editing exposes archive and explicit restore controls", async () =
     source("src/hooks/product/mutations/productMutations.ts"),
   ]);
   assert.match(edit, /ArchiveProductButton/);
-  assert.match(form, /restoreArchived \? "Restore Product"/);
+  assert.match(form, /restoreArchived \? "Restore product"/);
   assert.match(mutations, /export async function archiveProduct/);
 });
 

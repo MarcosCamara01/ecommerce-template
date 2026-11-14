@@ -86,7 +86,7 @@ function InputGroupInput({ className, ...props }: React.ComponentProps<typeof In
     <Input
       data-slot="input-group-control"
       className={cn(
-        "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:border-0 focus-visible:shadow-none group-data-[variant=search]/input-group:h-[52px] group-data-[variant=search]/input-group:px-0 group-data-[variant=search]/input-group:text-xl [&::-webkit-search-cancel-button]:hidden",
+        "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none transition-none focus-visible:border-0 focus-visible:shadow-none group-data-[variant=search]/input-group:h-[52px] group-data-[variant=search]/input-group:px-0 group-data-[variant=search]/input-group:text-xl [&::-webkit-search-cancel-button]:hidden",
         className,
       )}
       {...props}

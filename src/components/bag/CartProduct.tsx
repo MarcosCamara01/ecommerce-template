@@ -58,17 +58,20 @@ export const CartProduct = ({
         <div className="flex flex-col gap-0.5 lg:gap-1.5">
           <Link
             href={productLink}
-            className="font-medium leading-tight lg:font-display-75 lg:text-[30px] lg:leading-none lg:[word-spacing:0.1em]"
+            className="font-medium leading-tight [overflow-wrap:anywhere] lg:font-display-75 lg:text-[30px] lg:leading-none lg:[word-spacing:0.1em]"
           >
             {displayName(name)}
           </Link>
           <span className="flex items-center gap-2 text-xs text-muted lg:text-sm">
             <span
               aria-hidden="true"
-              className="hidden size-3.5 rounded-pill shadow-[0_0_0_1px_var(--line)] lg:inline-block"
+              className="hidden size-3.5 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)] lg:inline-block"
               style={{ background: swatchBackground(variant.color) }}
             />
-            {variant.color} · <span className="max-lg:hidden">Size</span> {size}
+            <span>
+              {variant.color} · <span className="max-lg:hidden">Size </span>
+              {size}
+            </span>
           </span>
         </div>
         <div className="flex items-center gap-3">

@@ -10,6 +10,7 @@ const require = createRequire(import.meta.url);
 const schema = await tsImport("../lib/db/drizzle/schema/index.ts", import.meta.url);
 const cartKeys = (await tsImport("./cart/keys.ts", import.meta.url)).CART_QUERY_KEYS;
 const wishlistKeys = (await tsImport("./wishlist/keys.ts", import.meta.url)).WISHLIST_QUERY_KEYS;
+const localCallback = await tsImport("../lib/auth/local-callback.ts", import.meta.url);
 
 async function loadMutation(kind, {
   authenticated = true,
@@ -20,6 +21,8 @@ async function loadMutation(kind, {
   const client = new QueryClient({ defaultOptions: { mutations: { gcTime: 0 } } });
   const mutations = [];
   const notices = [];
+  const actions = [];
+  const visits = [];
   const listKey = kind === "cart" ? cartKeys.cartList("qa") : wishlistKeys.wishlistList("qa");
   let listReads = 0;
   let nextTemporaryId = 0;
@@ -45,14 +48,23 @@ async function loadMutation(kind, {
     },
     "@/lib/auth/client": { useSession: () => ({ data: authenticated ? { user: { id: "qa" } } : null }) },
     "@/lib/db/drizzle/schema": schema,
-    sonner: { toast: { info: (message) => notices.push(message), error: (message) => notices.push(message) } },
+    "@/lib/auth/local-callback": localCallback,
+    sonner: {
+      toast: {
+        info: (message, options) => {
+          notices.push(message);
+          if (options?.action) actions.push(options.action);
+        },
+        error: (message) => notices.push(message),
+      },
+    },
     "../keys": { CART_QUERY_KEYS: cartKeys, WISHLIST_QUERY_KEYS: wishlistKeys },
   };
   const compiled = ts.transpileModule(source, {
     compilerOptions: { esModuleInterop: true, module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const hookModule = { exports: {} };
-  new Function("require", "module", "exports", "fetch", "console", "Math", compiled)(
+  new Function("require", "module", "exports", "fetch", "console", "Math", "window", compiled)(
     (id) => modules[id] ?? require(id), hookModule, hookModule.exports,
     async (...args) => {
       fetchCalls += 1;
@@ -60,6 +72,7 @@ async function loadMutation(kind, {
     },
     { error: () => {} },
     { floor: Math.floor, random: () => ++nextTemporaryId / 1e9 },
+    { location: { pathname: "/pants/104", search: "?variant=Washed%20black", assign: (url) => visits.push(url) } },
   );
   const createAddition = () => {
     const index = mutations.length;
@@ -67,7 +80,10 @@ async function loadMutation(kind, {
     return mutations[index];
   };
   createAddition();
-  return { client, mutations, notices, listKey, createAddition, listReads: () => listReads, fetchCalls: () => fetchCalls };
+  return {
+    client, mutations, notices, actions, visits, listKey, createAddition,
+    listReads: () => listReads, fetchCalls: () => fetchCalls,
+  };
 }
 
 // The notices people read: the storefront says "bag" and "sign in".
@@ -125,6 +141,28 @@ for (const kind of ["cart", "wishlist"]) {
       );
       assert.deepEqual(client.getQueryData(listKey)?.items ?? [], []);
       assert.deepEqual(notices, [SIGN_IN[kind]]);
+    } finally {
+      client.clear();
+    }
+  });
+
+  test(`${kind} sign-in guidance opens sign-in, which returns to the same page`, async () => {
+    const { client, mutations, actions, visits } = await loadMutation(kind, { authenticated: false });
+    try {
+      await assert.rejects(
+        mutations[0].mutate(kind === "cart" ? { variantId: 1, size: "M" } : 1),
+        { message: "Unauthorized" },
+      );
+      assert.deepEqual(actions.map((action) => action.label), ["Sign in"]);
+      actions[0].onClick();
+      assert.equal(visits.length, 1);
+      const destination = new URL(visits[0], "http://store.test");
+      assert.equal(destination.pathname, "/login");
+      // The login page reads `redirect` through safeLocalCallback and goes there after sign-in.
+      assert.equal(
+        localCallback.safeLocalCallback(destination.searchParams.get("redirect")),
+        "/pants/104?variant=Washed%20black",
+      );
     } finally {
       client.clear();
     }

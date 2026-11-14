@@ -18,6 +18,7 @@ import { formatPriceFromEuros } from "@/utils/formatters";
 import { searchProducts } from "@/utils/search";
 
 import {
+  closeSearch,
   openSearch,
   rememberSearch,
   setSearchOpen,
@@ -74,8 +75,9 @@ function popularTerms(catalog: ProductWithVariants[]) {
 
 /**
  * Search modal. Opened by click it fades and scales in (150ms); opened
- * with ⌘K or "/" it appears at once. Results update as you type without
- * animating; ↑ ↓ move, ↵ opens, Esc closes.
+ * with ⌘K, "/" or from the phone menu it appears at once, and Esc or ⌘K
+ * close it at once.
+ * Results update as you type without animating; ↑ ↓ move, ↵ opens.
  */
 export function SearchDialog({
   catalog,
@@ -93,7 +95,7 @@ export function SearchDialog({
         ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName ?? "");
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        if (open) setSearchOpen(false);
+        if (open) closeSearch();
         else openSearch(true);
       } else if (event.key === "/" && !typing && !open) {
         event.preventDefault();
@@ -109,18 +111,19 @@ export function SearchDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] backdrop-blur-[6px] dark:bg-black/55",
+            "fixed inset-0 z-50 bg-[rgba(17,18,20,0.35)] lg:backdrop-blur-[6px] dark:bg-black/55",
             !instant &&
-              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-150 data-[state=open]:duration-150",
+              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-150 data-[state=open]:duration-150 ease-out",
           )}
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           {...focusReturn}
+          onEscapeKeyDown={() => closeSearch()}
           className={cn(
-            "fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none lg:inset-auto lg:left-1/2 lg:top-24 lg:max-h-[calc(100vh-140px)] lg:w-[min(720px,calc(100%-32px))] lg:-translate-x-1/2 lg:rounded-photo-lg",
+            "fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg text-fg shadow-[0_40px_120px_rgba(0,0,0,.35)] outline-none lg:inset-auto lg:inset-x-0 lg:top-24 lg:mx-auto lg:max-h-[calc(100vh-140px)] lg:w-[min(720px,calc(100%-32px))] lg:rounded-photo-lg",
             !instant &&
-              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:duration-150 data-[state=open]:duration-150 motion-reduce:zoom-in-100 motion-reduce:zoom-out-100",
+              "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=closed]:duration-150 data-[state=open]:duration-150 ease-out motion-reduce:!zoom-in-100 motion-reduce:!zoom-out-100",
           )}
         >
           <DialogPrimitive.Title className="sr-only">Search</DialogPrimitive.Title>
@@ -218,7 +221,8 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
                     key={item}
                     type="button"
                     onClick={() => setQuery(item)}
-                    className="flex min-h-11 items-center gap-3 text-left"
+                    title={item}
+                    className="flex min-h-11 w-full min-w-0 items-center gap-3 text-left"
                   >
                     <svg
                       aria-hidden="true"
@@ -233,7 +237,7 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
                       <circle cx="12" cy="12" r="8" />
                       <path d="M12 8v4l3 2" />
                     </svg>
-                    {item}
+                    <span className="truncate">{item}</span>
                   </button>
                 ))}
               </div>
@@ -282,7 +286,7 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
                           {color ? (
                             <span
                               aria-hidden="true"
-                              className="size-2.5 rounded-pill shadow-[0_0_0_1px_var(--line)]"
+                              className="size-2.5 shrink-0 rounded-pill shadow-[0_0_0_1px_var(--line)]"
                               style={{ background: swatchBackground(color) }}
                             />
                           ) : null}
@@ -304,13 +308,15 @@ function SearchPanel({ catalog }: { catalog: ProductWithVariants[] }) {
               onNavigate={() => setSearchOpen(false)}
               className="press mt-1.5 flex min-h-[52px] items-center justify-between rounded-pill bg-fg px-[18px] font-semibold text-bg"
             >
-              <span>See all results for “{term}”</span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">See all results for “{term}”</span>
               <ArrowRightIcon />
             </Link>
           </div>
         ) : (
           <div className="flex flex-col gap-3.5 py-3" aria-live="polite">
-            <p className="font-display text-5xl leading-[0.9]">Nothing for “{term}”</p>
+            <p className="font-display text-5xl leading-[0.9] [overflow-wrap:anywhere]">
+              Nothing for “{term}”
+            </p>
             <p className="text-muted">Check the spelling, or try one of these:</p>
             <PopularTerms terms={popular} onPick={setQuery} hideHeading />
           </div>

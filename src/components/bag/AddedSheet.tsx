@@ -49,7 +49,7 @@ export function AddedSheet({
             className="h-[82px] w-16 rounded-[14px] bg-photo object-cover"
           />
           <span className="flex min-w-0 flex-col">
-            <span className="font-medium">{item.name}</span>
+            <span className="font-medium [overflow-wrap:anywhere]">{item.name}</span>
             <span className="text-13">
               {item.color} · {item.size}
             </span>

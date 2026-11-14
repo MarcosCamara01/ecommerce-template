@@ -142,7 +142,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
                   height={360}
                   className="rounded-field object-cover aspect-[2/3] shadow-md"
                 />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity rounded-field flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity rounded-field flex items-center justify-center">
                   <Button
                     type="button"
                     variant="destructive"
@@ -183,7 +183,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
                 aria-describedby={displayedError ? errorId : undefined}
               >
                 <FiUpload className="h-4 w-4 mr-2" aria-hidden="true" />
-                Choose File
+                Choose file
               </Button>
               <input
                 id={inputId}

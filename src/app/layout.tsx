@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/react";
@@ -49,6 +49,15 @@ export const metadata: Metadata = {
     title: "Ecommerce Template",
     description: defaultDescription,
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#e4e7ea" },
+    { media: "(prefers-color-scheme: dark)", color: "#141516" },
+  ],
 };
 
 export default async function RootLayout({

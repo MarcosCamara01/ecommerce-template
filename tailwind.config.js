@@ -8,6 +8,8 @@ const mix = (variable) =>
 
 module.exports = {
   darkMode: ["class"],
+  // Hover only where a pointer can hover, so it never sticks after a tap.
+  future: { hoverOnlyWhenSupported: true },
   content: ["./src/**/*.{ts,tsx,js,jsx}"],
   prefix: "",
   theme: {
@@ -57,11 +59,9 @@ module.exports = {
       transitionDuration: {
         120: "120ms",
         220: "220ms",
-        250: "250ms",
         350: "350ms",
         420: "420ms",
         450: "450ms",
-        600: "600ms",
       },
       boxShadow: {
         float: "var(--shadow-float)",
@@ -81,24 +81,21 @@ module.exports = {
           "0%, 100%": { opacity: "0.55" },
           "50%": { opacity: "1" },
         },
-        // Wishlist save.
+        // Wishlist save. The heart slows into each turn (--ease-in-out),
+        // written out: var() cannot set a keyframe's timing function.
         pop: {
-          "0%": { transform: "scale(1)" },
-          "30%": { transform: "scale(1.32)" },
-          "55%": { transform: "scale(0.9)" },
-          "75%": { transform: "scale(1.06)" },
+          "0%": { transform: "scale(1)", animationTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)" },
+          "30%": { transform: "scale(1.32)", animationTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)" },
+          "55%": { transform: "scale(0.9)", animationTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)" },
+          "75%": { transform: "scale(1.06)", animationTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)" },
           "100%": { transform: "scale(1)" },
         },
-        // Sparks fly to (--dx, --dy) and fade.
+        // Sparks leave the rim (--x0, --y0) for (--dx, --dy) and fade.
         spark: {
-          from: { transform: "translate(0, 0) scale(1)", opacity: "1" },
-          to: { transform: "translate(var(--dx), var(--dy)) scale(0.3)", opacity: "0" },
-        },
-        // Bag counter.
-        bump: {
-          "0%": { transform: "scale(1)" },
-          "40%": { transform: "scale(1.2)" },
-          "100%": { transform: "scale(1)" },
+          "0%": { transform: "translate(var(--x0), var(--y0)) scale(1)", opacity: "0" },
+          "8%": { opacity: "1" },
+          "55%": { opacity: "1" },
+          "100%": { transform: "translate(var(--dx), var(--dy)) scale(0.3)", opacity: "0" },
         },
         // Variant photo swap.
         swap: {
@@ -129,10 +126,15 @@ module.exports = {
           from: { opacity: "0", transform: "translateY(28px) scale(0.96)" },
           to: { opacity: "1", transform: "translateY(0) scale(1)" },
         },
-        // Hero rotation ring: fills while a piece is up (pathLength 100).
-        dwell: {
-          from: { strokeDashoffset: "100" },
-          to: { strokeDashoffset: "0" },
+        // Hero rotation ring: the right half-ring turns into view over the
+        // first half of the dwell, the left one over the second.
+        "dwell-right": {
+          "0%": { transform: "rotate(-180deg)" },
+          "50%, 100%": { transform: "rotate(0deg)" },
+        },
+        "dwell-left": {
+          "0%, 50%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(180deg)" },
         },
         // Confetti: falls from the top to --fall, drifting --dx, turning --rot.
         fall: {
@@ -145,8 +147,7 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s var(--ease-out)",
         shimmer: "shimmer 1.6s ease-in-out infinite",
         pop: "pop 450ms var(--ease-out)",
-        spark: "spark 520ms var(--ease-out) forwards",
-        bump: "bump 320ms var(--ease-out)",
+        spark: "spark 480ms var(--ease-out) 80ms both",
         swap: "swap 450ms var(--ease-out) both",
         "fade-in": "fade-in 450ms var(--ease-out) both",
         roll: "roll 220ms var(--ease-out) both",
@@ -155,7 +156,8 @@ module.exports = {
         tile: "tile 600ms var(--ease-out) both",
         fall: "fall var(--dur) var(--ease-in-out) var(--delay) both",
         // Constant motion; the duration is set where it is used.
-        dwell: "dwell linear both",
+        "dwell-right": "dwell-right linear both",
+        "dwell-left": "dwell-left linear both",
       },
       screens: {
         xs: "350px",
