@@ -30,7 +30,7 @@ export function OrderCard({ order }: OrderCardProps) {
             width={80}
             height={106}
             sizes="80px"
-            className="h-24 w-[72px] rounded-field bg-photo object-cover lg:h-[106px] lg:w-20"
+            className="h-24 w-[72px] rounded-[12px] bg-photo object-cover lg:h-[106px] lg:w-20"
           />
         ))}
       </div>

@@ -61,11 +61,11 @@ async function SearchResults({ searchParams }: SearchProps) {
         <section className="flex flex-col gap-7 pb-24">
           <div className="flex max-w-[900px] flex-col gap-4">
             <h2 className="font-display text-[56px] leading-[0.85] lg:text-[min(112px,7.8vw)]">
-              Nothing matches yet
+              Nothing matches
             </h2>
             <p className="text-lg [overflow-wrap:anywhere]">
               No products found for “{q}”. Check the spelling, or start with
-              what&apos;s new.
+              what’s new.
             </p>
           </div>
           <div className={grid}>

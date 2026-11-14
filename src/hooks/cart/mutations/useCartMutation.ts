@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CartItem, ProductSize } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
+import { signInPath } from "@/lib/auth/local-callback";
 import { toast } from "sonner";
 import { CART_QUERY_KEYS } from "../keys";
 import type { CartDetailsResponse, CartListResponse } from "../types";
@@ -137,7 +138,13 @@ export const useCartMutation = () => {
       }
 
       if (error.message === "Unauthorized" || error.message === "authentication_required") {
-        toast.info("Sign in to add to your bag");
+        toast.info("Sign in to add to your bag", {
+          action: {
+            label: "Sign in",
+            onClick: () =>
+              window.location.assign(signInPath(window.location.pathname + window.location.search)),
+          },
+        });
         return;
       }
 

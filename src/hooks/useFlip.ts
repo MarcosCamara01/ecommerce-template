@@ -12,11 +12,11 @@ import {
   toTransform,
   type Box,
 } from "@/lib/flip";
-import { EASE_DRAWER, EASE_OUT, prefersReducedMotion } from "@/lib/motion";
+import { cssEase, EASE_DRAWER, EASE_OUT, prefersReducedMotion } from "@/lib/motion";
 
 /** How long a piece takes to reach its new place, on the drawer curve. */
 const GLIDE_MS = 500;
-const GLIDE_EASING = `cubic-bezier(${EASE_DRAWER.join(", ")})`;
+const GLIDE_EASING = cssEase(EASE_DRAWER);
 
 /** Each piece sets off a little after the one before; the tenth waits longest. */
 const STAGGER_MS = 20;
@@ -24,7 +24,7 @@ const STAGGERED = 10;
 
 /** A piece that was not there before rises into place. */
 const ENTER_MS = 400;
-const ENTER_EASING = `cubic-bezier(${EASE_OUT.join(", ")})`;
+const ENTER_EASING = cssEase(EASE_OUT);
 
 const ITEM = "[data-flip-item]";
 const PARTS = '[data-flip-part="morph"], [data-flip-part="move"]';
@@ -77,6 +77,7 @@ function fly(
     element.style.transformOrigin = "";
   };
   flight.finished.then(land, land);
+  return flight;
 }
 
 /**
@@ -109,7 +110,8 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
   const base = container.getBoundingClientRect();
   const boxes = new Map<string, Box>();
   const moved: { part: Part; from: Box; to: Box }[] = [];
-  const entered = new Set<HTMLElement>();
+  const entered = new Map<HTMLElement, Box>();
+  const started: Animation[] = [];
 
   for (const part of partsOf(container)) {
     // A piece may still be in flight: its transform tells its layout box
@@ -128,8 +130,9 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
     boxes.set(part.key, to);
     if (!memory) continue;
     const before = memory.get(part.key);
-    if (!before) entered.add(part.item);
-    else if (!sameBox(before, to)) {
+    if (!before) {
+      if (!entered.has(part.item)) entered.set(part.item, to);
+    } else if (!sameBox(before, to)) {
       moved.push({ part, from: drawnBox(before, matrix), to });
     }
   }
@@ -140,17 +143,37 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
   const top = -base.top;
   const bottom = window.innerHeight - base.top;
   const onScreen = (box: Box) => box.top < bottom && box.top + box.height > top;
+  const flying = moved.map(({ part, from, to }) => ({
+    part,
+    to,
+    invert:
+      !reduced && (onScreen(from) || onScreen(to))
+        ? inversion(from, to, part.mode)
+        : null,
+  }));
+
+  // Turns go by where pieces land, top to bottom then left to right, movers
+  // and newcomers together, so the grid ripples as one wave. Only pieces
+  // that set off from rest take a turn, or the wave would have gaps.
+  const landing = new Map<HTMLElement, Box>();
+  for (const { part, to, invert } of flying) {
+    if (invert && !flights.has(part.element) && !landing.has(part.item)) {
+      landing.set(part.item, to);
+    }
+  }
+  entered.forEach((to, item) => {
+    if (!landing.has(item)) landing.set(item, to);
+  });
   const order = new Map<HTMLElement, number>();
+  Array.from(landing)
+    .sort(([, a], [, b]) => a.top - b.top || a.left - b.left)
+    .forEach(([item]) => order.set(item, order.size));
   const turn = (item: HTMLElement) => {
     if (!order.has(item)) order.set(item, order.size);
     return Math.min(order.get(item) ?? 0, STAGGERED) * STAGGER_MS;
   };
 
-  for (const { part, from, to } of moved) {
-    const invert =
-      !reduced && (onScreen(from) || onScreen(to))
-        ? inversion(from, to, part.mode)
-        : null;
+  for (const { part, invert } of flying) {
     if (!invert) {
       ground(part.element);
       continue;
@@ -162,38 +185,56 @@ function flip(container: HTMLElement, memory: Map<string, Box> | null) {
       delay: flights.has(part.element) ? 0 : turn(part.item),
       easing: GLIDE_EASING,
     };
-    fly(
-      part.element,
-      [{ transform: toTransform(invert) }, { transform: "none" }],
-      timing,
+    started.push(
+      fly(
+        part.element,
+        [{ transform: toTransform(invert) }, { transform: "none" }],
+        timing,
+      ),
     );
     if (invert.scaleX === 1 && invert.scaleY === 1) continue;
     part.element.querySelectorAll<HTMLElement>(KEPT).forEach((kept) =>
-      fly(
-        kept,
-        [{ transform: counterTransform(invert) }, { transform: "none" }],
-        timing,
-        pinOf(kept, part.element),
+      started.push(
+        fly(
+          kept,
+          [{ transform: counterTransform(invert) }, { transform: "none" }],
+          timing,
+          pinOf(kept, part.element),
+        ),
       ),
     );
   }
 
-  entered.forEach((item) =>
-    fly(
-      item,
-      reduced
-        ? [{ opacity: 0 }, { opacity: 1 }]
-        : [
-            { opacity: 0, transform: "translateY(12px)" },
-            { opacity: 1, transform: "none" },
-          ],
-      {
-        duration: reduced ? 200 : ENTER_MS,
-        delay: turn(item),
-        easing: ENTER_EASING,
-      },
+  entered.forEach((_, item) =>
+    started.push(
+      fly(
+        item,
+        reduced
+          ? [{ opacity: 0 }, { opacity: 1 }]
+          : [
+              { opacity: 0, transform: "translateY(12px)" },
+              { opacity: 1, transform: "none" },
+            ],
+        {
+          duration: reduced ? 200 : ENTER_MS,
+          delay: reduced ? 0 : turn(item),
+          easing: ENTER_EASING,
+        },
+      ),
     ),
   );
+
+  if (started.length > 0) {
+    // Cards keep their resting look while the grid glides under a resting
+    // pointer (PieceTile, .quick-add); the hover is theirs again once it lands.
+    container.dataset.flipping = "";
+    Promise.allSettled(started.map((flight) => flight.finished)).then(() => {
+      const flying = Array.from(
+        container.querySelectorAll<HTMLElement>("[data-flip-item], [data-flip-part]"),
+      ).some((element) => flights.has(element));
+      if (!flying) delete container.dataset.flipping;
+    });
+  }
 
   return boxes;
 }
