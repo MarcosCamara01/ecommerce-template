@@ -149,18 +149,24 @@ test.describe("product page, to the letter", { tags: ["product"] }, () => {
     await expect.poll(inView).toBe(true);
   });
 
-  test("a visitor is asked to sign in before adding to the bag", async ({ screen }) => {
+  test("a visitor is asked to sign in before adding to the bag", async ({ screen, browser }) => {
+    const here = String(await browser.evaluate(() => location.pathname + location.search));
     await screen.getByRole("button", { name: /^Add \S+ to bag — / }).tap();
 
     await expect(screen.getByText("Sign in to add to your bag")).toBeVisible();
     await expect(screen.getByRole("banner").getByRole("button", "Bag")).toBeVisible();
+    await screen.getByRole("button", "Sign in").tap();
+    await expect(browser).toHaveURL(`/login?redirect=${encodeURIComponent(here)}`);
   });
 
-  test("a visitor is asked to sign in before saving a piece", async ({ screen }) => {
+  test("a visitor is asked to sign in before saving a piece", async ({ screen, browser }) => {
+    const here = String(await browser.evaluate(() => location.pathname + location.search));
     const save = screen.getByRole("main").getByRole("button", { name: named(`Save ${piece.name} to wishlist`) });
     await save.tap();
 
     await expect(screen.getByText("Sign in to save to your wishlist")).toBeVisible();
     await expect(save).toHaveAttribute("aria-pressed", "false");
+    await screen.getByRole("button", "Sign in").tap();
+    await expect(browser).toHaveURL(`/login?redirect=${encodeURIComponent(here)}`);
   });
 });

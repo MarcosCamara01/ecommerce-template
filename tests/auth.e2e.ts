@@ -29,7 +29,7 @@ test.describe("signing in", { tags: ["auth", "agent"] }, () => {
 });
 
 test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? undefined : NEEDS_WRITES }, () => {
-  test("a visitor creates an account, logs out and signs back in", async ({ app, api, agent, browser }) => {
+  test("a visitor creates an account, signs out and signs back in", async ({ app, api, agent, browser }) => {
     // unique() marks values that change every run, so the recording still replays.
     const account = newAccount("signup");
     const email = unique(account.email);
@@ -42,7 +42,7 @@ test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? un
     await expect(browser).toHaveURL("/");
     expect(await shopperInStore(api)).toMatchObject({ email: account.email, name: account.name });
 
-    await agent.act("log out of the account");
+    await agent.act("sign out of the account");
     await settled(browser);
     await agent.assert("nobody is signed in: the store offers a way to sign in and no account menu");
     expect(await shopperInStore(api)).toBeNull();

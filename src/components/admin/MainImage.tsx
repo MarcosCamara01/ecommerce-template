@@ -183,7 +183,7 @@ export const MainImage = forwardRef<MainImageRef, MainImageProps>(
                 aria-describedby={displayedError ? errorId : undefined}
               >
                 <FiUpload className="h-4 w-4 mr-2" aria-hidden="true" />
-                Choose File
+                Choose file
               </Button>
               <input
                 id={inputId}

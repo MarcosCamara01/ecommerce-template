@@ -47,7 +47,7 @@ export const ProductItem = ({
           data-flip-part="keep"
           className="absolute right-1.5 top-1.5 lg:right-3 lg:top-3"
         >
-          <WishlistButton productId={id} productName={name} className="lg:size-11" />
+          <WishlistButton productId={id} productName={displayName(name)} className="lg:size-11" />
         </span>
       </PieceTile>
       <Link href={productLink} className="flex justify-between gap-3 px-0.5 lg:px-1">

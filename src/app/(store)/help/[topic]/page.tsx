@@ -158,7 +158,7 @@ function SizeGuide() {
       <div className={card}>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="text-xl font-semibold">Size chart</h2>
-          <span className="text-13">Body measurements in cm · tap your size</span>
+          <span className="text-13">Body measurements in cm · choose your size</span>
         </div>
         <SizeChart rows={MEASURE_NAMES} />
       </div>
@@ -250,7 +250,7 @@ function Returns() {
         ))}
       </ol>
       <div className={cn(card, "gap-1.5")}>
-        <h2 className="text-xl font-semibold">Can&apos;t be returned</h2>
+        <h2 className="text-xl font-semibold">Can’t be returned</h2>
         <p>[EXCLUSIONS — e.g. worn or washed items]</p>
       </div>
       <p className="text-sm text-muted">

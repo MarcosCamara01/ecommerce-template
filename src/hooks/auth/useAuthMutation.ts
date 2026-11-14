@@ -117,7 +117,7 @@ export const useAuthMutation = () => {
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Error signing in with Google");
+      toast.error("Couldn’t sign you in with Google. Try again.");
     },
   });
 
@@ -135,7 +135,7 @@ export const useAuthMutation = () => {
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Error signing out");
+      toast.error("Couldn’t sign you out. Try again.");
     },
   });
 

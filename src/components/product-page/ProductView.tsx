@@ -16,6 +16,7 @@ import type {
 import { fitDisplayStep } from "@/lib/display-type";
 import { cn } from "@/lib/utils";
 import { formatPriceFromEuros } from "@/utils/formatters";
+import { displayName } from "@/utils/product-name";
 
 import { ProductImages } from "./ProductImages";
 import { SizePicker } from "./SizePicker";
@@ -165,7 +166,7 @@ export function ProductView({
               <span className="flex gap-1.5">
                 <WishlistButton
                   productId={product.id}
-                  productName={product.name}
+                  productName={displayName(product.name)}
                   className="size-11"
                 />
               </span>
@@ -284,7 +285,7 @@ export function ProductView({
             </div>
             <WishlistButton
               productId={product.id}
-              productName={product.name}
+              productName={displayName(product.name)}
               appearance="outline"
               className="hidden lg:grid"
             />

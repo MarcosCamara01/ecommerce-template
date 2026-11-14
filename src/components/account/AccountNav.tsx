@@ -65,7 +65,7 @@ export function AccountNav({ current }: { current: "orders" | "wishlist" }) {
         onClick={() => signOut.mutate()}
         className={pill}
       >
-        Log out
+        Sign out
       </button>
     </nav>
   );
