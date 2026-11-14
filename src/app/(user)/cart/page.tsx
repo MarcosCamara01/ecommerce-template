@@ -68,7 +68,7 @@ const CartContent = async () => {
               Sign in
             </Link>
             <Link href="/new-in" className={buttonClass({ variant: "secondary" })}>
-              See what&apos;s new
+              See what’s new
             </Link>
           </>
         }
@@ -85,7 +85,7 @@ const CartContent = async () => {
           actions={
             <>
               <Link href="/new-in" className={buttonClass()}>
-                See what&apos;s new
+                See what’s new
               </Link>
               <Link href="/wishlist" className={buttonClass({ variant: "secondary" })}>
                 Open wishlist

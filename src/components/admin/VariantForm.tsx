@@ -71,7 +71,8 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
     }));
 
     return (
-      <Card className="overflow-hidden rounded-toast bg-field">
+      // When the list re-arranges (useFlip) the card follows its corner: text never stretches.
+      <Card data-flip-part="move" className="overflow-hidden rounded-toast bg-field">
         <CardHeader className="px-[18px] py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -170,7 +171,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
           <Accordion type="multiple" defaultValue={["sizes", "images"]} className="w-full">
             <AccordionItem value="sizes" className="rounded-field border border-line bg-panel px-4">
               <AccordionTrigger className="hover:no-underline">
-                <span className="text-sm font-medium">Available Sizes</span>
+                <span className="text-sm font-medium">Available sizes</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
                 <VariantSizes
@@ -183,7 +184,7 @@ export const VariantForm = forwardRef<VariantFormRef, VariantFormProps>(
             </AccordionItem>
             <AccordionItem value="images" className="mt-2 rounded-field border border-line bg-panel px-4">
               <AccordionTrigger className="hover:no-underline">
-                <span className="text-sm font-medium">Variant Images</span>
+                <span className="text-sm font-medium">Variant images</span>
               </AccordionTrigger>
               <AccordionContent forceMount>
                 <VariantImages

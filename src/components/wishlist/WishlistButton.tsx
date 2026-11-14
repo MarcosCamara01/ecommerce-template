@@ -16,9 +16,10 @@ import type { ProductWithVariants } from "@/lib/db/drizzle/schema";
  */
 type Appearance = "disc" | "outline";
 
-const sizes: Record<Appearance, { box: string; icon: number; spark: number }> = {
-  disc: { box: "size-10", icon: 16, spark: 32 },
-  outline: { box: "size-16", icon: 22, spark: 46 },
+/** Sparks start just past the rim and travel out to `spark` (px from the centre). */
+const sizes: Record<Appearance, { box: string; icon: number; spark: number; rim: number }> = {
+  disc: { box: "size-10", icon: 16, spark: 36, rim: 21 },
+  outline: { box: "size-16", icon: 22, spark: 46, rim: 32 },
 };
 
 interface WishlistButtonProps {
@@ -106,21 +107,28 @@ export const WishlistButton = ({
           }}
           className="pointer-events-none absolute inset-0"
         >
-          {SPARK_ANGLES.map((angle) => (
-            <span
-              key={angle}
-              className={cn(
-                "pointer-events-none absolute left-1/2 top-1/2 -ml-1 -mt-1 size-2 animate-spark rounded-pill opacity-0",
-                appearance === "disc" ? "bg-[#111214]" : "bg-fg",
-              )}
-              style={
-                {
-                  "--dx": `${Math.round(Math.cos(angle) * size.spark)}px`,
-                  "--dy": `${Math.round(Math.sin(angle) * size.spark)}px`,
-                } as React.CSSProperties
-              }
-            />
-          ))}
+          {SPARK_ANGLES.map((angle, index) => {
+            // Every other spark travels a little less and leaves a little later.
+            const far = index % 2 ? 0.85 : 1;
+            return (
+              <span
+                key={angle}
+                className={cn(
+                  "pointer-events-none absolute left-1/2 top-1/2 -ml-1 -mt-1 size-2 animate-spark rounded-pill opacity-0",
+                  appearance === "disc" ? "bg-[#111214]" : "bg-fg",
+                )}
+                style={
+                  {
+                    "--x0": `${Math.round(Math.cos(angle) * size.rim)}px`,
+                    "--y0": `${Math.round(Math.sin(angle) * size.rim)}px`,
+                    "--dx": `${Math.round(Math.cos(angle) * size.spark * far)}px`,
+                    "--dy": `${Math.round(Math.sin(angle) * size.spark * far)}px`,
+                    animationDelay: index % 2 ? "110ms" : undefined,
+                  } as React.CSSProperties
+                }
+              />
+            );
+          })}
         </span>
       ) : null}
       <button

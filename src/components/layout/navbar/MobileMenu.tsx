@@ -135,7 +135,7 @@ export function MobileMenu({
                 className={tile}
               >
                 <LogoutIcon />
-                <span>Log out</span>
+                <span>Sign out</span>
               </button>
             </div>
           </div>

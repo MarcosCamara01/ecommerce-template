@@ -29,16 +29,24 @@ function NativeSelect({
         className={cn(nativeSelectVariants({ variant }), className)}
         {...props}
       />
-      <span
+      <svg
+        width="8"
+        height="5"
+        viewBox="0 0 8 5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         className={cn(
-          "pointer-events-none absolute top-1/2 -translate-y-1/2 select-none",
-          variant === "hero" ? "right-4 text-xs" : "right-3 text-[10px]",
+          "pointer-events-none absolute top-1/2 -translate-y-1/2",
+          variant === "hero" ? "right-4" : "right-3",
         )}
         aria-hidden="true"
         data-slot="native-select-icon"
       >
-        ▾
-      </span>
+        <path d="M1 1 4 4 7 1" />
+      </svg>
     </div>
   );
 }

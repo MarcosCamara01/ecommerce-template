@@ -20,3 +20,7 @@ export function safeLocalCallback(
     return "/";
   }
 }
+
+export function signInPath(returnTo: string) {
+  return `/login?redirect=${encodeURIComponent(returnTo)}`;
+}
