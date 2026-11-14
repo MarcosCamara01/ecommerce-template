@@ -79,7 +79,7 @@ export const BasicInfo = forwardRef<BasicInfoRef, BasicInfoProps>(
             htmlFor="name"
             className="text-sm font-medium"
           >
-            Product Name <span className="text-err-fg">*</span>
+            Product name <span className="text-err-fg">*</span>
           </Label>
           <Input
             id="name"
