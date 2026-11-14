@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion } from "motion/react";
 import { ReactNode, useState } from "react";
 
+import { InputModality } from "@/components/ui/input-modality";
+
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -26,6 +28,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <LazyMotion features={loadMotionFeatures} strict>
+        <InputModality />
         {children}
       </LazyMotion>
     </QueryClientProvider>

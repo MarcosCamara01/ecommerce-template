@@ -3,8 +3,8 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Open state for the search modal. `instant` opens skip the entrance:
- * keyboard shortcuts are used too often to animate.
+ * Open state for the search modal. `instant` skips the entrance and the
+ * exit: keyboard shortcuts are used too often to animate.
  */
 type SearchUi = { open: boolean; instant: boolean };
 
@@ -30,6 +30,8 @@ export function useSearchUi() {
 
 export const openSearch = (instant = false) => set({ open: true, instant });
 export const setSearchOpen = (open: boolean) => set({ open, instant: state.instant });
+/** Escape and ⌘K close at once, however the search was opened. */
+export const closeSearch = () => set({ open: false, instant: true });
 
 // Versioned: bump if the stored shape ever changes.
 const RECENT_KEY = "store:recent-searches:v1";

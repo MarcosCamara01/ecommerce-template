@@ -6,9 +6,15 @@ import { useState } from "react";
 import { useThrottleFn } from "ahooks";
 
 import { AddedSheet, type AddedItem } from "@/components/bag/AddedSheet";
-import { bumpBag, openBag } from "@/components/bag/bag-ui";
+import {
+  bumpBag,
+  holdBagCount,
+  openBag,
+  releaseBagCount,
+} from "@/components/bag/bag-ui";
 import { flyToBag } from "@/components/bag/fly-to-bag";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/loader";
 import { useCartMutation } from "@/hooks/cart";
 import { useHydrated } from "@/hooks/useHydrated";
 import {
@@ -48,19 +54,27 @@ export function AddToCart({
   const { add: addToCart, isAdding } = useCartMutation();
   const isHydrated = useHydrated();
   const [added, setAdded] = useState(false);
+  // The request ends before the photo flies: the button stays busy until it
+  // lands, so it never reads "Add" again mid-flight.
+  const [landing, setLanding] = useState(false);
+  const busy = isAdding || landing;
   const [sheetItem, setSheetItem] = useState<AddedItem | null>(null);
 
   const { run: throttledAddToCart } = useThrottleFn(
     () => {
       if (!size) return;
+      // Phones have no flight: there the count changes at the tap.
+      if (window.matchMedia(DESKTOP).matches) holdBagCount();
       addToCart({ size, variantId: selectedVariant.id }, {
         onSuccess: () => {
           const line = { name: displayName(product.name), color: selectedVariant.color, size };
           if (window.matchMedia(DESKTOP).matches) {
-            void flyToBag(flySource()).then(() => {
+            setLanding(true);
+            void flyToBag(flySource()).then((flew) => {
               bumpBag();
+              setLanding(false);
               setAdded(true);
-              window.setTimeout(() => openBag(line), 160);
+              window.setTimeout(() => openBag(line), flew ? 160 : 0);
             });
           } else {
             setSheetItem({
@@ -70,6 +84,7 @@ export function AddToCart({
             });
           }
         },
+        onError: releaseBagCount,
       });
     },
     { wait: 300 },
@@ -86,16 +101,21 @@ export function AddToCart({
         disabled={!isHydrated || soldOut}
         // Busy rather than disabled while the request runs: a disabled
         // button drops keyboard focus to the top of the page.
-        aria-busy={isAdding || undefined}
-        aria-disabled={isAdding || undefined}
+        aria-busy={busy || undefined}
+        aria-disabled={busy || undefined}
         onClick={() => {
-          if (isAdding) return;
+          if (busy) return;
           if (added) openBag();
           else throttledAddToCart();
         }}
         className={cn("w-full", className)}
       >
-        {soldOut
+        {busy ? (
+          <>
+            <Spinner className="busy-in motion-reduce:animate-none" />
+            Adding…
+          </>
+        ) : soldOut
           ? "Sold out"
           : added
             ? compact

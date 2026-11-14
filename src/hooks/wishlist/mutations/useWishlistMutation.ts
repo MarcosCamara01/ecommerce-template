@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { WishlistItem } from "@/lib/db/drizzle/schema";
 import { useSession } from "@/lib/auth/client";
+import { signInPath } from "@/lib/auth/local-callback";
 import { toast } from "sonner";
 import { WISHLIST_QUERY_KEYS } from "../keys";
 import type { WishlistDetailsResponse, WishlistListResponse } from "../types";
@@ -89,7 +90,13 @@ export const useWishlistMutation = () => {
       }
 
       if (error.message === "Unauthorized" || error.message === "authentication_required") {
-        toast.info("Sign in to save to your wishlist");
+        toast.info("Sign in to save to your wishlist", {
+          action: {
+            label: "Sign in",
+            onClick: () =>
+              window.location.assign(signInPath(window.location.pathname + window.location.search)),
+          },
+        });
         return;
       }
 

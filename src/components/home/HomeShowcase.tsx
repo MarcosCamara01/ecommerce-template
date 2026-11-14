@@ -83,7 +83,7 @@ export function HomeShowcase({
     <RotationToggle
       playing={rotation.playing}
       stopped={rotation.stopped}
-      cycle={moves}
+      cycle={rotation.cycle}
       onToggle={rotation.toggle}
       className="size-11 lg:size-[52px] motion-reduce:hidden"
     />
