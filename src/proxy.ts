@@ -8,14 +8,19 @@ import {
 } from "@/lib/routing/unknown-path";
 
 export async function proxy(request: NextRequest) {
-  const canonicalRedirect = canonicalRequestRedirect(
-    request.nextUrl,
-    request.headers.get("host"),
-    request.headers.get("x-forwarded-proto")?.split(",", 1)[0] ?? null,
-  );
+  const pathname = request.nextUrl.pathname;
+  // Vercel Cron calls the deployment's own host and does not follow redirects.
+  // Job routes check CRON_SECRET themselves, so the host does not matter.
+  const isScheduledJob = pathname.startsWith("/api/cron/");
+  const canonicalRedirect = isScheduledJob
+    ? null
+    : canonicalRequestRedirect(
+        request.nextUrl,
+        request.headers.get("host"),
+        request.headers.get("x-forwarded-proto")?.split(",", 1)[0] ?? null,
+      );
   if (canonicalRedirect) return NextResponse.redirect(canonicalRedirect);
 
-  const pathname = request.nextUrl.pathname;
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
   const isProtectedRoute =
     isAdminRoute || pathname === "/orders" || pathname.startsWith("/orders/");

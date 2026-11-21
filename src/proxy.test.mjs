@@ -68,6 +68,17 @@ test("orders admit signed-in users while admin descendants require catalog capab
   assert.equal((await manager.request("/admin/products/create")).headers.get("x-middleware-next"), "1");
 });
 
+test("scheduled jobs run on the deployment host instead of being redirected", async () => {
+  const proxy = loadProxy({ canonicalRedirect: new URL("https://shop.example.test/") });
+  for (const path of ["/api/cron/fulfillment", "/api/cron/catalog-sync"]) {
+    const response = await proxy.request(path);
+    assert.equal(response.headers.get("location"), null, path);
+    assert.equal(response.headers.get("x-middleware-next"), "1", path);
+  }
+  const page = await proxy.request("/api/cron");
+  assert.equal(page.headers.get("location"), "https://shop.example.test/", "only job routes skip the redirect");
+});
+
 test("canonical host redirects still precede protected-route authorization", async () => {
   const canonicalRedirect = new URL("https://shop.example.test/orders/1?from=checkout");
   const proxy = loadProxy({ canonicalRedirect });
