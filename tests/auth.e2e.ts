@@ -141,6 +141,28 @@ test.describe("a verification link", { tags: ["auth"] }, () => {
   });
 });
 
+test.describe("a forgotten password", { tags: ["auth"] }, () => {
+  test("gets the same answer for an address without an account", async ({ app, api, screen, browser }) => {
+    await app.open("/login");
+    await screen.getByRole("link", "Forgot password?").tap();
+    await expect(browser).toHaveURL("/forgot-password");
+
+    await screen.getByLabel("Email").fill("nobody-here@example.test");
+    await screen.getByRole("button", "Send link").tap();
+
+    await expect(screen.getByText("Check your email")).toBeVisible();
+    await expect(screen.getByText(/if an account uses/i)).toBeVisible();
+    expect(await shopperInStore(api)).toBeNull();
+  });
+
+  test("a reset link that no longer works offers a new one", async ({ app, screen }) => {
+    await app.open("/reset-password?error=INVALID_TOKEN");
+
+    await expect(screen.getByText("This link has expired")).toBeVisible();
+    await expect(screen.getByRole("link", "Ask for a new link")).toHaveAttribute("href", "/forgot-password");
+  });
+});
+
 test.describe("a shopper who is not an admin", asShopper("account"), () => {
   test("is sent back to the store from the admin area", async ({ app, browser }) => {
     await app.open("/admin/products/create");

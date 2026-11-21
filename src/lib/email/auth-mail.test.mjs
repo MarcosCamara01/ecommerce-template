@@ -45,9 +45,28 @@ test("the expiry in the verification mail follows the link's lifetime", async ()
   assert.match(harness.messages[1].text, /expires in 2 hours/);
 });
 
-test("the existing-account mail links sign-in, and mentions Google only when enabled", async () => {
+test("the reset mail carries the reset link and says to ignore it if unrequested", async () => {
   const harness = loadAuthMailHarness();
-  const mail = { kind: "existing-account", signInUrl: "https://store.example.test/login" };
+  const url = "https://store.example.test/api/auth/reset-password/abc123?callbackURL=%2Freset-password";
+
+  await harness.sendAuthMail(recipient, { kind: "reset-password", url, expiresInSeconds: 3600 });
+
+  const [message] = harness.messages;
+  assert.equal(message.to, "alex@example.test");
+  assert.equal(message.subject, "Reset your password");
+  assert.ok(message.text.includes(url));
+  assert.ok(message.html.includes(url.replaceAll("&", "&amp;")));
+  assert.match(message.text, /expires in 1 hour/);
+  assert.match(message.text, /didn't ask for this, ignore this email/);
+});
+
+test("the existing-account mail links sign-in and password reset, and mentions Google only when enabled", async () => {
+  const harness = loadAuthMailHarness();
+  const mail = {
+    kind: "existing-account",
+    signInUrl: "https://store.example.test/login",
+    resetUrl: "https://store.example.test/forgot-password",
+  };
 
   await harness.sendAuthMail(recipient, { ...mail, googleEnabled: false });
   await harness.sendAuthMail(recipient, { ...mail, googleEnabled: true });
@@ -55,6 +74,7 @@ test("the existing-account mail links sign-in, and mentions Google only when ena
   const [withoutGoogle, withGoogle] = harness.messages;
   assert.equal(withoutGoogle.subject, "You already have an account");
   assert.ok(withoutGoogle.text.includes("https://store.example.test/login"));
+  assert.ok(withoutGoogle.text.includes("https://store.example.test/forgot-password"));
   assert.doesNotMatch(withoutGoogle.text, /verify-email|token=/);
   assert.doesNotMatch(withoutGoogle.text, /Google/);
   assert.match(withGoogle.text, /Continue with Google/);

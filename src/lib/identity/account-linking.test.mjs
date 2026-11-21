@@ -25,6 +25,9 @@ test("credential sign-in requires a verified email and mail leaves the response 
     /sendOnSignUp:/,
     "sendOnSignUp: true would also mail unverified Google registrations",
   );
+  assert.match(authSource, /sendResetPassword:/);
+  assert.match(authSource, /revokeSessionsOnPasswordReset:\s*true/);
+  assert.match(authSource, /onPasswordReset:\s*\(\{ user \}\) => markEmailVerifiedAfterReset\(user\.id\)/);
   assert.match(authSource, /disabledPaths:\s*\["\/send-verification-email"\]/);
   assert.match(authSource, /backgroundTasks:\s*\{\s*handler:\s*runAfterResponse\s*\}/);
   assert.match(authSource, /function runAfterResponse[\s\S]*?after\(task\)/);
@@ -43,7 +46,14 @@ test("OAuth cannot reclaim or rewrite an unverified credential account", () => {
     /databaseHooks:\s*\{[\s\S]*?account:[\s\S]*?rejectUnverifiedProviderLink\(account\.userId\)/,
   );
   assert.match(authSource, /if \(user && !user\.emailVerified\)/);
-  assert.doesNotMatch(authSource, /delete from|update [\s\S]*?"user"/i);
+  assert.doesNotMatch(authSource, /delete from/i);
+  const writes = authSource.match(/\bupdate\s[\s\S]*?`/gi) ?? [];
+  assert.equal(writes.length, 1, "auth config writes user rows in one place only");
+  assert.match(
+    writes[0],
+    /^update \$\{authSchemaIdentifier\}\."user"\s+set email_verified = true, updated_at = now\(\)\s+where id = \$\{userId\} and email_verified = false\s+`$/,
+    "the one write marks an unverified email verified, and nothing else",
+  );
 });
 
 test("every explicit provider-link create runs the configured account hook", async () => {

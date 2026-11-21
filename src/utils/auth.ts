@@ -9,6 +9,7 @@ import { after } from "next/server";
 
 import { getCanonicalAppOrigin } from "@/lib/app-origin";
 import {
+  RESET_LINK_TTL_SECONDS,
   VERIFICATION_LINK_TTL_SECONDS,
   authPageHref,
   verificationLandingLink,
@@ -82,6 +83,14 @@ async function rejectUnverifiedProviderLink(userId: string) {
   }
 }
 
+async function markEmailVerifiedAfterReset(userId: string) {
+  await db.execute(sql`
+    update ${authSchemaIdentifier}."user"
+    set email_verified = true, updated_at = now()
+    where id = ${userId} and email_verified = false
+  `);
+}
+
 function runAfterResponse(task: Promise<unknown>) {
   try {
     after(task);
@@ -107,10 +116,20 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    resetPasswordTokenExpiresIn: RESET_LINK_TTL_SECONDS,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: ({ user, url }) =>
+      sendAuthMail(user, {
+        kind: "reset-password",
+        url,
+        expiresInSeconds: RESET_LINK_TTL_SECONDS,
+      }),
+    onPasswordReset: ({ user }) => markEmailVerifiedAfterReset(user.id),
     onExistingUserSignUp: ({ user }) =>
       sendAuthMail(user, {
         kind: "existing-account",
         signInUrl: authPageHref("signIn", { origin: authBaseURL }),
+        resetUrl: authPageHref("forgotPassword", { origin: authBaseURL }),
         googleEnabled: googleAuthEnabled,
       }),
     customSyntheticUser: ({ coreFields, additionalFields, id }) => ({

@@ -6,7 +6,13 @@ export type AuthMailRecipient = Readonly<{ email: string }>;
 
 export type AuthMail =
   | Readonly<{ kind: "verify-email"; url: string; expiresInSeconds: number }>
-  | Readonly<{ kind: "existing-account"; signInUrl: string; googleEnabled: boolean }>;
+  | Readonly<{ kind: "reset-password"; url: string; expiresInSeconds: number }>
+  | Readonly<{
+      kind: "existing-account";
+      signInUrl: string;
+      resetUrl: string;
+      googleEnabled: boolean;
+    }>;
 
 type AuthMailContent = Readonly<{
   subject: string;
@@ -27,6 +33,16 @@ function contentFor(mail: AuthMail): AuthMailContent {
         action: { label: "Confirm email", url: mail.url },
         closing: "If you didn't ask for this, ignore this email.",
       };
+    case "reset-password":
+      return {
+        subject: "Reset your password",
+        paragraphs: [
+          "Someone asked to set a new password for your account.",
+          `The link works once and expires in ${duration(mail.expiresInSeconds)}. Setting a new password signs you out everywhere.`,
+        ],
+        action: { label: "Set a new password", url: mail.url },
+        closing: "If you didn't ask for this, ignore this email. Your password has not changed.",
+      };
     case "existing-account":
       return {
         subject: "You already have an account",
@@ -35,6 +51,7 @@ function contentFor(mail: AuthMail): AuthMailContent {
           mail.googleEnabled
             ? "Sign in with your password, or with Continue with Google if that is how you joined."
             : "Sign in with your password.",
+          `Forgot your password? Set a new one here: ${mail.resetUrl}`,
         ],
         action: { label: "Sign in", url: mail.signInUrl },
         closing: "If this wasn't you, ignore this email. Your account has not changed.",

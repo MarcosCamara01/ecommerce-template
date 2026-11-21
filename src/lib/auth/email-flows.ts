@@ -3,12 +3,15 @@ import { safeLocalCallback } from "./local-callback.ts";
 export const AUTH_PAGES = {
   signIn: "/login",
   register: "/register",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
   emailVerification: "/email-verification",
 } as const;
 
 export type AuthPage = keyof typeof AUTH_PAGES;
 
 export const VERIFICATION_LINK_TTL_SECONDS = 60 * 60;
+export const RESET_LINK_TTL_SECONDS = 60 * 60;
 
 export function authPageHref(
   page: AuthPage,

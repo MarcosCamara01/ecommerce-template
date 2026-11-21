@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "@/components/ui/link";
 import LoadingButton from "@/components/ui/loading-button";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
+import { AUTH_PAGES } from "@/lib/auth/email-flows";
 import { authErrorCode, authFailureMessage, invalidFields } from "@/lib/auth/form-errors";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
 
@@ -120,6 +122,12 @@ function LoginContent() {
               aria-invalid={invalid.includes("password") || undefined}
               readOnly={isLoading}
             />
+            <Link
+              href={AUTH_PAGES.forgotPassword}
+              className="self-end text-13 text-muted underline underline-offset-[3px] hover:text-fg"
+            >
+              Forgot password?
+            </Link>
           </div>
         </div>
 

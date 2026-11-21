@@ -10,6 +10,8 @@ import { type AuthErrorCode, authErrorCode } from "./form-errors";
 type EndpointBodies = {
   "/sign-in/email": { email: string; password: string; callbackURL: string };
   "/sign-up/email": { name: string; email: string; password: string; callbackURL: string };
+  "/request-password-reset": { email: string; redirectTo: string };
+  "/reset-password": { token: string; newPassword: string };
 };
 
 export type AuthEndpoint = keyof EndpointBodies;
