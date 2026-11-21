@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { headers } from "next/headers";
 
 import { AuthShell } from "@/components/auth/AuthShell";
 import { buttonClass } from "@/components/ui/button-classes";
@@ -8,7 +7,6 @@ import { getCanonicalAppOrigin } from "@/lib/app-origin";
 import { authPageHref } from "@/lib/auth/email-flows";
 import { authErrorCode, authErrorMessage } from "@/lib/auth/form-errors";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
-import { getIdentityFromHeaders } from "@/lib/identity";
 import { pickFirst } from "@/utils/pick-first";
 
 type Props = {
@@ -47,25 +45,17 @@ async function VerificationOutcome({ searchParams }: Props) {
     );
   }
 
-  const identity = await getIdentityFromHeaders(await headers());
   return (
     <AuthShell
       word="Welcome"
       title="Email verified"
-      description={
-        identity
-          ? "Your account is ready, and you are signed in."
-          : "Your account is ready. Sign in to continue."
-      }
+      description="Your account is ready. Sign in to continue."
       footerText="Just browsing?"
       footerHref="/"
       footerLinkLabel="Back to the store"
     >
-      <Link
-        href={identity ? destination : signInHref}
-        className={buttonClass({ className: "w-full text-base" })}
-      >
-        {identity ? "Continue" : "Sign in"}
+      <Link href={signInHref} className={buttonClass({ className: "w-full text-base" })}>
+        Sign in
       </Link>
     </AuthShell>
   );

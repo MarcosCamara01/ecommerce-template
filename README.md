@@ -105,7 +105,9 @@ mails a link and answers "check your email" whether or not the address already
 has an account; the owner of a taken address gets a mail saying how to get in.
 An unverified account that signs in with the right password is refused and
 gets a new link. Links last an hour, and every outcome of a link (verified,
-expired, already used) lands on `/email-verification`.
+expired, already used) lands on `/email-verification`. Opening a link confirms
+the email but signs nobody in: a link opened in someone else's browser would
+otherwise sign that browser into the registrant's account.
 
 `/forgot-password` answers the same for any address. A reset signs the
 account out everywhere and also confirms the email, because the link reached

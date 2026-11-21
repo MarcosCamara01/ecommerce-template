@@ -261,7 +261,7 @@ export const signUp = async (app: App, account: Account) => {
   if (!response.ok) {
     throw new Error(`verify-email answered ${response.status}: ${(await response.text()).slice(0, 200)}`);
   }
-  return sessionCookies(response, origin);
+  return signIn(app, account);
 };
 
 export const signIn = async (app: App, account: Pick<Account, "email" | "password">) =>

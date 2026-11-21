@@ -148,7 +148,9 @@ export const auth = betterAuth({
     // credential sign-ups and the unset Google option for OAuth, so Google
     // sign-ups get no mail.
     sendOnSignIn: true,
-    autoSignInAfterVerification: true,
+    // A link opened in another browser would sign that browser into the
+    // registrant's account, so verifying never signs anyone in.
+    autoSignInAfterVerification: false,
     expiresIn: VERIFICATION_LINK_TTL_SECONDS,
     sendVerificationEmail: ({ user, url }) =>
       sendAuthMail(user, {

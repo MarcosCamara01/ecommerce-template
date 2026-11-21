@@ -38,7 +38,7 @@ test.describe("signing in", { tags: ["auth", "agent"] }, () => {
 });
 
 test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? undefined : NEEDS_WRITES }, () => {
-  test("a visitor creates an account, confirms the email, signs out and signs back in", async ({ app, api, agent, browser, screen }) => {
+  test("a visitor creates an account, confirms the email, signs in and signs out", async ({ app, api, agent, browser, screen }) => {
     // unique() marks values that change every run, so the recording still replays.
     const account = newAccount("signup");
     const email = unique(account.email);
@@ -55,19 +55,19 @@ test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? un
     await app.open(await verificationLink(account.email, "/email-verification"));
     await expect(browser).toHaveURL("/email-verification");
     await expect(screen.getByText("Email verified")).toBeVisible();
-    expect(await shopperInStore(api)).toMatchObject({ email: account.email, name: account.name });
-
-    await agent.act("sign out of the account");
-    await settled(browser);
-    await agent.assert("nobody is signed in: the store offers a way to sign in and no account menu");
-    expect(await shopperInStore(api)).toBeNull();
+    expect(await shopperInStore(api), "opening the link signs nobody in").toBeNull();
 
     await app.open("/login");
     await agent.act("sign in with the email {email} and the password {password}", {
       params: { email, password },
     });
     await expect(browser).toHaveURL("/");
-    expect(await shopperInStore(api)).toMatchObject({ email: account.email });
+    expect(await shopperInStore(api)).toMatchObject({ email: account.email, name: account.name });
+
+    await agent.act("sign out of the account");
+    await settled(browser);
+    await agent.assert("nobody is signed in: the store offers a way to sign in and no account menu");
+    expect(await shopperInStore(api)).toBeNull();
   });
 });
 

@@ -18,7 +18,7 @@ test("credential sign-in requires a verified email and mail leaves the response 
   );
   assert.match(
     authSource,
-    /emailVerification:\s*\{[\s\S]*?sendOnSignIn:\s*true[\s\S]*?sendVerificationEmail:/,
+    /emailVerification:\s*\{[\s\S]*?sendOnSignIn:\s*true[\s\S]*?autoSignInAfterVerification:\s*false[\s\S]*?sendVerificationEmail:/,
   );
   assert.doesNotMatch(
     authSource,
