@@ -2,6 +2,7 @@ import { randomBytes, randomInt } from "node:crypto";
 
 import { test as base } from "@e2e-dev/web";
 import type { Browser, Cookie } from "@e2e-dev/web";
+import { createEmailVerificationToken } from "better-auth/api";
 import { expect } from "e2e";
 import type { Agent, App } from "e2e";
 import { z } from "zod";
@@ -184,6 +185,11 @@ export const newAccount = (label: string): Account => {
   };
 };
 
+const appOrigin = (app: App) => {
+  if (!app.baseUrl) throw new Error("The target has no app.url");
+  return new URL(app.baseUrl).origin;
+};
+
 /**
  * Calls the auth API the way the forms do. Sign-in and sign-up are rate
  * limited (three every ten seconds), so a refusal is waited out as the
@@ -193,9 +199,8 @@ async function authenticate(
   app: App,
   path: "/api/auth/sign-up/email" | "/api/auth/sign-in/email",
   body: Record<string, string>,
-): Promise<Cookie[]> {
-  if (!app.baseUrl) throw new Error("The target has no app.url");
-  const origin = new URL(app.baseUrl).origin;
+): Promise<Response> {
+  const origin = appOrigin(app);
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const response = await fetch(new URL(path, origin), {
       method: "POST",
@@ -210,35 +215,57 @@ async function authenticate(
     if (!response.ok) {
       throw new Error(`${path} answered ${response.status}: ${(await response.text()).slice(0, 200)}`);
     }
-    return response.headers.getSetCookie().map((header) => {
-      const [pair, ...attributes] = header.split(";").map((part) => part.trim());
-      const flags = new Map(
-        attributes.map((attribute) => {
-          const [key, ...rest] = attribute.split("=");
-          return [key.toLowerCase(), rest.join("=")] as const;
-        }),
-      );
-      const sameSite = flags.get("samesite")?.toLowerCase();
-      return {
-        name: pair.slice(0, pair.indexOf("=")),
-        value: pair.slice(pair.indexOf("=") + 1),
-        url: origin,
-        httpOnly: flags.has("httponly"),
-        secure: flags.has("secure"),
-        sameSite: sameSite === "strict" ? "Strict" : sameSite === "none" ? "None" : "Lax",
-        ...(flags.has("max-age") ? { expires: Math.floor(Date.now() / 1000) + Number(flags.get("max-age")) } : {}),
-      } satisfies Cookie;
-    });
+    return response;
   }
   throw new Error(`${path} kept answering 429`);
 }
 
-/** Creates the account and returns the cookies of its first session. */
-export const signUp = (app: App, account: Account) =>
-  authenticate(app, "/api/auth/sign-up/email", account);
+function sessionCookies(response: Response, origin: string): Cookie[] {
+  return response.headers.getSetCookie().map((header) => {
+    const [pair, ...attributes] = header.split(";").map((part) => part.trim());
+    const flags = new Map(
+      attributes.map((attribute) => {
+        const [key, ...rest] = attribute.split("=");
+        return [key.toLowerCase(), rest.join("=")] as const;
+      }),
+    );
+    const sameSite = flags.get("samesite")?.toLowerCase();
+    return {
+      name: pair.slice(0, pair.indexOf("=")),
+      value: pair.slice(pair.indexOf("=") + 1),
+      url: origin,
+      httpOnly: flags.has("httponly"),
+      secure: flags.has("secure"),
+      sameSite: sameSite === "strict" ? "Strict" : sameSite === "none" ? "None" : "Lax",
+      ...(flags.has("max-age") ? { expires: Math.floor(Date.now() / 1000) + Number(flags.get("max-age")) } : {}),
+    } satisfies Cookie;
+  });
+}
 
-export const signIn = (app: App, account: Pick<Account, "email" | "password">) =>
-  authenticate(app, "/api/auth/sign-in/email", account);
+/** With a `landing`, Better Auth redirects there; without one it answers JSON. */
+export const verificationLink = async (email: string, landing?: string) => {
+  const secret = process.env.BETTER_AUTH_SECRET;
+  if (!secret) throw new Error("Confirming new accounts needs the app's BETTER_AUTH_SECRET");
+  const search = new URLSearchParams({ token: await createEmailVerificationToken(secret, email) });
+  if (landing) search.set("callbackURL", landing);
+  return `/api/auth/verify-email?${search}`;
+};
+
+export const signUp = async (app: App, account: Account) => {
+  await authenticate(app, "/api/auth/sign-up/email", account);
+  const origin = appOrigin(app);
+  const response = await fetch(new URL(await verificationLink(account.email), origin), {
+    headers: { "x-forwarded-for": visitorAddress() },
+    redirect: "manual",
+  });
+  if (!response.ok) {
+    throw new Error(`verify-email answered ${response.status}: ${(await response.text()).slice(0, 200)}`);
+  }
+  return signIn(app, account);
+};
+
+export const signIn = async (app: App, account: Pick<Account, "email" | "password">) =>
+  sessionCookies(await authenticate(app, "/api/auth/sign-in/email", account), appOrigin(app));
 
 type Api = (path: string, init?: RequestInit) => Promise<Response>;
 

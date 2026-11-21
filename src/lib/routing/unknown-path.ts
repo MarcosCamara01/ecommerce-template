@@ -1,3 +1,4 @@
+import { AUTH_PAGES } from "../auth/email-flows.ts";
 import { parsePositiveIntegerId } from "./positive-integer-id.ts";
 
 /**
@@ -9,12 +10,11 @@ const PRODUCT_CATEGORY_SLUGS = new Set(["t-shirts", "pants", "sweatshirts"]);
 
 const ROOT_ONLY_SEGMENTS = new Set([
   "new-in",
-  "login",
-  "register",
   "search",
   "cart",
   "wishlist",
   "result",
+  ...Object.values(AUTH_PAGES).map((path) => path.slice(1)),
 ]);
 
 /**

@@ -12,9 +12,16 @@ before treating the combined branch as one approved delivery unit.
 
 The first administrator is promoted by stable Better Auth user id with `ADMIN_USER_ID npm run auth:bootstrap-admin`. Email addresses are not authorization keys.
 
-Credential sign-in does not wait for a verification email. Linking another provider
-still requires the existing local account to be verified, and OAuth callbacks never
-reclaim or rewrite an unverified credential registration.
+Credential sign-in requires a verified email (Better Auth `requireEmailVerification`).
+Sign-up answers the same for a new and a taken address, and verification and reset
+mail is sent after the response, so neither the answer nor its timing reveals an
+account. A password reset revokes the account's sessions and marks its email
+verified. Forms that do not sign the browser in are server actions that call Better
+Auth through `auth.handler`, which keeps its rate limiter and origin check. Sessions
+issued before verification was required are not revoked, and `getIdentityFromHeaders`
+does not gate on `emailVerified`: verification is enforced where sessions are created.
+Linking another provider still requires the existing local account to be verified,
+and OAuth callbacks never reclaim or rewrite an unverified credential registration.
 
 ## Data
 

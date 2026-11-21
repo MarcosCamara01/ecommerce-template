@@ -15,7 +15,9 @@ export function safeLocalCallback(
     const origin = new URL(canonicalOrigin).origin;
     const target = new URL(value, origin);
     if (target.origin !== origin) return "/";
-    return `${target.pathname}${target.search}${target.hash}`;
+    const callback = `${target.pathname}${target.search}${target.hash}`;
+    // Dot segments can normalize "/.//host" to "//host", which leaves the origin.
+    return callback.startsWith("//") ? "/" : callback;
   } catch {
     return "/";
   }

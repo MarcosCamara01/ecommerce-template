@@ -25,3 +25,15 @@ test("external and backslash callbacks fail closed", () => {
     assert.equal(safeLocalCallback(value, origin), "/", String(value));
   }
 });
+
+test("a callback that normalizes to a protocol-relative path fails closed", () => {
+  for (const value of [
+    "/.//evil.example",
+    "/a/..//evil.example/path",
+    "/%2e//evil.example",
+  ]) {
+    const callback = safeLocalCallback(value, origin);
+    assert.equal(new URL(callback, origin).origin, origin, value);
+    assert.equal(callback, "/", value);
+  }
+});

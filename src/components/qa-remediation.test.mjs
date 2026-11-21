@@ -5,21 +5,30 @@ import test from "node:test";
 const source = (path) => readFile(path, "utf8");
 
 test("auth forms have a safe native POST fallback", async () => {
-  const [login, register, nativeRoute] = await Promise.all([
+  const [login, register, forgot, reset, actions, nativeRoute] = await Promise.all([
     source("src/app/(auth)/login/page.tsx"),
     source("src/app/(auth)/register/page.tsx"),
+    source("src/components/auth/ForgotPasswordForm.tsx"),
+    source("src/components/auth/ResetPasswordForm.tsx"),
+    source("src/app/(auth)/actions.ts"),
     source("src/app/api/auth/email-form/route.ts"),
   ]);
   assert.match(login, /action="\/api\/auth\/email-form"/);
-  assert.match(login, /name="mode" value="sign-in"/);
   assert.match(login, /name="callbackURL" value=\{callbackURL\}/);
-  assert.match(register, /action="\/api\/auth\/email-form"/);
-  assert.match(register, /name="mode" value="sign-up"/);
+  assert.doesNotMatch(login, /name="mode"/);
+  assert.match(register, /useActionState\(signUp,/);
+  assert.match(register, /action=\{formAction\}/);
   assert.match(register, /name="callbackURL" value=\{callbackURL\}/);
+  assert.match(forgot, /useActionState\(\s*requestPasswordReset,/);
+  assert.match(forgot, /action=\{formAction\}/);
+  assert.match(reset, /useActionState\(\s*resetPassword,/);
+  assert.match(reset, /action=\{formAction\}/);
+  assert.match(reset, /name="token" value=\{token\}/);
+  assert.match(actions, /^"use server";/);
   assert.match(nativeRoute, /status:\s*303/);
-  assert.match(nativeRoute, /getSetCookie/);
-  assert.match(nativeRoute, /\/login\?error=/);
-  assert.match(nativeRoute, /\/register\?error=/);
+  assert.match(nativeRoute, /append\("set-cookie"/);
+  assert.match(nativeRoute, /authPageHref\("signIn", \{ redirect: callbackURL, error: result\.code \}\)/);
+  assert.doesNotMatch(nativeRoute, /\/register\?error=|sign-up/);
 });
 
 test("cart actions stay disabled until client hydration", async () => {

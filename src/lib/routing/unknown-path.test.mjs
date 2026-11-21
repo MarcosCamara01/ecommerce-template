@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readdir } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import {
@@ -12,6 +13,9 @@ describe("pathShould404", () => {
       "/",
       "/login",
       "/register",
+      "/email-verification",
+      "/forgot-password",
+      "/reset-password",
       "/search",
       "/new-in",
       "/help/delivery",
@@ -44,6 +48,9 @@ describe("pathShould404", () => {
       "/foo/bar",
       "/login/foo",
       "/register/foo",
+      "/email-verification/foo",
+      "/forgot-password/foo",
+      "/reset-password/foo",
       "/search/foo",
       "/new-in/foo",
       "/cart/foo",
@@ -62,6 +69,18 @@ describe("pathShould404", () => {
       "/__/not-found/fallback",
     ]) {
       assert.equal(pathShould404(pathname), true, pathname);
+    }
+  });
+
+  it("lets every static page directory in a route group through", async () => {
+    for (const group of ["(auth)", "(store)", "(user)"]) {
+      const entries = await readdir(new URL(`../../app/${group}/`, import.meta.url), {
+        withFileTypes: true,
+      });
+      for (const entry of entries) {
+        if (!entry.isDirectory() || entry.name.startsWith("[")) continue;
+        assert.equal(pathShould404(`/${entry.name}`), false, `${group}/${entry.name}`);
+      }
     }
   });
 

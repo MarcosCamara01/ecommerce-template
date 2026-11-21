@@ -8,7 +8,7 @@ import ts from "typescript";
 const nativeRequire = createRequire(import.meta.url);
 const source = await readFile(new URL("./server.ts", import.meta.url), "utf8");
 
-test("an unverified Better Auth session still becomes a Principal", async () => {
+test("verification is enforced at sign-in, so an unverified session still becomes a Principal", async () => {
   const identity = await loadServerHarness({ emailVerified: false })
     .getIdentityFromHeaders(new Headers());
   assert.deepEqual(identity, {

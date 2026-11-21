@@ -53,51 +53,6 @@ export const useAuthMutation = () => {
     },
   });
 
-  const signUp = useMutation({
-    mutationFn: async ({
-      email,
-      password,
-      name,
-      callbackURL,
-    }: {
-      email: string;
-      password: string;
-      name: string;
-      callbackURL?: string;
-    }) => {
-      const destination = safeLocalCallback(callbackURL);
-      const result = await authClient.signUp.email({
-        email,
-        password,
-        name,
-        callbackURL: destination,
-      });
-
-      if (result.error) {
-        throw Object.assign(
-          new Error(result.error.message || "Error creating account"),
-          { code: result.error.code },
-        );
-      }
-
-      return result;
-    },
-    onSuccess: (result, variables) => {
-      resetIdentityCache();
-      if (!result.data?.token) {
-        toast.error("Could not start a session after creating the account.");
-        router.push("/login");
-        return;
-      }
-
-      router.push(safeLocalCallback(variables.callbackURL));
-      router.refresh();
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
-
   const signInWithGoogle = useMutation({
     mutationFn: async ({ callbackURL }: { callbackURL?: string }) => {
       const destination = safeLocalCallback(callbackURL);
@@ -141,7 +96,6 @@ export const useAuthMutation = () => {
 
   return {
     signIn,
-    signUp,
     signInWithGoogle,
     signOut,
   };

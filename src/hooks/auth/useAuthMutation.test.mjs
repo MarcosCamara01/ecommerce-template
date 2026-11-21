@@ -24,7 +24,7 @@ function loadAuthMutation(result) {
         return { mutateAsync: observer.mutate.bind(observer) };
       },
     },
-    "@/lib/auth/client": { authClient: { signIn: { email: respond, social: respond }, signUp: { email: respond }, signOut: respond } },
+    "@/lib/auth/client": { authClient: { signIn: { email: respond, social: respond }, signOut: respond } },
     "@/lib/auth/local-callback": { safeLocalCallback },
     "next/navigation": { useRouter: () => ({ push: (url) => navigations.push(url), refresh: () => navigations.push("refresh") }) },
     sonner: { toast: { error: (message) => notices.push(message) } },
@@ -52,24 +52,22 @@ for (const action of ["signInWithGoogle", "signOut"]) {
   });
 }
 
-for (const action of ["signIn", "signUp"]) {
-  test(`${action} rejects with Better Auth's code and leaves the message to the page`, async () => {
-    const { mutations, client, navigations, notices } = loadAuthMutation({
-      error: { message: "Invalid email or password", code: "INVALID_EMAIL_OR_PASSWORD" }, data: null,
-    });
-    try {
-      await assert.rejects(
-        mutations[action].mutateAsync({ email: "shopper@example.test", name: "Shopper" }),
-        { message: "Invalid email or password", code: "INVALID_EMAIL_OR_PASSWORD" },
-      );
-      assert.equal(client.getQueryData(["qa"]), "session cache");
-      assert.deepEqual(navigations, []);
-      assert.equal(notices.length, 0);
-    } finally {
-      client.clear();
-    }
+test("signIn rejects with Better Auth's code and leaves the message to the page", async () => {
+  const { mutations, client, navigations, notices } = loadAuthMutation({
+    error: { message: "Invalid email or password", code: "INVALID_EMAIL_OR_PASSWORD" }, data: null,
   });
-}
+  try {
+    await assert.rejects(
+      mutations.signIn.mutateAsync({ email: "shopper@example.test" }),
+      { message: "Invalid email or password", code: "INVALID_EMAIL_OR_PASSWORD" },
+    );
+    assert.equal(client.getQueryData(["qa"]), "session cache");
+    assert.deepEqual(navigations, []);
+    assert.equal(notices.length, 0);
+  } finally {
+    client.clear();
+  }
+});
 
 test("Google sign-in leaves provider navigation to Better Auth", async () => {
   const { mutations, client, navigations } = loadAuthMutation({
