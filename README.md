@@ -31,7 +31,8 @@ invariants are in
 - Order history and a result page that only loads a session the buyer owns
 - Admin product create/edit with Stripe catalog sync and replay for failed work
 - Background fulfillment and catalog-sync crons (Vercel, every 5 minutes)
-- Optional order-confirmation and merchant-notification email
+- Email verification before credential sign-in, and forgot/reset password
+- Order-confirmation and merchant-notification email
 
 ## Prerequisites
 
@@ -99,8 +100,28 @@ in the runbook. Do not put `role=` in `MIGRATION_DATABASE_URL`.
 
 ### Auth
 
-Email/password registration opens a session immediately. The app does not send
-or require a verification email.
+A credential account must confirm its email before it can sign in. Sign-up
+mails a link and answers "check your email" whether or not the address already
+has an account; the owner of a taken address gets a mail saying how to get in.
+An unverified account that signs in with the right password is refused and
+gets a new link. Links last an hour, and every outcome of a link (verified,
+expired, already used) lands on `/email-verification`.
+
+`/forgot-password` answers the same for any address. A reset signs the
+account out everywhere and also confirms the email, because the link reached
+the mailbox. Resending a link by address alone is off
+(`/api/auth/send-verification-email` answers 404): signing in again or a reset
+sends a new one.
+
+Sign-up, forgot and reset are server actions in `src/app/(auth)/actions.ts`
+and work without JavaScript. They reach Better Auth through `auth.handler`,
+not `auth.api`, so its rate limiter and origin check still apply. Sign-in stays
+on the Better Auth client, with `/api/auth/email-form` as its no-JS fallback.
+Auth mail is sent after the response, so its latency does not reveal whether
+an account exists. Google sign-ups are verified by Google and get no mail.
+
+Sessions opened before verification was required stay valid until they end
+or the account's password is reset.
 
 Google sign-in is opt-in. Register the exact callback
 `http://localhost:3000/api/auth/callback/google` (and the HTTPS production
@@ -125,8 +146,9 @@ Mail goes through Resend's HTTP API. Set `RESEND_API_KEY` and `EMAIL_FROM`
 Resend). Owner notices go to `EMAIL_CONTACT_TO`, or `ADMIN_EMAIL` when it is
 unset; no other mail needs a contact address.
 
-Under `next dev` without a key, every message is printed to the terminal
-instead of sent. A production build never falls back: without a key, sends
+Under `next dev` without a key, every message, verification and reset links
+included, is printed to the terminal instead of sent. Without mail, nobody can
+confirm a new account, so set the key before a production launch. A production build never falls back: without a key, sends
 fail as `email_not_configured`, and order mail goes to `needs_attention` for
 an admin replay once the key is set.
 
@@ -217,7 +239,7 @@ E2E_APP_URL=http://localhost:3000 npm run test:e2e
 | Variable | Effect |
 | --- | --- |
 | `E2E_APP_URL` | The store under test. Default `http://localhost:3000`. |
-| `E2E_ALLOW_WRITES=1` | Also runs the tests that sign up shoppers, fill bags and save pieces. **Only against a disposable database.** Without it a run changes nothing. |
+| `E2E_ALLOW_WRITES=1` | Also runs the tests that sign up shoppers, fill bags and save pieces. **Only against a disposable database.** Without it a run changes nothing. New shoppers confirm their email with a link minted from `BETTER_AUTH_SECRET`, which must be the app's own. |
 | `E2E_USER_CUSTOMER_USERNAME`, `E2E_USER_CUSTOMER_PASSWORD` | A shopper with past orders, for the order pages. |
 | `E2E_USER_ADMIN_USERNAME`, `E2E_USER_ADMIN_PASSWORD` | An admin, for the product forms. They are opened, never saved. |
 | `E2E_MODEL` | The model the CLI runs. Default `sonnet`. |
