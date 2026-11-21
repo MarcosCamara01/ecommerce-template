@@ -16,11 +16,6 @@ export function isLegacyBundledEmailEffect(idempotencyKey: string): boolean {
   return /^order:\d+:email$/.test(idempotencyKey);
 }
 
-/**
- * Sends one claimed email effect, then records it complete. Delivery is at
- * least once: a crash after SMTP accepts the message and before the completion
- * is stored sends it again on the next claim.
- */
 export async function executeOrderEmailEffect(
   effect: Readonly<{ id: number; idempotencyKey: string }>,
   delivery: OrderEmailDelivery,

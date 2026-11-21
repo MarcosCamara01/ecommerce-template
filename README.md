@@ -16,7 +16,7 @@ Live demo: [ecommerce-template-mpc.vercel.app](https://ecommerce-template-mpc.ve
 | Data | Drizzle ORM on Supabase PostgreSQL (`app_private`) |
 | Payments | Stripe Checkout (server-priced line items) |
 | Media | Supabase Storage (`product-images`: JPEG, PNG, WebP) |
-| Mail | Nodemailer over explicit SMTP (optional) |
+| Mail | Resend HTTP API |
 | Validation | Zod |
 
 Shared domain language lives in [`CONTEXT.md`](CONTEXT.md). Architecture and
@@ -100,7 +100,7 @@ in the runbook. Do not put `role=` in `MIGRATION_DATABASE_URL`.
 ### Auth
 
 Email/password registration opens a session immediately. The app does not send
-or require a verification email, because SMTP is optional and often unset.
+or require a verification email.
 
 Google sign-in is opt-in. Register the exact callback
 `http://localhost:3000/api/auth/callback/google` (and the HTTPS production
@@ -120,14 +120,21 @@ ADMIN_USER_ID=<better-auth-user-id> npm run auth:bootstrap-admin
 
 ### Email
 
-Delivery is disabled until `EMAIL_SERVER_HOST` names an explicit SMTP
-transport. A configured host also needs a valid port, user, password, sender
-(`EMAIL_FROM`), and contact recipient (`EMAIL_CONTACT_TO` or `ADMIN_EMAIL`).
-Partial configuration fails before Nodemailer creates a transport. Gmail can be
-used with its SMTP host; credentials alone never enable a Gmail fallback.
+Mail goes through Resend's HTTP API. Set `RESEND_API_KEY` and `EMAIL_FROM`
+(`Store <store@your-verified-domain.com>`; the domain must be verified in
+Resend). Owner notices go to `EMAIL_CONTACT_TO`, or `ADMIN_EMAIL` when it is
+unset; no other mail needs a contact address.
 
-Without SMTP, sign-up still works. Order confirmation and merchant notification
-emails do not.
+Under `next dev` without a key, every message is printed to the terminal
+instead of sent. A production build never falls back: without a key, sends
+fail as `email_not_configured`, and order mail goes to `needs_attention` for
+an admin replay once the key is set.
+
+Order mail is at least once. Each send carries the effect's key as Resend's
+`Idempotency-Key`, scoped to the store's host, so a resend within 24 hours is
+not delivered twice. Refusals that no retry can fix (a bad key, an unverified
+domain, a spent quota) go straight to `needs_attention`; rate limits, outages,
+and timeouts retry.
 
 ### Local Stripe
 

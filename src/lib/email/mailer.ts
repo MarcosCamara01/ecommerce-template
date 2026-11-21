@@ -1,73 +1,66 @@
 import "server-only";
 
-import * as nodemailer from "nodemailer";
+import { getCanonicalAppOrigin } from "@/lib/app-origin";
 
-type MailOptions = {
-  to: string | string[];
+import { MailDeliveryError, failureFromResendResponse } from "./delivery-error";
+
+const RESEND_EMAILS_URL = "https://api.resend.com/emails";
+const RESEND_TIMEOUT_MS = 10_000;
+const MAX_IDEMPOTENCY_KEY_LENGTH = 256;
+
+export type MailMessage = Readonly<{
+  to: string;
   subject: string;
   html: string;
+  text?: string;
   replyTo?: string;
-  messageId?: string;
-};
+  /**
+   * For at-least-once senders only: Resend sends one message per key and
+   * payload within 24 hours. The key is scoped to the store's host before it
+   * is sent, because fulfillment work ids are a serial per database: a local
+   * and a production database sharing one Resend key both have a
+   * `work:7:email:customer`, and Resend would skip the second one.
+   */
+  idempotencyKey?: string;
+}>;
+
+type MailConfig =
+  | Readonly<{ mode: "resend"; apiKey: string; from: string }>
+  | Readonly<{ mode: "console" }>;
+
+function readMailConfig(env: NodeJS.ProcessEnv): MailConfig {
+  const apiKey = env.RESEND_API_KEY?.trim();
+  if (!apiKey) {
+    if (env.NODE_ENV !== "production") return { mode: "console" };
+    throw new MailDeliveryError(
+      "not_configured",
+      "Email is disabled. Set RESEND_API_KEY and EMAIL_FROM to send through Resend.",
+    );
+  }
+  const from = env.EMAIL_FROM?.trim();
+  if (!from) {
+    throw new MailDeliveryError(
+      "not_configured",
+      "EMAIL_FROM is required with RESEND_API_KEY.",
+    );
+  }
+  return { mode: "resend", apiKey, from };
+}
 
 function getFirstEnvValue(keys: string[]) {
   for (const key of keys) {
-    const rawValue = process.env[key];
-    if (!rawValue) {
-      continue;
-    }
-
-    const value = rawValue.trim();
-    if (value) {
-      return value;
-    }
+    const value = process.env[key]?.trim();
+    if (value) return value;
   }
-
   return undefined;
 }
 
-function getEmailConfig() {
-  const host = process.env.EMAIL_SERVER_HOST?.trim();
-  const portValue = process.env.EMAIL_SERVER_PORT?.trim();
-  const port = portValue ? Number(portValue) : Number.NaN;
-  const user = process.env.EMAIL_SERVER_USER?.trim();
-  // Never fall back to a NEXT_PUBLIC_* name here: Next.js inlines those into
-  // the client bundle, which would publish the SMTP password to every visitor.
-  const rawPassword = process.env.EMAIL_SERVER_PASSWORD;
-  const pass = rawPassword?.trim() ? rawPassword : undefined;
-  const from = process.env.EMAIL_FROM?.trim();
-  const contactTo = getFirstEnvValue([
-    "EMAIL_CONTACT_TO",
-    "ADMIN_EMAIL",
-  ]);
-
-  if (!host) {
-    throw new Error(
-      "Email is disabled. Set EMAIL_SERVER_HOST to enable an explicit SMTP transport.",
-    );
+function scopedIdempotencyKey(key: string) {
+  const scoped = `${new URL(getCanonicalAppOrigin()).host}/${key}`;
+  if (scoped.length > MAX_IDEMPOTENCY_KEY_LENGTH) {
+    throw new MailDeliveryError("rejected", "The idempotency key is longer than Resend accepts.");
   }
-  if (
-    !Number.isInteger(port) ||
-    port < 1 ||
-    port > 65_535 ||
-    !user ||
-    !pass ||
-    !from ||
-    !contactTo
-  ) {
-    throw new Error(
-      "Email configuration is incomplete or invalid. Set a valid EMAIL_SERVER_PORT, EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_FROM, and EMAIL_CONTACT_TO/ADMIN_EMAIL.",
-    );
-  }
-
-  return {
-    host,
-    port,
-    user,
-    pass,
-    from,
-    contactTo,
-  };
+  return scoped;
 }
 
 export function escapeHtml(value: string | number | null | undefined) {
@@ -83,47 +76,61 @@ export function escapeHtml(value: string | number | null | undefined) {
     .replaceAll("'", "&#39;");
 }
 
-let transporter: nodemailer.Transporter | null = null;
+export function getContactEmailAddress() {
+  const contactTo = getFirstEnvValue(["EMAIL_CONTACT_TO", "ADMIN_EMAIL"]);
+  if (!contactTo) {
+    throw new MailDeliveryError(
+      "not_configured",
+      "Set EMAIL_CONTACT_TO or ADMIN_EMAIL to receive owner notices.",
+    );
+  }
+  return contactTo;
+}
 
-function getTransporter() {
-  if (transporter) {
-    return transporter;
+export async function sendMail(message: MailMessage): Promise<void> {
+  const config = readMailConfig(process.env);
+  if (config.mode === "console") {
+    console.info(
+      `[mail] to=${message.to} subject=${message.subject}\n${message.text ?? "(html only)"}`,
+    );
+    return;
   }
 
-  const config = getEmailConfig();
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${config.apiKey}`,
+    "Content-Type": "application/json",
+    "User-Agent": "store-template-mailer",
+  };
+  if (message.idempotencyKey) {
+    headers["Idempotency-Key"] = scopedIdempotencyKey(message.idempotencyKey);
+  }
 
-  transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.port === 465,
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(RESEND_EMAILS_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        from: config.from,
+        to: message.to,
+        subject: message.subject,
+        html: message.html,
+        text: message.text,
+        reply_to: message.replyTo,
+      }),
+      signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+    });
+  } catch (error) {
+    throw new MailDeliveryError(
+      "unavailable",
+      `Resend could not be reached (${error instanceof Error ? error.name : "unknown error"})`,
+    );
+  }
 
-  return transporter;
-}
-
-export function getContactEmailAddress() {
-  return getEmailConfig().contactTo;
-}
-
-export async function sendMail({
-  to,
-  subject,
-  html,
-  replyTo,
-  messageId,
-}: MailOptions) {
-  const config = getEmailConfig();
-
-  await getTransporter().sendMail({
-    from: config.from,
-    to,
-    subject,
-    html,
-    ...(replyTo ? { replyTo } : {}),
-    ...(messageId ? { messageId } : {}),
-  });
+  if (!response.ok) {
+    throw failureFromResendResponse(
+      response.status,
+      await response.json().catch(() => null),
+    );
+  }
 }

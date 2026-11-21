@@ -37,7 +37,7 @@ Obligación durable de convertir una sesión de pago confirmada en un pedido com
 _Evitar_: evento, intento
 
 **Efecto de cumplimiento**:
-Entrega externa durable e independiente que nace de un trabajo completado. Cada correo al cliente o al comercio conserva su propio estado y reintentos. SMTP se trata honestamente como una frontera de entrega al menos una vez: una caída después de que el servidor acepte el mensaje, pero antes de persistir la finalización, puede producir un reenvío con el mismo `Message-ID`.
+Entrega externa durable e independiente que nace de un trabajo completado. Cada correo al cliente o al comercio conserva su propio estado y reintentos. Resend se trata honestamente como una frontera de entrega al menos una vez: una caída después de que Resend acepte el mensaje, pero antes de persistir la finalización, produce un reenvío con la misma `Idempotency-Key`, y Resend no lo entrega dos veces dentro de 24 horas.
 _Evitar_: efecto exactamente una vez, lote de correos
 
 ## Sincronizacion de catalogo

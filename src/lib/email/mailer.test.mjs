@@ -8,172 +8,165 @@ import ts from "typescript";
 import { customerEmailMessage } from "../../components/checkout/checkout-copy.ts";
 import { checkoutOutcomeFromRecord } from "../order-fulfillment/checkout-outcome.ts";
 import { executeOrderEmailEffect } from "../order-fulfillment/email-effect.ts";
+import { classifyFulfillmentError } from "../order-fulfillment/retry.ts";
+import * as deliveryError from "./delivery-error.ts";
 
+const { MailDeliveryError } = deliveryError;
 const nativeRequire = createRequire(import.meta.url);
 const source = await readFile(new URL("./mailer.ts", import.meta.url), "utf8");
 
-const completeConfig = {
-  EMAIL_SERVER_HOST: "smtp.example.test",
-  EMAIL_SERVER_PORT: "587",
-  EMAIL_SERVER_USER: "mailer@example.test",
-  EMAIL_SERVER_PASSWORD: "test-password",
-  EMAIL_FROM: "store@example.test",
-  EMAIL_CONTACT_TO: "owner@example.test",
+const resendConfig = {
+  NODE_ENV: "production",
+  RESEND_API_KEY: "re_test_key",
+  EMAIL_FROM: "Store <store@example.test>",
 };
 
-test("email stays disabled without transport configuration", async () => {
-  const harness = loadMailerHarness({});
+test("a configured key sends one request to Resend with sender, recipient and content", async () => {
+  const harness = loadMailerHarness(resendConfig);
 
-  await assert.rejects(
-    harness.sendMail(messageFixture()),
-    /email is disabled.*EMAIL_SERVER_HOST/i,
-  );
-  assert.equal(harness.transportOptions.length, 0);
-  assert.equal(harness.messages.length, 0);
-});
-
-test("residual Gmail credentials cannot enable delivery without a host", async () => {
-  const harness = loadMailerHarness({
-    EMAIL_SERVER_USER: "residual@gmail.example",
-    EMAIL_SERVER_PASSWORD: "residual-password",
-    EMAIL_FROM: "residual@gmail.example",
-    EMAIL_CONTACT_TO: "owner@example.test",
+  await harness.sendMail({
+    ...messageFixture(),
+    text: "Test",
+    replyTo: "buyer@example.test",
   });
 
-  await assert.rejects(
-    harness.sendMail(messageFixture()),
-    /email is disabled.*EMAIL_SERVER_HOST/i,
-  );
-  assert.equal(harness.transportOptions.length, 0);
-  assert.equal(harness.messages.length, 0);
+  assert.equal(harness.requests.length, 1);
+  const [request] = harness.requests;
+  assert.equal(request.url, "https://api.resend.com/emails");
+  assert.equal(request.init.method, "POST");
+  assert.equal(request.init.headers.Authorization, "Bearer re_test_key");
+  assert.equal(request.init.headers["Content-Type"], "application/json");
+  assert.ok(request.init.headers["User-Agent"], "Resend refuses requests without a User-Agent");
+  assert.ok(request.init.signal instanceof AbortSignal, "a hung request is cut off");
+  assert.deepEqual(JSON.parse(request.init.body), {
+    from: "Store <store@example.test>",
+    to: "buyer@example.test",
+    subject: "Test message",
+    html: "<p>Test</p>",
+    text: "Test",
+    reply_to: "buyer@example.test",
+  });
 });
 
-test("host and credentials alone cannot enable delivery", async () => {
+test("an idempotency key reaches Resend scoped to the store origin, the same on every retry", async () => {
+  const harness = loadMailerHarness(resendConfig);
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await harness.sendMail({ ...messageFixture(), idempotencyKey: "work:7:email:customer" });
+  }
+
+  assert.deepEqual(
+    harness.requests.map(({ init }) => init.headers["Idempotency-Key"]),
+    ["store.example.test/work:7:email:customer", "store.example.test/work:7:email:customer"],
+  );
+});
+
+test("a message without a key sends no Idempotency-Key header", async () => {
+  const harness = loadMailerHarness(resendConfig);
+
+  await harness.sendMail(messageFixture());
+
+  assert.equal("Idempotency-Key" in harness.requests[0].init.headers, false);
+});
+
+test("without a key in production nothing is sent and the failure is permanent", async () => {
+  const harness = loadMailerHarness({ NODE_ENV: "production" });
+
+  await assert.rejects(harness.sendMail(messageFixture()), (error) => {
+    assert.ok(error instanceof MailDeliveryError);
+    assert.equal(error.reason, "not_configured");
+    assert.equal(error.retryable, false);
+    return true;
+  });
+  assert.equal(harness.requests.length, 0);
+});
+
+test("without a key in development the message is printed instead of sent", async () => {
+  const harness = loadMailerHarness({ NODE_ENV: "development" });
+
+  await harness.sendMail({
+    ...messageFixture(),
+    text: "Confirm: https://store.example.test/api/auth/verify-email?token=abc",
+  });
+
+  assert.equal(harness.requests.length, 0);
+  assert.equal(harness.printed.length, 1);
+  assert.match(harness.printed[0], /buyer@example\.test/);
+  assert.match(harness.printed[0], /Test message/);
+  assert.match(harness.printed[0], /verify-email\?token=abc/);
+});
+
+test("a key without EMAIL_FROM fails before any request", async () => {
+  const harness = loadMailerHarness({ NODE_ENV: "production", RESEND_API_KEY: "re_test_key" });
+
+  await assert.rejects(harness.sendMail(messageFixture()), { reason: "not_configured" });
+  assert.equal(harness.requests.length, 0);
+});
+
+test("legacy SMTP or public variables cannot enable delivery", async () => {
   const harness = loadMailerHarness({
+    NODE_ENV: "production",
     EMAIL_SERVER_HOST: "smtp.example.test",
+    EMAIL_SERVER_PORT: "587",
     EMAIL_SERVER_USER: "mailer@example.test",
     EMAIL_SERVER_PASSWORD: "test-password",
+    NEXT_PUBLIC_RESEND_API_KEY: "re_public_key",
+    EMAIL_FROM: "store@example.test",
   });
 
-  await assert.rejects(
-    harness.sendMail(messageFixture()),
-    /email configuration is incomplete or invalid/i,
-  );
-  assert.equal(harness.transportOptions.length, 0);
-  assert.equal(harness.messages.length, 0);
+  await assert.rejects(harness.sendMail(messageFixture()), { reason: "not_configured" });
+  assert.equal(harness.requests.length, 0);
 });
 
-for (const requiredVariable of [
-  "EMAIL_SERVER_PORT",
-  "EMAIL_SERVER_USER",
-  "EMAIL_SERVER_PASSWORD",
-  "EMAIL_FROM",
-  "EMAIL_CONTACT_TO",
-]) {
-  test(`missing ${requiredVariable} fails before a transport is created`, async () => {
-    const environment = { ...completeConfig };
-    delete environment[requiredVariable];
-    const harness = loadMailerHarness(environment);
+test("customer mail needs no contact address; the owner address comes from EMAIL_CONTACT_TO, then ADMIN_EMAIL", async () => {
+  const withoutContact = loadMailerHarness(resendConfig);
+  await withoutContact.sendMail(messageFixture());
+  assert.equal(withoutContact.requests.length, 1);
+  assert.throws(() => withoutContact.getContactEmailAddress(), { reason: "not_configured" });
 
-    await assert.rejects(
-      harness.sendMail(messageFixture()),
-      /email configuration is incomplete or invalid/i,
-    );
-    assert.equal(harness.transportOptions.length, 0);
-    assert.equal(harness.messages.length, 0);
+  const withAdmin = loadMailerHarness({ ...resendConfig, ADMIN_EMAIL: "admin@example.test" });
+  assert.equal(withAdmin.getContactEmailAddress(), "admin@example.test");
+
+  const withBoth = loadMailerHarness({
+    ...resendConfig,
+    EMAIL_CONTACT_TO: "owner@example.test",
+    ADMIN_EMAIL: "admin@example.test",
   });
-}
-
-test("legacy public email variables cannot replace the SMTP user", async () => {
-  const environment = {
-    ...completeConfig,
-    EMAIL_SERVER_USER: "",
-    NEXT_PUBLIC_EMAIL_USERNAME: "legacy@example.test",
-  };
-  const harness = loadMailerHarness(environment);
-
-  await assert.rejects(
-    harness.sendMail(messageFixture()),
-    /email configuration is incomplete or invalid/i,
-  );
-  assert.equal(harness.transportOptions.length, 0);
-  assert.equal(harness.messages.length, 0);
+  assert.equal(withBoth.getContactEmailAddress(), "owner@example.test");
 });
 
-test("invalid SMTP ports fail before a transport is created", async () => {
-  for (const port of ["not-a-port", "0", "65536"]) {
-    const harness = loadMailerHarness({
-      ...completeConfig,
-      EMAIL_SERVER_PORT: port,
+test("any non-2xx reply rejects with its status", async () => {
+  const harness = loadMailerHarness(resendConfig, async () =>
+    Response.json({ name: "validation_error", message: "domain not verified" }, { status: 403 }));
+
+  await assert.rejects(harness.sendMail(messageFixture()), (error) => {
+    assert.ok(error instanceof MailDeliveryError);
+    assert.equal(error.status, 403);
+    assert.equal(error.retryable, false);
+    return true;
+  });
+});
+
+test("a network failure or timeout is retryable", async () => {
+  for (const failure of [
+    new TypeError("fetch failed"),
+    new DOMException("The operation timed out.", "TimeoutError"),
+  ]) {
+    const harness = loadMailerHarness(resendConfig, async () => {
+      throw failure;
     });
 
-    await assert.rejects(
-      harness.sendMail(messageFixture()),
-      /email configuration is incomplete or invalid/i,
-    );
-    assert.equal(harness.transportOptions.length, 0);
-    assert.equal(harness.messages.length, 0);
+    await assert.rejects(harness.sendMail(messageFixture()), (error) => {
+      assert.ok(error instanceof MailDeliveryError);
+      assert.equal(error.reason, "unavailable");
+      assert.equal(error.retryable, true);
+      return true;
+    });
   }
 });
 
-test("ADMIN_EMAIL can explicitly provide the contact recipient", async () => {
-  const environment = {
-    ...completeConfig,
-    EMAIL_CONTACT_TO: "",
-    ADMIN_EMAIL: "admin@example.test",
-  };
-  const harness = loadMailerHarness(environment);
-
-  await harness.sendMail(messageFixture());
-
-  assert.equal(harness.getContactEmailAddress(), "admin@example.test");
-  assert.equal(harness.transportOptions.length, 1);
-  assert.equal(harness.messages.length, 1);
-});
-
-test("complete Gmail SMTP configuration is explicit and supported", async () => {
-  const harness = loadMailerHarness({
-    ...completeConfig,
-    EMAIL_SERVER_HOST: "smtp.gmail.com",
-    EMAIL_SERVER_PORT: "465",
-  });
-
-  await harness.sendMail(messageFixture());
-
-  assert.deepEqual(harness.transportOptions, [{
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: "mailer@example.test",
-      pass: "test-password",
-    },
-  }]);
-  assert.equal(harness.messages.length, 1);
-});
-
-test("complete generic SMTP configuration preserves delivery", async () => {
-  const harness = loadMailerHarness(completeConfig);
-
-  await harness.sendMail(messageFixture());
-
-  assert.deepEqual(harness.transportOptions, [{
-    host: "smtp.example.test",
-    port: 587,
-    secure: false,
-    auth: {
-      user: "mailer@example.test",
-      pass: "test-password",
-    },
-  }]);
-  assert.deepEqual(harness.messages, [{
-    from: "store@example.test",
-    ...messageFixture(),
-  }]);
-});
-
 test("disabled email leaves a confirmed order safe and reports delayed delivery", async () => {
-  const harness = loadMailerHarness({});
+  const harness = loadMailerHarness({ NODE_ENV: "production" });
   const effect = {
     id: 9,
     idempotencyKey: "work:7:email:customer",
@@ -189,11 +182,13 @@ test("disabled email leaves a confirmed order safe and reports delayed delivery"
         effect.state = "succeeded";
       },
     });
-  } catch {
-    effect.state = "pending";
-    effect.lastErrorCode = "unexpected";
+  } catch (error) {
+    const failure = classifyFulfillmentError(error);
+    effect.state = failure.retryable ? "pending" : "needs_attention";
+    effect.lastErrorCode = failure.code;
   }
 
+  assert.equal(effect.lastErrorCode, "email_not_configured");
   const outcome = checkoutOutcomeFromRecord({
     workState: "succeeded",
     orderId: 42,
@@ -212,25 +207,16 @@ test("disabled email leaves a confirmed order safe and reports delayed delivery"
     customerEmailMessage(outcome.customerEmail),
     "Email delivery is delayed, but your order is confirmed and safe.",
   );
-  assert.equal(harness.transportOptions.length, 0);
-  assert.equal(harness.messages.length, 0);
+  assert.equal(harness.requests.length, 0);
 });
 
-function loadMailerHarness(environment) {
-  const transportOptions = [];
-  const messages = [];
+function loadMailerHarness(environment, respond = async () => Response.json({ id: "email-1" })) {
+  const requests = [];
+  const printed = [];
   const modules = {
     "server-only": {},
-    nodemailer: {
-      createTransport: (options) => {
-        transportOptions.push(options);
-        return {
-          sendMail: async (message) => {
-            messages.push(message);
-          },
-        };
-      },
-    },
+    "@/lib/app-origin": { getCanonicalAppOrigin: () => "https://store.example.test" },
+    "./delivery-error": deliveryError,
   };
   const compiled = ts.transpileModule(source, {
     compilerOptions: {
@@ -242,13 +228,19 @@ function loadMailerHarness(environment) {
   }).outputText;
   const mailerModule = { exports: {} };
   const mockedRequire = (id) => modules[id] ?? nativeRequire(id);
-  new Function("require", "module", "exports", "process", compiled)(
+  const fetch = async (url, init) => {
+    requests.push({ url, init });
+    return respond(url, init);
+  };
+  new Function("require", "module", "exports", "process", "fetch", "console", compiled)(
     mockedRequire,
     mailerModule,
     mailerModule.exports,
     { env: environment },
+    fetch,
+    { info: (message) => printed.push(message) },
   );
-  return { ...mailerModule.exports, messages, transportOptions };
+  return { ...mailerModule.exports, requests, printed };
 }
 
 function messageFixture() {
