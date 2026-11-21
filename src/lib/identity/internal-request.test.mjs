@@ -21,7 +21,7 @@ test("cron credentials fail closed when the server is not configured", () => {
 });
 
 test("cron credentials reject a missing or incorrect bearer token", () => {
-  for (const authorization of [null, "Bearer wrong"] ) {
+  for (const authorization of [null, "Bearer wrong", "Bearer expecte", "Bearer expected2", "expected"]) {
     const headers = new Headers();
     if (authorization) headers.set("authorization", authorization);
 

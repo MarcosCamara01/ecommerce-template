@@ -50,6 +50,33 @@ test("photos are served as AVIF or WebP, at photo quality, and cached for a mont
   });
 });
 
+test("every response refuses framing and sends the defensive headers", () => {
+  const output = execFileSync(
+    process.execPath,
+    [
+      "-e",
+      `const config = require("./next.config.js");
+       config.headers().then((rules) => {
+         process.stdout.write(JSON.stringify(rules.map((rule) => ({
+           source: rule.source,
+           headers: Object.fromEntries(rule.headers.map((h) => [h.key, h.value])),
+         }))));
+       });`,
+    ],
+    { cwd: process.cwd(), encoding: "utf8" },
+  );
+
+  const [rule, ...rest] = JSON.parse(output);
+  assert.equal(rest.length, 0);
+  assert.equal(rule.source, "/:path*");
+  assert.match(rule.headers["Content-Security-Policy"], /frame-ancestors 'none'/);
+  assert.equal(rule.headers["X-Frame-Options"], "DENY");
+  assert.equal(rule.headers["X-Content-Type-Options"], "nosniff");
+  assert.equal(rule.headers["Referrer-Policy"], "strict-origin-when-cross-origin");
+  assert.ok(rule.headers["Permissions-Policy"]);
+  assert.equal(rule.headers["Cross-Origin-Opener-Policy"], "same-origin");
+});
+
 test("no remote image host is open at every path", () => {
   const output = execFileSync(
     process.execPath,

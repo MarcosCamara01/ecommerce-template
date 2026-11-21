@@ -24,8 +24,36 @@ const allowLocalSupabaseImages = Boolean(
     ),
 );
 
+// Sent on every response. No page of the store is ever shown inside a frame,
+// so framing is refused everywhere: a page that hides the admin or the bag
+// under its own buttons can no longer turn a click into an action here.
+// The policy has no script-src: a nonce would need a render per request, and
+// under Cache Components the catalogue pages are prerendered once.
+const securityHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+  },
+  // frame-ancestors for browsers that predate it.
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  // The result page carries the Checkout Session id in its query string;
+  // another origin gets the store's origin and nothing after it.
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // Payment happens on Stripe's own page, so the store asks for none of these.
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=()",
+  },
+  // Google sign-in and Stripe Checkout are full-page redirects, not popups.
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+];
+
 const nextConfig = {
   cacheComponents: true,
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
   images: {
     // AVIF first, WebP for browsers without it. On the catalogue photos AVIF
     // is about a third lighter than WebP at the same fidelity.
