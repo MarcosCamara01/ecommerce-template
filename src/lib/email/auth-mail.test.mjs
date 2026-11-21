@@ -13,6 +13,9 @@ const recipient = { email: "alex@example.test", name: "Alex" };
 const VERIFY_URL =
   "https://store.example.test/api/auth/verify-email?token=abc.def.ghi&callbackURL=%2Femail-verification";
 
+const linksIn = (body) =>
+  [...new Set(body.match(/https:\/\/[^\s<"]+/g) ?? [])].map((link) => link.replaceAll("&amp;", "&"));
+
 test("the verification mail goes to the user with the link in both html and text", async () => {
   const harness = loadAuthMailHarness();
 
@@ -26,11 +29,8 @@ test("the verification mail goes to the user with the link in both html and text
   const [message] = harness.messages;
   assert.equal(message.to, "alex@example.test");
   assert.equal(message.subject, "Confirm your email address");
-  assert.ok(message.text.includes(VERIFY_URL), "the text part carries the link");
-  assert.ok(
-    message.html.includes(VERIFY_URL.replaceAll("&", "&amp;")),
-    "the html part carries the link",
-  );
+  assert.deepEqual(linksIn(message.text), [VERIFY_URL], "the text part carries only the link");
+  assert.deepEqual(linksIn(message.html), [VERIFY_URL], "the html part carries only the link");
   assert.match(message.text, /expires in 1 hour/);
   assert.match(message.text, /didn't ask for this, ignore this email/);
 });
@@ -54,8 +54,8 @@ test("the reset mail carries the reset link and says to ignore it if unrequested
   const [message] = harness.messages;
   assert.equal(message.to, "alex@example.test");
   assert.equal(message.subject, "Reset your password");
-  assert.ok(message.text.includes(url));
-  assert.ok(message.html.includes(url.replaceAll("&", "&amp;")));
+  assert.deepEqual(linksIn(message.text), [url]);
+  assert.deepEqual(linksIn(message.html), [url]);
   assert.match(message.text, /expires in 1 hour/);
   assert.match(message.text, /didn't ask for this, ignore this email/);
 });
@@ -73,8 +73,9 @@ test("the existing-account mail links sign-in and password reset, and mentions G
 
   const [withoutGoogle, withGoogle] = harness.messages;
   assert.equal(withoutGoogle.subject, "You already have an account");
-  assert.ok(withoutGoogle.text.includes("https://store.example.test/login"));
-  assert.ok(withoutGoogle.text.includes("https://store.example.test/forgot-password"));
+  const expectedLinks = [mail.resetUrl, mail.signInUrl].sort();
+  assert.deepEqual(linksIn(withoutGoogle.text).sort(), expectedLinks);
+  assert.deepEqual(linksIn(withoutGoogle.html).sort(), expectedLinks);
   assert.doesNotMatch(withoutGoogle.text, /verify-email|token=/);
   assert.doesNotMatch(withoutGoogle.text, /Google/);
   assert.match(withGoogle.text, /Continue with Google/);
