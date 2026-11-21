@@ -321,6 +321,9 @@ async function waitUntilReady(containerName) {
         "exec",
         containerName,
         "psql",
+        // TCP, not the socket: the image's init-time temporary server is socket-only and stops right after init.
+        "-h",
+        "127.0.0.1",
         "-X",
         "-A",
         "-t",
