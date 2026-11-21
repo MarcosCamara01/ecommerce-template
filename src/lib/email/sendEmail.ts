@@ -155,7 +155,7 @@ function formatOwnerEmail(orderDetails: OrderWithDetails): string {
   `;
 }
 
-async function sendCustomerEmail(orderDetails: OrderWithDetails, messageId: string) {
+async function sendCustomerEmail(orderDetails: OrderWithDetails, idempotencyKey: string) {
   if (!orderDetails.customerInfo.email) {
     console.warn("Skipping customer email: missing customer email address");
     return;
@@ -165,39 +165,31 @@ async function sendCustomerEmail(orderDetails: OrderWithDetails, messageId: stri
     to: orderDetails.customerInfo.email,
     subject: "Order Confirmation - Purchase Receipt",
     html: formatOrderEmail(orderDetails),
-    messageId,
+    idempotencyKey,
   });
 }
 
-async function sendOwnerEmail(orderDetails: OrderWithDetails, messageId: string) {
+async function sendOwnerEmail(orderDetails: OrderWithDetails, idempotencyKey: string) {
   await sendMail({
     to: getContactEmailAddress(),
     subject: `New Order #${orderDetails.orderNumber}`,
     replyTo: orderDetails.customerInfo.email || undefined,
     html: formatOwnerEmail(orderDetails),
-    messageId,
+    idempotencyKey,
   });
 }
 
-/**
- * Sends the message for one fulfillment effect. SMTP delivery is at least
- * once, so a crash can resend it. The Message-ID derives from the effect's
- * idempotency key, so a resend carries the same id and receivers can drop the
- * duplicate.
- */
 export const sendEmail = async (
   orderDetails: OrderWithDetails,
   delivery: OrderEmailDelivery,
   idempotencyKey: string,
 ) => {
-  const stableId = idempotencyKey.replace(/[^a-zA-Z0-9._-]/g, "-");
-  const messageId = `<${stableId}@ecommerce-template.local>`;
   if (delivery === "customer") {
-    await sendCustomerEmail(orderDetails, messageId);
+    await sendCustomerEmail(orderDetails, idempotencyKey);
     return;
   }
   if (delivery === "owner") {
-    await sendOwnerEmail(orderDetails, messageId);
+    await sendOwnerEmail(orderDetails, idempotencyKey);
     return;
   }
   throw new Error(`Unsupported order email delivery: ${String(delivery)}`);

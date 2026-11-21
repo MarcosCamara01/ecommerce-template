@@ -28,7 +28,7 @@ Stripe webhook delivery first creates an immutable Event Receipt and one Work ro
 
 The application stores a server-created snapshot of at most 100 distinct cart lines, including variant, size, quantity, unit amount, and currency, in the durable Checkout Intent. Before persistence, the EUR aggregate must remain between Stripe's 50-cent minimum and 99,999,999-cent maximum. Stripe metadata contains only its opaque `checkoutIntentId` reference. Fulfillment resolves that immutable intent, re-fetches Stripe, and reconciles aggregate charged quantities, unit amounts, and currency against the snapshot and current stable catalog mappings. The live cart is never a fulfillment input.
 
-One transaction creates or finds the idempotent order, marks Work succeeded, and enqueues durable email/cart-cleanup effects. Effects run after commit with independent leases and retries. Email is at-least-once with deterministic message ids; cleanup is idempotent.
+One transaction creates or finds the idempotent order, marks Work succeeded, and enqueues durable email/cart-cleanup effects. Effects run after commit with independent leases and retries. Email is at-least-once: each send carries the effect's key as Resend's `Idempotency-Key`, so a resend within 24 hours is not delivered twice, and a Resend refusal no retry can fix goes straight to `needs_attention`. Cleanup is idempotent.
 
 ## Catalog synchronization
 

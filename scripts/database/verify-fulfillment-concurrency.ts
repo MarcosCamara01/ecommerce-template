@@ -462,7 +462,7 @@ async function main() {
       { limit: 5 },
       {
         sendEmail: async () => {
-          throw new Error("Injected SMTP failure");
+          throw new Error("Injected mail failure");
         },
       },
     );
@@ -473,7 +473,7 @@ async function main() {
              count(*) filter (
                where effect.kind = 'order_email'
                  and effect.state = 'pending'
-                 and effect.last_error_detail like '%Injected SMTP failure%'
+                 and effect.last_error_detail like '%Injected mail failure%'
              )::int as failed_emails,
              count(*) filter (
                where effect.kind = 'cart_cleanup' and effect.state = 'succeeded'
@@ -490,7 +490,7 @@ async function main() {
         smtpEvidence.order_count === 1 &&
         smtpEvidence.failed_emails === 2 &&
         smtpEvidence.completed_cleanups === 1,
-      "SMTP failure did not preserve the committed order and independent effects",
+      "Mail failure did not preserve the committed order and independent effects",
     );
     const { dataAccess } = await import("../../src/lib/data-access");
     const { createUserPrincipalForIdentityModule } = await import(
@@ -590,7 +590,7 @@ async function main() {
       "Signed duplicate delivery created duplicate durable rows",
     );
     console.log("Fulfillment concurrency and expired-lease evidence: PASS");
-    console.log("Post-commit SMTP failure evidence: PASS");
+    console.log("Post-commit mail failure evidence: PASS");
     console.log("Truthful checkout outcome evidence: PASS");
     console.log("Write-once checkout binding evidence: PASS");
     console.log("Authorized replay and audit evidence: PASS");

@@ -8,7 +8,7 @@ import ts from "typescript";
 const nativeRequire = createRequire(import.meta.url);
 const source = await readFile(new URL("./sendEmail.ts", import.meta.url), "utf8");
 
-test("each durable email effect sends exactly one stable message", async () => {
+test("each durable email effect sends one message under its effect's idempotency key", async () => {
   const harness = loadEmailHarness();
   const order = orderFixture();
 
@@ -16,19 +16,27 @@ test("each durable email effect sends exactly one stable message", async () => {
   assert.equal(harness.messages.length, 1);
   assert.equal(harness.messages[0].to, "buyer@example.test");
   assert.equal(harness.messages[0].subject, "Order Confirmation - Purchase Receipt");
-  assert.equal(
-    harness.messages[0].messageId,
-    "<work-7-email-customer@ecommerce-template.local>",
-  );
+  assert.equal(harness.messages[0].idempotencyKey, "work:7:email:customer");
 
   await harness.sendEmail(order, "owner", "work:7:email:owner");
   assert.equal(harness.messages.length, 2);
   assert.equal(harness.messages[1].to, "owner@example.test");
   assert.equal(harness.messages[1].subject, "New Order #42");
-  assert.equal(
-    harness.messages[1].messageId,
-    "<work-7-email-owner@ecommerce-template.local>",
-  );
+  assert.equal(harness.messages[1].replyTo, "buyer@example.test");
+  assert.equal(harness.messages[1].idempotencyKey, "work:7:email:owner");
+});
+
+test("the same effect twice sends the same payload", async () => {
+  for (const delivery of ["customer", "owner"]) {
+    const harness = loadEmailHarness();
+    await harness.sendEmail(orderFixture(), delivery, `work:7:email:${delivery}`);
+    await harness.sendEmail(orderFixture(), delivery, `work:7:email:${delivery}`);
+    assert.deepEqual(
+      harness.messages[1],
+      harness.messages[0],
+      `a ${delivery} resend must match the first send, or Resend refuses the key`,
+    );
+  }
 });
 
 test("receipts preserve the bought product name and color after catalog edits", async () => {

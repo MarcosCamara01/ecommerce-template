@@ -1,3 +1,4 @@
+import { MailDeliveryError } from "../email/delivery-error.ts";
 import { ExistingOrderMismatchError } from "../orders/existing-order-idempotency.ts";
 import { externalErrorFacts } from "../external/error-facts.ts";
 
@@ -54,6 +55,9 @@ export function classifyFulfillmentError(error: unknown): {
   }
   if (error instanceof ExistingOrderMismatchError) {
     return { code: error.code, detail: error.message, retryable: false };
+  }
+  if (error instanceof MailDeliveryError) {
+    return { code: `email_${error.reason}`, detail: error.message, retryable: error.retryable };
   }
   if (typeof error === "object" && error !== null) {
     const facts = externalErrorFacts(error);

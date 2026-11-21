@@ -6,6 +6,7 @@ import {
   assertReferencedVariantsExist,
   reconcileChargedItems,
 } from "./checkout-snapshot.ts";
+import { MailDeliveryError } from "../email/delivery-error.ts";
 import { ExistingOrderMismatchError } from "../orders/existing-order-idempotency.ts";
 
 test("typed permanent failures never retry", () => {
@@ -87,4 +88,23 @@ test("typed permanent Stripe failures remain terminal", () => {
     message: "invalid request",
   });
   assert.equal(result.retryable, false);
+});
+
+test("a permanent mail failure goes directly to needs_attention", () => {
+  const result = classifyFulfillmentError(
+    new MailDeliveryError("rejected", "Resend answered 403 (validation_error)", 403),
+  );
+  assert.equal(result.code, "email_rejected");
+  assert.equal(result.detail, "Resend answered 403 (validation_error)");
+  assert.equal(result.retryable, false);
+  assert.equal(retryAt(1, result.retryable), null);
+});
+
+test("a transient mail failure retries within the budget", () => {
+  const result = classifyFulfillmentError(
+    new MailDeliveryError("rate_limited", "Resend answered 429 (rate_limit_exceeded)", 429),
+  );
+  assert.equal(result.code, "email_rate_limited");
+  assert.equal(result.retryable, true);
+  assert.notEqual(retryAt(1, result.retryable), null);
 });
