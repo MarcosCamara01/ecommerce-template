@@ -1,10 +1,11 @@
 "use client";
 
-import { Suspense, type FormEvent, useRef } from "react";
+import { Suspense, useActionState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { FaGoogle } from "react-icons/fa6";
 
 import { AuthShell } from "@/components/auth/AuthShell";
+import { CheckEmail } from "@/components/auth/CheckEmail";
 import { FormError } from "@/components/auth/FormError";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -12,52 +13,53 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loading-button";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-import { invalidFields } from "@/lib/auth/form-errors";
+import { authPageHref } from "@/lib/auth/email-flows";
+import { authFailureMessage, invalidFields } from "@/lib/auth/form-errors";
+import { SIGN_UP_START } from "@/lib/auth/form-state";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
+
+import { signUp } from "../actions";
 
 const FIELDS = ["name", "email", "password"] as const;
 
 function RegisterContent() {
-  const { signUp, signInWithGoogle } = useAuthMutation();
+  const { signInWithGoogle } = useAuthMutation();
+  const [state, formAction, isSubmitting] = useActionState(signUp, SIGN_UP_START);
   const searchParams = useSearchParams();
-  const nameRef = useRef<HTMLInputElement>(null!);
-  const emailRef = useRef<HTMLInputElement>(null!);
-  const passwordRef = useRef<HTMLInputElement>(null!);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-  const redirect = searchParams.get("redirect");
-  const callbackURL = safeLocalCallback(redirect);
-  const redirectSearch =
-    redirect && callbackURL !== "/"
-      ? `?redirect=${encodeURIComponent(callbackURL)}`
-      : "";
-  const nativeError = searchParams.get("error")
-    ? "Could not create the account. Check the form and try again."
-    : null;
+  const callbackURL = safeLocalCallback(searchParams.get("redirect"));
+  const signInHref = authPageHref("signIn", { redirect: callbackURL });
+  const failure = state.step === "form" ? state.failure : null;
 
   // Focus goes to the field to fix, unless it is already in one of them.
-  const focusInvalid = (failure: unknown) => {
+  useEffect(() => {
+    if (!failure) return;
     const refs = { name: nameRef, email: emailRef, password: passwordRef };
     const fields = invalidFields(failure, FIELDS).map((field) => refs[field].current);
     if (!fields.some((field) => field === document.activeElement)) fields[0]?.focus();
-  };
+  }, [failure]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    signUp.mutate(
-      {
-        email: emailRef.current.value,
-        password: passwordRef.current.value,
-        name: nameRef.current.value,
-        callbackURL,
-      },
-      { onError: focusInvalid },
+  if (state.step === "check-email") {
+    return (
+      <AuthShell
+        word="Join"
+        title="Check your email"
+        description="Open the link we sent to finish creating your account."
+        footerText="Already confirmed?"
+        footerHref={signInHref}
+        footerLinkLabel="Sign in here"
+      >
+        <CheckEmail email={state.email}>
+          Didn’t get it? Sign in with your email and password, and we’ll send a new link.
+        </CheckEmail>
+      </AuthShell>
     );
-  };
+  }
 
-  const error = signUp.error || signInWithGoogle.error || nativeError;
-  const invalid = invalidFields(signUp.error ?? nativeError, FIELDS);
-  const isSubmitting = signUp.isPending;
+  const invalid = invalidFields(failure, FIELDS);
   const isGoogleLoading = signInWithGoogle.isPending;
   const isLoading = isSubmitting || isGoogleLoading;
   const googleAuthEnabled =
@@ -69,21 +71,15 @@ function RegisterContent() {
       title="Create your account"
       description="Create your account in seconds with your email and password."
       footerText="Already have an account?"
-      footerHref={`/login${redirectSearch}`}
+      footerHref={signInHref}
       footerLinkLabel="Sign in here"
     >
-      <form
-        method="post"
-        action="/api/auth/email-form"
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-4"
-      >
-        <Input type="hidden" name="mode" value="sign-up" className="hidden" />
+      <form action={formAction} className="flex flex-col gap-4">
         <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
         <FormError
-          message={error instanceof Error ? error.message : error}
-          pending={signUp.isPending}
-          attempt={signUp.submittedAt}
+          message={failure?.message ?? authFailureMessage(signInWithGoogle.error)}
+          pending={isSubmitting}
+          attempt={failure?.attempt}
         />
 
         <div className="flex flex-col gap-4">
@@ -100,6 +96,7 @@ function RegisterContent() {
               ref={nameRef}
               required
               placeholder="Alex Morgan"
+              defaultValue={state.name}
 
               name="name"
               autoComplete="name"
@@ -121,6 +118,7 @@ function RegisterContent() {
               ref={emailRef}
               required
               placeholder="name@example.com"
+              defaultValue={state.email}
 
               name="email"
               autoComplete="email"

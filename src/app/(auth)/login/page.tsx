@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LoadingButton from "@/components/ui/loading-button";
 import { useAuthMutation } from "@/hooks/auth/useAuthMutation";
-import { invalidFields } from "@/lib/auth/form-errors";
+import { authErrorCode, authFailureMessage, invalidFields } from "@/lib/auth/form-errors";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
 
 const FIELDS = ["email", "password"] as const;
@@ -29,9 +29,8 @@ function LoginContent() {
     redirect && callbackURL !== "/"
       ? `?redirect=${encodeURIComponent(callbackURL)}`
       : "";
-  const nativeError = searchParams.get("error")
-    ? "Invalid email or password"
-    : null;
+  const noScriptErrorCode = searchParams.get("error");
+  const noScriptFailure = noScriptErrorCode ? { code: authErrorCode(noScriptErrorCode) } : null;
 
   // Focus goes to the field to fix, unless it is already in one of them.
   const focusInvalid = (failure: unknown) => {
@@ -53,8 +52,8 @@ function LoginContent() {
     );
   };
 
-  const error = signIn.error || signInWithGoogle.error || nativeError;
-  const invalid = invalidFields(signIn.error ?? nativeError, FIELDS);
+  const error = signIn.error ?? signInWithGoogle.error ?? noScriptFailure;
+  const invalid = invalidFields(signIn.error ?? noScriptFailure, FIELDS);
   const isSubmitting = signIn.isPending;
   const isGoogleLoading = signInWithGoogle.isPending;
   const isLoading = isSubmitting || isGoogleLoading;
@@ -76,10 +75,9 @@ function LoginContent() {
         action="/api/auth/email-form"
         onSubmit={handleSubmit}
       >
-        <Input type="hidden" name="mode" value="sign-in" className="hidden" />
         <Input type="hidden" name="callbackURL" value={callbackURL} className="hidden" />
         <FormError
-          message={error instanceof Error ? error.message : error}
+          message={authFailureMessage(error)}
           pending={signIn.isPending}
           attempt={signIn.submittedAt}
         />

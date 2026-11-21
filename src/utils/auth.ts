@@ -5,9 +5,16 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
 import { admin } from "better-auth/plugins";
 import { sql } from "drizzle-orm";
+import { after } from "next/server";
 
 import { getCanonicalAppOrigin } from "@/lib/app-origin";
+import {
+  VERIFICATION_LINK_TTL_SECONDS,
+  authPageHref,
+  verificationLandingLink,
+} from "@/lib/auth/email-flows";
 import { db } from "@/lib/db/drizzle/connection";
+import { sendAuthMail } from "@/lib/email";
 import {
   accounts,
   sessions,
@@ -75,9 +82,19 @@ async function rejectUnverifiedProviderLink(userId: string) {
   }
 }
 
+function runAfterResponse(task: Promise<unknown>) {
+  try {
+    after(task);
+  } catch {
+    // after() throws outside a Next request, as when a Node script calls
+    // auth.handler. The task is already running; it only misses the extended lifetime.
+  }
+}
+
 export const auth = betterAuth({
   baseURL: authBaseURL,
   trustedOrigins: authTrustedOrigins,
+  disabledPaths: ["/send-verification-email"],
   database: drizzleAdapter(db, {
     provider: "pg",
     transaction: true,
@@ -89,7 +106,13 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: true,
+    onExistingUserSignUp: ({ user }) =>
+      sendAuthMail(user, {
+        kind: "existing-account",
+        signInUrl: authPageHref("signIn", { origin: authBaseURL }),
+        googleEnabled: googleAuthEnabled,
+      }),
     customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
       ...coreFields,
       ...additionalFields,
@@ -102,8 +125,22 @@ export const auth = betterAuth({
   },
 
   emailVerification: {
-    sendOnSignUp: false,
-    sendOnSignIn: false,
+    // sendOnSignUp stays unset: it then follows requireEmailVerification for
+    // credential sign-ups and the unset Google option for OAuth, so Google
+    // sign-ups get no mail.
+    sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+    expiresIn: VERIFICATION_LINK_TTL_SECONDS,
+    sendVerificationEmail: ({ user, url }) =>
+      sendAuthMail(user, {
+        kind: "verify-email",
+        url: verificationLandingLink(url, authBaseURL),
+        expiresInSeconds: VERIFICATION_LINK_TTL_SECONDS,
+      }),
+  },
+
+  advanced: {
+    backgroundTasks: { handler: runAfterResponse },
   },
 
   account: {

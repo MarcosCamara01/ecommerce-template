@@ -1,71 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getCanonicalAppOrigin } from "@/lib/app-origin";
+import { authPageHref } from "@/lib/auth/email-flows";
+import { callAuthEndpoint } from "@/lib/auth/endpoint";
 import { safeLocalCallback } from "@/lib/auth/local-callback";
-import { auth } from "@/utils/auth";
 
-type FormMode = "sign-in" | "sign-up";
-
-const modeEndpoints: Record<FormMode, string> = {
-  "sign-in": "/api/auth/sign-in/email",
-  "sign-up": "/api/auth/sign-up/email",
-};
-
-function redirectWithCookies(destination: string, upstream?: Response) {
+function redirectWithCookies(destination: string, cookies: readonly string[] = []) {
   const response = NextResponse.redirect(
     new URL(destination, getCanonicalAppOrigin()),
     { status: 303 },
   );
-  const headers = upstream?.headers as
-    | (Headers & { getSetCookie?: () => string[] })
-    | undefined;
-  const cookies = headers?.getSetCookie?.() ?? [];
-  if (!cookies.length) {
-    const cookie = upstream?.headers.get("set-cookie");
-    if (cookie) cookies.push(cookie);
-  }
   for (const cookie of cookies) response.headers.append("set-cookie", cookie);
   return response;
 }
 
 export async function POST(request: NextRequest) {
   const form = await request.formData();
-  const mode = form.get("mode");
-  if (mode !== "sign-in" && mode !== "sign-up") {
-    return redirectWithCookies("/login?error=invalid_request");
-  }
+  const text = (name: string) => {
+    const value = form.get(name);
+    return typeof value === "string" ? value : "";
+  };
+  const callbackURL = safeLocalCallback(form.get("callbackURL"), getCanonicalAppOrigin());
 
-  const callbackURL = safeLocalCallback(
-    form.get("callbackURL"),
-    getCanonicalAppOrigin(),
-  );
-  const body = new URLSearchParams();
-  for (const field of mode === "sign-in"
-    ? ["email", "password"]
-    : ["name", "email", "password"]) {
-    const value = form.get(field);
-    if (typeof value === "string") body.set(field, value);
-  }
-  body.set("callbackURL", callbackURL);
+  const result = await callAuthEndpoint("/sign-in/email", {
+    email: text("email"),
+    password: text("password"),
+    callbackURL,
+  });
 
-  const headers = new Headers(request.headers);
-  headers.set("content-type", "application/x-www-form-urlencoded");
-  headers.delete("content-length");
-  const upstream = await auth.handler(
-    new Request(new URL(modeEndpoints[mode], getCanonicalAppOrigin()), {
-      method: "POST",
-      headers,
-      body,
-    }),
-  );
-
-  if (!upstream.ok) {
-    return redirectWithCookies(
-      mode === "sign-in"
-        ? "/login?error=invalid_credentials"
-        : "/register?error=registration_failed",
-    );
-  }
-
-  return redirectWithCookies(callbackURL, upstream);
+  return result.ok
+    ? redirectWithCookies(callbackURL, result.cookies)
+    : redirectWithCookies(authPageHref("signIn", { redirect: callbackURL, error: result.code }));
 }

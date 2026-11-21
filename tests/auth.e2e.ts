@@ -1,6 +1,15 @@
 import { expect, unique } from "e2e";
 
-import { asShopper, NEEDS_WRITES, newAccount, settled, shopperInStore, test, WRITES } from "./support/store";
+import {
+  asShopper,
+  NEEDS_WRITES,
+  newAccount,
+  settled,
+  shopperInStore,
+  test,
+  verificationLink,
+  WRITES,
+} from "./support/store";
 
 test.describe("signing in", { tags: ["auth", "agent"] }, () => {
   test("a wrong password is refused without saying which part was wrong", async ({ app, api, agent, browser }) => {
@@ -29,7 +38,7 @@ test.describe("signing in", { tags: ["auth", "agent"] }, () => {
 });
 
 test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? undefined : NEEDS_WRITES }, () => {
-  test("a visitor creates an account, signs out and signs back in", async ({ app, api, agent, browser }) => {
+  test("a visitor creates an account, confirms the email, signs out and signs back in", async ({ app, api, agent, browser, screen }) => {
     // unique() marks values that change every run, so the recording still replays.
     const account = newAccount("signup");
     const email = unique(account.email);
@@ -39,7 +48,13 @@ test.describe("accounts", { tags: ["auth", "agent", "writes"], skip: WRITES ? un
     await agent.act("create an account for {name} with the email {email} and the password {password}", {
       params: { name: account.name, email, password },
     });
-    await expect(browser).toHaveURL("/");
+    await expect(screen.getByText("Check your email")).toBeVisible();
+    await expect(browser).toHaveURL("/register");
+    expect(await shopperInStore(api)).toBeNull();
+
+    await app.open(await verificationLink(account.email, "/email-verification"));
+    await expect(browser).toHaveURL("/email-verification");
+    await expect(screen.getByText("Email verified")).toBeVisible();
     expect(await shopperInStore(api)).toMatchObject({ email: account.email, name: account.name });
 
     await agent.act("sign out of the account");
@@ -78,24 +93,51 @@ test.describe("doors that stay shut", { tags: ["auth"] }, () => {
 });
 
 test.describe("an email that is taken", { tags: ["auth", "writes"], skip: WRITES ? undefined : NEEDS_WRITES }, () => {
-  test("cannot be used for a second account", async ({ app, api, screen, browser }) => {
+  test("gets the same check-email answer and signs nobody in", async ({ app, api, screen }) => {
     const account = newAccount("twice");
-    for (const attempt of ["first", "second"]) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
       await app.open("/register");
       await screen.getByLabel("Full name").fill(account.name);
       await screen.getByLabel("Email").fill(account.email);
       await screen.getByLabel("Password").fill(account.password);
       await screen.getByRole("button", "Create account").tap();
-      if (attempt === "first") {
-        // Signed up and signed in: forget the session and come back as a stranger.
-        await expect(browser).toHaveURL("/");
-        await app.clearState();
-      }
+      await expect(screen.getByText("Check your email")).toBeVisible();
+      await expect(screen.getByText(account.email)).toBeVisible();
+      await app.clearState();
     }
 
-    await expect(screen.getByText(/already/i).first()).toBeVisible();
-    await expect(browser).toHaveURL(/\/register(\?|$)/);
+    await expect(screen.getByText(/already/i)).toHaveCount(0);
     expect(await shopperInStore(api)).toBeNull();
+  });
+});
+
+test.describe("an unverified account", { tags: ["auth", "writes"], skip: WRITES ? undefined : NEEDS_WRITES }, () => {
+  test("is told to verify the email at sign-in", async ({ app, api, screen, browser }) => {
+    const account = newAccount("unverified");
+    await app.open("/register");
+    await screen.getByLabel("Full name").fill(account.name);
+    await screen.getByLabel("Email").fill(account.email);
+    await screen.getByLabel("Password").fill(account.password);
+    await screen.getByRole("button", "Create account").tap();
+    await expect(screen.getByText("Check your email")).toBeVisible();
+
+    await app.open("/login");
+    await screen.getByLabel("Email").fill(account.email);
+    await screen.getByLabel("Password").fill(account.password);
+    await screen.getByRole("button", "Sign in").tap();
+
+    await expect(screen.getByText(/verify your email/i)).toBeVisible();
+    await expect(browser).toHaveURL(/\/login(\?|$)/);
+    expect(await shopperInStore(api)).toBeNull();
+  });
+});
+
+test.describe("a verification link", { tags: ["auth"] }, () => {
+  test("that has expired offers a way to sign in for a new one", async ({ app, screen }) => {
+    await app.open("/email-verification?error=TOKEN_EXPIRED&redirect=%2Fcart");
+
+    await expect(screen.getByText("This link has expired")).toBeVisible();
+    await expect(screen.getByRole("link", "Sign in")).toHaveAttribute("href", "/login?redirect=%2Fcart");
   });
 });
 
