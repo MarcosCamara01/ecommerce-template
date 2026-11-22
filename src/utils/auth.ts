@@ -14,6 +14,7 @@ import {
   authPageHref,
   verificationLandingLink,
 } from "@/lib/auth/email-flows";
+import { refuseUsedVerificationLink } from "@/lib/auth/verification-link";
 import { db } from "@/lib/db/drizzle/connection";
 import { sendAuthMail } from "@/lib/email";
 import {
@@ -159,6 +160,8 @@ export const auth = betterAuth({
         expiresInSeconds: VERIFICATION_LINK_TTL_SECONDS,
       }),
   },
+
+  hooks: { before: refuseUsedVerificationLink },
 
   advanced: {
     backgroundTasks: { handler: runAfterResponse },
