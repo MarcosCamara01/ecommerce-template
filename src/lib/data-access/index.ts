@@ -64,7 +64,8 @@ function forUser(value: Principal): UserDataAccess {
 
   return {
     checkout: {
-      createIntent: (items) => checkoutRepository.create(userId, items),
+      claimIntent: (items, staleIntentIds) =>
+        checkoutRepository.claim(userId, items, staleIntentIds),
       bindIntent: (intentId, checkoutSessionId) =>
         checkoutRepository.bind(userId, intentId, checkoutSessionId),
       ownsSession: async (intentId, checkoutSessionId) =>
@@ -191,9 +192,10 @@ export const dataAccess = {
 
 type UserDataAccess = {
   checkout: {
-    createIntent: (
+    claimIntent: (
       items: CheckoutIntentItem[],
-    ) => ReturnType<typeof checkoutRepository.create>;
+      staleIntentIds: readonly string[],
+    ) => ReturnType<typeof checkoutRepository.claim>;
     bindIntent: (
       intentId: string,
       checkoutSessionId: string,

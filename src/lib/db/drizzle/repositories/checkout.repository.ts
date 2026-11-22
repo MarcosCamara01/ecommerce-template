@@ -1,7 +1,9 @@
 import "server-only";
 
-import { and, eq, sql } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
+import { and, desc, eq, gt, sql } from "drizzle-orm";
+import { createHash, randomUUID } from "node:crypto";
+
+import { planCheckoutIntent } from "@/lib/cart/checkout-intent-plan";
 
 import { db } from "../connection";
 import {
@@ -27,6 +29,17 @@ type OwnedCheckoutOutcomeRecord = Readonly<{
     | "needs_attention"
     | null;
 }>;
+
+const CHECKOUT_INTENT_LOCK_NAMESPACE = 42_002;
+// Stripe refuses expires_at less than 30 minutes after a session is created.
+const STRIPE_MIN_SESSION_MINUTES = 30;
+const SESSION_MINUTES = STRIPE_MIN_SESSION_MINUTES + 1;
+const REUSE_MIN_REMAINING = sql`interval '5 minutes'`;
+const MAX_OPEN_INTENTS = 50;
+
+function checkoutLockKey(userId: string): number {
+  return createHash("sha256").update(userId).digest().readInt32BE(0);
+}
 
 type RawOwnedCheckoutOutcomeRecord = Omit<
   OwnedCheckoutOutcomeRecord,
@@ -55,18 +68,52 @@ async function bindCheckoutIntent(
 }
 
 export const checkoutRepository = {
-  async create(userId: string, items: CheckoutIntentItem[]) {
-    const [intent] = await db
-      .insert(checkoutIntents)
-      .values({
-        id: randomUUID(),
-        userId,
-        items,
-        expiresAt: new Date(Date.now() + 31 * 60 * 1000),
-      })
-      .returning();
-    if (!intent) throw new Error("Checkout intent insert returned no row");
-    return intent;
+  async claim(
+    userId: string,
+    items: CheckoutIntentItem[],
+    staleIntentIds: readonly string[],
+  ) {
+    return db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(${CHECKOUT_INTENT_LOCK_NAMESPACE}, ${checkoutLockKey(userId)})`,
+      );
+      const open = await tx
+        .select({
+          id: checkoutIntents.id,
+          userId: checkoutIntents.userId,
+          checkoutSessionId: checkoutIntents.checkoutSessionId,
+          items: checkoutIntents.items,
+          expiresAt: checkoutIntents.expiresAt,
+          createdAt: checkoutIntents.createdAt,
+          reusable: sql<boolean>`${checkoutIntents.expiresAt} > now() + ${REUSE_MIN_REMAINING}
+            and (${checkoutIntents.checkoutSessionId} is not null
+              or ${checkoutIntents.expiresAt} > now() + make_interval(mins => ${STRIPE_MIN_SESSION_MINUTES}))`,
+        })
+        .from(checkoutIntents)
+        .where(
+          and(
+            eq(checkoutIntents.userId, userId),
+            gt(checkoutIntents.expiresAt, sql`now()`),
+          ),
+        )
+        .orderBy(desc(checkoutIntents.createdAt))
+        .limit(MAX_OPEN_INTENTS);
+      const plan = planCheckoutIntent(open, items, new Set(staleIntentIds));
+      if (plan.reuse) {
+        return { intent: plan.reuse, supersededSessionIds: plan.supersededSessionIds };
+      }
+      const [intent] = await tx
+        .insert(checkoutIntents)
+        .values({
+          id: randomUUID(),
+          userId,
+          items,
+          expiresAt: new Date(Date.now() + SESSION_MINUTES * 60 * 1000),
+        })
+        .returning();
+      if (!intent) throw new Error("Checkout intent insert returned no row");
+      return { intent, supersededSessionIds: plan.supersededSessionIds };
+    });
   },
 
   async bind(userId: string, intentId: string, checkoutSessionId: string) {

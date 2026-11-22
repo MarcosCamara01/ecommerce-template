@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import test from "node:test";
 
 import ts from "typescript";
+import { planCheckoutIntent } from "../../../../lib/cart/checkout-intent-plan.ts";
 import { stripeEurChargeTotal } from "../../../../lib/stripe/amount-limits.ts";
 
 const nativeRequire = createRequire(import.meta.url);
@@ -122,6 +123,179 @@ test("Checkout return URLs use the configured canonical application origin", () 
   assert.doesNotMatch(source, /request\.nextUrl\.origin/);
 });
 
+const openIntent = (overrides = {}) => ({
+  id: "intent-1",
+  checkoutSessionId: null,
+  expiresAt: new Date("2030-01-01T00:32:00Z"),
+  ...overrides,
+});
+
+test("concurrent checkouts of the same cart share one Checkout Session", async () => {
+  const intents = [];
+  let lock = Promise.resolve();
+  const claimIntent = (items, stale) => {
+    const run = lock.then(async () => {
+      const open = intents.map((intent) => ({ ...intent, reusable: true }));
+      const plan = planCheckoutIntent(open, items, new Set(stale));
+      if (plan.reuse) return { intent: plan.reuse, supersededSessionIds: [] };
+      const intent = openIntent({ id: `intent-${intents.length + 1}`, items });
+      intents.unshift(intent);
+      return { intent, supersededSessionIds: plan.supersededSessionIds };
+    });
+    lock = run;
+    return run;
+  };
+  const sessionsByKey = new Map();
+  const route = loadRouteHarness({
+    claimIntent,
+    stripeSessions: {
+      create: async (params, options) => {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        if (!sessionsByKey.has(options.idempotencyKey)) {
+          const id = `cs_${sessionsByKey.size + 1}`;
+          sessionsByKey.set(options.idempotencyKey, { id, url: `https://checkout.test/${id}` });
+        }
+        return sessionsByKey.get(options.idempotencyKey);
+      },
+    },
+  });
+  const responses = await Promise.all(
+    Array.from({ length: 15 }, () => route.POST(requestWith({ cartItemIds: [1] }))),
+  );
+  assert.deepEqual(new Set(responses.map((response) => response.status)), new Set([200]));
+  assert.equal(new Set(responses.map((response) => response.body.url)).size, 1);
+  assert.equal(sessionsByKey.size, 1);
+  assert.equal(intents.length, 1);
+});
+
+test("the session is created under the intent's idempotency key and expiry", async () => {
+  let call;
+  const response = await loadRouteHarness({
+    stripeSessions: {
+      create: async (params, options) => {
+        call = { params, options };
+        return { id: "cs_1", url: "https://checkout.test" };
+      },
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.equal(response.status, 200);
+  assert.equal(call.options.idempotencyKey, "checkout-intent:intent-1");
+  assert.equal(
+    call.params.expires_at,
+    Date.parse("2030-01-01T00:32:00Z") / 1000,
+  );
+});
+
+test("an open session for the same cart is returned instead of a new one", async () => {
+  const response = await loadRouteHarness({
+    claimIntent: async () => ({
+      intent: openIntent({ checkoutSessionId: "cs_open" }),
+      supersededSessionIds: [],
+    }),
+    stripeSessions: {
+      create: async () => assert.fail("a second payable session was created"),
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.deepEqual(response.body, { url: "https://checkout.test/cs_open" });
+});
+
+test("a cart whose session is already paid goes to its result page", async () => {
+  const response = await loadRouteHarness({
+    claimIntent: async () => ({
+      intent: openIntent({ checkoutSessionId: "cs_paid" }),
+      supersededSessionIds: [],
+    }),
+    stripeSessions: {
+      retrieve: async (id) => ({ id, status: "complete", url: null }),
+      create: async () => assert.fail("a paid cart was charged again"),
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.deepEqual(response.body, {
+    url: "https://shop.example.test/result?session_id=cs_paid",
+  });
+});
+
+test("superseded open sessions are expired before a new one is created", async () => {
+  const events = [];
+  const response = await loadRouteHarness({
+    claimIntent: async () => ({
+      intent: openIntent(),
+      supersededSessionIds: ["cs_old"],
+    }),
+    stripeSessions: {
+      expire: async (id) => {
+        events.push(`expire:${id}`);
+      },
+      create: async () => {
+        events.push("create");
+        return { id: "cs_new", url: "https://checkout.test/cs_new" };
+      },
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.equal(response.status, 200);
+  assert.deepEqual(events, ["expire:cs_old", "create"]);
+});
+
+test("a superseded session that was already paid stops the new charge", async () => {
+  const response = await loadRouteHarness({
+    claimIntent: async () => ({
+      intent: openIntent(),
+      supersededSessionIds: ["cs_paid"],
+    }),
+    stripeSessions: {
+      retrieve: async (id) => ({ id, status: "complete", url: null }),
+      create: async () => assert.fail("overlapping lines were charged twice"),
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.deepEqual(response.body, {
+    url: "https://shop.example.test/result?session_id=cs_paid",
+  });
+});
+
+test("a superseded session expired by a concurrent request is not an error", async () => {
+  let retrievals = 0;
+  const response = await loadRouteHarness({
+    claimIntent: async () => ({
+      intent: openIntent(),
+      supersededSessionIds: ["cs_old"],
+    }),
+    stripeSessions: {
+      retrieve: async (id) => ({
+        id,
+        status: (retrievals += 1) === 1 ? "open" : "expired",
+        url: null,
+      }),
+      expire: async () => {
+        throw new Error("Checkout Session is not open");
+      },
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.equal(response.status, 200);
+});
+
+test("an expired session for the same cart is replaced by a fresh intent", async () => {
+  const claims = [];
+  const response = await loadRouteHarness({
+    claimIntent: async (snapshot, stale) => {
+      claims.push([...stale]);
+      return claims.length === 1
+        ? { intent: openIntent({ id: "intent-old", checkoutSessionId: "cs_gone" }), supersededSessionIds: [] }
+        : { intent: openIntent({ id: "intent-new" }), supersededSessionIds: [] };
+    },
+    stripeSessions: {
+      retrieve: async (id) => ({ id, status: "expired", url: null }),
+      create: async (params, options) => ({
+        id: "cs_fresh",
+        url: `https://checkout.test/${options.idempotencyKey}`,
+      }),
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.deepEqual(claims, [[], ["intent-old"]]);
+  assert.deepEqual(response.body, {
+    url: "https://checkout.test/checkout-intent:intent-new",
+  });
+});
+
 class IdentityError extends Error {
   constructor(code, message) {
     super(message);
@@ -143,6 +317,8 @@ function loadRouteHarness({
   checkoutItemsError,
   checkoutItemsResult,
   onCreateIntent,
+  claimIntent,
+  stripeSessions = {},
   unitAmount = 1000,
 } = {}) {
   const principal = { kind: "user", userId: "user-1" };
@@ -161,10 +337,17 @@ function loadRouteHarness({
       },
     },
     checkout: {
-      createIntent: async (snapshot) => {
+      claimIntent: claimIntent ?? (async (snapshot) => {
         onCreateIntent?.(snapshot);
-        return { id: "intent-1" };
-      },
+        return {
+          intent: {
+            id: "intent-1",
+            checkoutSessionId: null,
+            expiresAt: new Date("2030-01-01T00:32:00Z"),
+          },
+          supersededSessionIds: [],
+        };
+      }),
       bindIntent: async () => ({ id: "intent-1" }),
     },
   };
@@ -199,7 +382,9 @@ function loadRouteHarness({
         checkout: {
           sessions: {
             create: async () => ({ id: "cs_1", url: "https://checkout.test" }),
+            retrieve: async (id) => ({ id, status: "open", url: `https://checkout.test/${id}` }),
             expire: async () => undefined,
+            ...stripeSessions,
           },
         },
       },
