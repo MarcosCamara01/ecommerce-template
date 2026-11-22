@@ -10,6 +10,7 @@ Branch `fix/pentest-2026-11-22`, based on `master` at `dec8856` (the commit the 
 | P1 (FIX-03, FIX-04, FIX-05) | https://github.com/MarcosCamara01/ecommerce-template/pull/118 | P0 |
 | P2 (FIX-06 to FIX-09) | https://github.com/MarcosCamara01/ecommerce-template/pull/119 | P1 |
 | P3 (FIX-10 to FIX-13) | https://github.com/MarcosCamara01/ecommerce-template/pull/120 | P2 |
+| FIX-01 follow-up (Vercel finding `01M81NC83`) | https://github.com/MarcosCamara01/ecommerce-template/pull/121 | `master` |
 
 ## Findings
 
@@ -28,6 +29,7 @@ Branch `fix/pentest-2026-11-22`, based on `master` at `dec8856` (the commit the 
 | FIX-11 | fixed | `a1ccb82` | `src/proxy.ts`, `src/proxy.test.mjs` |
 | FIX-12 | fixed | `cad2105` | `src/app/robots.ts` (+test), `src/app/sitemap.ts` (+test), `src/lib/routing/unknown-path.ts` (+test), `src/proxy.test.mjs` |
 | FIX-13 | already-correct, contract pinned and documented | `a47a51d` | `src/lib/identity/internal-request.test.mjs`, `README.md` |
+| FIX-01 follow-up | fixed; migration 0019 pending in production | `948c4db` | `drizzle/migrations/0019_checkout-intent-retire.sql` (+meta), `src/app/api/stripe/payment/route.ts` (+test), `src/lib/db/drizzle/repositories/checkout.repository.ts`, `src/lib/data-access/index.ts`, `scripts/database/checkout-binding-contract.ts` (+test), `scripts/database/verify.ts`, `scripts/database/schema-contract.ts`, `scripts/database/cutover-existing.sql`, `scripts/database/bootstrap-roles.sql`, `scripts/database/cutover-contract.test.mjs`, `scripts/database/runtime-product-privileges.test.mjs` |
 
 ## Where the backlog's suggestion was not followed
 
@@ -470,6 +472,60 @@ $ node --test src/lib/identity/internal-request.test.mjs
 ℹ fail 0
 ```
 
+### FIX-01 follow-up
+
+Vercel's security review flagged the FIX-01 code on #120 (`01M81NC83`, medium, denial of service). Superseded intents stayed open until their TTL, so every later checkout re-read each of their Stripe sessions. The route now retires the sessions Stripe confirms expired through `app_private.retire_checkout_intents`.
+
+The new route test drives 50 quantity changes and then 10 identical retries. Without the retire call it fails with `actual: 1225, expected: 49`. With it:
+
+```text
+$ node --test src/app/api/stripe/payment/route.test.mjs scripts/database/checkout-binding-contract.test.mjs
+✔ the canonical checkout intent functions are accepted (0.7761ms)
+✔ cutover marking rejects body, owner, security, search path, and ACL drift (0.2916ms)
+✔ a missing retirement function is rejected (0.1231ms)
+✔ retirement can only shorten the caller's own unexpired intents (0.1117ms)
+✔ malformed checkout JSON returns a clear 400 (108.8508ms)
+✔ Zod and unavailable cart items remain 400 (17.5267ms)
+✔ missing identity remains 401 (5.1454ms)
+✔ unexpected checkout failures remain 500 (5.5517ms)
+✔ resolved checkout snapshots are bounded before intent persistence (4.1745ms)
+✔ Stripe aggregate charge limits are enforced before intent persistence (8.6082ms)
+✔ Checkout Sessions carry the stable integration identifier (0.171ms)
+✔ checkout intent snapshots immutable product display facts (4.7439ms)
+✔ Checkout return URLs use the configured canonical application origin (0.1403ms)
+✔ concurrent checkouts of the same cart share one Checkout Session (23.4581ms)
+✔ the session is created under the intent's idempotency key and expiry (4.1838ms)
+✔ an open session for the same cart is returned instead of a new one (3.9758ms)
+✔ a cart whose session is already paid goes to its result page (3.7976ms)
+✔ superseded open sessions are expired before a new one is created (3.7957ms)
+✔ a superseded session that was already paid stops the new charge (3.7041ms)
+✔ a superseded session expired by a concurrent request is not an error (3.5218ms)
+✔ an expired session for the same cart is replaced by a fresh intent (4.6984ms)
+✔ only sessions Stripe confirms expired are retired (3.4197ms)
+✔ a paid superseded session is never retired (3.4784ms)
+✔ each superseded session is read from Stripe until it is retired, not on every checkout (4.4633ms)
+ℹ tests 24
+ℹ pass 24
+ℹ fail 0
+```
+
+Migration 0019 rehearsed on the hosted database in one transaction that always rolls back:
+
+```text
+PASS connected as app_migrator
+PASS migration 0019 applies as app_owner
+PASS function contracts hold []
+PASS app_runtime can execute the retire function
+PASS anon and authenticated cannot execute it
+PASS app_runtime still cannot update expires_at directly
+PASS another user's id retires nothing
+PASS the owner's confirmed session leaves the open set, the other stays
+PASS retiring twice is a no-op
+PASS the repository's parameterised query retires by session id (3 params)
+ROLLED BACK, nothing persisted
+PASS function absent after rollback
+```
+
 ### Post-fix live checks on production
 
 P0 to P2 (#117, #118, #119) are merged, and production serves `dpl_7b4yyZgtUu2axHK3nrwCZDyjWuf3`. These are anonymous checks run with `live-after-p2.sh`, one request every 0.3 seconds:
@@ -525,16 +581,47 @@ Only console entry on /: [warn] Feature-Policy and Permissions-Policy both set c
 
 The previews could not be checked. They are behind Vercel Authentication, and no share link was created.
 
-P3 (#120) is not merged yet, so FIX-11 and FIX-12 are not live. Once it merges, run:
+P3 (#120) merged as `febe3f7`, and production serves `dpl_FFzSK4tmK9D1vVyqto1nYvmdNYi8`. Same pacing, run with `live-after-p3.sh`:
 
-    BASE=https://ecommerce-template-mpc.vercel.app
-    # FIX-11: expect {"error":"invalid_origin"} 403, then 401 same-origin, then 400 on the signed webhook route
-    curl -s -w " %{http_code}\n" -X POST -H "Origin: https://evil.example" -H "Cookie: x=1" -H "Content-Type: application/json" -d "{}" $BASE/api/user/cart
-    curl -s -w " %{http_code}\n" -X POST -H "Origin: $BASE" -H "Cookie: x=1" -H "Content-Type: application/json" -d "{}" $BASE/api/user/cart
-    curl -s -w " %{http_code}\n" -X POST -H "Origin: https://evil.example" -H "Cookie: x=1" $BASE/api/stripe/webhooks
-    # FIX-12: expect 200 text/plain and 200 application/xml
-    curl -sS -o /dev/null -w "%{http_code} %{content_type}\n" $BASE/robots.txt
-    curl -sS -o /dev/null -w "%{http_code} %{content_type}\n" $BASE/sitemap.xml
+```text
+### deployment serving /
+dpl_FFzSK4tmK9D1vVyqto1nYvmdNYi8
+### FIX-11 cross-origin write with a cookie (expect invalid_origin 403)
+{"error":"invalid_origin"} 403
+### FIX-11 same-origin write with a cookie (expect 401, reaches the route)
+{"error":"authentication_required"} 401
+### FIX-11 webhook is exempt (expect 400 from the signature check)
+{"error":"Webhook signature is required"} 400
+### FIX-12 robots.txt and sitemap.xml
+robots.txt 200 text/plain; charset=utf-8
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /cart
+Disallow: /wishlist
+Disallow: /orders
+Disallow: /result
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /email-verification
+
+Sitemap: https://ecommerce-template-mpc.vercel.app/sitemap.xml
+
+sitemap.xml 200 application/xml
+sitemap urls: 32
+### FIX-13 cron with x-vercel-cron only (expect 401)
+{"error":"Unauthorized"} [401]
+### Do not break
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; 
+X-Frame-Options: DENY
+cart GET anonymous -> {"error":"authentication_required"} [401]
+orders anonymous -> 307 https://ecommerce-template-mpc.vercel.app/login
+unknown path -> 404
+product page -> 200
+```
 
 ### Repository gates
 
@@ -613,7 +700,7 @@ Production steps applied on 2026-11-22 with the owner's approval:
 
 Still for the operator:
 
-1. Merge #120 once the open Vercel Security Review finding on its branch has been read and settled. #117, #118 and #119 are merged and deployed.
+1. #117 to #120 are merged and deployed. For #121, run `npm run db:migrate` on production first, then merge. Without the function, a checkout that supersedes a session fails with 500. Then run `npm run db:verify` with `VERIFY_DATABASE_URL` set to the runtime credential.
 2. FIX-09, Supabase settings. Set `SUPABASE_PROJECT_REF` and `SUPABASE_ACCESS_TOKEN`, run `npm run db:apply-hosted`, then `npm run db:verify-hosted`. That closes GoTrue sign-up and aligns the Data API with `schemas = []`. Expect four `PASS` lines, and point `RELEASE_HOSTED_EXPOSURE_EVIDENCE` at that output.
 3. Decide on `pt-mpc-a7c9de@euploading.com`. It has the `pt` prefix, but it is not on the pentest's `@mailinator.com` domain, so it was kept.
 
@@ -621,6 +708,7 @@ Still for the operator:
 
 - **FIX-01.** Two different but overlapping selections sent within about a second of each other can both get a session. The second request cannot expire a session the first has not created yet. Identical selections are fully serialized.
 - **Rate limiting.** Better Auth keeps its counters in memory, so each serverless instance has its own budget. This was not in the backlog, and no fix was applied.
+- **Checkout throttling.** After the FIX-01 follow-up, a checkout costs at most one session create plus one read and one expire for each superseded session Stripe has not yet confirmed expired. The cost no longer grows with the number of earlier intents. The Vercel finding also suggested a per-user checkout throttle. It was not added.
 - **F6-2.** The `Public read access` SELECT policy still lets anyone list the public bucket. Public object URLs probably keep working without it, but that is untested. Dropping it is a separate decision.
 - **Uncovered probes in the backlog.** The admin-authenticated probes (mass assignment, uploads, impersonation, replays) need the admin working, so they wait for FIX-02's operator step. The webhook replay, RSC cache and GraphQL/Realtime probes were not run.
 - **Next.js notice.** The local `next build` printed a security notice asking the agent to run `next upgrade --agent=security`. It was not run. The installed Next is 16.4.3, older than the 16.4.6 the lockfile requires, so run `npm ci` locally.
