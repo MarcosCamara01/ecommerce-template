@@ -135,7 +135,9 @@ differ. Keep both `false` until the callback is registered.
 OAuth cannot reclaim or rewrite an unverified credential account. Linking
 another provider still requires the existing local account to be verified.
 
-Promote the first administrator by user id, not by email:
+Promote the first administrator by user id, not by email. Credential
+sign-in requires a verified email, and the operator vouches for this
+account, so the script also marks its email verified:
 
 ```bash
 ADMIN_USER_ID=<better-auth-user-id> npm run auth:bootstrap-admin
@@ -193,7 +195,7 @@ The live webhook endpoint is `/api/stripe/webhooks`.
 | `npm run db:apply-hosted` / `db:verify-hosted` | Push and check Supabase Data API + `product-images` |
 | `npm run db:mark-cutover` | Record applied migrations after a cutover |
 | `npm run db:studio` / `db:pull` | Drizzle Kit as `app_owner` via the migrator session |
-| `npm run auth:bootstrap-admin` | Grant `admin` to `ADMIN_USER_ID` |
+| `npm run auth:bootstrap-admin` | Grant `admin` to `ADMIN_USER_ID` and mark its email verified |
 | `npm run doctor` | React Doctor on the full tree |
 
 `db:migrate` authenticates as `app_migrator`, proves that role cannot run

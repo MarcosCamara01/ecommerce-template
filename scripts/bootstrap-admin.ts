@@ -37,7 +37,7 @@ async function main() {
     }
     const rows = await sql`
       update ${sql(schema)}.${sql("user")}
-      set role = 'admin', updated_at = now()
+      set role = 'admin', email_verified = true, updated_at = now()
       where id = ${userId}
       returning id, role
     `;
