@@ -20,8 +20,8 @@ Branch `fix/pentest-2026-11-22`, based on `master` at `dec8856` (the commit the 
 | FIX-03 | fixed | `5ac2747` | `src/lib/db/drizzle/repositories/cart.repository.ts` (+test), `src/lib/data-access/index.ts`, `src/lib/data-access/cart-addition.test.mjs`, `src/lib/http/user-route.ts`, `src/app/api/user/cart/route.test.mjs` |
 | FIX-04 | fixed | `0c27007` | `src/app/admin/products/create/page.tsx` (+test) |
 | FIX-05 | already-correct, behavior pinned by tests | `d50d8f3` | `src/utils/auth-sign-up.test.mjs` |
-| FIX-06 | fixed | `28e7763` | `next.config.js`, `next.config.test.mjs` |
-| FIX-07 | fixed (safe variant) | `1940eec` | `src/app/api/auth/[...all]/route.ts` (+test), `src/app/api/auth/email-form/route.test.mjs`, `src/lib/auth/form-errors.ts` (+test), `src/utils/auth.ts` |
+| FIX-06 | fixed, live | `28e7763` | `next.config.js`, `next.config.test.mjs` |
+| FIX-07 | fixed (safe variant), live | `1940eec` | `src/app/api/auth/[...all]/route.ts` (+test), `src/app/api/auth/email-form/route.test.mjs`, `src/lib/auth/form-errors.ts` (+test), `src/utils/auth.ts` |
 | FIX-08 | fixed | `e7c23aa` | `src/lib/auth/verification-link.ts` (+test), `src/utils/auth.ts`, `src/utils/auth-sign-up.test.mjs` |
 | FIX-09 | fixed; Storage applied in production, Supabase settings pending | `b888c2a` | `supabase/config.toml`, `supabase/migrations/20261122000000_product_images_storage_policies.sql`, `scripts/database/verify-hosted-exposure.mjs` (+test), `scripts/database/apply-hosted-exposure.test.mjs`, `README.md`, `docs/runbooks/database-cutover.md`, `docs/architecture/acceptance-evidence.md`, `.react-doctor/false-positives.md` |
 | FIX-10 | already-correct, contract documented | `0042193` | `README.md` |
@@ -48,7 +48,7 @@ Credentials stay out of this verification. The hosted host is not a test-labeled
 
 There is no local Postgres or Docker on this machine, so the app could not run locally against a non-production database.
 
-The fixes reach `https://ecommerce-template-mpc.vercel.app/` only after the PRs merge and production deploys. The post-fix live checks below ran against the Vercel preview of the P3 branch, which contains every fix.
+The post-fix live checks below ran on `https://ecommerce-template-mpc.vercel.app/` after P0 to P2 merged.
 
 ### Baseline on production before the fixes
 
@@ -470,17 +470,64 @@ $ node --test src/lib/identity/internal-request.test.mjs
 ℹ fail 0
 ```
 
-### Post-fix live checks on the preview
+### Post-fix live checks on production
 
-Not run yet. Every Vercel preview of these branches is behind Vercel Authentication (302 to vercel.com/sso-api), and the built-in browser has no Vercel session. A share link would open the preview to anyone holding the URL for 23 hours, so none was created without the owner's approval.
+P0 to P2 (#117, #118, #119) are merged, and production serves `dpl_7b4yyZgtUu2axHK3nrwCZDyjWuf3`. These are anonymous checks run with `live-after-p2.sh`, one request every 0.3 seconds:
 
-Run these after merge on production, or on the preview through an authenticated session. None of them needs an app account. `BASE=https://ecommerce-template-mpc.vercel.app`.
+```text
+### deployment serving /
+dpl_7b4yyZgtUu2axHK3nrwCZDyjWuf3
+### FIX-06 CSP on /, /login, /cart, a product page
+/ -> Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+/login -> Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+/cart -> Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+/pants/66 -> Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+### FIX-07 CORS, trusted origin
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: https://ecommerce-template-mpc.vercel.app
+Vary: Origin
+### FIX-07 CORS, untrusted origin (expect no access-control-allow-*)
+HTTP/1.1 200 OK
+### FIX-07 preflight, trusted
+HTTP/1.1 204 No Content
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: content-type
+Access-Control-Allow-Methods: GET, POST
+Access-Control-Allow-Origin: https://ecommerce-template-mpc.vercel.app
+### FIX-07 preflight, untrusted (expect no access-control-*)
+HTTP/1.1 204 No Content
+### FIX-04 /admin/products/create, anonymous
+307 https://ecommerce-template-mpc.vercel.app/login
+### Do not break
+X-Frame-Options: DENY
+webhook without signature -> {"error":"Webhook signature is required"} [400]
+cron without secret -> {"error":"Unauthorized"} [401]
+cron with x-vercel-cron only -> {"error":"Unauthorized"} [401]
+admin products DELETE anonymous -> {"error":"Unauthorized"} [401]
+cart GET anonymous -> {"error":"authentication_required"} [401]
+orders anonymous -> 307 https://ecommerce-template-mpc.vercel.app/login
+image optimizer to metadata host -> 400
+unknown path -> 404
+product page -> 200
+```
 
-    # FIX-06: expect the full policy (default-src, script-src, form-action, frame-ancestors 'none')
-    curl -sS -D - -o /dev/null $BASE/login | grep -i content-security-policy
-    # FIX-07: expect access-control-allow-origin: $BASE and allow-credentials: true; none for evil.example
-    curl -sS -D - -o /dev/null -H "Origin: $BASE" $BASE/api/auth/get-session | grep -iE "^(access-control|vary)"
-    curl -sS -D - -o /dev/null -H "Origin: https://evil.example" $BASE/api/auth/get-session | grep -ic "access-control-allow"
+FIX-06 acceptance in a real browser (the app's built-in browser, anonymous):
+
+```text
+Browser (built-in, anonymous) on production dpl_7b4yyZgtUu2axHK3nrwCZDyjWuf3:
+/          34 images, 0 broken; Bag panel opens (client JS runs); CSP console messages: none
+/pants/66  15 images, 0 broken; client redirect to ?variant=Khaki%20green ran; CSP console messages: none
+/login     sign-in form renders; CSP console messages: none
+/cart      bag page renders; CSP console messages: none
+Only console entry on /: [warn] Feature-Policy and Permissions-Policy both set camera (pre-existing, not a CSP violation)
+```
+
+The previews could not be checked. They are behind Vercel Authentication, and no share link was created.
+
+P3 (#120) is not merged yet, so FIX-11 and FIX-12 are not live. Once it merges, run:
+
+    BASE=https://ecommerce-template-mpc.vercel.app
     # FIX-11: expect {"error":"invalid_origin"} 403, then 401 same-origin, then 400 on the signed webhook route
     curl -s -w " %{http_code}\n" -X POST -H "Origin: https://evil.example" -H "Cookie: x=1" -H "Content-Type: application/json" -d "{}" $BASE/api/user/cart
     curl -s -w " %{http_code}\n" -X POST -H "Origin: $BASE" -H "Cookie: x=1" -H "Content-Type: application/json" -d "{}" $BASE/api/user/cart
@@ -488,10 +535,6 @@ Run these after merge on production, or on the preview through an authenticated 
     # FIX-12: expect 200 text/plain and 200 application/xml
     curl -sS -o /dev/null -w "%{http_code} %{content_type}\n" $BASE/robots.txt
     curl -sS -o /dev/null -w "%{http_code} %{content_type}\n" $BASE/sitemap.xml
-    # FIX-13: expect {"error":"Unauthorized"} 401
-    curl -s -w " %{http_code}\n" -H "x-vercel-cron: 1" $BASE/api/cron/fulfillment
-
-FIX-06 acceptance also needs a browser: open home, a product page, /login and /cart and confirm the console shows no CSP violation.
 
 ### Repository gates
 
@@ -570,7 +613,7 @@ Production steps applied on 2026-11-22 with the owner's approval:
 
 Still for the operator:
 
-1. Merge #117, #118, #119 and #120 bottom-up, and let production deploy. The `Protect default branch` ruleset needs one approving review. No new environment variable is needed.
+1. Merge #120 once the open Vercel Security Review finding on its branch has been read and settled. #117, #118 and #119 are merged and deployed.
 2. FIX-09, Supabase settings. Set `SUPABASE_PROJECT_REF` and `SUPABASE_ACCESS_TOKEN`, run `npm run db:apply-hosted`, then `npm run db:verify-hosted`. That closes GoTrue sign-up and aligns the Data API with `schemas = []`. Expect four `PASS` lines, and point `RELEASE_HOSTED_EXPOSURE_EVIDENCE` at that output.
 3. Decide on `pt-mpc-a7c9de@euploading.com`. It has the `pt` prefix, but it is not on the pentest's `@mailinator.com` domain, so it was kept.
 
