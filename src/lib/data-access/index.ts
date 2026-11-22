@@ -9,6 +9,7 @@ import {
 } from "@/lib/identity";
 import type {
   AddToCartInput,
+  CartItem,
   CheckoutIntentItem,
   ProductCategory,
   ProductSize,
@@ -26,7 +27,7 @@ import { selectCheckoutCartItems } from "@/lib/cart/checkout-selection";
 
 export class DataAccessError extends Error {
   constructor(
-    readonly code: "not_found" | "invariant_failed",
+    readonly code: "not_found" | "invariant_failed" | "quantity_limit_exceeded",
     message: string,
   ) {
     super(message);
@@ -85,10 +86,16 @@ function forUser(value: Principal): UserDataAccess {
       find: (variantId, size) => cartRepository.findOne(userId, variantId, size),
       add: async (item) => {
         const result = await cartRepository.upsertAvailable({ ...item, userId });
-        if (!result) {
+        if (result.status === "unavailable") {
           throw new DataAccessError("not_found", "Variant or size is unavailable");
         }
-        return result;
+        if (result.status === "quantity_limit_exceeded") {
+          throw new DataAccessError(
+            "quantity_limit_exceeded",
+            "Cart line quantity would exceed its limit",
+          );
+        }
+        return result.item;
       },
       update: async (id, quantity) => {
         const result = await cartRepository.updateQuantity(userId, id, quantity);
@@ -212,7 +219,7 @@ type UserDataAccess = {
     list: () => ReturnType<typeof cartRepository.findByUserId>;
     listWithDetails: () => ReturnType<typeof cartRepository.findByUserIdWithDetails>;
     find: (variantId: number, size: ProductSize) => ReturnType<typeof cartRepository.findOne>;
-    add: (item: AddToCartInput) => ReturnType<typeof cartRepository.upsertAvailable>;
+    add: (item: AddToCartInput) => Promise<CartItem>;
     update: (id: number, quantity: number) => ReturnType<typeof cartRepository.updateQuantity>;
     remove: (id: number) => ReturnType<typeof cartRepository.delete>;
     clear: () => ReturnType<typeof cartRepository.clearByUserId>;

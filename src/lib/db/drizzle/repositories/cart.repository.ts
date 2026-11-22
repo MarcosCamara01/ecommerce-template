@@ -14,6 +14,13 @@ import type {
   ProductSize,
 } from "@/lib/db/drizzle/schema";
 
+const INT4_MAX = 2_147_483_647;
+
+type CartAddition =
+  | { status: "added"; item: CartItem }
+  | { status: "unavailable" }
+  | { status: "quantity_limit_exceeded" };
+
 export const cartRepository = {
   async findByUserId(userId: string): Promise<CartItem[]> {
     const result = await db
@@ -98,13 +105,14 @@ export const cartRepository = {
 
   async upsertAvailable(
     data: AddToCartInput & { userId: string },
-  ): Promise<CartItem | null> {
+  ): Promise<CartAddition> {
     return db.transaction(async (tx) => {
+      const unavailable = { status: "unavailable" } as const;
       const [variantIdentity] = await tx
         .select({ productId: productsVariants.productId })
         .from(productsVariants)
         .where(eq(productsVariants.id, data.variantId));
-      if (!variantIdentity) return null;
+      if (!variantIdentity) return unavailable;
 
       const [product] = await tx
         .select({ id: productsItems.id })
@@ -116,7 +124,7 @@ export const cartRepository = {
           ),
         )
         .for("share");
-      if (!product) return null;
+      if (!product) return unavailable;
 
       const [activeVariant] = await tx
         .select({
@@ -131,7 +139,7 @@ export const cartRepository = {
             isNull(productsVariants.archivedAt),
           ),
         );
-      if (!activeVariant || !activeVariant.sizes.includes(data.size)) return null;
+      if (!activeVariant || !activeVariant.sizes.includes(data.size)) return unavailable;
       return upsertInternal(tx, { ...data, stripeId: activeVariant.stripeId });
     });
   },
@@ -213,7 +221,7 @@ export async function consumePurchasedInTransaction(
 async function upsertInternal(
   tx: DatabaseTransaction,
   data: InsertCartItem,
-): Promise<CartItem | null> {
+): Promise<CartAddition> {
   const [result] = await tx
     .insert(cartItems)
     .values(data)
@@ -223,9 +231,14 @@ async function upsertInternal(
         quantity: sql`${cartItems.quantity} + ${data.quantity}`,
         updatedAt: new Date(),
       },
+      // Checked on the locked row, so no sum can overflow int4. When it fails,
+      // Postgres skips the update and RETURNING yields no row.
+      setWhere: sql`${cartItems.quantity} <= ${INT4_MAX - data.quantity}`,
     })
     .returning();
-  return result ? transformCartItem(result) : null;
+  return result
+    ? { status: "added", item: transformCartItem(result) }
+    : { status: "quantity_limit_exceeded" };
 }
 
 function transformCartItem(row: typeof cartItems.$inferSelect): CartItem {
