@@ -301,7 +301,10 @@ input. Webhooks record an event receipt and work row, then a worker (or the
   `RELEASE_CREDENTIAL_ROTATION_EVIDENCE` point at the approved restore
   rehearsal, hosted exposure report, and credential-rotation audit.
 - Vercel crons call `/api/cron/fulfillment` and `/api/cron/catalog-sync` every
-  five minutes. Both require `CRON_SECRET`.
+  five minutes. The only credential they accept is
+  `Authorization: Bearer <CRON_SECRET>`, which Vercel sends when `CRON_SECRET`
+  is set. Any client can send `x-vercel-cron: 1`, so that header alone gets a
+  401. Without `CRON_SECRET` both answer 503.
 
 ## CI
 

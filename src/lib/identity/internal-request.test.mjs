@@ -45,6 +45,28 @@ test("cron credentials accept only the configured bearer token", () => {
   );
 });
 
+test("the x-vercel-cron header is not a cron credential", () => {
+  for (const authorization of [null, "Bearer wrong"]) {
+    const headers = new Headers({ "x-vercel-cron": "1" });
+    if (authorization) headers.set("authorization", authorization);
+
+    assert.throws(
+      () => requireCronCredentialFromHeaders(headers, { CRON_SECRET: "expected" }),
+      (error) => {
+        assert.ok(error instanceof InternalIdentityError);
+        assert.equal(internalIdentityErrorHttpStatus(error), 401);
+        return true;
+      },
+      `authorization=${authorization}`,
+    );
+  }
+
+  const vercelCron = new Headers({ "x-vercel-cron": "1", authorization: "Bearer expected" });
+  assert.doesNotThrow(() =>
+    requireCronCredentialFromHeaders(vercelCron, { CRON_SECRET: "expected" }),
+  );
+});
+
 test("cron routes share one HTTP credential adapter", async () => {
   const routes = await Promise.all([
     readFile("src/app/api/cron/catalog-sync/route.ts", "utf8"),
