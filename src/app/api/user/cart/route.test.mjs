@@ -7,6 +7,10 @@ import ts from "typescript";
 
 const nativeRequire = createRequire(import.meta.url);
 const source = await readFile(new URL("./route.ts", import.meta.url), "utf8");
+const userRouteSource = await readFile(
+  new URL("../../../../lib/http/user-route.ts", import.meta.url),
+  "utf8",
+);
 
 test("malformed cart JSON returns 400", async () => {
   const response = await loadRouteHarness().POST(
@@ -16,7 +20,8 @@ test("malformed cart JSON returns 400", async () => {
   assert.deepEqual(response.body, { error: "Invalid cart payload" });
 });
 
-test("cart preserves auth, Zod, and operational error mappings", async () => {
+test("cart preserves auth, Zod, and operational error mappings", async (t) => {
+  t.mock.method(console, "error", () => undefined);
   const authResponse = await loadRouteHarness({ unauthenticated: true }).POST(
     requestWith(validItem()),
   );
@@ -37,6 +42,17 @@ test("archived cart additions return 404", async () => {
   }).POST(requestWith(validItem()));
   assert.equal(response.status, 404);
   assert.deepEqual(response.body, { error: "Not found" });
+});
+
+test("adding past the cart line quantity limit returns 400", async () => {
+  const response = await loadRouteHarness({
+    serviceError: new DataAccessError(
+      "quantity_limit_exceeded",
+      "Cart line quantity would exceed its limit",
+    ),
+  }).POST(requestWith(validItem()));
+  assert.equal(response.status, 400);
+  assert.match(response.body.error, /quantity/i);
 });
 
 test("cart and wishlist routes share HTTP behavior and call data access directly", async () => {
@@ -105,65 +121,35 @@ function loadRouteHarness({ unauthenticated = false, serviceError } = {}) {
     },
     "@/lib/identity": {
       IdentityError,
+      identityErrorHttpStatus: (error) =>
+        error.code === "authentication_required" ? 401 : 403,
       requirePrincipalFromHeaders: async () => {
         if (unauthenticated) throw new IdentityError("authentication_required");
         return { kind: "user", userId: "user-1" };
       },
     },
-    "@/lib/http/user-route": userRouteModule(z),
   };
-  return loadModule(modules);
+  modules["@/lib/http/user-route"] = loadModule(userRouteSource, modules);
+  return loadModule(source, modules);
 }
 
-function userRouteModule(z) {
-  class InvalidJsonBodyError extends Error {}
-  return {
-    readJsonBody: async (request) => {
-      try {
-        return await request.json();
-      } catch (error) {
-        if (error instanceof SyntaxError) throw new InvalidJsonBodyError();
-        throw error;
-      }
-    },
-    userRouteError: (error, options) => {
-      if (error instanceof IdentityError) {
-        return { body: { error: error.code }, status: 401 };
-      }
-      if (error instanceof DataAccessError && error.code === "not_found") {
-        return { body: { error: "Not found" }, status: 404 };
-      }
-      if (error instanceof z.ZodError) {
-        return {
-          body: { error: options.invalidPayloadMessage, details: error.flatten() },
-          status: 400,
-        };
-      }
-      if (error instanceof InvalidJsonBodyError) {
-        return { body: { error: options.invalidPayloadMessage }, status: 400 };
-      }
-      return { body: { error: "Internal server error" }, status: 500 };
-    },
-  };
-}
-
-function loadModule(modules) {
-  const compiled = ts.transpileModule(source, {
+function loadModule(moduleSource, modules) {
+  const compiled = ts.transpileModule(moduleSource, {
     compilerOptions: {
       esModuleInterop: true,
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2022,
     },
-    fileName: "route.ts",
+    fileName: "module.ts",
   }).outputText;
-  const routeModule = { exports: {} };
+  const loadedModule = { exports: {} };
   const mockedRequire = (id) => modules[id] ?? nativeRequire(id);
   new Function("require", "module", "exports", compiled)(
     mockedRequire,
-    routeModule,
-    routeModule.exports,
+    loadedModule,
+    loadedModule.exports,
   );
-  return routeModule.exports;
+  return loadedModule.exports;
 }
 
 function requestWith(payload) {

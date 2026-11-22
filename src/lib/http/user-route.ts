@@ -36,6 +36,12 @@ export function userRouteError(
   if (error instanceof DataAccessError && error.code === "not_found") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+  if (error instanceof DataAccessError && error.code === "quantity_limit_exceeded") {
+    return NextResponse.json(
+      { error: "Quantity limit exceeded" },
+      { status: 400 },
+    );
+  }
   if (error instanceof z.ZodError) {
     return NextResponse.json(
       { error: options.invalidPayloadMessage, details: error.flatten() },
