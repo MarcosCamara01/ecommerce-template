@@ -29,7 +29,7 @@ Branch `fix/pentest-2026-11-22`, based on `master` at `dec8856` (the commit the 
 | FIX-11 | fixed | `a1ccb82` | `src/proxy.ts`, `src/proxy.test.mjs` |
 | FIX-12 | fixed | `cad2105` | `src/app/robots.ts` (+test), `src/app/sitemap.ts` (+test), `src/lib/routing/unknown-path.ts` (+test), `src/proxy.test.mjs` |
 | FIX-13 | already-correct, contract pinned and documented | `a47a51d` | `src/lib/identity/internal-request.test.mjs`, `README.md` |
-| FIX-01 follow-up | fixed; migration 0019 pending in production | `948c4db` | `drizzle/migrations/0019_checkout-intent-retire.sql` (+meta), `src/app/api/stripe/payment/route.ts` (+test), `src/lib/db/drizzle/repositories/checkout.repository.ts`, `src/lib/data-access/index.ts`, `scripts/database/checkout-binding-contract.ts` (+test), `scripts/database/verify.ts`, `scripts/database/schema-contract.ts`, `scripts/database/cutover-existing.sql`, `scripts/database/bootstrap-roles.sql`, `scripts/database/cutover-contract.test.mjs`, `scripts/database/runtime-product-privileges.test.mjs` |
+| FIX-01 follow-up | fixed; migration 0019 applied in production | `948c4db` | `drizzle/migrations/0019_checkout-intent-retire.sql` (+meta), `src/app/api/stripe/payment/route.ts` (+test), `src/lib/db/drizzle/repositories/checkout.repository.ts`, `src/lib/data-access/index.ts`, `scripts/database/checkout-binding-contract.ts` (+test), `scripts/database/verify.ts`, `scripts/database/schema-contract.ts`, `scripts/database/cutover-existing.sql`, `scripts/database/bootstrap-roles.sql`, `scripts/database/cutover-contract.test.mjs`, `scripts/database/runtime-product-privileges.test.mjs` |
 
 ## Where the backlog's suggestion was not followed
 
@@ -698,9 +698,33 @@ Production steps applied on 2026-11-22 with the owner's approval:
 
   The pentest's Storage objects (`pt-f6/`, `outside.png`, `code42e.png`) and its GoTrue user were already gone. The only GoTrue user left is the owner's own account, and it was not touched.
 
+- **FIX-01 follow-up, migration 0019.** Applied with the owner's approval before #121 deployed. Production had 19 migrations recorded, so Drizzle ran only 0019.
+
+  ```text
+  recorded migrations: 19, last created_at: 1787127839812
+  journal entries: 20
+  pending by Drizzle's rule (when > last): 0019_checkout-intent-retire
+  retire_checkout_intents present: false
+  app_runtime can bind: true; app_runtime can update expires_at directly: false
+
+  $ npx tsx --env-file=.env.local scripts/database/migrate.ts
+    (two NOTICEs: schema "drizzle" and relation "__drizzle_migrations" already exist, skipping)
+  exit=0
+
+  recorded migrations: 20, last created_at: 1795370000000
+  journal entries: 20
+  pending by Drizzle's rule (when > last): none
+  retire_checkout_intents present: true
+  app_runtime can bind: true; app_runtime can update expires_at directly: false
+  function contracts: hold
+  app_runtime can retire: true; anon: false; authenticated: false
+  routines in production: app_private.bind_checkout_intent(text,text,text), app_private.retire_checkout_intents(text,text[])
+  schema contract: matches
+  ```
+
 Still for the operator:
 
-1. #117 to #120 are merged and deployed. For #121, run `npm run db:migrate` on production first, then merge. Without the function, a checkout that supersedes a session fails with 500. Then run `npm run db:verify` with `VERIFY_DATABASE_URL` set to the runtime credential.
+1. #117 to #121 are merged, and migration 0019 ran before #121 deployed. `npm run db:verify` was not run, because `.env.local` has no `VERIFY_DATABASE_URL` (the runtime credential). Run it once that credential is set.
 2. FIX-09, Supabase settings. Set `SUPABASE_PROJECT_REF` and `SUPABASE_ACCESS_TOKEN`, run `npm run db:apply-hosted`, then `npm run db:verify-hosted`. That closes GoTrue sign-up and aligns the Data API with `schemas = []`. Expect four `PASS` lines, and point `RELEASE_HOSTED_EXPOSURE_EVIDENCE` at that output.
 3. Decide on `pt-mpc-a7c9de@euploading.com`. It has the `pt` prefix, but it is not on the pentest's `@mailinator.com` domain, so it was kept.
 
