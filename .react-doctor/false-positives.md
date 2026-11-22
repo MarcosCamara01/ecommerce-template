@@ -53,9 +53,9 @@ table*. These tables are not reachable by any client role.
 
 - `supabase/config.toml:2-3` — `[api] enabled = false`, `schemas = []`. PostgREST is
   off and no schema is exposed.
-- `scripts/database/verify-hosted-exposure.mjs:33-35` — fails the release if the hosted
-  Data API ever exposes `public` or `app_private`. Runs via `verify:release` in
-  `vercel-build`.
+- `scripts/database/verify-hosted-exposure.mjs:200-204` — fails if the hosted Data API
+  ever exposes `public` or `app_private`. `verify:release` in `vercel-build` blocks
+  production until `RELEASE_HOSTED_EXPOSURE_EVIDENCE` references its output.
 - `scripts/database/bootstrap-roles.sql:162-173` — `REVOKE ALL ON SCHEMA app_private
   FROM PUBLIC`; only the server-side `app_runtime` login role gets `USAGE`, with default
   privileges revoking tables and sequences.

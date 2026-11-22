@@ -1,8 +1,29 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import test from "node:test";
 
 import { applyHostedExposureConfiguration } from "./apply-hosted-exposure.mjs";
+
+function tomlSection(config, name) {
+  const header = `[${name}]`;
+  const start = config.indexOf(header);
+  assert.notEqual(start, -1, `supabase/config.toml declares ${header}`);
+  const nextSection = config.indexOf("\n[", start + header.length);
+  return config.slice(
+    start + header.length,
+    nextSection === -1 ? config.length : nextSection,
+  );
+}
+
+test("the pushed config exposes no Data API schema and closes GoTrue sign-up", async () => {
+  const config = await readFile("supabase/config.toml", "utf8");
+
+  const api = tomlSection(config, "api");
+  assert.match(api, /^enabled\s*=\s*false\s*$/m);
+  assert.match(api, /^schemas\s*=\s*\[\]\s*$/m);
+  assert.match(tomlSection(config, "auth"), /^enable_signup\s*=\s*false\s*$/m);
+});
 
 test("hosted exposure is verified only after the pinned config is pushed", async () => {
   const events = [];
