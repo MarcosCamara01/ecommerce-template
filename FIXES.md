@@ -16,14 +16,14 @@ Branch `fix/pentest-2026-11-22`, based on `master` at `dec8856` (the commit the 
 | ID | State | Commit | Files |
 |---|---|---|---|
 | FIX-01 | fixed | `abcc9f7` | `src/app/api/stripe/payment/route.ts` (+test), `src/lib/cart/checkout-intent-plan.ts` (+test), `src/lib/db/drizzle/repositories/checkout.repository.ts`, `src/lib/data-access/index.ts` |
-| FIX-02 | fixed in code, needs one operator run | `bde5f1b` | `scripts/bootstrap-admin.ts`, `scripts/database/cutover-contract.test.mjs`, `README.md` |
+| FIX-02 | fixed, applied in production | `bde5f1b` | `scripts/bootstrap-admin.ts`, `scripts/database/cutover-contract.test.mjs`, `README.md` |
 | FIX-03 | fixed | `5ac2747` | `src/lib/db/drizzle/repositories/cart.repository.ts` (+test), `src/lib/data-access/index.ts`, `src/lib/data-access/cart-addition.test.mjs`, `src/lib/http/user-route.ts`, `src/app/api/user/cart/route.test.mjs` |
 | FIX-04 | fixed | `0c27007` | `src/app/admin/products/create/page.tsx` (+test) |
 | FIX-05 | already-correct, behavior pinned by tests | `d50d8f3` | `src/utils/auth-sign-up.test.mjs` |
 | FIX-06 | fixed | `28e7763` | `next.config.js`, `next.config.test.mjs` |
 | FIX-07 | fixed (safe variant) | `1940eec` | `src/app/api/auth/[...all]/route.ts` (+test), `src/app/api/auth/email-form/route.test.mjs`, `src/lib/auth/form-errors.ts` (+test), `src/utils/auth.ts` |
 | FIX-08 | fixed | `e7c23aa` | `src/lib/auth/verification-link.ts` (+test), `src/utils/auth.ts`, `src/utils/auth-sign-up.test.mjs` |
-| FIX-09 | fixed in code, needs operator apply | `b888c2a` | `supabase/config.toml`, `supabase/migrations/20261122000000_product_images_storage_policies.sql`, `scripts/database/verify-hosted-exposure.mjs` (+test), `scripts/database/apply-hosted-exposure.test.mjs`, `README.md`, `docs/runbooks/database-cutover.md`, `docs/architecture/acceptance-evidence.md`, `.react-doctor/false-positives.md` |
+| FIX-09 | fixed; Storage applied in production, Supabase settings pending | `b888c2a` | `supabase/config.toml`, `supabase/migrations/20261122000000_product_images_storage_policies.sql`, `scripts/database/verify-hosted-exposure.mjs` (+test), `scripts/database/apply-hosted-exposure.test.mjs`, `README.md`, `docs/runbooks/database-cutover.md`, `docs/architecture/acceptance-evidence.md`, `.react-doctor/false-positives.md` |
 | FIX-10 | already-correct, contract documented | `0042193` | `README.md` |
 | FIX-11 | fixed | `a1ccb82` | `src/proxy.ts`, `src/proxy.test.mjs` |
 | FIX-12 | fixed | `cad2105` | `src/app/robots.ts` (+test), `src/app/sitemap.ts` (+test), `src/lib/routing/unknown-path.ts` (+test), `src/proxy.test.mjs` |
@@ -526,16 +526,53 @@ The 3 test failures are the known CRLF artifacts of this Windows checkout (`cuto
 
 ## Deploy notes
 
-Do these in order. Only the operator can run them, because they write to production.
+Production steps applied on 2026-11-22 with the owner's approval:
 
-1. Merge #117, #118, #119 and #120 bottom-up, and let production deploy. No new environment variable is needed.
-2. FIX-02. Run `npm run auth:bootstrap-admin` with `ADMIN_USER_ID` and `MIGRATION_DATABASE_URL` set.
-3. FIX-09.
-   1. Run `supabase/migrations/20261122000000_product_images_storage_policies.sql` once as `postgres`, for example `psql "<postgres URI>" -v ON_ERROR_STOP=1 --single-transaction -f supabase/migrations/20261122000000_product_images_storage_policies.sql`.
-   2. Set `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN` and `SUPABASE_SERVICE_ROLE_KEY`.
-   3. Run `npm run db:apply-hosted`, then `npm run db:verify-hosted`. Expect four `PASS` lines (Data API `[]`, Auth sign-up disabled, bucket, policies).
-   4. Point `RELEASE_HOSTED_EXPOSURE_EVIDENCE` at that output.
-4. Clean up the pentest's writes: GoTrue users created through `/auth/v1/signup`, the Storage objects `pt-f6/`, `outside.png` and `code42e.png`, and any `pt-` accounts.
+- **FIX-02.** `auth:bootstrap-admin` ran against production. The admin account now has `email_verified = true` and keeps its `admin` role.
+
+  ```text
+  $ ADMIN_USER_ID=<admin user id> npx tsx --env-file=.env.local scripts/bootstrap-admin.ts
+  Admin bootstrap complete
+  exit=0
+  admin account: [{"id":"<admin user id>","role":"admin","emailVerified":true}]
+  ```
+
+- **FIX-09, Storage policies.** The migration ran once as `postgres`, in one transaction. Only the public read policy is left, and public product images still load.
+
+  ```text
+  applied 20261122000000_product_images_storage_policies.sql
+  exit=0
+  policy "Public read access" PERMISSIVE SELECT TO public USING (bucket_id = 'product-images'::text) WITH CHECK null
+  authenticator role config: session_preload_libraries=safeupdate | statement_timeout=8s | lock_timeout=8s
+  product page image via optimizer: 200 image/jpeg
+  public image after policy change: 200 image/jpeg 77029
+  ```
+
+- **Pentest cleanup.** 11 test accounts on `@mailinator.com` were deleted, along with their sessions and credentials. None of them had a cart, wishlist, checkout intent or order. The run used `app_migrator` assuming `app_owner`, because `postgres` has no write access to `app_private`.
+
+  ```text
+  deleted users=11 sessions=3 accounts=11 verifications=0
+    pt-x@mailinator.com
+    pt-f1-browser@mailinator.com
+    ptcheck123@mailinator.com
+    pt.f8.1@mailinator.com
+    pt.f8.3@mailinator.com
+    pt-ma3@mailinator.com
+    ptadmin.sufijo@mailinator.com
+    ptadmin2@mailinator.com
+    pt-mailtest@mailinator.com
+    pt-f4-role@mailinator.com
+    ptws1@mailinator.com
+  app users whose email starts with pt: 1
+  ```
+
+  The pentest's Storage objects (`pt-f6/`, `outside.png`, `code42e.png`) and its GoTrue user were already gone. The only GoTrue user left is the owner's own account, and it was not touched.
+
+Still for the operator:
+
+1. Merge #117, #118, #119 and #120 bottom-up, and let production deploy. The `Protect default branch` ruleset needs one approving review. No new environment variable is needed.
+2. FIX-09, Supabase settings. Set `SUPABASE_PROJECT_REF` and `SUPABASE_ACCESS_TOKEN`, run `npm run db:apply-hosted`, then `npm run db:verify-hosted`. That closes GoTrue sign-up and aligns the Data API with `schemas = []`. Expect four `PASS` lines, and point `RELEASE_HOSTED_EXPOSURE_EVIDENCE` at that output.
+3. Decide on `pt-mpc-a7c9de@euploading.com`. It has the `pt` prefix, but it is not on the pentest's `@mailinator.com` domain, so it was kept.
 
 ## Residual risks and follow-ups
 
