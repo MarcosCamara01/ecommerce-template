@@ -44,7 +44,7 @@ const authDatabaseSchema = process.env.AUTH_DATABASE_LAYOUT === "public"
   : "app_private";
 const authSchemaIdentifier = sql.identifier(authDatabaseSchema);
 const authBaseURL = getCanonicalAppOrigin();
-const authTrustedOrigins = [authBaseURL];
+export const authTrustedOrigins = [authBaseURL];
 const googleAuthEnabled = process.env.GOOGLE_AUTH_ENABLED === "true";
 const googleAuthUiEnabled =
   process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";

@@ -1,5 +1,10 @@
 export type AuthField = "name" | "email" | "password";
 
+const FOREIGN_FORM = {
+  message: "This form was sent from another site. Try again from this page.",
+  fields: [],
+} as const;
+
 const AUTH_ERRORS = {
   INVALID_EMAIL_OR_PASSWORD: {
     message: "Invalid email or password",
@@ -17,6 +22,9 @@ const AUTH_ERRORS = {
   TOKEN_EXPIRED: { message: "This link has expired.", fields: [] },
   USER_NOT_FOUND: { message: "This link is for an account that no longer exists.", fields: [] },
   RATE_LIMITED: { message: "Too many attempts. Wait a minute and try again.", fields: [] },
+  INVALID_ORIGIN: FOREIGN_FORM,
+  MISSING_OR_NULL_ORIGIN: FOREIGN_FORM,
+  CROSS_SITE_NAVIGATION_LOGIN_BLOCKED: FOREIGN_FORM,
 } as const satisfies Record<string, { message: string; fields: readonly AuthField[] }>;
 
 type KnownAuthErrorCode = keyof typeof AUTH_ERRORS;
