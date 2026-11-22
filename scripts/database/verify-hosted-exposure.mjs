@@ -10,6 +10,13 @@ const PRODUCT_IMAGES_MIME_TYPES = [
   "image/png",
   "image/webp",
 ];
+const STORAGE_OBJECT_POLICIES = [
+  `"Public read access" PERMISSIVE SELECT TO public USING (bucket_id = '${PRODUCT_IMAGES_BUCKET}'::text)`,
+];
+const STORAGE_OBJECT_POLICIES_QUERY = `select policyname, permissive,
+  pg_catalog.array_to_string(roles, ',') as roles, cmd, qual, with_check
+from pg_catalog.pg_policies
+where schemaname = 'storage' and tablename = 'objects'`;
 
 class SafeVerificationError extends Error {}
 
@@ -34,14 +41,15 @@ function requiredEnvironment(environment) {
   return { accessToken, projectRef, serviceRoleKey };
 }
 
-async function fetchJson({ fetchImpl, headers, label, timeoutMs, url }) {
+async function fetchJson({ body, fetchImpl, headers, label, timeoutMs, url }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   timeout.unref?.();
   try {
     const response = await fetchImpl(url, {
-      method: "GET",
+      method: body === undefined ? "GET" : "POST",
       headers,
+      body,
       signal: controller.signal,
     });
     if (!response.ok) {
@@ -109,6 +117,47 @@ function verifyBucketContract(buckets) {
   }
 }
 
+function describePolicy(row) {
+  const isNullableString = (value) => value == null || typeof value === "string";
+  if (
+    !row ||
+    typeof row !== "object" ||
+    typeof row.policyname !== "string" ||
+    typeof row.permissive !== "string" ||
+    typeof row.roles !== "string" ||
+    typeof row.cmd !== "string" ||
+    !isNullableString(row.qual) ||
+    !isNullableString(row.with_check)
+  ) {
+    throw new Error("Supabase Management API returned invalid Storage policies");
+  }
+  return [
+    JSON.stringify(row.policyname),
+    row.permissive,
+    row.cmd,
+    "TO",
+    row.roles.split(",").sort().join(","),
+    row.qual == null ? "" : `USING ${row.qual}`,
+    row.with_check == null ? "" : `WITH CHECK ${row.with_check}`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function verifyStoragePolicies(rows) {
+  if (!Array.isArray(rows)) {
+    throw new Error("Supabase Management API returned invalid Storage policies");
+  }
+  const actualPolicies = rows.map(describePolicy).sort();
+  if (
+    JSON.stringify(actualPolicies) !== JSON.stringify(STORAGE_OBJECT_POLICIES)
+  ) {
+    throw new Error(
+      `Hosted Storage drift: storage.objects policies must be exactly [${STORAGE_OBJECT_POLICIES.join("; ")}], received [${actualPolicies.join("; ")}]`,
+    );
+  }
+}
+
 export async function verifyHostedExposure({
   environment = process.env,
   fetchImpl = fetch,
@@ -155,6 +204,27 @@ export async function verifyHostedExposure({
   }
   log(`Hosted Data API schema allowlist: PASS [${actualSchemas.join(",")}]`);
 
+  const authSettings = await fetchJson({
+    fetchImpl,
+    headers: { Authorization: `Bearer ${accessToken}` },
+    label: "Supabase Management Auth API",
+    timeoutMs,
+    url: `https://api.supabase.com/v1/projects/${projectRef}/config/auth`,
+  });
+  if (
+    !authSettings ||
+    typeof authSettings !== "object" ||
+    typeof authSettings.disable_signup !== "boolean"
+  ) {
+    throw new Error("Supabase Management API returned invalid Auth settings");
+  }
+  if (!authSettings.disable_signup) {
+    throw new Error(
+      "Hosted Auth drift: GoTrue sign-up must be disabled ([auth] enable_signup = false)",
+    );
+  }
+  log("Hosted Auth sign-up: PASS (disabled)");
+
   const buckets = await fetchJson({
     fetchImpl,
     headers: {
@@ -168,6 +238,22 @@ export async function verifyHostedExposure({
   verifyBucketContract(buckets);
   log(
     `Hosted Storage bucket ${PRODUCT_IMAGES_BUCKET}: PASS (public, ${PRODUCT_IMAGES_MAX_BYTES} bytes, ${PRODUCT_IMAGES_MIME_TYPES.join(",")})`,
+  );
+
+  const policies = await fetchJson({
+    body: JSON.stringify({ query: STORAGE_OBJECT_POLICIES_QUERY }),
+    fetchImpl,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    label: "Supabase Management query API",
+    timeoutMs,
+    url: `https://api.supabase.com/v1/projects/${projectRef}/database/query/read-only`,
+  });
+  verifyStoragePolicies(policies);
+  log(
+    `Hosted Storage policies on storage.objects: PASS (public read of ${PRODUCT_IMAGES_BUCKET} only)`,
   );
 }
 

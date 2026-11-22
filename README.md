@@ -192,7 +192,7 @@ The live webhook endpoint is `/api/stripe/webhooks`.
 | `npm run db:generate` | Drizzle Kit migration |
 | `npm run db:migrate` | Role-aware migrator (`app_migrator` → `app_owner`) |
 | `npm run db:verify` | Schema and privilege verifier |
-| `npm run db:apply-hosted` / `db:verify-hosted` | Push and check Supabase Data API + `product-images` |
+| `npm run db:apply-hosted` / `db:verify-hosted` | Push and check Supabase Data API, Auth sign-up, and `product-images` |
 | `npm run db:mark-cutover` | Record applied migrations after a cutover |
 | `npm run db:studio` / `db:pull` | Drizzle Kit as `app_owner` via the migrator session |
 | `npm run auth:bootstrap-admin` | Grant `admin` to `ADMIN_USER_ID` and mark its email verified |
@@ -203,9 +203,15 @@ private DDL directly, then `SET ROLE app_owner` before applying the official
 Drizzle journal.
 
 `db:apply-hosted` uses the lockfile-pinned Supabase CLI to push
-`supabase/config.toml` to `SUPABASE_PROJECT_REF`, then verifies the Data API
-allowlist and the public `product-images` bucket (5 MiB, JPEG/PNG/WebP). It
-needs `SUPABASE_ACCESS_TOKEN` and `SUPABASE_SERVICE_ROLE_KEY`. The service-role
+`supabase/config.toml` to `SUPABASE_PROJECT_REF`, which exposes no Data API
+schema and closes GoTrue sign-up (Better Auth owns accounts). It then runs
+`db:verify-hosted`, which checks, read-only, the Data API allowlist,
+`disable_signup`, the public `product-images` bucket (5 MiB, JPEG/PNG/WebP), and
+that `storage.objects` carries only the public read policy from
+`supabase/migrations/20261122000000_product_images_storage_policies.sql`. No
+client role can write Storage; the app uploads with the service role. Run that
+SQL once as `postgres` (SQL editor) before `db:apply-hosted`. Both commands
+need `SUPABASE_ACCESS_TOKEN` and `SUPABASE_SERVICE_ROLE_KEY`. The service-role
 key is withheld from the CLI config-push subprocess.
 
 ## End-to-end tests

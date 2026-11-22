@@ -22,6 +22,10 @@ window, a tested restore point, and human review of the captured evidence.
   after authenticating as `app_migrator`, proving direct private DDL is denied,
   and assuming `app_owner` on that same session. `npm run db:push` is disabled.
 - The hosted PostgREST/Data API remains disabled, or exposes an empty schema.
+- Hosted GoTrue sign-up stays disabled; Better Auth owns accounts. `storage.objects`
+  carries only the public read policy for `product-images`, so no client role can
+  write Storage. `supabase/migrations/` holds only that Supabase platform SQL, not
+  application schema.
 - `AUTH_DATABASE_LAYOUT=public` is a temporary compatibility mode used only while all
   non-authentication application traffic is paused.
 
@@ -59,15 +63,20 @@ metadata.
 4. Set the immutable Better Auth user id in `ADMIN_USER_ID`, then run
    `npx tsx scripts/bootstrap-admin.ts`.
 5. Run `npm run db:verify` and retain the complete output as release evidence.
-6. Set `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, and
+6. In the project's SQL editor (role `postgres`), run
+   `supabase/migrations/20261122000000_product_images_storage_policies.sql`. It is
+   idempotent and leaves only the public read policy on `storage.objects`.
+7. Set `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, and
    `SUPABASE_SERVICE_ROLE_KEY` for the same reviewed target, then run
    `npm run db:apply-hosted`. The Management API token must be permitted to
-   update that project's configuration. The lockfile-pinned CLI applies
-   `supabase/config.toml`; the same command then verifies the effective Data API
-   allowlist and uses the read-only Storage bucket endpoint to require the
-   public `product-images` bucket, its 5 MiB limit, and its exact JPEG, PNG, and
-   WebP allowlist. Retain the exact result before accepting traffic; the command
-   verifier never prints the service-role key or an error response body.
+   update that project's configuration and run read-only queries. The
+   lockfile-pinned CLI applies `supabase/config.toml`, which also closes GoTrue
+   sign-up; the same command then verifies the effective Data API allowlist,
+   `disable_signup`, the public `product-images` bucket with its 5 MiB limit and
+   exact JPEG, PNG, and WebP allowlist, and, through the Management API read-only
+   query endpoint, the exact `storage.objects` policy set. Retain the exact
+   result before accepting traffic; the verifier never prints the service-role
+   key or an error response body.
 
 ## Existing database cutover
 
@@ -169,8 +178,9 @@ read, archive, and drop the table without granting access to runtime roles.
     `npm run db:mark-cutover` with `MIGRATION_DATABASE_URL`. This records the reviewed
     canonical migrations without executing them over the converted schema.
 14. Reconfirm `SUPABASE_PROJECT_REF` and the target associated with
-    `SUPABASE_SERVICE_ROLE_KEY`, run `npm run db:apply-hosted`, and retain its
-    post-apply Data API and Storage verification result. Only then re-enable
+    `SUPABASE_SERVICE_ROLE_KEY`, run the Storage policy SQL from fresh-database
+    step 6, then run `npm run db:apply-hosted`, and retain its post-apply Data API,
+    Auth sign-up, and Storage verification result. Only then re-enable
     Stripe webhook delivery and cron and reopen application traffic.
 
 ## Rollback boundary

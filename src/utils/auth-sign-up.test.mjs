@@ -10,6 +10,7 @@ import * as drizzleOrm from "drizzle-orm";
 import ts from "typescript";
 
 import * as emailFlows from "../lib/auth/email-flows.ts";
+import * as verificationLink from "../lib/auth/verification-link.ts";
 
 const AUTH_TEST_ORIGIN = "http://localhost:3000";
 const AUTH_TEST_SECRET = "auth-harness-test-secret-0123456789abcdef";
@@ -45,6 +46,7 @@ function loadAuthHarness() {
     "next/server": { after: () => {} },
     "@/lib/app-origin": { getCanonicalAppOrigin: () => AUTH_TEST_ORIGIN },
     "@/lib/auth/email-flows": emailFlows,
+    "@/lib/auth/verification-link": verificationLink,
     "@/lib/db/drizzle/connection": { db: {} },
     "@/lib/email": { sendAuthMail: (user, mail) => mails.push({ to: user.email, ...mail }) },
     "@/lib/db/drizzle/schema": { accounts: {}, sessions: {}, users: {}, verifications: {} },

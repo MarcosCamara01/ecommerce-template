@@ -14,6 +14,7 @@ import {
   authPageHref,
   verificationLandingLink,
 } from "@/lib/auth/email-flows";
+import { refuseUsedVerificationLink } from "@/lib/auth/verification-link";
 import { db } from "@/lib/db/drizzle/connection";
 import { sendAuthMail } from "@/lib/email";
 import {
@@ -44,7 +45,7 @@ const authDatabaseSchema = process.env.AUTH_DATABASE_LAYOUT === "public"
   : "app_private";
 const authSchemaIdentifier = sql.identifier(authDatabaseSchema);
 const authBaseURL = getCanonicalAppOrigin();
-const authTrustedOrigins = [authBaseURL];
+export const authTrustedOrigins = [authBaseURL];
 const googleAuthEnabled = process.env.GOOGLE_AUTH_ENABLED === "true";
 const googleAuthUiEnabled =
   process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
@@ -159,6 +160,8 @@ export const auth = betterAuth({
         expiresInSeconds: VERIFICATION_LINK_TTL_SECONDS,
       }),
   },
+
+  hooks: { before: refuseUsedVerificationLink },
 
   advanced: {
     backgroundTasks: { handler: runAfterResponse },

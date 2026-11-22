@@ -27,6 +27,14 @@ test("an unverified email, an expired link or a rate limit flags no field", () =
   }
 });
 
+test("a form sent from another site, or with no origin, says so and flags no field", () => {
+  for (const code of ["INVALID_ORIGIN", "MISSING_OR_NULL_ORIGIN", "CROSS_SITE_NAVIGATION_LOGIN_BLOCKED"]) {
+    assert.equal(authErrorCode(code), code);
+    assert.match(authFailureMessage({ code }), /another site/i, code);
+    assert.deepEqual(invalidFields({ code }, SIGN_IN), [], code);
+  }
+});
+
 test("an error that names no field flags every field of the form", () => {
   assert.deepEqual(invalidFields(new Error("Network error"), SIGN_UP), SIGN_UP);
   assert.deepEqual(invalidFields("Invalid email or password", SIGN_IN), SIGN_IN);

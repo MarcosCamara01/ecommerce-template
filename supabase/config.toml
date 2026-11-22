@@ -3,6 +3,10 @@ enabled = false
 schemas = []
 extra_search_path = []
 
+# Better Auth owns accounts. Open GoTrue sign-up hands anyone an `authenticated` JWT.
+[auth]
+enable_signup = false
+
 [storage.buckets.product-images]
 public = true
 file_size_limit = "5MiB"

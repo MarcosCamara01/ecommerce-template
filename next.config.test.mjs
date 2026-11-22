@@ -50,7 +50,7 @@ test("photos are served as AVIF or WebP, at photo quality, and cached for a mont
   });
 });
 
-test("every response refuses framing and sends the defensive headers", () => {
+function headerRules(env) {
   const output = execFileSync(
     process.execPath,
     [
@@ -63,10 +63,33 @@ test("every response refuses framing and sends the defensive headers", () => {
          }))));
        });`,
     ],
-    { cwd: process.cwd(), encoding: "utf8" },
+    {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        NODE_ENV: "production",
+        VERCEL_ENV: "production",
+        NEXT_PUBLIC_SUPABASE_URL: "https://project.supabase.co",
+        ...env,
+      },
+    },
   );
+  return JSON.parse(output);
+}
 
-  const [rule, ...rest] = JSON.parse(output);
+function contentSecurityPolicy(env) {
+  const [rule] = headerRules(env);
+  return Object.fromEntries(
+    rule.headers["Content-Security-Policy"]
+      .split(";")
+      .map((directive) => directive.trim().split(/\s+/))
+      .map(([name, ...sources]) => [name, sources]),
+  );
+}
+
+test("every response refuses framing and sends the defensive headers", () => {
+  const [rule, ...rest] = headerRules();
   assert.equal(rest.length, 0);
   assert.equal(rule.source, "/:path*");
   assert.match(rule.headers["Content-Security-Policy"], /frame-ancestors 'none'/);
@@ -75,6 +98,44 @@ test("every response refuses framing and sends the defensive headers", () => {
   assert.equal(rule.headers["Referrer-Policy"], "strict-origin-when-cross-origin");
   assert.ok(rule.headers["Permissions-Policy"]);
   assert.equal(rule.headers["Cross-Origin-Opener-Policy"], "same-origin");
+});
+
+test("in production, scripts, styles, fonts, requests and form posts stay on the store's origin", () => {
+  assert.deepEqual(contentSecurityPolicy(), {
+    "default-src": ["'self'"],
+    "script-src": ["'self'", "'unsafe-inline'"],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": ["'self'", "data:"],
+    "font-src": ["'self'"],
+    "connect-src": ["'self'"],
+    "form-action": ["'self'"],
+    "frame-ancestors": ["'none'"],
+    "base-uri": ["'self'"],
+    "object-src": ["'none'"],
+  });
+});
+
+test("only development allows eval and Vercel's debug scripts", () => {
+  const policy = contentSecurityPolicy({ NODE_ENV: "development", VERCEL_ENV: "" });
+  assert.deepEqual(policy["script-src"], [
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "https://va.vercel-scripts.com",
+  ]);
+  assert.deepEqual(policy["connect-src"], ["'self'"]);
+});
+
+test("only a Preview deployment lets the Vercel toolbar load", () => {
+  const preview = contentSecurityPolicy({ VERCEL_ENV: "preview" });
+  assert.deepEqual(preview["script-src"], ["'self'", "'unsafe-inline'", "https://vercel.live"]);
+  assert.deepEqual(preview["frame-src"], ["'self'", "https://vercel.live"]);
+  assert.deepEqual(preview["connect-src"], [
+    "'self'",
+    "https://vercel.live",
+    "wss://ws-us3.pusher.com",
+  ]);
+  assert.deepEqual(preview["frame-ancestors"], ["'none'"]);
 });
 
 test("no remote image host is open at every path", () => {

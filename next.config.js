@@ -24,15 +24,54 @@ const allowLocalSupabaseImages = Boolean(
     ),
 );
 
+const contentSecurityPolicy = [
+  {
+    "default-src": ["'self'"],
+    // The App Router streams each page's RSC payload in inline scripts. Cache
+    // Components prerender pages once, so there is no per-request nonce, and
+    // no hash covers payloads that differ per page.
+    "script-src": ["'self'", "'unsafe-inline'"],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": ["'self'", "data:"],
+    "font-src": ["'self'"],
+    "connect-src": ["'self'"],
+    "form-action": ["'self'"],
+    "frame-ancestors": ["'none'"],
+    "base-uri": ["'self'"],
+    "object-src": ["'none'"],
+  },
+  // React needs eval for its dev-only stack traces, and Vercel Analytics
+  // and Speed Insights load their debug scripts from Vercel's CDN.
+  process.env.NODE_ENV === "development" && {
+    "script-src": ["'unsafe-eval'", "https://va.vercel-scripts.com"],
+  },
+  // Vercel injects its toolbar into Preview deployments.
+  process.env.VERCEL_ENV === "preview" && {
+    "script-src": ["https://vercel.live"],
+    "style-src": ["https://vercel.live"],
+    "img-src": ["https://vercel.live", "https://vercel.com", "blob:"],
+    "font-src": ["https://vercel.live", "https://assets.vercel.com"],
+    "connect-src": ["https://vercel.live", "wss://ws-us3.pusher.com"],
+    "frame-src": ["'self'", "https://vercel.live"],
+  },
+]
+  .filter(Boolean)
+  .reduce((policy, layer) => {
+    for (const [directive, sources] of Object.entries(layer)) {
+      policy[directive] = [...(policy[directive] ?? []), ...sources];
+    }
+    return policy;
+  }, {});
+
 // Sent on every response. No page of the store is ever shown inside a frame,
 // so framing is refused everywhere: a page that hides the admin or the bag
 // under its own buttons can no longer turn a click into an action here.
-// The policy has no script-src: a nonce would need a render per request, and
-// under Cache Components the catalogue pages are prerendered once.
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
-    value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+    value: Object.entries(contentSecurityPolicy)
+      .map(([directive, sources]) => [directive, ...sources].join(" "))
+      .join("; "),
   },
   // frame-ancestors for browsers that predate it.
   { key: "X-Frame-Options", value: "DENY" },
