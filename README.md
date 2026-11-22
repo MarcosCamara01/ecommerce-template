@@ -291,12 +291,20 @@ input. Webhooks record an event receipt and work row, then a worker (or the
 - Point Stripe webhooks at `https://<origin>/api/stripe/webhooks`.
 - Run `npm run db:migrate` before shipping code that depends on a new schema.
 - Never use `db:push`.
+- Better Auth rate-limits by the client IP in `X-Forwarded-For`. Vercel
+  overwrites that header with the caller's address, so a client cannot rotate
+  it to dodge the limit. Behind any other proxy, set
+  `advanced.ipAddress.ipAddressHeaders` in `src/utils/auth.ts` to a header that
+  proxy sets and strips from incoming requests.
 - Production builds run `npm run verify:release` and fail until
   `RELEASE_CUTOVER_EVIDENCE`, `RELEASE_HOSTED_EXPOSURE_EVIDENCE`, and
   `RELEASE_CREDENTIAL_ROTATION_EVIDENCE` point at the approved restore
   rehearsal, hosted exposure report, and credential-rotation audit.
 - Vercel crons call `/api/cron/fulfillment` and `/api/cron/catalog-sync` every
-  five minutes. Both require `CRON_SECRET`.
+  five minutes. The only credential they accept is
+  `Authorization: Bearer <CRON_SECRET>`, which Vercel sends when `CRON_SECRET`
+  is set. Any client can send `x-vercel-cron: 1`, so that header alone gets a
+  401. Without `CRON_SECRET` both answer 503.
 
 ## CI
 
