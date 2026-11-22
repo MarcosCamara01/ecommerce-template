@@ -134,6 +134,13 @@
       "when": 1787127839812,
       "tag": "0018_faulty_sleeper",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795370000000,
+      "tag": "0019_checkout-intent-retire",
+      "breakpoints": true
     }
   ]
 }

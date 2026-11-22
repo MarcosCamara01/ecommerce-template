@@ -62,7 +62,7 @@ test("runtime verification expects and probes minimum product privileges", () =>
   assert.match(verifier, /runtime variant delete is denied/);
 });
 
-test("checkout intent grants make only the session binding mutable", () => {
+test("checkout intents change only through the guarded functions", () => {
   for (const sql of [baseline, cutover]) {
     assert.match(
       sql,
@@ -75,9 +75,12 @@ test("checkout intent grants make only the session binding mutable", () => {
   }
   assert.match(cutover, /SECURITY DEFINER[\s\S]+bind_checkout_intent/i);
   assert.match(cutover, /GRANT EXECUTE ON FUNCTION app_private\.bind_checkout_intent/i);
+  assert.match(cutover, /SECURITY DEFINER[\s\S]+retire_checkout_intents/i);
+  assert.match(cutover, /GRANT EXECUTE ON FUNCTION app_private\.retire_checkout_intents/i);
   assert.match(verifier, /runtime checkout snapshot update is denied/);
   assert.match(verifier, /runtime direct checkout session update is denied/);
-  assert.match(verifier, /checkout binding function matches the write-once contract/);
+  assert.match(verifier, /runtime direct checkout expiry update is denied/);
+  assert.match(verifier, /checkout intent functions match their guarded contracts/);
   assert.match(verifier, /runtime function grants match the exact allowlist/);
   assert.match(verifier, /runtime sequence grants match the exact allowlist/);
   assert.match(verifier, /default private-object ACLs are owner-only/);

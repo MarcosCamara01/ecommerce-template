@@ -296,6 +296,112 @@ test("an expired session for the same cart is replaced by a fresh intent", async
   });
 });
 
+test("only sessions Stripe confirms expired are retired", async () => {
+  const retired = [];
+  const statuses = { cs_open: "open", cs_gone: "expired", cs_unknown: null };
+  await loadRouteHarness({
+    claimIntent: async () => ({
+      intent: openIntent(),
+      supersededSessionIds: ["cs_open", "cs_gone", "cs_unknown"],
+    }),
+    retireSessions: async (ids) => retired.push(...ids),
+    stripeSessions: {
+      retrieve: async (id) => ({ id, status: statuses[id], url: null }),
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.deepEqual(retired, ["cs_open", "cs_gone"]);
+});
+
+test("a paid superseded session is never retired", async () => {
+  const retired = [];
+  const response = await loadRouteHarness({
+    claimIntent: async () => ({
+      intent: openIntent(),
+      supersededSessionIds: ["cs_gone", "cs_paid"],
+    }),
+    retireSessions: async (ids) => retired.push(...ids),
+    stripeSessions: {
+      retrieve: async (id) => ({
+        id,
+        status: id === "cs_paid" ? "complete" : "expired",
+        url: null,
+      }),
+    },
+  }).POST(requestWith({ cartItemIds: [1] }));
+  assert.deepEqual(retired, ["cs_gone"]);
+  assert.deepEqual(response.body, {
+    url: "https://shop.example.test/result?session_id=cs_paid",
+  });
+});
+
+test("each superseded session is read from Stripe until it is retired, not on every checkout", async () => {
+  const intents = [];
+  const sessions = new Map();
+  let quantity = 1;
+  let reads = 0;
+  const route = loadRouteHarness({
+    checkoutItemsResult: () => [cartItem({ quantity })],
+    claimIntent: async (items, stale) => {
+      const open = intents
+        .filter((intent) => !intent.retired)
+        .map((intent) => ({ ...intent, reusable: true }));
+      const plan = planCheckoutIntent(open, items, new Set(stale));
+      if (plan.reuse) {
+        return { intent: plan.reuse, supersededSessionIds: plan.supersededSessionIds };
+      }
+      const intent = openIntent({ id: `intent-${intents.length + 1}`, items });
+      intents.unshift(intent);
+      return { intent, supersededSessionIds: plan.supersededSessionIds };
+    },
+    bindIntent: async (intentId, sessionId) => {
+      intents.find((intent) => intent.id === intentId).checkoutSessionId = sessionId;
+    },
+    retireSessions: async (ids) => {
+      for (const intent of intents) {
+        if (ids.includes(intent.checkoutSessionId)) intent.retired = true;
+      }
+    },
+    stripeSessions: {
+      create: async () => {
+        const id = `cs_${sessions.size + 1}`;
+        sessions.set(id, "open");
+        return { id, url: `https://checkout.test/${id}` };
+      },
+      retrieve: async (id) => {
+        reads += 1;
+        return { id, status: sessions.get(id), url: `https://checkout.test/${id}` };
+      },
+      expire: async (id) => {
+        sessions.set(id, "expired");
+      },
+    },
+  });
+  for (quantity = 1; quantity <= 50; quantity += 1) {
+    await route.POST(requestWith({ cartItemIds: [1] }));
+  }
+  assert.equal(reads, 49, "each quantity change reads only the session it replaces");
+  quantity = 50;
+  reads = 0;
+  for (let retry = 0; retry < 10; retry += 1) {
+    const response = await route.POST(requestWith({ cartItemIds: [1] }));
+    assert.deepEqual(response.body, { url: "https://checkout.test/cs_50" });
+  }
+  assert.equal(reads, 10, "an identical retry reads only the session it reuses");
+  assert.equal([...sessions.values()].filter((status) => status === "open").length, 1);
+});
+
+function cartItem(overrides = {}) {
+  return {
+    id: 1,
+    variantId: 2,
+    size: "M",
+    quantity: 1,
+    variant: { stripeId: "price_1", color: "Black", images: ["https://example.test/item.jpg"] },
+    product: { price: 10, name: "Test product", img: "https://example.test/product.jpg" },
+    ...overrides,
+  };
+}
+
 class IdentityError extends Error {
   constructor(code, message) {
     super(message);
@@ -318,6 +424,8 @@ function loadRouteHarness({
   checkoutItemsResult,
   onCreateIntent,
   claimIntent,
+  bindIntent = async () => ({ id: "intent-1" }),
+  retireSessions = async () => undefined,
   stripeSessions = {},
   unitAmount = 1000,
 } = {}) {
@@ -326,14 +434,8 @@ function loadRouteHarness({
     cart: {
       checkoutItems: async () => {
         if (checkoutItemsError) throw checkoutItemsError;
-        return checkoutItemsResult ?? [{
-          id: 1,
-          variantId: 2,
-          size: "M",
-          quantity: 1,
-          variant: { stripeId: "price_1", color: "Black", images: ["https://example.test/item.jpg"] },
-          product: { price: 10, name: "Test product", img: "https://example.test/product.jpg" },
-        }];
+        if (typeof checkoutItemsResult === "function") return checkoutItemsResult();
+        return checkoutItemsResult ?? [cartItem()];
       },
     },
     checkout: {
@@ -348,7 +450,8 @@ function loadRouteHarness({
           supersededSessionIds: [],
         };
       }),
-      bindIntent: async () => ({ id: "intent-1" }),
+      bindIntent,
+      retireSessions,
     },
   };
   const modules = {

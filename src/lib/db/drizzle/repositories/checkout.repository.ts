@@ -122,6 +122,19 @@ export const checkoutRepository = {
     return intent;
   },
 
+  async retireSessions(userId: string, checkoutSessionIds: readonly string[]) {
+    if (checkoutSessionIds.length === 0) return;
+    await db.execute(sql`
+      select app_private.retire_checkout_intents(
+        ${userId},
+        array[${sql.join(
+          checkoutSessionIds.map((id) => sql`${id}`),
+          sql`, `,
+        )}]::text[]
+      )
+    `);
+  },
+
   async findOwned(userId: string, intentId: string, checkoutSessionId: string) {
     return db.query.checkoutIntents.findFirst({
       where: and(

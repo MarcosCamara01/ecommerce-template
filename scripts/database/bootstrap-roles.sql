@@ -294,6 +294,13 @@ BEGIN
       app_private.bind_checkout_intent(text, text, text)
     TO app_runtime;
   END IF;
+  IF to_regprocedure(
+    'app_private.retire_checkout_intents(text,text[])'
+  ) IS NOT NULL THEN
+    GRANT EXECUTE ON FUNCTION
+      app_private.retire_checkout_intents(text, text[])
+    TO app_runtime;
+  END IF;
 END
 $$;
 

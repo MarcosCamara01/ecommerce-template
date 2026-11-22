@@ -25,22 +25,33 @@ const checkoutRequestSchema = z.object({
     .max(MAX_CHECKOUT_ITEMS, "Cart has too many items"),
 });
 
+async function expireOpenSession(sessionId: string) {
+  try {
+    await stripe.checkout.sessions.expire(sessionId);
+    return "expired";
+  } catch (error) {
+    const settled = await stripe.checkout.sessions.retrieve(sessionId);
+    if (settled.status === "complete" || settled.status === "expired") {
+      return settled.status;
+    }
+    throw error;
+  }
+}
+
 async function expireSupersededSessions(
   sessionIds: readonly string[],
-): Promise<{ alreadyPaidSessionId: string | null }> {
+): Promise<{ alreadyPaidSessionId: string | null; expiredSessionIds: string[] }> {
+  const expiredSessionIds: string[] = [];
   for (const sessionId of sessionIds) {
     const current = await stripe.checkout.sessions.retrieve(sessionId);
-    if (current.status === "complete") return { alreadyPaidSessionId: current.id };
-    if (current.status !== "open") continue;
-    try {
-      await stripe.checkout.sessions.expire(sessionId);
-    } catch (error) {
-      const settled = await stripe.checkout.sessions.retrieve(sessionId);
-      if (settled.status === "complete") return { alreadyPaidSessionId: settled.id };
-      if (settled.status !== "expired") throw error;
+    const status =
+      current.status === "open" ? await expireOpenSession(sessionId) : current.status;
+    if (status === "complete") {
+      return { alreadyPaidSessionId: sessionId, expiredSessionIds };
     }
+    if (status === "expired") expiredSessionIds.push(sessionId);
   }
-  return { alreadyPaidSessionId: null };
+  return { alreadyPaidSessionId: null, expiredSessionIds };
 }
 
 export async function POST(request: NextRequest) {
@@ -105,8 +116,10 @@ export async function POST(request: NextRequest) {
         snapshot,
         staleIntentIds,
       );
-      const { alreadyPaidSessionId } =
+      const { alreadyPaidSessionId, expiredSessionIds } =
         await expireSupersededSessions(supersededSessionIds);
+      // Without this, every later checkout re-reads every superseded session.
+      await userData.checkout.retireSessions(expiredSessionIds);
       if (alreadyPaidSessionId) {
         return NextResponse.json({ url: resultUrl(alreadyPaidSessionId) });
       }
