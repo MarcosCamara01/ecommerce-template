@@ -615,7 +615,7 @@ sitemap urls: 32
 ### FIX-13 cron with x-vercel-cron only (expect 401)
 {"error":"Unauthorized"} [401]
 ### Do not break
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; 
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline';
 X-Frame-Options: DENY
 cart GET anonymous -> {"error":"authentication_required"} [401]
 orders anonymous -> 307 https://ecommerce-template-mpc.vercel.app/login
