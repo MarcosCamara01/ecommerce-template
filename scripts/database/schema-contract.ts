@@ -105,7 +105,10 @@ export async function loadSchemaContract(): Promise<SchemaContract> {
           ),
       )
       .sort(),
-    routines: ["app_private.bind_checkout_intent(text,text,text)"],
+    routines: [
+      "app_private.bind_checkout_intent(text,text,text)",
+      "app_private.retire_checkout_intents(text,text[])",
+    ],
     columns: tables
       .flatMap((table) =>
         Object.values(table.columns).map((column) =>

@@ -302,6 +302,10 @@ test("database bootstrap removes implicit PUBLIC function execution", async () =
     bootstrap,
     /to_regprocedure\([\s\S]*?bind_checkout_intent\(text,text,text\)[\s\S]*?GRANT EXECUTE/,
   );
+  assert.match(
+    bootstrap,
+    /to_regprocedure\([\s\S]*?retire_checkout_intents\(text,text\[\]\)[\s\S]*?GRANT EXECUTE/,
+  );
 });
 
 test("existing-database cutover removes every unrecognized private ACL", async () => {

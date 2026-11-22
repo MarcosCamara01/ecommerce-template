@@ -69,6 +69,8 @@ function forUser(value: Principal): UserDataAccess {
         checkoutRepository.claim(userId, items, staleIntentIds),
       bindIntent: (intentId, checkoutSessionId) =>
         checkoutRepository.bind(userId, intentId, checkoutSessionId),
+      retireSessions: (checkoutSessionIds) =>
+        checkoutRepository.retireSessions(userId, checkoutSessionIds),
       ownsSession: async (intentId, checkoutSessionId) =>
         Boolean(
           await checkoutRepository.findOwned(
@@ -207,6 +209,9 @@ type UserDataAccess = {
       intentId: string,
       checkoutSessionId: string,
     ) => ReturnType<typeof checkoutRepository.bind>;
+    retireSessions: (
+      checkoutSessionIds: readonly string[],
+    ) => ReturnType<typeof checkoutRepository.retireSessions>;
     ownsSession: (
       intentId: string,
       checkoutSessionId: string,

@@ -335,6 +335,7 @@ async function main() {
         `${row.signature}:${row.privilege_type}`
       )) === JSON.stringify([
         "app_private.bind_checkout_intent(text,text,text):EXECUTE",
+        "app_private.retire_checkout_intents(text,text[]):EXECUTE",
       ]),
       "runtime function grants match the exact allowlist",
     );
@@ -713,7 +714,7 @@ async function main() {
     );
     check(
       checkoutBindingFailures.length === 0,
-      "checkout binding function matches the write-once contract",
+      "checkout intent functions match their guarded contracts",
     );
     await sql`
       select id
@@ -724,6 +725,21 @@ async function main() {
       )
     `;
     check(true, "runtime guarded checkout binding is allowed");
+    await sql`
+      select app_private.retire_checkout_intents(
+        '__missing_user__',
+        array['cs_missing']::text[]
+      )
+    `;
+    check(true, "runtime guarded checkout retirement is allowed");
+    await expectDenied(
+      () => sql`
+        update app_private.checkout_intents
+        set expires_at = expires_at
+        where id = '__missing_checkout_intent__'
+      `,
+      "runtime direct checkout expiry update is denied",
+    );
     await expectDenied(
       () => sql`
         update app_private.checkout_intents
