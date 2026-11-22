@@ -11,10 +11,15 @@ const nativeRequire = createRequire(import.meta.url);
 const { NextRequest } = nativeRequire("next/server");
 const source = await readFile(new URL("./proxy.ts", import.meta.url), "utf8");
 
+const APP_ORIGIN = "http://localhost:3000";
+
 function loadProxy({ principal = null, canManage = false, canonicalRedirect = null } = {}) {
   let principalReads = 0;
   const modules = {
-    "@/lib/app-origin": { canonicalRequestRedirect: () => canonicalRedirect },
+    "@/lib/app-origin": {
+      canonicalRequestRedirect: () => canonicalRedirect,
+      getCanonicalAppOrigin: () => APP_ORIGIN,
+    },
     "@/lib/identity": {
       getPrincipalFromHeaders: async () => { principalReads += 1; return principal; },
       hasCapability: () => canManage,
@@ -33,9 +38,79 @@ function loadProxy({ principal = null, canManage = false, canonicalRedirect = nu
   );
   return {
     principalReads: () => principalReads,
-    request: (path) => proxyModule.exports.proxy(new NextRequest(`http://localhost:3000${path}`)),
+    request: (path, init) => proxyModule.exports.proxy(new NextRequest(`${APP_ORIGIN}${path}`, init)),
   };
 }
+
+const COOKIE_WRITE_ROUTES = [
+  "/api/user/cart",
+  "/api/user/wishlist",
+  "/api/stripe/payment",
+  "/api/admin/products",
+  "/api/admin/catalog-sync/replay",
+  "/api/admin/fulfillment/replay",
+  "/api/auth/update-user",
+];
+const WRITE_METHODS = ["POST", "PUT", "PATCH", "DELETE"];
+
+function write(method, { origin, cookie = "better-auth.session_token=x" } = {}) {
+  const headers = new Headers();
+  if (origin !== undefined) headers.set("origin", origin);
+  if (cookie) headers.set("cookie", cookie);
+  return { method, headers };
+}
+
+test("cookie-bearing writes from another origin or without one are refused", async () => {
+  const proxy = loadProxy();
+  for (const path of COOKIE_WRITE_ROUTES) {
+    for (const method of WRITE_METHODS) {
+      for (const origin of ["https://evil.example", "http://localhost:3000.evil.example", "null", undefined]) {
+        const label = `${method} ${path} origin=${origin}`;
+        const response = await proxy.request(path, write(method, { origin }));
+        assert.equal(response.status, 403, label);
+        assert.deepEqual(await response.json(), { error: "invalid_origin" }, label);
+        assert.equal(response.headers.get("x-middleware-next"), null, label);
+      }
+    }
+  }
+});
+
+test("same-origin writes and writes without a cookie reach the route", async () => {
+  const proxy = loadProxy();
+  const passing = {
+    "same origin": { origin: APP_ORIGIN },
+    "no cookie, other origin": { origin: "https://evil.example", cookie: null },
+    "no cookie, no origin": { cookie: null },
+  };
+  for (const path of COOKIE_WRITE_ROUTES) {
+    for (const method of WRITE_METHODS) {
+      for (const [name, options] of Object.entries(passing)) {
+        const response = await proxy.request(path, write(method, options));
+        assert.equal(response.headers.get("x-middleware-next"), "1", `${method} ${path} ${name}`);
+      }
+    }
+  }
+});
+
+test("reads are not origin-checked", async () => {
+  const proxy = loadProxy();
+  for (const path of COOKIE_WRITE_ROUTES) {
+    for (const method of ["GET", "HEAD", "OPTIONS"]) {
+      const response = await proxy.request(path, write(method, { origin: "https://evil.example" }));
+      assert.equal(response.headers.get("x-middleware-next"), "1", `${method} ${path}`);
+    }
+  }
+});
+
+test("webhooks, cron jobs, and Better Auth keep their own credential checks", async () => {
+  const proxy = loadProxy();
+  for (const path of ["/api/stripe/webhooks", "/api/cron/fulfillment", "/api/cron/catalog-sync", "/api/auth/sign-in/email", "/api/auth/email-form"]) {
+    for (const method of ["GET", "POST"]) {
+      const response = await proxy.request(path, write(method, { origin: "https://evil.example" }));
+      assert.equal(response.headers.get("x-middleware-next"), "1", `${method} ${path}`);
+    }
+  }
+});
 
 test("unknown paths sharing a protected prefix reach 404 handling without auth", async () => {
   for (const path of ["/orders-archive", "/admin-anything", "/orders2", "/administrator"]) {
