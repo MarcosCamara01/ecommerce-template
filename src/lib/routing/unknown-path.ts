@@ -14,6 +14,8 @@ const ROOT_ONLY_SEGMENTS = new Set([
   "cart",
   "wishlist",
   "result",
+  "robots.txt",
+  "sitemap.xml",
   ...Object.values(AUTH_PAGES).map((path) => path.slice(1)),
 ]);
 

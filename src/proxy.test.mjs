@@ -122,6 +122,15 @@ test("unknown paths sharing a protected prefix reach 404 handling without auth",
   }
 });
 
+test("robots.txt and sitemap.xml reach their metadata routes", async () => {
+  const proxy = loadProxy();
+  for (const path of ["/robots.txt", "/sitemap.xml"]) {
+    const response = await proxy.request(path);
+    assert.equal(response.headers.get("x-middleware-rewrite"), null, path);
+    assert.equal(response.headers.get("x-middleware-next"), "1", path);
+  }
+});
+
 test("real protected paths still redirect anonymous visitors to login", async () => {
   for (const path of ["/orders", "/orders/1", "/admin", "/admin/products", "/admin/products/create"]) {
     const proxy = loadProxy();

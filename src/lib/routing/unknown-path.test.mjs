@@ -34,6 +34,8 @@ describe("pathShould404", () => {
       "/t-shirts/1",
       "/pants/99",
       "/sweatshirts/3",
+      "/robots.txt",
+      "/sitemap.xml",
     ]) {
       assert.equal(pathShould404(pathname), false, pathname);
     }
@@ -65,7 +67,9 @@ describe("pathShould404", () => {
       "/sweatshirts/1e2",
       "/t-shirts/not-a-number",
       "/t-shirts/1/extra",
-      "/robots.txt",
+      "/robots.txt/foo",
+      "/sitemap.xml/foo",
+      "/humans.txt",
       "/__/not-found/fallback",
     ]) {
       assert.equal(pathShould404(pathname), true, pathname);
