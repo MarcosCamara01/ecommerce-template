@@ -355,6 +355,7 @@ test("private admin bootstrap verifies migrator and assumes app_owner", async ()
   assert.match(source, /identity\.current_user !== "app_migrator"/);
   assert.match(source, /identity\.session_user !== "app_migrator"/);
   assert.match(source, /set role app_owner[\s\S]*?update \$\{sql\(schema\)\}/i);
+  assert.match(source, /set role = 'admin', email_verified = true,/);
   assert.match(source, /reset role/);
 });
 
